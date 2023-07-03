@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import Visuals from "./Spectrogram.jsx"; './Spectrogram.jsx'
+import Visuals from "./Visuals.jsx"
 
 
 function App() {

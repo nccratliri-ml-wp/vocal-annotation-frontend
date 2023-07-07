@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import {useState, useRef, useEffect} from 'react'
 import './App.css'
 import Visuals from "./Visuals.jsx"
-
 
 function App() {
 
     const [audioLength, setAudioLength] = useState()
+
     const spectrogramImg = new Image()
-    spectrogramImg.src = 'test-media/birdname_130519_113316.31.png'
+    spectrogramImg.src = '/test-media/birdname_130519_113316.31.png'
 
     function handleAudioLoaded(event){
         setAudioLength(event.target.duration)
@@ -21,8 +21,6 @@ function App() {
                 audioLength={audioLength}
                 spectrogramImg={spectrogramImg}
             />
-
-
     </>
     )
 }

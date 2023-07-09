@@ -5,6 +5,7 @@ import Visuals from "./Visuals.jsx"
 function App() {
 
     const [audioLength, setAudioLength] = useState()
+    const audioFile = useRef(null)
 
     const spectrogramImg = new Image()
     spectrogramImg.src = '/test-media/birdname_130519_113316.31.png'
@@ -16,8 +17,9 @@ function App() {
     return (
     <>
         <h1>Witaj</h1>
-        <audio src="test-media/birdname_130519_113316.31.wav" preload="metadata" onLoadedMetadata={handleAudioLoaded}></audio>
+        <audio src="test-media/birdname_130519_113316.31.wav" preload="metadata" ref={audioFile} onLoadedMetadata={handleAudioLoaded}></audio>
             <Visuals
+                audioFile={audioFile.current}
                 audioLength={audioLength}
                 spectrogramImg={spectrogramImg}
             />

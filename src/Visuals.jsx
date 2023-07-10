@@ -7,10 +7,10 @@ class Label {
     }
 }
 
-function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramCanvasContext, zoomLevel){
+function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramContext, zoomLevel){
     spectrogramCanvas.width = zoomLevel
     spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
-    spectrogramCanvasContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
+    spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
 }
 
 function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
@@ -93,6 +93,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     const [labels, setLabels] = useState([])
 
+    let clickedLabel = undefined
+
     function handleLMBDown(event){
         // Ignore other mouse buttons
         if (event.button !== 0){
@@ -102,8 +104,108 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         const rect = event.target.getBoundingClientRect()
         const xClicked = event.clientX - rect.left
 
+        // add offset to existing label if necessary
+        if (labels.length > 0 && labels[labels.length-1].offset === undefined){
+            const newOffset = calculateTimeframe(event)
+            const labelsCopy = labels
+            labelsCopy[labels.length-1].offset = newOffset
+            setLabels(labelsCopy)
+            drawLine(newOffset)
+            drawLineBetween(labels[labels.length-1])
+            return
+        }
+
+        if ( checkIfPositionIsOccupied(xClicked) ){
+            // Deal with click on Onset
+            clickedLabel = checkIfClickedOnOnset(xClicked)
+            if ( clickedLabel ){
+                spectrogramCanvasRef.current.addEventListener('mousemove', dragOnset)
+                return
+            }
+
+            // Deal with click on Offset
+            clickedLabel = checkIfClickedOnOffset(xClicked)
+            if (clickedLabel){
+                spectrogramCanvasRef.current.addEventListener('mousemove', dragOffset)
+                return
+            }
+        }
+
         addNewLabel(event)
         drawLine( calculateTimeframe(event) )
+    }
+
+    function updateOnset(event){
+        clickedLabel.onset = calculateTimeframe(event)
+    }
+
+    function updateOffset(event){
+        clickedLabel.offset = calculateTimeframe(event)
+    }
+
+    function dragOnset(event){
+        updateOnset(event)
+        drawSpectrogram(spectrogramImg,
+            spectrogramCanvasRef.current,
+            spectrogramContextRef.current,
+            zoomLevel)
+        drawAllLabels()
+    }
+
+    function dragOffset(event){
+        updateOffset(event)
+        drawSpectrogram(spectrogramImg,
+            spectrogramCanvasRef.current,
+            spectrogramContextRef.current,
+            zoomLevel)
+        drawAllLabels()
+    }
+
+    function handleMouseUp(event) {
+        if (event.button !== 0) {
+            return
+        }
+
+        spectrogramCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        spectrogramCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        clickedLabel = undefined
+    }
+
+    function handleHoverOverLine(event){
+        const rect = event.target.getBoundingClientRect()
+        const xHovered = event.clientX - rect.left
+
+        if (checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
+            spectrogramCanvasRef.current.style.cursor = 'col-resize'
+        } else{
+            spectrogramCanvasRef.current.style.cursor = 'default'
+        }
+    }
+
+    function checkIfPositionIsOccupied(xClicked){
+        for (let label of labels) {
+            if ( checkIfClickedOnOnset(xClicked) || checkIfClickedOnOffset(xClicked) ){
+                return label
+            }
+        }
+    }
+
+    function checkIfClickedOnOnset(xClicked){
+        for (let label of labels){
+            const xOnset = calculateXPosition(label.onset)
+            if ( ( xOnset >= xClicked - 1 && xOnset <= xClicked + 1 ) ){
+                return label
+            }
+        }
+    }
+
+    function checkIfClickedOnOffset(xClicked){
+        for (let label of labels){
+            const xOffset = calculateXPosition(label.offset)
+            if ( ( xOffset >= xClicked - 1 && xOffset <= xClicked + 1 ) ){
+                return label
+            }
+        }
     }
 
     function addNewLabel(event){
@@ -123,10 +225,37 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.stroke()
     }
 
+    function drawAllLabels(){
+        for (let label of labels) {
+            drawLine(label.onset)
+            drawLine(label.offset)
+            drawLineBetween(label)
+        }
+    }
+
+    function drawLineBetween(label){
+        const xOnset = calculateXPosition(label.onset)
+        const xOffset = calculateXPosition(label.offset)
+        const ctx = spectrogramContextRef.current
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(xOnset, spectrogramImg.naturalHeight * 1.5 / 2 )
+        ctx.lineTo(xOffset, spectrogramImg.naturalHeight * 1.5 / 2)
+        ctx.lineWidth = 3
+        ctx.strokeStyle = "#00FF00"
+        ctx.stroke()
+        ctx.setLineDash([])
+    }
+
     function calculateTimeframe(event){
         const rect = event.target.getBoundingClientRect()
         const xClicked = event.clientX - rect.left
         return audioLength * (xClicked / spectrogramCanvasRef.current.width)
+    }
+
+    function calculateXPosition(timeframe){
+        return timeframe * spectrogramCanvasRef.current.width / audioLength
     }
 
     function handleClickZoomIn(){
@@ -167,6 +296,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 timelineContextRef.current,
                 audioLength,
                 zoomLevel === spectrogramImg.naturalWidth)
+
+            drawAllLabels()
         })
     }
     , [spectrogramImg])
@@ -186,6 +317,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             timelineContextRef.current,
             audioLength,
             zoomLevel === spectrogramImg.naturalWidth)
+
+        drawAllLabels()
 
     }
     , [zoomLevel])
@@ -208,7 +341,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 ⏹
             </button>
             <div id='canvas-container' ref={canvasContainerRef}>
-                <canvas id='spectrogram-canvas' ref={spectrogramCanvasRef} onMouseDown={handleLMBDown} />
+                <canvas id='spectrogram-canvas' ref={spectrogramCanvasRef} onMouseDown={handleLMBDown} onMouseMove={handleHoverOverLine} onMouseUp={handleMouseUp}/>
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
         </div>

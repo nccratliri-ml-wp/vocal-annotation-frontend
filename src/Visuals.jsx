@@ -101,8 +101,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             return
         }
 
-        const rect = event.target.getBoundingClientRect()
-        const xClicked = event.clientX - rect.left
+        const xClicked = getXClicked(event)
 
         // add offset to existing label if necessary
         if (labels.length > 0 && labels[labels.length-1].offset === undefined){
@@ -132,7 +131,6 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         }
 
         addNewLabel(event)
-        drawLine( calculateTimeframe(event) )
     }
 
     function updateOnset(event){
@@ -172,14 +170,34 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function handleHoverOverLine(event){
-        const rect = event.target.getBoundingClientRect()
-        const xHovered = event.clientX - rect.left
+        const xHovered = getXClicked(event)
 
         if (checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
             spectrogramCanvasRef.current.style.cursor = 'col-resize'
         } else{
             spectrogramCanvasRef.current.style.cursor = 'default'
         }
+    }
+
+    function handleRightClick(event){
+        event.preventDefault()
+        const xClicked = getXClicked(event)
+
+        if ( !checkIfPositionIsOccupied(xClicked ) ){
+            return
+        }
+
+        deleteLabel(xClicked)
+    }
+
+    function deleteLabel(xClicked){
+        const labelToBeDeleted = labels.find(
+            label => (calculateXPosition(label.onset) >= xClicked - 1  &&  calculateXPosition(label.onset) <= xClicked + 1 )
+                    || (calculateXPosition(label.offset) >= xClicked - 1  &&  calculateXPosition(label.offset) <= xClicked + 1 )
+        )
+
+        const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
+        setLabels(filteredLabels)
     }
 
     function checkIfPositionIsOccupied(xClicked){
@@ -249,13 +267,17 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function calculateTimeframe(event){
-        const rect = event.target.getBoundingClientRect()
-        const xClicked = event.clientX - rect.left
+        const xClicked = getXClicked(event)
         return audioLength * (xClicked / spectrogramCanvasRef.current.width)
     }
 
     function calculateXPosition(timeframe){
         return timeframe * spectrogramCanvasRef.current.width / audioLength
+    }
+
+    function getXClicked(event){
+        const rect = event.target.getBoundingClientRect()
+        return event.clientX - rect.left
     }
 
     function handleClickZoomIn(){
@@ -321,7 +343,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         drawAllLabels()
 
     }
-    , [zoomLevel])
+    , [zoomLevel, labels])
 
     return (
         <div>
@@ -341,7 +363,13 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 ⏹
             </button>
             <div id='canvas-container' ref={canvasContainerRef}>
-                <canvas id='spectrogram-canvas' ref={spectrogramCanvasRef} onMouseDown={handleLMBDown} onMouseMove={handleHoverOverLine} onMouseUp={handleMouseUp}/>
+                <canvas id='spectrogram-canvas'
+                        ref={spectrogramCanvasRef}
+                        onMouseDown={handleLMBDown}
+                        onMouseMove={handleHoverOverLine}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
         </div>

@@ -1,5 +1,11 @@
 import {useEffect, useRef, useState} from "react";
 
+// TO DO
+//. Drag line immedieately after onset is set
+// Clustername
+// Mockup Backend connection
+// Interpolation up to 200ms
+
 class Label {
     constructor(onset, offset) {
         this.onset = onset
@@ -103,16 +109,6 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         const xClicked = getXClicked(event)
 
-        // add offset to existing label if necessary
-        if (labels.length > 0 && labels[labels.length-1].offset === undefined){
-            const newOffset = calculateTimeframe(event)
-            const labelsCopy = labels
-            labelsCopy[labels.length-1].offset = newOffset
-            setLabels(labelsCopy)
-            drawLine(newOffset)
-            drawLineBetween(labels[labels.length-1])
-            return
-        }
 
         if ( checkIfPositionIsOccupied(xClicked) ){
             // Deal with click on Onset
@@ -128,6 +124,17 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 spectrogramCanvasRef.current.addEventListener('mousemove', dragOffset)
                 return
             }
+        }
+
+        // add offset to existing label if necessary
+        if (labels.length > 0 && labels[labels.length-1].offset === undefined){
+            const newOffset = calculateTimeframe(event)
+            const labelsCopy = labels
+            labelsCopy[labels.length-1].offset = newOffset
+            setLabels(labelsCopy)
+            drawLine(newOffset)
+            drawLineBetween(labels[labels.length-1])
+            return
         }
 
         addNewLabel(event)
@@ -167,6 +174,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragOnset)
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragOffset)
         clickedLabel = undefined
+
+        console.log(labels)
     }
 
     function handleHoverOverLine(event){
@@ -238,7 +247,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.beginPath()
         ctx.moveTo(x, 0)
         ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
-        ctx.lineWidth = 3
+        ctx.lineWidth = 2
         ctx.strokeStyle = "#00FF00"
         ctx.stroke()
     }
@@ -354,7 +363,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 Zoom out
             </button>
             <button id='play-btn' onClick={playAudio}>
-                ▶️
+                ▶
             </button>
             <button id='pause-btn' onClick={pauseAudio}>
                 ⏸

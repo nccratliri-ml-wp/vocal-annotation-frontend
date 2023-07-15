@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 
+
 // TO DO
-//. Drag line immedieately after onset is set
 // Clustername
 // Mockup Backend connection
 // Interpolation up to 200ms
@@ -10,6 +10,12 @@ class Label {
     constructor(onset, offset) {
         this.onset = onset
         this.offset = offset
+    }
+}
+
+class PlayHead{
+    constructor(timeframe) {
+        this.timeframe = timeframe
     }
 }
 
@@ -96,12 +102,17 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     const timelineContextRef = useRef(null)
 
     const [zoomLevel, setZoomLevel] = useState(null)
+    const zoomLevelRef = useRef()
 
     const [labels, setLabels] = useState([])
+
+    const [playHead, setPlayHead] = useState(new PlayHead(0))
 
     let clickedLabel = undefined
 
     function handleLMBDown(event){
+        pauseAudio()
+
         // Ignore other mouse buttons
         if (event.button !== 0){
             return
@@ -275,6 +286,18 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.setLineDash([])
     }
 
+    function drawPlayhead(timeframe){
+        const x = calculateXPosition(timeframe)
+        const ctx = spectrogramContextRef.current
+
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
+        ctx.lineWidth = 3
+        ctx.strokeStyle = "#ff0000"
+        ctx.stroke()
+    }
+
     function calculateTimeframe(event){
         const xClicked = getXClicked(event)
         return audioLength * (xClicked / spectrogramCanvasRef.current.width)
@@ -291,28 +314,86 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     function handleClickZoomIn(){
         setZoomLevel(spectrogramImg.naturalWidth)
+        zoomLevelRef.current = spectrogramImg.naturalWidth
     }
 
     function handleClickZoomOut(){
         setZoomLevel(canvasContainerRef.current.clientWidth)
+        zoomLevelRef.current = canvasContainerRef.current.clientWidth
     }
 
     function playAudio(){
         audioFile.play()
+
+        const scrollSteps = Math.floor( spectrogramCanvasRef.current.width / canvasContainerRef.current.clientWidth )
+        const scrollStepsXValues = []
+        for (let i = 1; i <= scrollSteps; i++){
+            scrollStepsXValues.push(canvasContainerRef.current.clientWidth * i)
+        }
+
+        loop(scrollStepsXValues)
+
     }
 
     function pauseAudio(){
         audioFile.pause()
+        updatePlayHead(audioFile.currentTime)
     }
 
     function stopAudio(){
         audioFile.pause()
         audioFile.currentTime = 0
+        updatePlayHead(audioFile.currentTime)
+        drawSpectrogram(spectrogramImg,
+            spectrogramCanvasRef.current,
+            spectrogramContextRef.current,
+            zoomLevel)
+        drawAllLabels()
+        drawPlayhead(playHead.timeframe)
+    }
+
+    function updatePlayHead(timeframe){
+        setPlayHead({
+            ...playHead,
+            timeframe: timeframe
+        })
+    }
+
+    function loop(scrollStepsXValues){
+        if (audioFile.paused){
+            return
+        }
+        window.requestAnimationFrame(() => loop(scrollStepsXValues) )
+
+        drawSpectrogram(spectrogramImg,
+            spectrogramCanvasRef.current,
+            spectrogramContextRef.current,
+            zoomLevelRef.current)
+        console.log(zoomLevelRef.current)
+        drawAllLabels()
+
+        drawPlayhead(audioFile.currentTime)
+
+        scroll(scrollStepsXValues)
+    }
+
+    function scroll(scrollStepsXValues){
+        const x = calculateXPosition(audioFile.currentTime)
+
+        if (x > scrollStepsXValues[0]){
+            canvasContainerRef.current.scrollTo({
+                top: 0,
+                left: x,
+                behavior: "smooth",
+            })
+            scrollStepsXValues.shift()
+        }
     }
 
     // Initial drawing
     useEffect( () => {
         setZoomLevel(canvasContainerRef.current.clientWidth)
+        zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
 
@@ -329,12 +410,14 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 zoomLevel === spectrogramImg.naturalWidth)
 
             drawAllLabels()
+            drawPlayhead(playHead.timeframe)
         })
     }
     , [spectrogramImg])
 
-    // Redraw every time zoom level is changed
+    // Redraw every time zoom level or labels is changed
     useEffect( () => {
+        console.log('trigger rerender')
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
         timelineContextRef.current = timelineCanvasRef.current.getContext('2d')
 
@@ -350,6 +433,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             zoomLevel === spectrogramImg.naturalWidth)
 
         drawAllLabels()
+        drawPlayhead(playHead.timeframe)
 
     }
     , [zoomLevel, labels])

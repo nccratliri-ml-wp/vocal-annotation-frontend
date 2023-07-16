@@ -1,6 +1,4 @@
 import {useEffect, useRef, useState} from "react";
-
-
 // TO DO
 // Clustername
 // Mockup Backend connection
@@ -106,7 +104,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     const [labels, setLabels] = useState([])
 
-    const [playHead, setPlayHead] = useState(new PlayHead(0))
+    const playHeadRef = useRef(new PlayHead(0))
 
     let clickedLabel = undefined
 
@@ -120,6 +118,10 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         const xClicked = getXClicked(event)
 
+        if ( checkIfClickedOnPlayhead(xClicked) ){
+            spectrogramCanvasRef.current.addEventListener('mousemove', dragPlayhead)
+            return
+        }
 
         if ( checkIfPositionIsOccupied(xClicked) ){
             // Deal with click on Onset
@@ -166,6 +168,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
     }
 
     function dragOffset(event){
@@ -175,15 +178,29 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
+    }
+
+    function dragPlayhead(event){
+        updatePlayHead( calculateTimeframe(event) )
+        audioFile.currentTime = playHeadRef.current.timeframe
+        drawSpectrogram(spectrogramImg,
+            spectrogramCanvasRef.current,
+            spectrogramContextRef.current,
+            zoomLevel)
+        drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
     }
 
     function handleMouseUp(event) {
         if (event.button !== 0) {
             return
         }
-
+        console.log(spectrogramCanvasRef.current)
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragOnset)
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        spectrogramCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
+
         clickedLabel = undefined
 
         console.log(labels)
@@ -192,7 +209,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     function handleHoverOverLine(event){
         const xHovered = getXClicked(event)
 
-        if (checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
+        if (checkIfPositionIsOccupied(xHovered) || checkIfClickedOnPlayhead(xHovered)){
             spectrogramCanvasRef.current.style.cursor = 'col-resize'
         } else{
             spectrogramCanvasRef.current.style.cursor = 'default'
@@ -246,6 +263,13 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         }
     }
 
+    function checkIfClickedOnPlayhead(xClicked){
+        const xPlayhead = calculateXPosition(playHeadRef.current.timeframe)
+        if (xPlayhead >= xClicked - 1 && xPlayhead <= xClicked + 1){
+            return true
+        }
+    }
+
     function addNewLabel(event){
         const onset = calculateTimeframe(event)
         setLabels(current => [...current, new Label (onset)])
@@ -293,7 +317,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.beginPath()
         ctx.moveTo(x, 0)
         ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
-        ctx.lineWidth = 3
+        ctx.lineWidth = 2
         ctx.strokeStyle = "#ff0000"
         ctx.stroke()
     }
@@ -343,20 +367,19 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     function stopAudio(){
         audioFile.pause()
         audioFile.currentTime = 0
-        updatePlayHead(audioFile.currentTime)
+
+        updatePlayHead(0)
         drawSpectrogram(spectrogramImg,
             spectrogramCanvasRef.current,
             spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
-        drawPlayhead(playHead.timeframe)
+        drawPlayhead(0)
+
     }
 
-    function updatePlayHead(timeframe){
-        setPlayHead({
-            ...playHead,
-            timeframe: timeframe
-        })
+    function updatePlayHead(newTimeframe){
+        playHeadRef.current.timeframe = newTimeframe
     }
 
     function loop(scrollStepsXValues){
@@ -369,9 +392,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             spectrogramCanvasRef.current,
             spectrogramContextRef.current,
             zoomLevelRef.current)
-        console.log(zoomLevelRef.current)
         drawAllLabels()
-
         drawPlayhead(audioFile.currentTime)
 
         scroll(scrollStepsXValues)
@@ -410,7 +431,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 zoomLevel === spectrogramImg.naturalWidth)
 
             drawAllLabels()
-            drawPlayhead(playHead.timeframe)
+            drawPlayhead(playHeadRef.current.timeframe)
         })
     }
     , [spectrogramImg])
@@ -433,7 +454,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             zoomLevel === spectrogramImg.naturalWidth)
 
         drawAllLabels()
-        drawPlayhead(playHead.timeframe)
+        drawPlayhead(playHeadRef.current.timeframe)
 
     }
     , [zoomLevel, labels])

@@ -1,13 +1,17 @@
 import {useEffect, useRef, useState} from "react";
+import Clusternames from "./assets/Clusternames.jsx"
+import { nanoid } from 'nanoid'
+
 // TO DO
 // Clustername
 // Mockup Backend connection
 // Interpolation up to 200ms
 
 class Label {
-    constructor(onset, offset) {
+    constructor(onset, offset, clustername) {
         this.onset = onset
         this.offset = offset
+        this.clustername = clustername
     }
 }
 
@@ -103,6 +107,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     const zoomLevelRef = useRef()
 
     const [labels, setLabels] = useState([])
+    const [clusternameButtons, setClusternameButtons] = useState([])
 
     const playHeadRef = useRef(new PlayHead(0))
 
@@ -118,11 +123,13 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         const xClicked = getXClicked(event)
 
+        // Deal with click on PlayHead
         if ( checkIfClickedOnPlayhead(xClicked) ){
             spectrogramCanvasRef.current.addEventListener('mousemove', dragPlayhead)
             return
         }
 
+        // Deal with click on Label
         if ( checkIfPositionIsOccupied(xClicked) ){
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(xClicked)
@@ -139,17 +146,22 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             }
         }
 
-        // add offset to existing label if necessary
+        // Add offset to existing label if necessary
         if (labels.length > 0 && labels[labels.length-1].offset === undefined){
             const newOffset = calculateTimeframe(event)
             const labelsCopy = labels
             labelsCopy[labels.length-1].offset = newOffset
             setLabels(labelsCopy)
-            drawLine(newOffset)
-            drawLineBetween(labels[labels.length-1])
+            drawLine(newOffset,"#00FF00")
+            drawLineBetween(labels[labels.length-1],"#00FF00")
+            setTimeout(function() {
+                addClustername(labels[labels.length-1])
+                updateClusternamesButtons(labels[labels.length-1])
+            }, 100);
             return
         }
 
+        // Add new Label
         addNewLabel(event)
     }
 
@@ -275,7 +287,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         setLabels(current => [...current, new Label (onset)])
     }
 
-    function drawLine(timeframe){
+    function drawLine(timeframe, colorHex){
         const x = Math.round(timeframe * spectrogramCanvasRef.current.width / audioLength)
         const ctx = spectrogramContextRef.current
 
@@ -283,19 +295,19 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.moveTo(x, 0)
         ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
         ctx.lineWidth = 2
-        ctx.strokeStyle = "#00FF00"
+        ctx.strokeStyle = colorHex
         ctx.stroke()
     }
 
     function drawAllLabels(){
         for (let label of labels) {
-            drawLine(label.onset)
-            drawLine(label.offset)
-            drawLineBetween(label)
+            drawLine(label.onset, "#00FF00")
+            drawLine(label.offset,"#00FF00")
+            drawLineBetween(label,"#00FF00")
         }
     }
 
-    function drawLineBetween(label){
+    function drawLineBetween(label, colorHex){
         const xOnset = calculateXPosition(label.onset)
         const xOffset = calculateXPosition(label.offset)
         const ctx = spectrogramContextRef.current
@@ -305,7 +317,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.moveTo(xOnset, spectrogramImg.naturalHeight * 1.5 / 2 )
         ctx.lineTo(xOffset, spectrogramImg.naturalHeight * 1.5 / 2)
         ctx.lineWidth = 3
-        ctx.strokeStyle = "#00FF00"
+        ctx.strokeStyle = colorHex
         ctx.stroke()
         ctx.setLineDash([])
     }
@@ -411,6 +423,29 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         }
     }
 
+    function hoverLabel(event){
+        const mouseX = getXClicked(event)
+        for (let label of labels){
+            const onsetX = calculateXPosition(label.onset)
+            const offsetX = calculateXPosition(label.offset)
+            if (mouseX >= onsetX && mouseX <= offsetX){
+                drawLine(label.onset, 'blue')
+                drawLine(label.offset, 'blue')
+                drawLineBetween(label, 'blue')
+            }
+        }
+
+
+    }
+
+    function addClustername(newestLabel){
+        newestLabel.clustername = window.prompt('Enter clustername: ')
+    }
+
+    function updateClusternamesButtons(newestLabel){
+        setClusternameButtons(prevState => [ ...prevState, <div key={nanoid()}>{newestLabel.clustername}</div> ])
+    }
+
     // Initial drawing
     useEffect( () => {
         setZoomLevel(canvasContainerRef.current.clientWidth)
@@ -480,12 +515,14 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 <canvas id='spectrogram-canvas'
                         ref={spectrogramCanvasRef}
                         onMouseDown={handleLMBDown}
-                        onMouseMove={handleHoverOverLine}
+                        onMouseMove={(event) => {handleHoverOverLine(event); hoverLabel(event)}}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
+
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
+            <Clusternames clusternameButtons={clusternameButtons} />
         </div>
 
     )

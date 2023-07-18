@@ -4,7 +4,7 @@ function Clusternames({ clusternameButtons }){
 
 
     return (
-        <div>{clusternameButtons}</div>
+        <div id='clustername-buttons-container'>{clusternameButtons}</div>
     )
 }
 

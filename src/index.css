@@ -17,3 +17,17 @@
 #canvas-container{
   overflow-x: scroll;
 }
+
+#clustername-buttons-container{
+  display: flex;
+  margin: 3%;
+}
+
+#clustername-buttons-container > div{
+  background-color: whitesmoke;
+  border-radius: 5%;
+  margin: 5px;
+  padding: 2px 5px;
+  color: #242424;
+  font-size: 22px;
+}

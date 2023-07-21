@@ -31,3 +31,6 @@
   color: #242424;
   font-size: 22px;
 }
+#clustername-buttons-container > div[isactive='true']{
+  background-color: yellow;
+}

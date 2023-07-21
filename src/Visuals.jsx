@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from "react";
 import Clusternames from "./assets/Clusternames.jsx"
-import { nanoid } from 'nanoid'
 
 // TO DO
 // Offset only legal after onset?
@@ -108,7 +107,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     const zoomLevelRef = useRef()
 
     const [labels, setLabels] = useState([])
-    const [clusternameButtons, setClusternameButtons] = useState([])
+    //const [clusternameButtons, setClusternameButtons] = useState([])
 
     const playHeadRef = useRef(new PlayHead(0))
 
@@ -460,11 +459,11 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function addClustername(newestLabel){
-        newestLabel.clustername = window.prompt('Enter clustername: ')
+        //newestLabel.clustername = window.prompt('Enter clustername: ')
     }
 
     function updateClusternamesButtons(newestLabel){
-        setClusternameButtons(prevState => [ ...prevState, <div key={nanoid()}>{newestLabel.clustername}</div> ])
+        //setClusternameButtons(prevState => [ ...prevState, <div key={nanoid()}>{newestLabel.clustername}</div> ])
     }
 
     // Initial drawing
@@ -543,7 +542,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
-            <Clusternames clusternameButtons={clusternameButtons} />
+            <Clusternames />
         </div>
 
     )

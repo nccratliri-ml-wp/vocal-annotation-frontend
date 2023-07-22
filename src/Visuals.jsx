@@ -107,7 +107,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     const zoomLevelRef = useRef()
 
     const [labels, setLabels] = useState([])
-    //const [clusternameButtons, setClusternameButtons] = useState([])
+
+    const [activeClustername, setActiveClustername] = useState()
 
     const playHeadRef = useRef(new PlayHead(0))
 
@@ -154,10 +155,6 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             setLabels(labelsCopy)
             drawLine(newOffset,"#00FF00")
             drawLineBetween(labels[labels.length-1],"#00FF00")
-            setTimeout(function() {
-                addClustername(labels[labels.length-1])
-                updateClusternamesButtons(labels[labels.length-1])
-            }, 100);
             return
         }
 
@@ -283,7 +280,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     function addNewLabel(event){
         const onset = calculateTimeframe(event)
-        setLabels(current => [...current, new Label (onset)])
+        setLabels(current => [...current, new Label (onset, undefined, activeClustername)])
     }
 
     function drawLine(timeframe, colorHex){
@@ -458,12 +455,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.fillText(label.clustername, xClustername, spectrogramImg.naturalHeight * 1.5 / 2 - 5);
     }
 
-    function addClustername(newestLabel){
-        //newestLabel.clustername = window.prompt('Enter clustername: ')
-    }
-
-    function updateClusternamesButtons(newestLabel){
-        //setClusternameButtons(prevState => [ ...prevState, <div key={nanoid()}>{newestLabel.clustername}</div> ])
+    function passActiveClusternameToVisuals(chosenClustername){
+        setActiveClustername(chosenClustername)
     }
 
     // Initial drawing
@@ -542,7 +535,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
-            <Clusternames />
+            <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>
 
     )

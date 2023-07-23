@@ -2,8 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import Clusternames from "./assets/Clusternames.jsx"
 
 // TO DO
-// Offset only legal after onset?
-// Nested labels allowed?
+// Labels without clusternames allowed?
 // Mockup Backend connection
 // Interpolation up to 200ms
 
@@ -24,7 +23,7 @@ class PlayHead{
 function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramContext, zoomLevel){
     spectrogramCanvas.width = zoomLevel
     spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
-    spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
+    //spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
 }
 
 function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
@@ -148,18 +147,34 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         }
 
         // Add offset to existing label if necessary
-        if (labels.length > 0 && labels[labels.length-1].offset === undefined){
+        const lastLabel = labels[labels.length-1]
+        if (labels.length > 0 && lastLabel.offset === undefined){
             const newOffset = calculateTimeframe(event)
             const labelsCopy = labels
-            labelsCopy[labels.length-1].offset = newOffset
+            if (newOffset < lastLabel.onset){
+                lastLabel.offset = newOffset
+                labelsCopy[labels.length-1] = flipOnsetOffset(lastLabel)
+            } else{
+                labelsCopy[labels.length-1].offset = newOffset
+            }
             setLabels(labelsCopy)
             drawLine(newOffset,"#00FF00")
-            drawLineBetween(labels[labels.length-1],"#00FF00")
+            drawLineBetween(lastLabel,"#00FF00")
             return
         }
 
         // Add new Label
         addNewLabel(event)
+    }
+
+    function flipOnsetOffset(label){
+        const newOnset = label.offset
+        const newOffset = label.onset
+
+        label.onset = newOnset
+        label.offset = newOffset
+
+        return label
     }
 
     function updateOnset(event){
@@ -209,9 +224,15 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragOffset)
         spectrogramCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
+        // flip onset with offset if necessary
+        if (clickedLabel){
+            if (clickedLabel.onset > clickedLabel.offset){
+                clickedLabel = flipOnsetOffset(clickedLabel)
+            }
+        }
         clickedLabel = undefined
 
-        //console.log(labels)
+        console.log(labels)
     }
 
     function hoverLine(event){
@@ -535,6 +556,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
+            <div id='background-img'></div>
             <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>
 

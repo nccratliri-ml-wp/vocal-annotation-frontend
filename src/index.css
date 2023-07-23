@@ -34,3 +34,10 @@
 #clustername-buttons-container > div[isactive='true']{
   background-color: yellow;
 }
+
+#background-img{
+  background: url('/test-media/birdname_130519_113316.31.png');
+  height: 40px;
+  width: 50px;
+  border: 2px solid red;
+}

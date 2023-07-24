@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import Clusternames from "./assets/Clusternames.jsx"
 
 // TO DO
-// Labels without clusternames allowed?
+// Labels without clusternames allowed? numbers allowed, what's the max length?
 // Mockup Backend connection
 // Interpolation up to 200ms
 
@@ -22,8 +22,11 @@ class PlayHead{
 
 function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramContext, zoomLevel){
     spectrogramCanvas.width = zoomLevel
-    spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
+    //spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
     //spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
+
+    // background image rendered in CSS:
+    spectrogramCanvas.height = 128
 }
 
 function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
@@ -102,8 +105,10 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     const timelineCanvasRef = useRef(null)
     const timelineContextRef = useRef(null)
 
+    const backgroundImageRef = useRef(null)
+
     const [zoomLevel, setZoomLevel] = useState(null)
-    const zoomLevelRef = useRef()
+    const zoomLevelRef = useRef(null)
 
     const [labels, setLabels] = useState([])
 
@@ -366,13 +371,22 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function handleClickZoomIn(){
-        setZoomLevel(spectrogramImg.naturalWidth)
-        zoomLevelRef.current = spectrogramImg.naturalWidth
+        //setZoomLevel(spectrogramImg.naturalWidth * 12)
+        //zoomLevelRef.current = spectrogramImg.naturalWidth * 12
+        setZoomLevel(currentState => currentState * 2)
+        zoomLevelRef.current = zoomLevelRef.current * 2
+        console.log(zoomLevelRef.current)
+        console.log(backgroundImageRef.current.style.background)
     }
 
     function handleClickZoomOut(){
-        setZoomLevel(canvasContainerRef.current.clientWidth)
-        zoomLevelRef.current = canvasContainerRef.current.clientWidth
+        //setZoomLevel(canvasContainerRef.current.clientWidth)
+        //zoomLevelRef.current = canvasContainerRef.current.clientWidth
+        if (zoomLevelRef.current <= canvasContainerRef.current.clientWidth){
+            return
+        }
+        setZoomLevel(currentState => currentState / 2)
+        zoomLevelRef.current = zoomLevelRef.current / 2
     }
 
     function playAudio(){
@@ -434,7 +448,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
             canvasContainerRef.current.scrollTo({
                 top: 0,
                 left: x,
-                behavior: "smooth",
+                behavior: "instant",
             })
             scrollStepsXValues.shift()
         }
@@ -546,17 +560,16 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 ⏹
             </button>
             <div id='canvas-container' ref={canvasContainerRef}>
+                <div id='background-img' ref={backgroundImageRef}></div>
                 <canvas id='spectrogram-canvas'
                         ref={spectrogramCanvasRef}
                         onMouseDown={handleLMBDown}
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
-
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
             </div>
-            <div id='background-img'></div>
             <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>
 

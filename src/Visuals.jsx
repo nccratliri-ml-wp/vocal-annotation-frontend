@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import Clusternames from "./assets/Clusternames.jsx"
+import Clusternames from "./Clusternames.jsx"
 
 // TO DO
 // Labels without clusternames allowed? numbers allowed, what's the max length?
@@ -543,22 +543,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     , [zoomLevel, labels])
 
     return (
-        <div>
-            <button id='zoom-in-btn' onClick={handleClickZoomIn}>
-                Zoom in
-            </button>
-            <button id='zoom-out-btn' onClick={handleClickZoomOut}>
-                Zoom out
-            </button>
-            <button id='play-btn' onClick={playAudio}>
-                ▶
-            </button>
-            <button id='pause-btn' onClick={pauseAudio}>
-                ⏸
-            </button>
-            <button id='stop-btn' onClick={stopAudio}>
-                ⏹
-            </button>
+        <div id='visuals-container'>
             <div id='canvas-container' ref={canvasContainerRef}>
                 <div id='background-img' ref={backgroundImageRef}></div>
                 <canvas id='spectrogram-canvas'
@@ -569,6 +554,23 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                         onContextMenu={handleRightClick}
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
+            </div>
+            <div id='controls-container'>
+                <button id='play-btn' onClick={playAudio}>
+                    ▶
+                </button>
+                <button id='pause-btn' onClick={pauseAudio}>
+                    ⏸
+                </button>
+                <button id='stop-btn' onClick={stopAudio}>
+                    ⏹
+                </button>
+                <button id='zoom-in-btn' onClick={handleClickZoomIn}>
+                    +🔍
+                </button>
+                <button id='zoom-out-btn' onClick={handleClickZoomOut}>
+                    -🔍
+                </button>
             </div>
             <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>

@@ -1,3 +1,5 @@
+/* -------------------------- General -------------------------- */
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -5,16 +7,39 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #051923;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  height: 100%;
 }
 
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 10px 5px;
+}
+
+
+#visuals-container{
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+          "canvas"
+          "controls"
+          "clusternames";
+  height: 100vh;
+}
+
+/* -------------------------- Spectrogram -------------------------- */
+
 #canvas-container{
+  grid-area: canvas;
   display: grid;
   grid-template-columns: 1fr;
   overflow-x: scroll;
@@ -33,19 +58,69 @@
   background-size: 100% 100%;
 }
 
+/* -------------------------- Controls -------------------------- */
+
+#controls-container{
+  grid-area: controls;
+  display: flex;
+  padding: 2rem;
+  justify-content: center;
+}
+
+#controls-container > button{
+  height: 45px;
+  width: 60px;
+  border: none;
+  border-radius: 4px;
+  margin: 2px;
+  background-color: #dddddd;
+}
+
+#controls-container > button:hover{
+  background-color: whitesmoke;
+}
+
+
+/* -------------------------- Clusternames -------------------------- */
+
+#clusternames-container{
+  grid-area: clusternames;
+  background-color: #082536;
+}
+
+#clustername-input-field{
+  border: none;
+  height: 30px;
+  margin: 15px;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+}
+
+#clustername-input-field:focus{
+  outline: none;
+}
+
+#clustername-input-field:hover{
+}
+
 #clustername-buttons-container{
   display: flex;
-  margin: 3%;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 10px;
 }
 
 #clustername-buttons-container > div{
-  background-color: whitesmoke;
-  border-radius: 5%;
+  /*max-width: fit-content;*/
+  background-color: #f6fffe;
   margin: 5px;
-  padding: 2px 5px;
-  color: #242424;
-  font-size: 22px;
+  padding: 2px 30px;
+  color: #36d5a8;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
 }
 #clustername-buttons-container > div[isactive='true']{
-  background-color: yellow;
+  background-color: #36d5a8;
+  color: #f6fffe;
 }

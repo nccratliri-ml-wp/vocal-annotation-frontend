@@ -16,7 +16,6 @@ function App() {
 
     return (
     <>
-        <h1>Annotation Interface</h1>
         <audio src="test-media/birdname_130519_113316.31.wav" preload="metadata" ref={audioFile} onLoadedMetadata={handleAudioLoaded}></audio>
             <Visuals
                 audioFile={audioFile.current}

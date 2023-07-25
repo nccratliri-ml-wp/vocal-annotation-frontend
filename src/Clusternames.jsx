@@ -11,7 +11,18 @@ class ClusternameButton {
 
 function Clusternames( { passActiveClusternameToVisuals } ){
     const [newClustername, setNewClustername] = useState('')
-    const [clusternameButtons, setClusternameButtons] = useState([])
+    const [clusternameButtons, setClusternameButtons] = useState([
+        new ClusternameButton (nanoid(), 'Pineapple', false),
+        new ClusternameButton (nanoid(), 'Banana', false),
+        new ClusternameButton (nanoid(), 'Strawberry', false),
+        new ClusternameButton (nanoid(), 'Potato', false),
+        new ClusternameButton (nanoid(), 'Onion', false),
+        new ClusternameButton (nanoid(), 'Garlic', false),
+        new ClusternameButton (nanoid(), 'Tomato', true),
+        new ClusternameButton (nanoid(), 'Apple', false),
+        new ClusternameButton (nanoid(), 'Pear', false)
+
+    ])
 
     function handleChange(event){
         setNewClustername(event.target.value)
@@ -78,12 +89,13 @@ function Clusternames( { passActiveClusternameToVisuals } ){
     }, [JSON.stringify(clusternameButtons)])
 
     return (
-        <div>
+        <div id='clusternames-container'>
             <form onSubmit={updateClusternamesButtons}>
                 <input
+                    id='clustername-input-field'
                     type='text'
                     value={newClustername}
-                    placeholder='Add custom clustername'
+                    placeholder='Add a custom tag:'
                     onChange={handleChange}
                 />
             </form>

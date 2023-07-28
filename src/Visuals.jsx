@@ -3,8 +3,9 @@ import Clusternames from "./Clusternames.jsx"
 
 // TO DO
 // Labels without clusternames allowed? numbers allowed, what's the max length?
-// Mockup Backend connection
+// Mockup Backend connection (upload and download)
 // Interpolation up to 200ms
+// savoid image crash
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -22,11 +23,7 @@ class PlayHead{
 
 function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramContext, zoomLevel){
     spectrogramCanvas.width = zoomLevel
-    //spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
-    //spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
-
-    // background image rendered in CSS:
-    spectrogramCanvas.height = 128
+    spectrogramCanvas.height = 128 //hardcoded, depends on image file input
 }
 
 function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){

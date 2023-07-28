@@ -3,7 +3,6 @@ import './App.css'
 import Visuals from "./Visuals.jsx"
 
 function App() {
-
     const [audioLength, setAudioLength] = useState()
     const audioFile = useRef(null)
 
@@ -16,6 +15,9 @@ function App() {
 
     return (
     <>
+        <div id='upload-container'>
+            Mock Up Backend Branch
+        </div>
         <audio src="test-media/birdname_130519_113316.31.wav" preload="metadata" ref={audioFile} onLoadedMetadata={handleAudioLoaded}></audio>
             <Visuals
                 audioFile={audioFile.current}

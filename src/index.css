@@ -54,7 +54,7 @@ html, body {
 #background-img{
   grid-row-start: 1;
   grid-column-start: 1;
-  background: url('/test-media/birdname_130519_113316.31.png') no-repeat;
+  background: url('') no-repeat;
   background-size: 100% 100%;
 }
 

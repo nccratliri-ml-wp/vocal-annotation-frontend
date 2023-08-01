@@ -92,7 +92,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, audioLength, spectrogramImg} ){
+function Visuals( {audioFile, audioLength, spectrogramImg, base64Url} ){
 
     const canvasContainerRef = useRef(null)
 
@@ -491,6 +491,10 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         setActiveClustername(chosenClustername)
     }
 
+    function populateSpectrogramCanvas(){
+        backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
+    }
+
     // Initial drawing
     useEffect( () => {
         setZoomLevel(canvasContainerRef.current.clientWidth)
@@ -567,6 +571,9 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 </button>
                 <button id='zoom-out-btn' onClick={handleClickZoomOut}>
                     -🔍
+                </button>
+                <button onClick={populateSpectrogramCanvas}>
+                    Populate
                 </button>
             </div>
             <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>

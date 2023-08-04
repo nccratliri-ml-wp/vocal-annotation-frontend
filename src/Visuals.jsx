@@ -5,6 +5,8 @@ import Clusternames from "./Clusternames.jsx"
 // Labels without clusternames allowed? numbers allowed, what's the max length?
 // Interpolation up to 200ms
 // fix image crash
+// fill clusternameButtons with preloaded CSV clusternames instead of mockup
+// refactor audioUpload into it's own component like CSVReader
 
 const spectrogramCanvasHeight = 128 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 
@@ -93,7 +95,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, audioLength, base64Url} ){
+function Visuals( {audioFile, audioLength, base64Url, importedLabels} ){
 
     const canvasContainerRef = useRef(null)
 
@@ -485,6 +487,11 @@ function Visuals( {audioFile, audioLength, base64Url} ){
         backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
+    function showData(event){
+        event.preventDefault()
+        console.log(labels)
+    }
+
     // Initial drawing
     useEffect( () => {
         if (base64Url === null){
@@ -507,10 +514,11 @@ function Visuals( {audioFile, audioLength, base64Url} ){
             audioLength,
             false)
 
+        setLabels(importedLabels)
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
     }
-    , [base64Url])
+    , [base64Url, importedLabels])
 
     // Redraw every time zoom level or labels is changed
     useEffect( () => {
@@ -563,6 +571,7 @@ function Visuals( {audioFile, audioLength, base64Url} ){
                 <button id='zoom-out-btn' onClick={handleClickZoomOut}>
                     -🔍
                 </button>
+                <button onClick={showData}>Show data</button>
             </div>
             <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>

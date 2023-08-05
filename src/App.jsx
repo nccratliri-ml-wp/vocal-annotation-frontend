@@ -1,60 +1,58 @@
 import {useState, useRef} from 'react'
-import './App.css'
+
 import Visuals from "./Visuals.jsx"
 import CSVReader from "./CSVReader.jsx";
-import axios from 'axios'
-
-const formData = new FormData();
+import Clusternames from "./Clusternames.jsx";
+import AudioUpload from "./AudioUpload.jsx";
 
 function App() {
-    const [audioLength, setAudioLength] = useState()
-    const audioFile = useRef(null)
-
+    const audioDOMObject = useRef(null)
     const [base64Url, setBase64Url] = useState(null)
-
     const [importedLabels, setImportedLabels] = useState([]);
+    const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
+    const [activeClustername, setActiveClustername] = useState()
+
+    function passAudioDOMObjectURLToApp(url){
+        audioDOMObject.current.setAttribute('src', url)
+    }
+
+    function passBase64UrlToApp(newUrl){
+        setBase64Url( newUrl )
+    }
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
     }
 
-    function handleAudioLoaded(event){
-        setAudioLength(event.target.duration)
+    function passClusterNameButtonsToApp(newClusternameButtons){
+        setImportedClusternameButtons(newClusternameButtons)
     }
 
-    function handleChangeAudioFile(event){
-        formData.append("newAudioFile", event.target.files[0])
-
-        const url = URL.createObjectURL(event.target.files[0])
-        audioFile.current.setAttribute('src', url)
-    }
-
-    function handleUploadClickAudoFile(){
-        axios.post(
-            '/upload',
-            formData)
-            .then(response => {
-                setBase64Url(response.data)
-            })
-            .catch((error) => console.log(error.response))
+    function passActiveClusternameToApp(chosenClustername){
+        setActiveClustername(chosenClustername)
     }
 
 
     return (
     <>
-        <div id='audio-upload-container'>
-            <input type='file' onChange={handleChangeAudioFile}/>
-            <button onClick={handleUploadClickAudoFile}>Upload Audio File</button>
-        </div>
+        <AudioUpload
+            passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
+            passBase64UrlToApp={passBase64UrlToApp}
+        />
+        <audio preload="metadata" ref={audioDOMObject}></audio>
         <CSVReader
             passLabelsToApp={passLabelsToApp}
+            passClusterNameButtonsToApp={passClusterNameButtonsToApp}
         />
-        <audio preload="metadata" ref={audioFile} onLoadedMetadata={handleAudioLoaded}></audio>
         <Visuals
-            audioFile={audioFile.current}
-            audioLength={audioLength}
+            audioFile={audioDOMObject.current}
             base64Url={base64Url}
             importedLabels={importedLabels}
+            activeClustername={activeClustername}
+        />
+        <Clusternames
+            passActiveClusternameToApp={passActiveClusternameToApp}
+            importedClusternameButtons={importedClusternameButtons}
         />
     </>
     )

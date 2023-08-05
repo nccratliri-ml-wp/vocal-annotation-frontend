@@ -1,4 +1,5 @@
-import {useState} from "react";
+import { useState } from "react";
+import { nanoid } from 'nanoid'
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -8,7 +9,15 @@ class Label {
     }
 }
 
-function CSVReader( {passLabelsToApp} ){
+class ClusternameButton {
+    constructor(id, clustername, isActive) {
+        this.id = id
+        this.clustername = clustername
+        this.isActive = isActive
+    }
+}
+
+function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
     const [csvFile, setCSVFile] = useState(null)
 
     function handleChange(event){
@@ -35,17 +44,25 @@ function CSVReader( {passLabelsToApp} ){
         const rows = str.slice(str.indexOf('\n')+1).split('\n')
 
         let newLabels = []
+        let clusternames = []
         for (let item of rows){
             const values = item.split(delim)
-            newLabels.push(new Label(
+            newLabels.push(
+                new Label(
                 parseFloat(values[0]),
                 parseFloat(values[1]),
-                values[2]) )
+                values[2])
+            )
+            if ( values[2] && !clusternames.includes(values[2]) ){
+                clusternames.push(values[2])
+            }
         }
 
         newLabels = newLabels.filter( label => !isNaN(label.onset) && !isNaN(label.offset) )
-
         passLabelsToApp(newLabels)
+
+        const newClusternameButtons = clusternames.map( clustername => new ClusternameButton(nanoid(), clustername, false) )
+        passClusterNameButtonsToApp(newClusternameButtons)
     }
 
 

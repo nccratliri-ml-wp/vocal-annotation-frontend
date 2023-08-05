@@ -1,5 +1,4 @@
 import {useEffect, useRef, useState} from "react";
-import Clusternames from "./Clusternames.jsx"
 
 // TO DO
 // Labels without clusternames allowed? numbers allowed, what's the max length?
@@ -95,7 +94,9 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, audioLength, base64Url, importedLabels} ){
+function Visuals( {audioFile, base64Url, importedLabels, activeClustername} ){
+
+    const [audioLength, setAudioLength] = useState(null)
 
     const canvasContainerRef = useRef(null)
 
@@ -112,11 +113,10 @@ function Visuals( {audioFile, audioLength, base64Url, importedLabels} ){
 
     const [labels, setLabels] = useState([])
 
-    const [activeClustername, setActiveClustername] = useState()
-
     const playHeadRef = useRef(new PlayHead(0))
 
     let clickedLabel = undefined
+
 
     function handleLMBDown(event){
         pauseAudio()
@@ -479,24 +479,20 @@ function Visuals( {audioFile, audioLength, base64Url, importedLabels} ){
         ctx.fillText(label.clustername, xClustername, spectrogramCanvasHeight / 2 - 5);
     }
 
-    function passActiveClusternameToVisuals(chosenClustername){
-        setActiveClustername(chosenClustername)
-    }
 
     function populateSpectrogramCanvas(){
         backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
-    function showData(event){
-        event.preventDefault()
-        console.log(labels)
-    }
 
     // Initial drawing
     useEffect( () => {
-        if (base64Url === null){
+        if (!base64Url){
             return
         }
+
+        setAudioLength(audioFile.duration)
+
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
@@ -571,11 +567,8 @@ function Visuals( {audioFile, audioLength, base64Url, importedLabels} ){
                 <button id='zoom-out-btn' onClick={handleClickZoomOut}>
                     -🔍
                 </button>
-                <button onClick={showData}>Show data</button>
             </div>
-            <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>
-
     )
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { nanoid } from 'nanoid'
 
 class Label {
@@ -24,8 +24,7 @@ function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
         setCSVFile(event.target.files[0])
     }
 
-    function submit(event){
-        event.preventDefault()
+    function readFile(){
         if (!csvFile){
             return
         }
@@ -65,6 +64,10 @@ function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
         passClusterNameButtonsToApp(newClusternameButtons)
     }
 
+    // When a new CSV file is added, read it
+    useEffect( () => {
+        readFile()
+    }, [csvFile])
 
     return(
         <form id='csv-form'>
@@ -74,9 +77,6 @@ function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
                 id='csvFile'
                 onChange={handleChange}
             />
-            <button onClick={submit}>
-                Submit
-            </button>
         </form>
     )
 }

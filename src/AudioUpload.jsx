@@ -1,24 +1,20 @@
 import axios from 'axios'
 
-const formData = new FormData();
-
 function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp} ){
 
     function handleChange(event){
+        const formData = new FormData();
         formData.append("newAudioFile", event.target.files[0])
 
         const url = URL.createObjectURL(event.target.files[0])
         passAudioDOMObjectURLToApp( url )
+
+        getSpectrogramFromBackend(formData)
     }
 
-    function submit(event){
-        event.preventDefault()
-        axios.post(
-            '/upload',
-            formData)
-            .then(response => {
-                passBase64UrlToApp(response.data)
-            })
+    function getSpectrogramFromBackend(formData){
+        axios.post('/upload', formData)
+            .then(response => passBase64UrlToApp(response.data))
             .catch((error) => console.log(error.response))
     }
 
@@ -31,9 +27,6 @@ function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp} ){
                 id='audioFile'
                 onChange={handleChange}
             />
-            <button onClick={submit}>
-                Submit
-            </button>
         </form>
     )
 }

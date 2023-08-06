@@ -9,7 +9,7 @@ class ClusternameButton {
     }
 }
 
-function Clusternames( { passActiveClusternameToApp, importedClusternameButtons } ){
+function Clusternames( { passActiveClusternameToApp, importedClusternameButtons, base64Url } ){
     const [newClustername, setNewClustername] = useState('')
     const [clusternameButtons, setClusternameButtons] = useState([])
 
@@ -64,11 +64,17 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons 
         return clusternameButtons.filter(item => item.id !== btn.id)
     }
 
+    // When a new CSV-File was uploaded, update the Clustername Buttons and re-render the component
     useEffect( () => {
         setClusternameButtons(importedClusternameButtons)
 
     }, [importedClusternameButtons])
 
+    // When a new Audio-File was uploaded, delete previous clusternameButtons and re-render the component
+    useEffect( () => {
+        setClusternameButtons([])
+
+    }, [base64Url])
 
     // Whenever user deletes the active Clustername Button, the last button in the state array becomes active
     useEffect( () => {
@@ -89,6 +95,9 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons 
                 <input
                     id='clustername-input-field'
                     type='text'
+                    required='required'
+                    pattern='^[^,]{1,30}$'
+                    title='No commas allowed. Max length 30 characters'
                     value={newClustername}
                     placeholder='Add a custom tag:'
                     onChange={handleChange}

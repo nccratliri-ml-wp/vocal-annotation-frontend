@@ -4,8 +4,6 @@ import {useEffect, useRef, useState} from "react";
 // Labels without clusternames allowed? numbers allowed, what's the max length?
 // Interpolation up to 200ms
 // fix image crash
-// fill clusternameButtons with preloaded CSV clusternames instead of mockup
-// refactor audioUpload into it's own component like CSVReader
 
 const spectrogramCanvasHeight = 128 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 
@@ -484,7 +482,7 @@ function Visuals( {audioFile, base64Url, importedLabels, activeClustername} ){
         backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
-
+    /*
     // Initial drawing
     useEffect( () => {
         if (!base64Url){
@@ -515,6 +513,49 @@ function Visuals( {audioFile, base64Url, importedLabels, activeClustername} ){
         drawPlayhead(playHeadRef.current.timeframe)
     }
     , [base64Url, importedLabels])
+     */
+
+    // When a new audio File was uploaded, do this:
+    useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setAudioLength(audioFile.duration)
+
+        setZoomLevel(canvasContainerRef.current.clientWidth)
+        zoomLevelRef.current = canvasContainerRef.current.clientWidth
+
+        spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
+
+        populateSpectrogramCanvas()
+
+        adjustSpectrogramCanvasDimensions(
+            spectrogramCanvasRef.current,
+            zoomLevel)
+
+        drawTimeline(spectrogramCanvasRef.current,
+            timelineCanvasRef.current,
+            timelineContextRef.current,
+            audioLength,
+            false)
+
+        setLabels([])
+        drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
+    }, [base64Url])
+
+
+    // When a new CSV File was uploaded, do this:
+    useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setLabels(importedLabels)
+        drawAllLabels()
+    }, [importedLabels])
+
 
     // Redraw every time zoom level or labels is changed
     useEffect( () => {

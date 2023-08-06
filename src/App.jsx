@@ -53,9 +53,51 @@ function App() {
         <Clusternames
             passActiveClusternameToApp={passActiveClusternameToApp}
             importedClusternameButtons={importedClusternameButtons}
+            base64Url={base64Url}
         />
     </>
     )
 }
 
 export default App
+/*
+// When a new audio File was uploaded, do this:
+    useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setAudioLength(audioFile.duration)
+
+        setZoomLevel(canvasContainerRef.current.clientWidth)
+        zoomLevelRef.current = canvasContainerRef.current.clientWidth
+
+        spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
+
+        populateSpectrogramCanvas()
+
+        adjustSpectrogramCanvasDimensions(
+            spectrogramCanvasRef.current,
+            zoomLevel)
+
+        drawTimeline(spectrogramCanvasRef.current,
+            timelineCanvasRef.current,
+            timelineContextRef.current,
+            audioLength,
+            false)
+
+        drawPlayhead(playHeadRef.current.timeframe)
+    }, [base64Url])
+
+
+    // When a new CSV File was uploaded, do this:
+    useEffect( () => {
+            if (!base64Url){
+                return
+            }
+
+            setLabels(importedLabels)
+            drawAllLabels()
+    }, [importedLabels])
+
+ */

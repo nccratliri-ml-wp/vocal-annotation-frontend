@@ -1,10 +1,11 @@
 import axios from 'axios'
 
-function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp} ){
+function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp} ){
 
     function handleChange(event){
         const formData = new FormData();
         formData.append("newAudioFile", event.target.files[0])
+        passAudioFileNameToApp( event.target.files[0].name )
 
         const url = URL.createObjectURL(event.target.files[0])
         passAudioDOMObjectURLToApp( url )

@@ -1,11 +1,12 @@
 import {useEffect, useRef, useState} from "react";
+import Export from "./Export.jsx";
 
 // TO DO
 // Labels without clusternames allowed? numbers allowed, what's the max length?
 // Interpolation up to 200ms
 // fix image crash
 
-const spectrogramCanvasHeight = 128 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
+const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -92,7 +93,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, base64Url, importedLabels, activeClustername} ){
+function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeClustername} ){
 
     const [audioLength, setAudioLength] = useState(null)
 
@@ -608,6 +609,10 @@ function Visuals( {audioFile, base64Url, importedLabels, activeClustername} ){
                 <button id='zoom-out-btn' onClick={handleClickZoomOut}>
                     -🔍
                 </button>
+                <Export
+                    audioFileName={audioFileName}
+                    labels={labels}
+                />
             </div>
         </div>
     )

@@ -8,6 +8,7 @@ import AudioUpload from "./AudioUpload.jsx";
 function App() {
     const audioDOMObject = useRef(null)
     const [base64Url, setBase64Url] = useState(null)
+    const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
@@ -20,16 +21,20 @@ function App() {
         setBase64Url( newUrl )
     }
 
+    function passAudioFileNameToApp(newAudioFileName){
+        setAudioFileName( newAudioFileName )
+    }
+
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
     }
 
     function passClusterNameButtonsToApp(newClusternameButtons){
-        setImportedClusternameButtons(newClusternameButtons)
+        setImportedClusternameButtons( newClusternameButtons )
     }
 
     function passActiveClusternameToApp(chosenClustername){
-        setActiveClustername(chosenClustername)
+        setActiveClustername( chosenClustername )
     }
 
 
@@ -38,6 +43,7 @@ function App() {
         <AudioUpload
             passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
             passBase64UrlToApp={passBase64UrlToApp}
+            passAudioFileNameToApp={passAudioFileNameToApp}
         />
         <audio preload="metadata" ref={audioDOMObject}></audio>
         <CSVReader
@@ -46,6 +52,7 @@ function App() {
         />
         <Visuals
             audioFile={audioDOMObject.current}
+            audioFileName={audioFileName}
             base64Url={base64Url}
             importedLabels={importedLabels}
             activeClustername={activeClustername}

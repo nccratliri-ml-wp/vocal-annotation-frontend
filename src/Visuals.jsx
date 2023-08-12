@@ -1,10 +1,12 @@
 import {useEffect, useRef, useState} from "react";
-import Clusternames from "./Clusternames.jsx"
+import Export from "./Export.jsx";
 
 // TO DO
 // Labels without clusternames allowed? numbers allowed, what's the max length?
-// Mockup Backend connection
 // Interpolation up to 200ms
+// fix image crash
+
+const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -20,13 +22,9 @@ class PlayHead{
     }
 }
 
-function drawSpectrogram(spectrogramImg, spectrogramCanvas, spectrogramContext, zoomLevel){
+function adjustSpectrogramCanvasDimensions(spectrogramCanvas, zoomLevel){
     spectrogramCanvas.width = zoomLevel
-    //spectrogramCanvas.height = spectrogramImg.naturalHeight * 1.5
-    //spectrogramContext.drawImage(spectrogramImg, 0, 0, zoomLevel, spectrogramImg.naturalHeight * 1.5)
-
-    // background image rendered in CSS:
-    spectrogramCanvas.height = 128
+    spectrogramCanvas.height = spectrogramCanvasHeight
 }
 
 function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
@@ -95,7 +93,9 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, audioLength, spectrogramImg} ){
+function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeClustername} ){
+
+    const [audioLength, setAudioLength] = useState(null)
 
     const canvasContainerRef = useRef(null)
 
@@ -112,11 +112,10 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     const [labels, setLabels] = useState([])
 
-    const [activeClustername, setActiveClustername] = useState()
-
     const playHeadRef = useRef(new PlayHead(0))
 
     let clickedLabel = undefined
+
 
     function handleLMBDown(event){
         pauseAudio()
@@ -192,9 +191,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     function dragOnset(event){
         updateOnset(event)
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
@@ -202,9 +200,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
     function dragOffset(event){
         updateOffset(event)
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
@@ -213,9 +210,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     function dragPlayhead(event){
         updatePlayHead( calculateTimeframe(event) )
         audioFile.currentTime = playHeadRef.current.timeframe
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
@@ -315,7 +311,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         ctx.beginPath()
         ctx.moveTo(x, 0)
-        ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
+        ctx.lineTo(x, spectrogramCanvasHeight)
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
         ctx.stroke()
@@ -336,8 +332,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         ctx.beginPath()
         ctx.setLineDash([1, 1])
-        ctx.moveTo(xOnset, spectrogramImg.naturalHeight * 1.5 / 2 )
-        ctx.lineTo(xOffset, spectrogramImg.naturalHeight * 1.5 / 2)
+        ctx.moveTo(xOnset, spectrogramCanvasHeight / 2 )
+        ctx.lineTo(xOffset, spectrogramCanvasHeight / 2)
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
         ctx.stroke()
@@ -350,7 +346,7 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
 
         ctx.beginPath()
         ctx.moveTo(x, 0)
-        ctx.lineTo(x, spectrogramImg.naturalHeight * 1.5)
+        ctx.lineTo(x, spectrogramCanvasHeight)
         ctx.lineWidth = 2
         ctx.strokeStyle = "#ff0000"
         ctx.stroke()
@@ -371,8 +367,6 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function handleClickZoomIn(){
-        //setZoomLevel(spectrogramImg.naturalWidth * 12)
-        //zoomLevelRef.current = spectrogramImg.naturalWidth * 12
         setZoomLevel(currentState => currentState * 2)
         zoomLevelRef.current = zoomLevelRef.current * 2
         console.log(zoomLevelRef.current)
@@ -380,8 +374,6 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
     }
 
     function handleClickZoomOut(){
-        //setZoomLevel(canvasContainerRef.current.clientWidth)
-        //zoomLevelRef.current = canvasContainerRef.current.clientWidth
         if (zoomLevelRef.current <= canvasContainerRef.current.clientWidth){
             return
         }
@@ -412,13 +404,11 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         audioFile.currentTime = 0
 
         updatePlayHead(0)
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevel)
         drawAllLabels()
         drawPlayhead(0)
-
     }
 
     function updatePlayHead(newTimeframe){
@@ -431,9 +421,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         }
         window.requestAnimationFrame(() => loop(scrollStepsXValues) )
 
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevelRef.current)
         drawAllLabels()
         drawPlayhead(audioFile.currentTime)
@@ -459,9 +448,8 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         for (let label of labels){
             const onsetX = calculateXPosition(label.onset)
             const offsetX = calculateXPosition(label.offset)
-            drawSpectrogram(spectrogramImg,
+            adjustSpectrogramCanvasDimensions(
                 spectrogramCanvasRef.current,
-                spectrogramContextRef.current,
                 zoomLevelRef.current)
             drawAllLabels()
             drawPlayhead(audioFile.currentTime)
@@ -487,37 +475,88 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         ctx.font = "bold 20px Arial";
         ctx.textAlign = "center";
         ctx.fillStyle = '#f3e655'
-        ctx.fillText(label.clustername, xClustername, spectrogramImg.naturalHeight * 1.5 / 2 - 5);
+        ctx.fillText(label.clustername, xClustername, spectrogramCanvasHeight / 2 - 5);
     }
 
-    function passActiveClusternameToVisuals(chosenClustername){
-        setActiveClustername(chosenClustername)
+
+    function populateSpectrogramCanvas(){
+        backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
+    /*
     // Initial drawing
     useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setAudioLength(audioFile.duration)
+
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
 
-        spectrogramImg.addEventListener('load', () => {
-            drawSpectrogram(spectrogramImg,
-                spectrogramCanvasRef.current,
-                spectrogramContextRef.current,
-                zoomLevel)
+        populateSpectrogramCanvas()
 
-            drawTimeline(spectrogramCanvasRef.current,
-                timelineCanvasRef.current,
-                timelineContextRef.current,
-                audioLength,
-                zoomLevel === spectrogramImg.naturalWidth)
+        adjustSpectrogramCanvasDimensions(
+            spectrogramCanvasRef.current,
+            zoomLevel)
 
-            drawAllLabels()
-            drawPlayhead(playHeadRef.current.timeframe)
-        })
+        drawTimeline(spectrogramCanvasRef.current,
+            timelineCanvasRef.current,
+            timelineContextRef.current,
+            audioLength,
+            false)
+
+        setLabels(importedLabels)
+        drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
     }
-    , [spectrogramImg])
+    , [base64Url, importedLabels])
+     */
+
+    // When a new audio File was uploaded, do this:
+    useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setAudioLength(audioFile.duration)
+
+        setZoomLevel(canvasContainerRef.current.clientWidth)
+        zoomLevelRef.current = canvasContainerRef.current.clientWidth
+
+        spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
+
+        populateSpectrogramCanvas()
+
+        adjustSpectrogramCanvasDimensions(
+            spectrogramCanvasRef.current,
+            zoomLevel)
+
+        drawTimeline(spectrogramCanvasRef.current,
+            timelineCanvasRef.current,
+            timelineContextRef.current,
+            audioLength,
+            false)
+
+        setLabels([])
+        drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe)
+    }, [base64Url])
+
+
+    // When a new CSV File was uploaded, do this:
+    useEffect( () => {
+        if (!base64Url){
+            return
+        }
+
+        setLabels(importedLabels)
+        drawAllLabels()
+    }, [importedLabels])
+
 
     // Redraw every time zoom level or labels is changed
     useEffect( () => {
@@ -525,16 +564,15 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
         timelineContextRef.current = timelineCanvasRef.current.getContext('2d')
 
-        drawSpectrogram(spectrogramImg,
+        adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
-            spectrogramContextRef.current,
             zoomLevel)
 
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
             audioLength,
-            zoomLevel === spectrogramImg.naturalWidth)
+            false)
 
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
@@ -571,10 +609,12 @@ function Visuals( {audioFile, audioLength, spectrogramImg} ){
                 <button id='zoom-out-btn' onClick={handleClickZoomOut}>
                     -🔍
                 </button>
+                <Export
+                    audioFileName={audioFileName}
+                    labels={labels}
+                />
             </div>
-            <Clusternames passActiveClusternameToVisuals={passActiveClusternameToVisuals}/>
         </div>
-
     )
 }
 

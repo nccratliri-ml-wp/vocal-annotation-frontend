@@ -9,20 +9,9 @@ class ClusternameButton {
     }
 }
 
-function Clusternames( { passActiveClusternameToVisuals } ){
+function Clusternames( { passActiveClusternameToApp, importedClusternameButtons, base64Url } ){
     const [newClustername, setNewClustername] = useState('')
-    const [clusternameButtons, setClusternameButtons] = useState([
-        new ClusternameButton (nanoid(), 'Pineapple', false),
-        new ClusternameButton (nanoid(), 'Banana', false),
-        new ClusternameButton (nanoid(), 'Strawberry', false),
-        new ClusternameButton (nanoid(), 'Potato', false),
-        new ClusternameButton (nanoid(), 'Onion', false),
-        new ClusternameButton (nanoid(), 'Garlic', false),
-        new ClusternameButton (nanoid(), 'Tomato', true),
-        new ClusternameButton (nanoid(), 'Apple', false),
-        new ClusternameButton (nanoid(), 'Pear', false)
-
-    ])
+    const [clusternameButtons, setClusternameButtons] = useState([])
 
     function handleChange(event){
         setNewClustername(event.target.value)
@@ -39,7 +28,7 @@ function Clusternames( { passActiveClusternameToVisuals } ){
                 new ClusternameButton( nanoid(),newClustername, true )
             ])
 
-        passActiveClusternameToVisuals(newClustername)
+        passActiveClusternameToApp(newClustername)
 
         setNewClustername('')
     }
@@ -59,7 +48,7 @@ function Clusternames( { passActiveClusternameToVisuals } ){
 
         return newClusternameButtons.map(item => {
             if (item.id === btn.id){
-                passActiveClusternameToVisuals(item.clustername)
+                passActiveClusternameToApp(item.clustername)
                 return new ClusternameButton (item.id, item.clustername, !item.isActive)
             }
             return new ClusternameButton (item.id, item.clustername, item.isActive)
@@ -74,6 +63,18 @@ function Clusternames( { passActiveClusternameToVisuals } ){
     function deleteClusternameButton(btn){
         return clusternameButtons.filter(item => item.id !== btn.id)
     }
+
+    // When a new CSV-File was uploaded, update the Clustername Buttons and re-render the component
+    useEffect( () => {
+        setClusternameButtons(importedClusternameButtons)
+
+    }, [importedClusternameButtons])
+
+    // When a new Audio-File was uploaded, delete previous clusternameButtons and re-render the component
+    useEffect( () => {
+        setClusternameButtons([])
+
+    }, [base64Url])
 
     // Whenever user deletes the active Clustername Button, the last button in the state array becomes active
     useEffect( () => {
@@ -94,6 +95,9 @@ function Clusternames( { passActiveClusternameToVisuals } ){
                 <input
                     id='clustername-input-field'
                     type='text'
+                    required='required'
+                    pattern='^[^,]{1,30}$'
+                    title='No commas allowed. Max length 30 characters'
                     value={newClustername}
                     placeholder='Add a custom tag:'
                     onChange={handleChange}

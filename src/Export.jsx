@@ -1,4 +1,4 @@
-function Export( {labels, audioFileName} ){
+function Export( { labels, audioFileName } ){
 
     function exportCSV(){
         let csvData = labels.map(label => `${label.onset},${label.offset},${label.clustername}`)

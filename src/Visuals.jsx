@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import Export from "./Export.jsx";
 
 // TO DO
-// Labels without clusternames allowed? numbers allowed, what's the max length?
+// Export CSV File: Do the labels have to be sorted by timeframe?
 // Interpolation up to 200ms
 // fix image crash
 

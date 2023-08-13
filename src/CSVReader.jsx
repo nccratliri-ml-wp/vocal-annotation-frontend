@@ -17,11 +17,13 @@ class ClusternameButton {
     }
 }
 
-function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
+function CSVReader({passLabelsToApp, passClusterNameButtonsToApp} ){
+
+    // CSV Reader Implementation
     const [csvFile, setCSVFile] = useState(null)
 
-    function handleChange(event){
-        setCSVFile(event.target.files[0])
+    function handleFilePicked(newFile){
+        setCSVFile( newFile )
     }
 
     function readFile(){
@@ -48,9 +50,9 @@ function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
             const values = item.split(delim)
             newLabels.push(
                 new Label(
-                parseFloat(values[0]),
-                parseFloat(values[1]),
-                values[2])
+                    parseFloat(values[0]),
+                    parseFloat(values[1]),
+                    values[2])
             )
             if ( values[2] && !clusternames.includes(values[2]) ){
                 clusternames.push(values[2])
@@ -69,14 +71,68 @@ function CSVReader( {passLabelsToApp, passClusterNameButtonsToApp} ){
         readFile()
     }, [csvFile])
 
-    return(
-        <form id='csv-form'>
+
+    // Drag & Drop implementation
+    const [dragActive, setDragActive] = useState(false)
+
+    function handleDrag(event){
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.type === 'dragenter' || event.type === 'dragover') {
+            setDragActive(true)
+        } else if (event.type === 'dragleave') {
+            setDragActive(false)
+        }
+    }
+
+    function handleDrop(event){
+        event.preventDefault()
+        event.stopPropagation()
+        setDragActive(false)
+        if (event.dataTransfer.files && event.dataTransfer.files[0]){
+            handleFilePicked(event.dataTransfer.files[0])
+        }
+    }
+
+    function handleChange(event){
+        event.preventDefault()
+        setDragActive(false)
+        if (event.dataTransfer.files && event.dataTransfer.files[0]){
+            handleFilePicked(event.dataTransfer.files[0])
+        }
+    }
+
+    return (
+        <form
+            className='form-file-upload'
+            onDragEnter={handleDrag}
+            onSubmit={(event) => event.preventDefault()}
+        >
             <input
+                className='input-file-upload'
                 type='file'
-                accept='.csv'
-                id='csvFile'
+                multiple={false}
                 onChange={handleChange}
             />
+            <label
+                className='label-file-upload'
+                htmlFor='input-file-upload'
+                isdragactive={dragActive ? 'true' : 'false'}
+            >
+                <div>
+                    Drag and drop your CSV file or click here to upload
+                </div>
+            </label>
+            {
+                dragActive &&
+                <div
+                    className='drag-file-element'
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}>
+                </div>
+            }
         </form>
     )
 }

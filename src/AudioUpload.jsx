@@ -1,13 +1,15 @@
-import axios from 'axios'
+import {useState} from "react";
+import axios from "axios";
 
-function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp} ){
+function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp} ){
 
-    function handleChange(event){
+    // Audio Upload and fetch Spectrogram Image implementation
+    function handleFileDropped(newFile){
         const formData = new FormData();
-        formData.append("newAudioFile", event.target.files[0])
-        passAudioFileNameToApp( event.target.files[0].name )
+        formData.append("newAudioFile", newFile)
+        passAudioFileNameToApp( newFile.name )
 
-        const url = URL.createObjectURL(event.target.files[0])
+        const url = URL.createObjectURL(newFile)
         passAudioDOMObjectURLToApp( url )
 
         getSpectrogramFromBackend(formData)
@@ -20,14 +22,67 @@ function AudioUpload( {passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudio
     }
 
 
+    // Drag & Drop implementation
+    const [dragActive, setDragActive] = useState(false)
+
+    function handleDrag(event){
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.type === 'dragenter' || event.type === 'dragover') {
+            setDragActive(true)
+        } else if (event.type === 'dragleave') {
+            setDragActive(false)
+        }
+    }
+
+    function handleDrop(event){
+        event.preventDefault()
+        event.stopPropagation()
+        setDragActive(false)
+        if (event.dataTransfer.files && event.dataTransfer.files[0]){
+            handleFileDropped(event.dataTransfer.files[0])
+        }
+    }
+
+    function handleChange(event){
+        event.preventDefault()
+        setDragActive(false)
+        if (event.dataTransfer.files && event.dataTransfer.files[0]){
+            handleFileDropped(event.dataTransfer.files[0])
+        }
+    }
+
     return (
-        <form id='audio-file-form'>
+        <form
+            className='form-file-upload'
+            onDragEnter={handleDrag}
+            onSubmit={(event) => event.preventDefault()}
+        >
             <input
+                className='input-file-upload'
                 type='file'
-                accept='.wav'
-                id='audioFile'
+                multiple={false}
                 onChange={handleChange}
             />
+            <label
+                className='label-file-upload'
+                htmlFor='input-file-upload'
+                isdragactive={dragActive ? 'true' : 'false'}
+            >
+            <div>
+                Drag and drop your WAV file or click here to upload
+            </div>
+            </label>
+            {
+                dragActive &&
+                <div
+                    className='drag-file-element'
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}>
+                </div>
+            }
         </form>
     )
 }

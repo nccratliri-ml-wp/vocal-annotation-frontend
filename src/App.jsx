@@ -1,9 +1,9 @@
 import {useState, useRef} from 'react'
 
 import Visuals from "./Visuals.jsx"
-import CSVReader from "./CSVReader.jsx";
 import Clusternames from "./Clusternames.jsx";
 import AudioUpload from "./AudioUpload.jsx";
+import CSVReader from "./CSVReader.jsx";
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -67,44 +67,3 @@ function App() {
 }
 
 export default App
-/*
-// When a new audio File was uploaded, do this:
-    useEffect( () => {
-        if (!base64Url){
-            return
-        }
-
-        setAudioLength(audioFile.duration)
-
-        setZoomLevel(canvasContainerRef.current.clientWidth)
-        zoomLevelRef.current = canvasContainerRef.current.clientWidth
-
-        spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
-
-        populateSpectrogramCanvas()
-
-        adjustSpectrogramCanvasDimensions(
-            spectrogramCanvasRef.current,
-            zoomLevel)
-
-        drawTimeline(spectrogramCanvasRef.current,
-            timelineCanvasRef.current,
-            timelineContextRef.current,
-            audioLength,
-            false)
-
-        drawPlayhead(playHeadRef.current.timeframe)
-    }, [base64Url])
-
-
-    // When a new CSV File was uploaded, do this:
-    useEffect( () => {
-            if (!base64Url){
-                return
-            }
-
-            setLabels(importedLabels)
-            drawAllLabels()
-    }, [importedLabels])
-
- */

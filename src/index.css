@@ -100,9 +100,6 @@ html, body {
   outline: none;
 }
 
-#clustername-input-field:hover{
-}
-
 #clustername-buttons-container{
   display: flex;
   align-items: flex-start;
@@ -128,9 +125,17 @@ html, body {
 
 /* -------------------------- Drag & Drop Components -------------------------- */
 
+
+#files-upload-container{
+  display: flex;
+  justify-content: center;
+  margin: 30px;
+}
+
 .form-file-upload {
-  height: 16rem;
-  width: 28rem;
+  height: 10rem;
+  width: 20rem;
+  margin: 10px;
   max-width: 100%;
   text-align: center;
   position: relative;
@@ -146,25 +151,16 @@ html, body {
   align-items: center;
   justify-content: center;
   border-width: 2px;
-  border-radius: 1rem;
+  border-radius: 10px;
   border-style: dashed;
-  color: #051923;
-  border-color: #cbd5e1;
-  background-color: #f8fafc;
-}
-
-.upload-button {
-  cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1rem;
-  border: none;
-  font-family: 'Oswald', sans-serif;
-  color: #051923;
-  background-color: transparent;
+  padding: 10px;
+  color: #cbd5e1;
+  border-color: #86a9ce;
+  background-color: #082536;
 }
 
 .label-file-upload[isdragactive='true'] {
-  background-color: peachpuff;
+  background-color: #114b6e;
 }
 
 .drag-file-element {
@@ -172,8 +168,16 @@ html, body {
   width: 100%;
   height: 100%;
   border-radius: 1rem;
-  top: 0px;
-  right: 0px;
-  bottom: 0px;
-  left: 0px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
+
+.file-icon{
+  font-size: 3rem;
+}
+
+
+
+

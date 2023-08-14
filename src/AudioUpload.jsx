@@ -3,11 +3,16 @@ import axios from "axios";
 
 function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp} ){
 
+    const [audioFileName, setAudioFileName] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+
     // Audio Upload and fetch Spectrogram Image implementation
     function handleFileDropped(newFile){
         const formData = new FormData();
         formData.append("newAudioFile", newFile)
         passAudioFileNameToApp( newFile.name )
+        setAudioFileName( newFile.name )
+        setIsLoading(true)
 
         const url = URL.createObjectURL(newFile)
         passAudioDOMObjectURLToApp( url )
@@ -17,7 +22,10 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
 
     function getSpectrogramFromBackend(formData){
         axios.post('/upload', formData)
-            .then(response => passBase64UrlToApp(response.data))
+            .then(response => {
+                passBase64UrlToApp(response.data)
+                setIsLoading(false)
+            })
             .catch((error) => console.log(error.response))
     }
 
@@ -46,9 +54,8 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
 
     function handleChange(event){
         event.preventDefault()
-        setDragActive(false)
-        if (event.dataTransfer.files && event.dataTransfer.files[0]){
-            handleFileDropped(event.dataTransfer.files[0])
+        if (event.target.files && event.target.files[0]){
+            handleFileDropped(event.target.files[0])
         }
     }
 
@@ -59,19 +66,22 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
             onSubmit={(event) => event.preventDefault()}
         >
             <input
+                id='audio-file-upload'
                 className='input-file-upload'
                 type='file'
+                accept='.wav'
                 multiple={false}
                 onChange={handleChange}
             />
             <label
                 className='label-file-upload'
-                htmlFor='input-file-upload'
+                htmlFor='audio-file-upload'
                 isdragactive={dragActive ? 'true' : 'false'}
             >
-            <div>
-                Drag and drop your WAV file or click here to upload
-            </div>
+                <div>
+                    {audioFileName ? <div><div className='file-icon'>♫</div>{audioFileName}</div> : 'Drag and drop your WAV file or click here to upload'}
+                    {isLoading ? 'is loading...' : ''}
+                </div>
             </label>
             {
                 dragActive &&

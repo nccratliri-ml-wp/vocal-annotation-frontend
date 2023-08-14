@@ -40,16 +40,19 @@ function App() {
 
     return (
     <>
-        <AudioUpload
-            passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-            passBase64UrlToApp={passBase64UrlToApp}
-            passAudioFileNameToApp={passAudioFileNameToApp}
-        />
-        <audio preload="metadata" ref={audioDOMObject}></audio>
-        <CSVReader
-            passLabelsToApp={passLabelsToApp}
-            passClusterNameButtonsToApp={passClusterNameButtonsToApp}
-        />
+        <div id='files-upload-container'>
+            <AudioUpload
+                passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
+                passBase64UrlToApp={passBase64UrlToApp}
+                passAudioFileNameToApp={passAudioFileNameToApp}
+            />
+            <audio preload="metadata" ref={audioDOMObject}></audio>
+            <CSVReader
+                passLabelsToApp={passLabelsToApp}
+                passClusterNameButtonsToApp={passClusterNameButtonsToApp}
+            />
+        </div>
+
         <Visuals
             audioFile={audioDOMObject.current}
             audioFileName={audioFileName}

@@ -97,8 +97,8 @@ function CSVReader({passLabelsToApp, passClusterNameButtonsToApp} ){
     function handleChange(event){
         event.preventDefault()
         setDragActive(false)
-        if (event.dataTransfer.files && event.dataTransfer.files[0]){
-            handleFilePicked(event.dataTransfer.files[0])
+        if (event.target.files && event.target.files[0]){
+            handleFilePicked(event.target.files[0])
         }
     }
 
@@ -109,18 +109,20 @@ function CSVReader({passLabelsToApp, passClusterNameButtonsToApp} ){
             onSubmit={(event) => event.preventDefault()}
         >
             <input
+                id='csv-file-upload'
                 className='input-file-upload'
                 type='file'
+                accept='.csv'
                 multiple={false}
                 onChange={handleChange}
             />
             <label
                 className='label-file-upload'
-                htmlFor='input-file-upload'
+                htmlFor='csv-file-upload'
                 isdragactive={dragActive ? 'true' : 'false'}
             >
                 <div>
-                    Drag and drop your CSV file or click here to upload
+                    {csvFile ? <div><div className='file-icon'>🗎</div>{csvFile.name}</div> : 'Drag and drop your CSV file or click here to upload'}
                 </div>
             </label>
             {

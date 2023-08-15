@@ -1,10 +1,10 @@
 import {useState} from "react";
 import axios from "axios";
 
-function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp} ){
+function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
 
     const [audioFileName, setAudioFileName] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
+
 
     // Audio Upload and fetch Spectrogram Image implementation
     function handleFileDropped(newFile){
@@ -12,7 +12,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
         formData.append("newAudioFile", newFile)
         passAudioFileNameToApp( newFile.name )
         setAudioFileName( newFile.name )
-        setIsLoading(true)
+        passSpectrogramIsLoadingToApp(true)
 
         const url = URL.createObjectURL(newFile)
         passAudioDOMObjectURLToApp( url )
@@ -24,7 +24,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
         axios.post('/upload', formData)
             .then(response => {
                 passBase64UrlToApp(response.data)
-                setIsLoading(false)
+                passSpectrogramIsLoadingToApp(false)
             })
             .catch((error) => console.log(error.response))
     }
@@ -80,7 +80,6 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
             >
                 <div>
                     {audioFileName ? <div><div className='file-icon'>♫</div>{audioFileName}</div> : 'Drag and drop your WAV file or click here to upload'}
-                    {isLoading ? 'is loading...' : ''}
                 </div>
             </label>
             {

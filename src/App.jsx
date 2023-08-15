@@ -1,9 +1,8 @@
 import {useState, useRef} from 'react'
-
 import Visuals from "./Visuals.jsx"
-import Clusternames from "./Clusternames.jsx";
-import AudioUpload from "./AudioUpload.jsx";
-import CSVReader from "./CSVReader.jsx";
+import Clusternames from "./Clusternames.jsx"
+import AudioUpload from "./AudioUpload.jsx"
+import CSVReader from "./CSVReader.jsx"
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -12,6 +11,7 @@ function App() {
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
+    const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
     function passAudioDOMObjectURLToApp(url){
         audioDOMObject.current.setAttribute('src', url)
@@ -37,6 +37,10 @@ function App() {
         setActiveClustername( chosenClustername )
     }
 
+    function passSpectrogramIsLoadingToApp(boolean){
+        setSpectrogramIsLoading( boolean )
+    }
+
 
     return (
     <>
@@ -45,6 +49,7 @@ function App() {
                 passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
                 passBase64UrlToApp={passBase64UrlToApp}
                 passAudioFileNameToApp={passAudioFileNameToApp}
+                passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
             />
             <audio preload="metadata" ref={audioDOMObject}></audio>
             <CSVReader
@@ -52,11 +57,11 @@ function App() {
                 passClusterNameButtonsToApp={passClusterNameButtonsToApp}
             />
         </div>
-
         <Visuals
             audioFile={audioDOMObject.current}
             audioFileName={audioFileName}
             base64Url={base64Url}
+            spectrogramIsLoading={spectrogramIsLoading}
             importedLabels={importedLabels}
             activeClustername={activeClustername}
         />

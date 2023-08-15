@@ -1,4 +1,8 @@
 import {useEffect, useRef, useState} from "react";
+import CircularProgress from '@mui/material/CircularProgress'
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress'
+
 import Export from "./Export.jsx";
 
 // TO DO
@@ -93,7 +97,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     }
 }
 
-function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeClustername} ){
+function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, importedLabels, activeClustername} ){
 
     const [audioLength, setAudioLength] = useState(null)
 
@@ -370,7 +374,6 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
         setZoomLevel(currentState => currentState * 2)
         zoomLevelRef.current = zoomLevelRef.current * 2
         console.log(zoomLevelRef.current)
-        console.log(backgroundImageRef.current.style.background)
     }
 
     function handleClickZoomOut(){
@@ -391,7 +394,6 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
         }
 
         loop(scrollStepsXValues)
-
     }
 
     function pauseAudio(){
@@ -483,6 +485,10 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
         backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
+    function displayLoadingBar(){
+        console.log('loading')
+    }
+
     /*
     // Initial drawing
     useEffect( () => {
@@ -528,6 +534,8 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
+
+        displayLoadingBar()
 
         populateSpectrogramCanvas()
 
@@ -583,7 +591,11 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
     return (
         <div id='visuals-container'>
             <div id='canvas-container' ref={canvasContainerRef}>
-                <div id='background-img' ref={backgroundImageRef}></div>
+                <div id='background-img' ref={backgroundImageRef}>
+                    <div id='loading-bar'>
+                        {spectrogramIsLoading ? <CircularProgress /> : ''}
+                    </div>
+                </div>
                 <canvas id='spectrogram-canvas'
                         ref={spectrogramCanvasRef}
                         onMouseDown={handleLMBDown}
@@ -592,6 +604,7 @@ function Visuals( {audioFile, audioFileName, base64Url, importedLabels, activeCl
                         onContextMenu={handleRightClick}
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
+                {/*spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''*/}
             </div>
             <div id='controls-container'>
                 <button id='play-btn' onClick={playAudio}>

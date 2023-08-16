@@ -1,14 +1,13 @@
 import {useEffect, useRef, useState} from "react";
-import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress'
 
 import Export from "./Export.jsx";
 
 // TO DO
-// Export CSV File: Do the labels have to be sorted by timeframe?
 // Interpolation up to 200ms
 // fix image crash
+// sort new labels by onset
 
 const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 
@@ -592,9 +591,6 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
         <div id='visuals-container'>
             <div id='canvas-container' ref={canvasContainerRef}>
                 <div id='background-img' ref={backgroundImageRef}>
-                    <div id='loading-bar'>
-                        {spectrogramIsLoading ? <CircularProgress /> : ''}
-                    </div>
                 </div>
                 <canvas id='spectrogram-canvas'
                         ref={spectrogramCanvasRef}
@@ -604,7 +600,7 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
                         onContextMenu={handleRightClick}
                 />
                 <canvas id='timeline-canvas' ref={timelineCanvasRef} />
-                {/*spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''*/}
+                {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
             </div>
             <div id='controls-container'>
                 <button id='play-btn' onClick={playAudio}>

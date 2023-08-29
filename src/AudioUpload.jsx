@@ -23,7 +23,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
     function getSpectrogramFromBackend(formData){
         axios.post('/upload', formData)
             .then(response => {
-                passBase64UrlToApp(response.data)
+                passBase64UrlToApp(response.data[0])
                 passSpectrogramIsLoadingToApp(false)
             })
             .catch((error) => console.log(error.response))

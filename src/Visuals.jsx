@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState, useMemo} from "react";
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress'
 
@@ -119,6 +119,7 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
 
     let clickedLabel = undefined
 
+    let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
     function handleLMBDown(event){
         pauseAudio()
@@ -241,10 +242,9 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
 
     function hoverLine(event){
         const xHovered = getXClicked(event)
-
-        if (checkIfPositionIsOccupied(xHovered) || checkIfClickedOnPlayhead(xHovered)){
+        if ( checkIfPositionIsOccupied(xHovered) || checkIfClickedOnPlayhead(xHovered)){
             spectrogramCanvasRef.current.style.cursor = 'col-resize'
-        } else{
+        } else {
             spectrogramCanvasRef.current.style.cursor = 'default'
         }
     }
@@ -265,17 +265,12 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
             label => (calculateXPosition(label.onset) >= xClicked - 1  &&  calculateXPosition(label.onset) <= xClicked + 1 )
                     || (calculateXPosition(label.offset) >= xClicked - 1  &&  calculateXPosition(label.offset) <= xClicked + 1 )
         )
-
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
     }
 
     function checkIfPositionIsOccupied(xClicked){
-        for (let label of labels) {
-            if ( checkIfClickedOnOnset(xClicked) || checkIfClickedOnOffset(xClicked) ){
-                return label
-            }
-        }
+        return ( checkIfClickedOnOnset(xClicked) || checkIfClickedOnOffset(xClicked) )
     }
 
     function checkIfClickedOnOnset(xClicked){
@@ -444,25 +439,37 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
         }
     }
 
+    // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factorin in the future
     function hoverLabel(event){
-        const mouseX = getXClicked(event)
-        for (let label of labels){
-            const onsetX = calculateXPosition(label.onset)
-            const offsetX = calculateXPosition(label.offset)
+        if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
             adjustSpectrogramCanvasDimensions(
                 spectrogramCanvasRef.current,
                 zoomLevelRef.current)
             drawAllLabels()
             drawPlayhead(audioFile.currentTime)
-            if (mouseX >= onsetX && mouseX <= offsetX) {
+            lastHoveredLabel.isHighlighted = false
+            console.log('drawing green')
+        }
+
+
+        const mouseX = getXClicked(event)
+
+        for (let label of labels){
+            const onsetX = calculateXPosition(label.onset)
+            const offsetX = calculateXPosition(label.offset)
+            if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
                 drawLine(label.onset, "#f3e655") //"#f3e655"
                 drawLine(label.offset, "#f3e655")
                 drawLineBetween(label, "#f3e655")
                 drawClustername(label)
+                lastHoveredLabel.labelObject = label
+                lastHoveredLabel.isHighlighted = true
+                console.log('drawing yellow')
                 break;
             }
         }
     }
+
 
     function handleMouseMove(event){
         hoverLine(event)
@@ -479,7 +486,6 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
         ctx.fillText(label.clustername, xClustername, spectrogramCanvasHeight / 2 - 5);
     }
 
-
     function populateSpectrogramCanvas(){
         backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
@@ -488,38 +494,6 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
         console.log('loading')
     }
 
-    /*
-    // Initial drawing
-    useEffect( () => {
-        if (!base64Url){
-            return
-        }
-
-        setAudioLength(audioFile.duration)
-
-        setZoomLevel(canvasContainerRef.current.clientWidth)
-        zoomLevelRef.current = canvasContainerRef.current.clientWidth
-
-        spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
-
-        populateSpectrogramCanvas()
-
-        adjustSpectrogramCanvasDimensions(
-            spectrogramCanvasRef.current,
-            zoomLevel)
-
-        drawTimeline(spectrogramCanvasRef.current,
-            timelineCanvasRef.current,
-            timelineContextRef.current,
-            audioLength,
-            false)
-
-        setLabels(importedLabels)
-        drawAllLabels()
-        drawPlayhead(playHeadRef.current.timeframe)
-    }
-    , [base64Url, importedLabels])
-     */
 
     // When a new audio File was uploaded, do this:
     useEffect( () => {

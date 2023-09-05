@@ -28,22 +28,28 @@ html, body {
 #visuals-container{
   display: grid;
   grid-template-columns: 100%;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   grid-template-areas:
+          "overview-canvas"
           "canvas"
           "controls"
           "clusternames";
-
 }
 
 /* -------------------------- Spectrogram -------------------------- */
+
+#overview-canvas{
+  margin: 0 0 20px 0;
+  background: url('') no-repeat;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
 
 #canvas-container{
   grid-area: canvas;
   display: grid;
   grid-template-columns: 1fr;
   overflow-x: scroll;
-  z-index: 100;
 }
 
 #spectrogram-canvas{

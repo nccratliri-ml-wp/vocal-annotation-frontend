@@ -6,7 +6,7 @@ import CSVReader from "./CSVReader.jsx"
 
 function App() {
     const audioDOMObject = useRef(null)
-    const [base64Url, setBase64Url] = useState(null)
+    const [specImages, setSpecImages] = useState(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
@@ -17,8 +17,8 @@ function App() {
         audioDOMObject.current.setAttribute('src', url)
     }
 
-    function passBase64UrlToApp(newUrl){
-        setBase64Url( newUrl )
+    function passSpecImagesToApp(newDictionary){
+        setSpecImages( newDictionary )
     }
 
     function passAudioFileNameToApp(newAudioFileName){
@@ -47,7 +47,7 @@ function App() {
         <div id='files-upload-container'>
             <AudioUpload
                 passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-                passBase64UrlToApp={passBase64UrlToApp}
+                passSpecImagesToApp={passSpecImagesToApp}
                 passAudioFileNameToApp={passAudioFileNameToApp}
                 passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
             />
@@ -60,7 +60,7 @@ function App() {
         <Visuals
             audioFile={audioDOMObject.current}
             audioFileName={audioFileName}
-            base64Url={base64Url}
+            specImages={specImages}
             spectrogramIsLoading={spectrogramIsLoading}
             importedLabels={importedLabels}
             activeClustername={activeClustername}
@@ -68,7 +68,7 @@ function App() {
         <Clusternames
             passActiveClusternameToApp={passActiveClusternameToApp}
             importedClusternameButtons={importedClusternameButtons}
-            base64Url={base64Url}
+            specImages={specImages}
         />
     </>
     )

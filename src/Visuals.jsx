@@ -18,6 +18,7 @@ import Export from "./Export.jsx";
 
 const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 const overviewCanvasHeight = 50
+const maxZoomLevel = 1
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -27,12 +28,18 @@ class Label {
     }
 }
 
-class PlayHead{
+class PlayHead {
     constructor(timeframe) {
         this.timeframe = timeframe
     }
 }
 
+class CurrentSpecIndex{
+    constructor(zoomLevel, index) {
+        this.zoomLevel = zoomLevel
+        this.index = index
+    }
+}
 function adjustSpectrogramCanvasDimensions(spectrogramCanvas, zoomLevel){
     spectrogramCanvas.width = zoomLevel
     spectrogramCanvas.height = spectrogramCanvasHeight
@@ -124,7 +131,8 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     const [zoomLevel, setZoomLevel] = useState(null)
     const zoomLevelRef = useRef(null)
 
-    const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState(0)
+    const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState( new CurrentSpecIndex(0, 0) )
+
     const [currentViewportTimeframes, setCurrentViewportTimeframes] = useState(null)
 
     const [labels, setLabels] = useState([])
@@ -379,29 +387,33 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function handleClickZoomIn(){
-        //setZoomLevel(currentState => currentState * 2)
-        //zoomLevelRef.current = zoomLevelRef.current * 2
-
         setZoomLevel(65535) // max width in pixels supported by Canvas API
         zoomLevelRef.current = 65535
 
-        populateSpectrogramCanvas(specImages.zoom_level_1[0])
+        if (specImagesCurrentIndex.zoomLevel >= maxZoomLevel){
+            return
+        }
 
-        console.log(zoomLevelRef.current)
+        setSpecImagesCurrentIndex(prevState => ({
+                ...prevState,
+                zoomLevel: prevState.zoomLevel + 1
+            })
+        )
     }
 
     function handleClickZoomOut(){
-        /*
-        if (zoomLevelRef.current <= canvasContainerRef.current.clientWidth){
-            return
-        }
-        setZoomLevel(currentState => currentState / 2)
-        zoomLevelRef.current = zoomLevelRef.current / 2
-        */
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
-        populateSpectrogramCanvas(specImages.full_length)
+        if (specImagesCurrentIndex.zoomLevel <= 0){
+            return
+        }
+
+        setSpecImagesCurrentIndex(prevState => ({
+                ...prevState,
+                zoomLevel: prevState.zoomLevel - 1
+            })
+        )
     }
 
     function playAudio(){
@@ -465,7 +477,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         }
     }
 
-    // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factorin in the future
+    // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factoring in the future
     function hoverLabel(event){
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
             adjustSpectrogramCanvasDimensions(
@@ -516,24 +528,35 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function populateOverviewCanvas(){
-        overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages.full_length})`
+        if (!overviewCanvasRef.current.style.backgroundImage){
+            overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
+        }
     }
 
     function checkIfScrolledToEdge(event){
-        // track current viewport in new miniature overview
         if (event.target.scrollWidth - event.target.scrollLeft - event.target.clientWidth < 10) {
-            if (specImagesCurrentIndex >= specImages.zoom_level_1.length - 1){
+            if (specImagesCurrentIndex.index >= specImages[specImagesCurrentIndex.zoomLevel].length - 1){
+                // reached right edge
                 return
             }
-            setSpecImagesCurrentIndex(currentState => currentState + 1)
+            setSpecImagesCurrentIndex(prevState => ({
+                    ...prevState,
+                    index: prevState.index + 1
+                })
+            )
             setCurrentViewportTimeframes(currentState => currentState.map(timeframe => timeframe + 5))
             return
         }
         if (event.target.scrollLeft === 0){
-            if (specImagesCurrentIndex <= 0){
+            if (specImagesCurrentIndex.index <= 0){
+                // reached left edge
                 return
             }
-            setSpecImagesCurrentIndex(currentState => currentState - 1)
+            setSpecImagesCurrentIndex(prevState => ({
+                    ...prevState,
+                    index: prevState.index - 1
+                })
+            )
             setCurrentViewportTimeframes(currentState => currentState.map(timeframe => timeframe - 5))
         }
     }
@@ -639,8 +662,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
 
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
 
-        populateSpectrogramCanvas(specImages.full_length)
-        populateOverviewCanvas()
+        populateSpectrogramCanvas(specImages[0][0])
 
         adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
@@ -655,6 +677,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         setLabels([])
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
+
     }, [specImages])
 
 
@@ -688,12 +711,6 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
 
-        if (!specImages){
-            return
-        }
-        adjustOverviewCanvasDimensions()
-        drawViewport('#55e6f3')
-
     }
     , [zoomLevel, labels])
 
@@ -703,16 +720,20 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
             return
         }
         adjustOverviewCanvasDimensions()
-        populateSpectrogramCanvas(specImages.zoom_level_1[specImagesCurrentIndex])
         drawViewport('#55e6f3')
-    }
-    , [specImagesCurrentIndex])
+        populateOverviewCanvas()
+        console.log('zoomlevel '+specImagesCurrentIndex.zoomLevel)
+        console.log('index ' +specImagesCurrentIndex.index)
 
-    // On first render, set the overviewCanvas dimensions
-    useEffect ( () => {
-        adjustOverviewCanvasDimensions()
+        // this prevents crash when zooming out
+        let correctIndex = specImagesCurrentIndex.index
+        if (specImagesCurrentIndex.zoomLevel === 0){
+            correctIndex = 0
+        }
+        populateSpectrogramCanvas(specImages[specImagesCurrentIndex.zoomLevel][correctIndex])
     }
-    , [])
+    , [specImagesCurrentIndex, zoomLevel])
+
 
     return (
         <div id='visuals-container'>

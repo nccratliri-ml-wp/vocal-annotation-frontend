@@ -45,7 +45,7 @@ function adjustSpectrogramCanvasDimensions(spectrogramCanvas, zoomLevel){
     spectrogramCanvas.height = spectrogramCanvasHeight
 }
 
-function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
+function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstTimeFrame, lastTimeFrame, extraTimestamps){
     timelineCanvas.height = 40
     timelineCanvas.width = spectrogramCanvas.width
 
@@ -74,8 +74,8 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
     timelineContext.stroke()
 
     // Drawing lines in between
-    const step = timelineCanvas.width / audioLength
-    let timestamp = audioLength * (step / spectrogramCanvas.width)
+    const step = timelineCanvas.width / lastTimeFrame
+    let timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
     for (let i = step; i < timelineCanvas.width; i += step) {
         timelineContext.beginPath()
         timelineContext.moveTo(i, timelineCanvas.height)
@@ -89,7 +89,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioL
         timestamp++
     }
 
-    timestamp = audioLength * (step / spectrogramCanvas.width)
+    timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
     for (let i = step/4; i < timelineCanvas.width; i += step/4) {
         if (timestamp % 4 === 0){
             timestamp++
@@ -133,7 +133,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
 
     const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState( new CurrentSpecIndex(0, 0) )
 
-    const [currentViewportTimeframes, setCurrentViewportTimeframes] = useState(null)
+    const [currentViewportTimeframes, setCurrentViewportTimeframes] = useState([0, 0])
 
     const [labels, setLabels] = useState([])
 
@@ -399,6 +399,11 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
                 zoomLevel: prevState.zoomLevel + 1
             })
         )
+
+        // Only on the first time zooming in, set the viewport time frames, to avoid overwriting viewport updates in checkIfScrolledToEdge()
+        if (currentViewportTimeframes[1] === audioLength){
+            setCurrentViewportTimeframes([0, 5])
+        }
     }
 
     function handleClickZoomOut(){
@@ -568,7 +573,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     function drawViewport(colorHex){
         const ctx = overviewContextRef.current
 
-        // if max zoomed out, don't draw the viewport
+        // if max zoomed out, draw viewport over the entire overview canvas
         if (zoomLevelRef.current === canvasContainerRef.current.clientWidth){
             // Draw Top Line
             ctx.beginPath()
@@ -655,7 +660,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         }
 
         setAudioLength(audioFile.duration)
-        setCurrentViewportTimeframes([0, 5])
+        setCurrentViewportTimeframes([0, audioFile.duration])
 
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
@@ -671,6 +676,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
+            0,
             audioLength,
             false)
 
@@ -705,25 +711,32 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
-            audioLength,
+            currentViewportTimeframes[0],
+            currentViewportTimeframes[1],
             false)
 
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
-
     }
     , [zoomLevel, labels])
+
 
     // Every time specImagesCurrentIndex is changed (this means the user scrolled to edge of the spectrogram), do this:
     useEffect ( () => {
         if (!specImages){
             return
         }
+        console.log(currentViewportTimeframes)
+        drawTimeline(spectrogramCanvasRef.current,
+            timelineCanvasRef.current,
+            timelineContextRef.current,
+            currentViewportTimeframes[0],
+            currentViewportTimeframes[1],
+            false)
+
         adjustOverviewCanvasDimensions()
         drawViewport('#55e6f3')
         populateOverviewCanvas()
-        console.log('zoomlevel '+specImagesCurrentIndex.zoomLevel)
-        console.log('index ' +specImagesCurrentIndex.index)
 
         // this prevents crash when zooming out
         let correctIndex = specImagesCurrentIndex.index

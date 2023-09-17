@@ -74,8 +74,9 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstT
     timelineContext.stroke()
 
     // Drawing lines in between
-    const step = timelineCanvas.width / lastTimeFrame
-    let timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
+    const step = timelineCanvas.width / (lastTimeFrame - firstTimeFrame)
+    //let timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
+    let timestamp = firstTimeFrame + 1
     for (let i = step; i < timelineCanvas.width; i += step) {
         timelineContext.beginPath()
         timelineContext.moveTo(i, timelineCanvas.height)
@@ -131,7 +132,8 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     const [zoomLevel, setZoomLevel] = useState(null)
     const zoomLevelRef = useRef(null)
 
-    const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState( new CurrentSpecIndex(0, 0) )
+    //const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState( new CurrentSpecIndex(0, 0) )
+    const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState(null)
 
     const [currentViewportTimeframes, setCurrentViewportTimeframes] = useState([0, 0])
 
@@ -410,6 +412,8 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
+        setCurrentViewportTimeframes([0, audioLength])
+
         if (specImagesCurrentIndex.zoomLevel <= 0){
             return
         }
@@ -533,9 +537,11 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function populateOverviewCanvas(){
+        /*
         if (!overviewCanvasRef.current.style.backgroundImage){
             overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
-        }
+        }*/
+        overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
     }
 
     function checkIfScrolledToEdge(event){
@@ -653,7 +659,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         overviewContextRef.current = overviewCanvasRef.current.getContext('2d')
     }
 
-    // When a new audio File was uploaded, do this:
+    // When a new audio File gets uploaded, do this:
     useEffect( () => {
         if (!specImages){
             return
@@ -673,16 +679,20 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
             spectrogramCanvasRef.current,
             zoomLevel)
 
+        /*
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
             0,
             audioLength,
             false)
-
+        */
         setLabels([])
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
+
+        // this is new
+        setSpecImagesCurrentIndex( new CurrentSpecIndex(0, 0))
 
     }, [specImages])
 
@@ -726,7 +736,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         if (!specImages){
             return
         }
-        console.log(currentViewportTimeframes)
+        console.log('Current Viewport Timeframes: '+currentViewportTimeframes)
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
@@ -744,6 +754,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
             correctIndex = 0
         }
         populateSpectrogramCanvas(specImages[specImagesCurrentIndex.zoomLevel][correctIndex])
+
     }
     , [specImagesCurrentIndex, zoomLevel])
 

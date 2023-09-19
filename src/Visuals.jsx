@@ -404,6 +404,11 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
 
         // Only on the first time zooming in, set the viewport time frames, to avoid overwriting viewport updates in checkIfScrolledToEdge()
         if (currentViewportTimeframes[1] === audioLength){
+            // If the audio file is shorter than 5 seconds, set the last viewport timeframe to the audio length to render the timeline correctly
+            if (audioLength < 5){
+                setCurrentViewportTimeframes([0, audioLength])
+                return
+            }
             setCurrentViewportTimeframes([0, 5])
         }
     }
@@ -495,7 +500,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
             drawAllLabels()
             drawPlayhead(audioFile.currentTime)
             lastHoveredLabel.isHighlighted = false
-            console.log('drawing green')
+            //console.log('drawing green')
         }
 
 
@@ -511,7 +516,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
-                console.log('drawing yellow')
+                //console.log('drawing yellow')
                 break;
             }
         }

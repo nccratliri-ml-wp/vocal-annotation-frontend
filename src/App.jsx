@@ -3,6 +3,7 @@ import Visuals from "./Visuals.jsx"
 import Clusternames from "./Clusternames.jsx"
 import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
+import Test from "./Test.jsx"
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -44,6 +45,9 @@ function App() {
 
     return (
     <>
+        <Test
+            specImages={specImages}
+        />
         <div id='files-upload-container'>
             <AudioUpload
                 passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
@@ -70,6 +74,7 @@ function App() {
             importedClusternameButtons={importedClusternameButtons}
             specImages={specImages}
         />
+
     </>
     )
 }

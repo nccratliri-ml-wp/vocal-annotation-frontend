@@ -1,9 +1,10 @@
 import {useState} from "react";
 import axios from "axios";
 
-function AudioUpload({passAudioDOMObjectURLToApp, passSpecImagesToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
+function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
 
     const [audioFileName, setAudioFileName] = useState(null)
+
 
     // Audio Upload and fetch Spectrogram Image implementation
     function handleFileDropped(newFile){
@@ -22,7 +23,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passSpecImagesToApp, passAudio
     function getSpectrogramFromBackend(formData){
         axios.post('/upload', formData)
             .then(response => {
-                passSpecImagesToApp(response.data)
+                passBase64UrlToApp(response.data)
                 passSpectrogramIsLoadingToApp(false)
             })
             .catch((error) => console.log(error.response))

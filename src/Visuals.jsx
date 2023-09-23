@@ -9,16 +9,7 @@ import Export from "./Export.jsx";
 // fix image crash
 // sort new labels by onset
 
-// generate several spectrograms for each zoomlevel
-// set defined zoom levels from max zoom out (canvas width = screen width) to max zoom in (max canvas width) at ~32k pixels
-// for each zoom level, pass necessary hop length as parameter to the backend. generate the specs for each zoom level
-// load as many spec images as fit into the max canvas width, combine them to one image, send as base64 string into the background image css property
-// on scroll event, load the next combined image
-// on zoom out/in load the corresponding spec images
-
 const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
-const overviewCanvasHeight = 50
-const maxZoomLevel = 1
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -28,24 +19,18 @@ class Label {
     }
 }
 
-class PlayHead {
+class PlayHead{
     constructor(timeframe) {
         this.timeframe = timeframe
     }
 }
 
-class CurrentSpecIndex{
-    constructor(zoomLevel, index) {
-        this.zoomLevel = zoomLevel
-        this.index = index
-    }
-}
 function adjustSpectrogramCanvasDimensions(spectrogramCanvas, zoomLevel){
     spectrogramCanvas.width = zoomLevel
     spectrogramCanvas.height = spectrogramCanvasHeight
 }
 
-function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstTimeFrame, lastTimeFrame, extraTimestamps){
+function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, audioLength, extraTimestamps){
     timelineCanvas.height = 40
     timelineCanvas.width = spectrogramCanvas.width
 
@@ -74,9 +59,8 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstT
     timelineContext.stroke()
 
     // Drawing lines in between
-    const step = timelineCanvas.width / (lastTimeFrame - firstTimeFrame)
-    //let timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
-    let timestamp = firstTimeFrame + 1
+    const step = timelineCanvas.width / audioLength
+    let timestamp = audioLength * (step / spectrogramCanvas.width)
     for (let i = step; i < timelineCanvas.width; i += step) {
         timelineContext.beginPath()
         timelineContext.moveTo(i, timelineCanvas.height)
@@ -90,7 +74,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstT
         timestamp++
     }
 
-    timestamp = lastTimeFrame * (step / spectrogramCanvas.width)
+    timestamp = audioLength * (step / spectrogramCanvas.width)
     for (let i = step/4; i < timelineCanvas.width; i += step/4) {
         if (timestamp % 4 === 0){
             timestamp++
@@ -112,7 +96,7 @@ function drawTimeline(spectrogramCanvas, timelineCanvas, timelineContext, firstT
     }
 }
 
-function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, importedLabels, activeClustername} ){
+function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, importedLabels, activeClustername} ){
 
     const [audioLength, setAudioLength] = useState(null)
 
@@ -121,9 +105,6 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     const spectrogramCanvasRef = useRef(null)
     const spectrogramContextRef = useRef(null)
 
-    const overviewCanvasRef = useRef(null)
-    const overviewContextRef = useRef(null)
-
     const timelineCanvasRef = useRef(null)
     const timelineContextRef = useRef(null)
 
@@ -131,11 +112,6 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
 
     const [zoomLevel, setZoomLevel] = useState(null)
     const zoomLevelRef = useRef(null)
-
-    //const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState( new CurrentSpecIndex(0, 0) )
-    const [specImagesCurrentIndex, setSpecImagesCurrentIndex] = useState(null)
-
-    const [currentViewportTimeframes, setCurrentViewportTimeframes] = useState([0, 0])
 
     const [labels, setLabels] = useState([])
 
@@ -328,7 +304,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function drawLine(timeframe, colorHex){
-        const x = Math.round(calculateXPosition(timeframe))
+        const x = Math.round(timeframe * spectrogramCanvasRef.current.width / audioLength)
         const ctx = spectrogramContextRef.current
 
         ctx.beginPath()
@@ -389,45 +365,32 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function handleClickZoomIn(){
-        setZoomLevel(65535) // max width in pixels supported by Canvas API
-        zoomLevelRef.current = 65535
-
-        if (specImagesCurrentIndex.zoomLevel >= maxZoomLevel){
+        // If zoom level reached the max width of canvas API 65535, stop zooming in to avoid crash
+        if (zoomLevelRef.current * 2 > 65535){
+            setZoomLevel(65535)
+            zoomLevelRef.current = 65535
             return
         }
-
-        setSpecImagesCurrentIndex(prevState => ({
-                ...prevState,
-                zoomLevel: prevState.zoomLevel + 1
-            })
-        )
-
-        // Only on the first time zooming in, set the viewport time frames, to avoid overwriting viewport updates in checkIfScrolledToEdge()
-        if (currentViewportTimeframes[1] === audioLength){
-            // If the audio file is shorter than 5 seconds, set the last viewport timeframe to the audio length to render the timeline correctly
-            if (audioLength < 5){
-                setCurrentViewportTimeframes([0, audioLength])
-                return
-            }
-            setCurrentViewportTimeframes([0, 5])
-        }
+        setZoomLevel(currentState => currentState * 2)
+        zoomLevelRef.current = zoomLevelRef.current * 2
     }
 
     function handleClickZoomOut(){
-        setZoomLevel(canvasContainerRef.current.clientWidth)
-        zoomLevelRef.current = canvasContainerRef.current.clientWidth
-
-        setCurrentViewportTimeframes([0, audioLength])
-
-        if (specImagesCurrentIndex.zoomLevel <= 0){
+        // If current zoom level is equal or smaller than canvas container client width, don't zoom in further
+        if (zoomLevelRef.current <= canvasContainerRef.current.clientWidth){
             return
         }
 
-        setSpecImagesCurrentIndex(prevState => ({
-                ...prevState,
-                zoomLevel: prevState.zoomLevel - 1
-            })
-        )
+        // if requested zoom level would be smaller or equal to canvas container client width, set the zoom level canvas container client width
+        const newZoomLevel = zoomLevelRef.current / 2
+        if (newZoomLevel <= canvasContainerRef.current.clientWidth){
+            setZoomLevel(canvasContainerRef.current.clientWidth)
+            zoomLevelRef.current = canvasContainerRef.current.clientWidth
+            return
+        }
+
+        setZoomLevel(currentState => currentState / 2)
+        zoomLevelRef.current = zoomLevelRef.current / 2
     }
 
     function playAudio(){
@@ -529,6 +492,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
     }
 
     function drawClustername(label){
+
         const xClustername = ( calculateXPosition(label.onset) + calculateXPosition(label.offset) ) / 2
         const ctx = spectrogramContextRef.current
         ctx.font = "bold 20px Arial";
@@ -537,174 +501,46 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         ctx.fillText(label.clustername, xClustername, spectrogramCanvasHeight / 2 - 5);
     }
 
-    function populateSpectrogramCanvas(base64string){
-        backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64string})`
+    function populateSpectrogramCanvas(){
+        backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
-    function populateOverviewCanvas(){
-        /*
-        if (!overviewCanvasRef.current.style.backgroundImage){
-            overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
-        }*/
-        overviewCanvasRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
-    }
 
-    function checkIfScrolledToEdge(event){
-        if (event.target.scrollWidth - event.target.scrollLeft - event.target.clientWidth < 10) {
-            if (specImagesCurrentIndex.index >= specImages[specImagesCurrentIndex.zoomLevel].length - 1){
-                // reached right edge
-                return
-            }
-            setSpecImagesCurrentIndex(prevState => ({
-                    ...prevState,
-                    index: prevState.index + 1
-                })
-            )
-            setCurrentViewportTimeframes(currentState => currentState.map(timeframe => timeframe + 5))
-            return
-        }
-        if (event.target.scrollLeft === 0){
-            if (specImagesCurrentIndex.index <= 0){
-                // reached left edge
-                return
-            }
-            setSpecImagesCurrentIndex(prevState => ({
-                    ...prevState,
-                    index: prevState.index - 1
-                })
-            )
-            setCurrentViewportTimeframes(currentState => currentState.map(timeframe => timeframe - 5))
-        }
-    }
 
-    function calculateViewportX(timeframe){
-        return timeframe * overviewCanvasRef.current.width / audioLength
-    }
-
-    function drawViewport(colorHex){
-        const ctx = overviewContextRef.current
-
-        // if max zoomed out, draw viewport over the entire overview canvas
-        if (zoomLevelRef.current === canvasContainerRef.current.clientWidth){
-            // Draw Top Line
-            ctx.beginPath()
-            ctx.moveTo(0, 0)
-            ctx.lineTo(canvasContainerRef.current.clientWidth, 0)
-            ctx.lineWidth = 2
-            ctx.strokeStyle = colorHex
-            ctx.stroke()
-
-            // Draw Bottom Line
-            ctx.beginPath()
-            ctx.moveTo(0, overviewCanvasHeight)
-            ctx.lineTo(canvasContainerRef.current.clientWidth, overviewCanvasHeight)
-            ctx.lineWidth = 2
-            ctx.strokeStyle = colorHex
-            ctx.stroke()
-
-            // Draw left line
-            ctx.beginPath()
-            ctx.moveTo(0, 0)
-            ctx.lineTo(0, overviewCanvasHeight)
-            ctx.lineWidth = 2
-            ctx.strokeStyle = colorHex
-            ctx.stroke()
-
-            // Draw right line
-            ctx.beginPath()
-            ctx.moveTo(canvasContainerRef.current.clientWidth, 0)
-            ctx.lineTo(canvasContainerRef.current.clientWidth, overviewCanvasHeight)
-            ctx.lineWidth = 2
-            ctx.strokeStyle = colorHex
-            ctx.stroke()
-
-            return
-        }
-
-        const viewportStart = Math.round( calculateViewportX(currentViewportTimeframes[0] ) )
-        const viewportEnd = Math.round( calculateViewportX(currentViewportTimeframes[1] ) )
-
-        // Draw Top Line
-        ctx.beginPath()
-        ctx.moveTo(viewportStart, 0)
-        ctx.lineTo(viewportEnd, 0)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
-        ctx.stroke()
-
-        // Draw Bottom Line
-        ctx.beginPath()
-        ctx.moveTo(viewportStart, overviewCanvasHeight)
-        ctx.lineTo(viewportEnd, overviewCanvasHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
-        ctx.stroke()
-
-        // Draw Left Line
-        ctx.beginPath()
-        ctx.moveTo(viewportStart, 0)
-        ctx.lineTo(viewportStart, overviewCanvasHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
-        ctx.stroke()
-
-        // Draw Right Line
-        ctx.beginPath()
-        ctx.moveTo(viewportEnd, 0)
-        ctx.lineTo(viewportEnd, overviewCanvasHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
-        ctx.stroke()
-    }
-
-    function adjustOverviewCanvasDimensions(){
-        overviewCanvasRef.current.height = overviewCanvasHeight
-        overviewCanvasRef.current.style.width ='100%'
-        overviewCanvasRef.current.width  = overviewCanvasRef.current.offsetWidth
-        overviewContextRef.current = overviewCanvasRef.current.getContext('2d')
-    }
-
-    // When a new audio File gets uploaded, do this:
+    // When a new audio File was uploaded, do this:
     useEffect( () => {
-        if (!specImages){
+        if (!base64Url){
             return
         }
 
         setAudioLength(audioFile.duration)
-        setCurrentViewportTimeframes([0, audioFile.duration])
 
         setZoomLevel(canvasContainerRef.current.clientWidth)
         zoomLevelRef.current = canvasContainerRef.current.clientWidth
 
         spectrogramContextRef.current = spectrogramCanvasRef.current.getContext('2d')
 
-        populateSpectrogramCanvas(specImages[0][0])
+        populateSpectrogramCanvas()
 
         adjustSpectrogramCanvasDimensions(
             spectrogramCanvasRef.current,
             zoomLevel)
 
-        /*
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
-            0,
             audioLength,
             false)
-        */
+
         setLabels([])
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
-
-        // this is new
-        setSpecImagesCurrentIndex( new CurrentSpecIndex(0, 0))
-
-    }, [specImages])
+    }, [base64Url])
 
 
     // When a new CSV File was uploaded, do this:
     useEffect( () => {
-        if (!specImages){
+        if (!base64Url){
             return
         }
 
@@ -726,53 +562,20 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
         drawTimeline(spectrogramCanvasRef.current,
             timelineCanvasRef.current,
             timelineContextRef.current,
-            currentViewportTimeframes[0],
-            currentViewportTimeframes[1],
+            audioLength,
             false)
 
         drawAllLabels()
         drawPlayhead(playHeadRef.current.timeframe)
+
     }
     , [zoomLevel, labels])
 
-
-    // Every time specImagesCurrentIndex is changed (this means the user scrolled to edge of the spectrogram), do this:
-    useEffect ( () => {
-        if (!specImages){
-            return
-        }
-        console.log('Current Viewport Timeframes: '+currentViewportTimeframes)
-        drawTimeline(spectrogramCanvasRef.current,
-            timelineCanvasRef.current,
-            timelineContextRef.current,
-            currentViewportTimeframes[0],
-            currentViewportTimeframes[1],
-            false)
-
-        adjustOverviewCanvasDimensions()
-        drawViewport('#55e6f3')
-        populateOverviewCanvas()
-
-        // this prevents crash when zooming out
-        let correctIndex = specImagesCurrentIndex.index
-        if (specImagesCurrentIndex.zoomLevel === 0){
-            correctIndex = 0
-        }
-        populateSpectrogramCanvas(specImages[specImagesCurrentIndex.zoomLevel][correctIndex])
-
-    }
-    , [specImagesCurrentIndex, zoomLevel])
-
-
     return (
         <div id='visuals-container'>
-            <canvas id='overview-canvas'
-                    ref={overviewCanvasRef}
-            />
-            <div id='canvas-container' ref={canvasContainerRef} onScroll={checkIfScrolledToEdge}>
-                <div id='background-img'
-                     ref={backgroundImageRef}
-                />
+            <div id='canvas-container' ref={canvasContainerRef}>
+                <div id='background-img' ref={backgroundImageRef}>
+                </div>
                 <canvas id='spectrogram-canvas'
                         ref={spectrogramCanvasRef}
                         onMouseDown={handleLMBDown}
@@ -780,9 +583,7 @@ function Visuals( {audioFile, audioFileName, specImages, spectrogramIsLoading, i
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
                 />
-                <canvas id='timeline-canvas'
-                        ref={timelineCanvasRef}
-                />
+                <canvas id='timeline-canvas' ref={timelineCanvasRef} />
                 {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
             </div>
             <div id='controls-container'>

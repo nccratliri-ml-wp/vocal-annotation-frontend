@@ -8,6 +8,8 @@ import Export from "./Export.jsx";
 // Interpolation up to 200ms
 // fix image crash
 // sort new labels by onset
+// refactor timeline to be more accurate
+// sampling rates for different species
 
 const spectrogramCanvasHeight = 256 //hardcoded, but actually depends on the height of the spectrogram generated in the backend
 

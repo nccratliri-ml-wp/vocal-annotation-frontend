@@ -1,12 +1,12 @@
 
 import {useRef} from "react";
 
-function Test ({ specImages }){
+function Test ({ base64Url }){
     const svgRef = useRef(null)
     const containerRef = useRef(null)
 
     function populateSVG (){
-        svgRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
+        svgRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
     function zoomIn(){
@@ -30,9 +30,9 @@ function Test ({ specImages }){
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
 
         line.setAttribute('x1', x)
-        line.setAttribute('y1', 0)
+        line.setAttribute('y1', '0')
         line.setAttribute('x2', x)
-        line.setAttribute('y2', 256)
+        line.setAttribute('y2', '256')
         line.setAttribute('stroke', '#00FF00')
         line.setAttribute('stroke-width', '2')
 

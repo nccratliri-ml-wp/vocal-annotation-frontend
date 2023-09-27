@@ -193,7 +193,6 @@ html, body {
 
 #test-svg{
   background: url('');
-  image-rendering: smooth;
   background-size: 100% 100%;
   image-rendering: pixelated;
 }

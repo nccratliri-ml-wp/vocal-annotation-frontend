@@ -3,11 +3,10 @@ import Visuals from "./Visuals.jsx"
 import Clusternames from "./Clusternames.jsx"
 import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
-import Test from "./Test.jsx"
 
 function App() {
     const audioDOMObject = useRef(null)
-    const [specImages, setSpecImages] = useState(null)
+    const [base64Url, setBase64Url] = useState(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
@@ -18,8 +17,8 @@ function App() {
         audioDOMObject.current.setAttribute('src', url)
     }
 
-    function passSpecImagesToApp(newDictionary){
-        setSpecImages( newDictionary )
+    function passBase64UrlToApp(newUrl){
+        setBase64Url( newUrl )
     }
 
     function passAudioFileNameToApp(newAudioFileName){
@@ -44,38 +43,34 @@ function App() {
 
 
     return (
-    <>
-        <Test
-            specImages={specImages}
-        />
-        <div id='files-upload-container'>
-            <AudioUpload
-                passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-                passSpecImagesToApp={passSpecImagesToApp}
-                passAudioFileNameToApp={passAudioFileNameToApp}
-                passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
+        <>
+            <div id='files-upload-container'>
+                <AudioUpload
+                    passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
+                    passBase64UrlToApp={passBase64UrlToApp}
+                    passAudioFileNameToApp={passAudioFileNameToApp}
+                    passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
+                />
+                <audio preload="metadata" ref={audioDOMObject}></audio>
+                <CSVReader
+                    passLabelsToApp={passLabelsToApp}
+                    passClusterNameButtonsToApp={passClusterNameButtonsToApp}
+                />
+            </div>
+            <Visuals
+                audioFile={audioDOMObject.current}
+                audioFileName={audioFileName}
+                base64Url={base64Url}
+                spectrogramIsLoading={spectrogramIsLoading}
+                importedLabels={importedLabels}
+                activeClustername={activeClustername}
             />
-            <audio preload="metadata" ref={audioDOMObject}></audio>
-            <CSVReader
-                passLabelsToApp={passLabelsToApp}
-                passClusterNameButtonsToApp={passClusterNameButtonsToApp}
+            <Clusternames
+                passActiveClusternameToApp={passActiveClusternameToApp}
+                importedClusternameButtons={importedClusternameButtons}
+                base64Url={base64Url}
             />
-        </div>
-        <Visuals
-            audioFile={audioDOMObject.current}
-            audioFileName={audioFileName}
-            specImages={specImages}
-            spectrogramIsLoading={spectrogramIsLoading}
-            importedLabels={importedLabels}
-            activeClustername={activeClustername}
-        />
-        <Clusternames
-            passActiveClusternameToApp={passActiveClusternameToApp}
-            importedClusternameButtons={importedClusternameButtons}
-            specImages={specImages}
-        />
-
-    </>
+        </>
     )
 }
 

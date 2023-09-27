@@ -195,5 +195,6 @@ html, body {
   background: url('');
   image-rendering: smooth;
   background-size: 100% 100%;
+  image-rendering: pixelated;
 }
 

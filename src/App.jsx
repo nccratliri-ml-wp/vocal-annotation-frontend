@@ -3,6 +3,7 @@ import Visuals from "./Visuals.jsx"
 import Clusternames from "./Clusternames.jsx"
 import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
+import ScalableSpec from "./ScalableSpec.jsx";
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -57,7 +58,8 @@ function App() {
                     passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 />
             </div>
-            <Visuals
+            {/*
+             <Visuals
                 audioFile={audioDOMObject.current}
                 audioFileName={audioFileName}
                 base64Url={base64Url}
@@ -65,6 +67,10 @@ function App() {
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
             />
+            */}
+            <ScalableSpec>
+
+            </ScalableSpec>
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

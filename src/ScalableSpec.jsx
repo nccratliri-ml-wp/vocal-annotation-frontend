@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
+class Label {
+    constructor(onset, offset, clustername) {
+        this.onset = onset
+        this.offset = offset
+        this.clustername = clustername
+    }
+}
+
 function ScalableSpec() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [spectrogram, setSpectrogram] = useState(null);
@@ -14,6 +22,8 @@ function ScalableSpec() {
     const canvasRef = useRef(null);
     const timeAxisRef = useRef(null);
 
+    const [labels, setLabels] = useState([])
+
     const onFileChange = event => {
         setSelectedFile(event.target.files[0]);
     };
@@ -23,7 +33,7 @@ function ScalableSpec() {
         formData.append('newAudioFile', selectedFile);
 
         try {
-            const response = await axios.post('http://localhost:5000/upload', formData);
+            const response = await axios.post('http://localhost:8050/upload', formData);
             setAudioDuration(response.data.audio_duration);
             setAudioId(response.data.audio_id);
             setClipDuration(response.data.audio_duration);
@@ -37,7 +47,7 @@ function ScalableSpec() {
 
     const getAudioClipSpec = async (start_time, duration) => {
         try {
-            const response = await axios.post('http://localhost:5000/get-audio-clip-spec', {
+            const response = await axios.post('http://localhost:8050/get-audio-clip-spec', {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
@@ -67,9 +77,11 @@ function ScalableSpec() {
             ctx.beginPath();
             ctx.moveTo(x, 5); // Start point of the line (5 pixels from the top)
             ctx.lineTo(x, 15); // End point of the line (10 pixels long)
+            ctx.strokeStyle = '#9db4c0'
             ctx.stroke();
 
             // Display time with 2 decimal places followed by 's', positioned below the line
+            ctx.fillStyle = '#9db4c0'
             ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
         }
     };
@@ -130,6 +142,61 @@ function ScalableSpec() {
         setScrollInterval(null);
     };
 
+
+
+
+    /* ++++++++++++++++++ Label methods ++++++++++++++++++ */
+
+    const handleLMBDown = (event) => {
+        if (event.button !== 0){
+            return
+        }
+
+        const clickedTimestamp = calculateTimestamp(event)
+        drawLine(clickedTimestamp, "#00FF00")
+        addNewLabel(clickedTimestamp)
+    }
+
+    const getXClicked = (event) => {
+        const rect = event.target.getBoundingClientRect()
+        return event.clientX - rect.left
+    }
+
+    const drawLine = (timestamp, hexColorCode) => {
+        const x = calculateXPosition(timestamp)
+        const ctx = canvasRef.current.getContext('2d');
+
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, 300)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = hexColorCode
+        ctx.stroke()
+    }
+
+    const calculateTimestamp = (event) => {
+        const xClicked = getXClicked(event)
+        return ( clipDuration + currentStartTime ) * (xClicked / canvasRef.current.width)
+    }
+
+    const calculateXPosition = (timeframe) => {
+        return timeframe * canvasRef.current.width / ( clipDuration + currentStartTime )
+    }
+
+    const addNewLabel = (onset) => {
+        setLabels(current => [...current, new Label (onset, undefined, 'my clustername')])
+    }
+
+    const drawAllLabels = () => {
+        console.log(labels)
+        for (let label of labels) {
+            drawLine(label.onset, "#00FF00")
+        }
+    }
+
+
+
+
     useEffect(() => {
         if (spectrogram) {
             const canvas = canvasRef.current;
@@ -137,31 +204,51 @@ function ScalableSpec() {
             const image = new Image();
             image.onload = () => {
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                drawAllLabels()
             };
             image.src = `data:image/png;base64,${spectrogram}`;
 
-            renderTimeAxis(); // Render the time axis
+
+            renderTimeAxis();
         }
-    }, [spectrogram, currentStartTime, clipDuration]);
+    }, [spectrogram]);
 
     useEffect( () => {
+        if (!clipDuration){
+            return
+        }
             getAudioClipSpec(currentStartTime, clipDuration);
         },
         [currentStartTime, clipDuration]
     );
 
+
+
     return (
-        <div className="App">
-            <h2>Upload WAV and Get Spectrogram</h2>
-            <input type="file" accept=".wav" onChange={onFileChange} />
-            <button onClick={onUpload}>Upload</button>
+        <div>
+            <input
+                type="file"
+                accept=".wav"
+                onChange={onFileChange}
+            />
+            <button
+                onClick={onUpload}
+            >
+                Upload
+            </button>
             {spectrogram && (
-                <div style={{ marginLeft: '20px' }}>
-                    <h3>Spectrogram:</h3>
-                    <canvas ref={canvasRef} width={1500} height={300}></canvas>
-                    <div style={{ marginLeft: '0px' }}>
-                        <canvas ref={timeAxisRef} width={1500} height={30}></canvas>
-                    </div>
+                <div>
+                    <canvas
+                        ref={canvasRef}
+                        width={1500}
+                        height={300}
+                        onMouseDown={handleLMBDown}
+                    />
+                    <canvas
+                        ref={timeAxisRef}
+                        width={1500}
+                        height={30}
+                    />
                     <div>
                         <button
                             // onClick={onLeftScroll}
@@ -182,9 +269,24 @@ function ScalableSpec() {
                             onMouseDown={startRightScroll}
                             onMouseUp={stopScroll}
                             onMouseLeave={stopScroll}
-                        >Right Scroll &rarr;</button>
-                        <button onClick={onZoomIn}>Zoom In</button>
-                        <button onClick={onZoomOut}>Zoom Out</button>
+                        >
+                            Right Scroll &rarr;
+                        </button>
+                        <button
+                            onClick={onZoomIn}
+                        >
+                            Zoom In
+                        </button>
+                        <button
+                            onClick={onZoomOut}
+                        >
+                            Zoom Out
+                        </button>
+                        <button
+                            onClick={drawAllLabels}
+                        >
+                            Draw all labels
+                        </button>
                     </div>
                 </div>
             )}

@@ -1,12 +1,12 @@
 
 import {useRef} from "react";
 
-function SVGTest ({ specImages }){
+function SVGTest ({ base64Url }){
     const svgRef = useRef(null)
     const containerRef = useRef(null)
 
     function populateSVG (){
-        svgRef.current.style.backgroundImage = `url(data:image/png;base64,${specImages[0][0]})`
+        svgRef.current.style.backgroundImage = `url(data:image/png;base64,${base64Url})`
     }
 
     function zoomIn(){

@@ -26,7 +26,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
                 passBase64UrlToApp(response.data)
                 passSpectrogramIsLoadingToApp(false)
             })
-            .catch((error) => console.log(error.response))
+            .catch((error) => console.log(error))
     }
 
 

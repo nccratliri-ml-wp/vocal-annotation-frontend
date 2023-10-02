@@ -45,6 +45,9 @@ function App() {
 
     return (
         <>
+            <ScalableSpec>
+            </ScalableSpec>
+            {/*
             <div id='files-upload-container'>
                 <AudioUpload
                     passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
@@ -58,6 +61,7 @@ function App() {
                     passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 />
             </div>
+            */}
             {/*
              <Visuals
                 audioFile={audioDOMObject.current}
@@ -68,14 +72,13 @@ function App() {
                 activeClustername={activeClustername}
             />
             */}
-            <ScalableSpec>
-
-            </ScalableSpec>
+            {/*
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}
                 base64Url={base64Url}
             />
+            */}
         </>
     )
 }

@@ -157,11 +157,6 @@ function ScalableSpec() {
         addNewLabel(clickedTimestamp)
     }
 
-    const getXClicked = (event) => {
-        const rect = event.target.getBoundingClientRect()
-        return event.clientX - rect.left
-    }
-
     const drawLine = (timestamp, hexColorCode) => {
         const x = calculateXPosition(timestamp)
         const ctx = canvasRef.current.getContext('2d');
@@ -174,13 +169,19 @@ function ScalableSpec() {
         ctx.stroke()
     }
 
+    const getXClicked = (event) => {
+        const rect = event.target.getBoundingClientRect()
+        return event.clientX - rect.left
+    }
+
     const calculateTimestamp = (event) => {
         const xClicked = getXClicked(event)
-        return ( clipDuration + currentStartTime ) * (xClicked / canvasRef.current.width)
+        const ratio = (xClicked / canvasRef.current.width)
+        return clipDuration * ratio + currentStartTime
     }
 
     const calculateXPosition = (timeframe) => {
-        return timeframe * canvasRef.current.width / ( clipDuration + currentStartTime )
+        return ( timeframe * canvasRef.current.width / clipDuration ) - ( currentStartTime * canvasRef.current.width / clipDuration )
     }
 
     const addNewLabel = (onset) => {
@@ -188,7 +189,6 @@ function ScalableSpec() {
     }
 
     const drawAllLabels = () => {
-        console.log(labels)
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
         }
@@ -283,9 +283,9 @@ function ScalableSpec() {
                             Zoom Out
                         </button>
                         <button
-                            onClick={drawAllLabels}
+                            onClick={() => console.log(labels)}
                         >
-                            Draw all labels
+                            Console log labels
                         </button>
                     </div>
                 </div>

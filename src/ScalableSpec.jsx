@@ -9,7 +9,7 @@ class Label {
     }
 }
 
-function ScalableSpec() {
+function ScalableSpec( { activeClustername }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
@@ -288,7 +288,7 @@ function ScalableSpec() {
     }
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label (onset, undefined, 'my clustername')])
+        setLabels(current => [...current, new Label (onset, undefined, activeClustername)])
     }
 
     const drawAllLabels = () => {

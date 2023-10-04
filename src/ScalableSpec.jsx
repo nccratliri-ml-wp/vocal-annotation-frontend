@@ -58,6 +58,7 @@ function ScalableSpec() {
         }
     };
 
+    /*
     const renderTimeAxis = () => {
         const canvas = timeAxisRef.current;
         const ctx = canvas.getContext('2d');
@@ -85,7 +86,76 @@ function ScalableSpec() {
             ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
         }
     };
+    */
 
+    const renderTimeAxis = () => {
+        const canvas = timeAxisRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+
+        const extraTimestamps = clipDuration !== audioDuration
+
+        // Drawing horizontal timeline
+        ctx.beginPath()
+        ctx.moveTo(0, canvas.height - 1)
+        ctx.lineTo(canvas.width, canvas.height - 1)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing first timestamp
+        ctx.beginPath()
+        ctx.moveTo(1, canvas.height)
+        ctx.lineTo(1, 0)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing last timestamp
+        ctx.beginPath()
+        ctx.moveTo(canvas.width - 1, canvas.height)
+        ctx.lineTo(canvas.width - 1, 0)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing lines in between
+        const step = canvas.width / clipDuration
+        let timestamp =  clipDuration * (step / canvas.width)
+        for (let i = step; i < canvas.width; i += step) {
+            ctx.beginPath()
+            ctx.moveTo(i, canvas.height)
+            ctx.lineTo(i, 15)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = '#9db4c0'
+            ctx.stroke()
+            ctx.font = "14px Arial";
+            ctx.fillStyle = '#9db4c0'
+            ctx.fillText(timestamp.toString() + '.00', i - 14, 12);
+            timestamp++
+        }
+
+        timestamp = clipDuration * (step / canvas.width)
+        for (let i = step/4; i < canvas.width; i += step/4) {
+            if (timestamp % 4 === 0){
+                timestamp++
+                continue;
+            }
+            ctx.beginPath()
+            ctx.moveTo(i, canvas.height)
+            ctx.lineTo(i, 25)
+            ctx.lineWidth = 1
+            ctx.strokeStyle = '#9db4c0'
+            ctx.stroke()
+            ctx.font = "10px Arial";
+            ctx.fillStyle = '#9db4c0'
+            if (extraTimestamps){
+                const timestampText = (timestamp/4).toString()
+                ctx.fillText(timestampText, i - 10, 20);
+            }
+            timestamp++
+        }
+    }
 
 
     const onZoomIn = () => {
@@ -152,6 +222,24 @@ function ScalableSpec() {
             return
         }
 
+        // Add offset to existing label if necessary
+        const lastLabel = labels[labels.length-1]
+        if (labels.length > 0 && lastLabel.offset === undefined){
+            const newOffset = calculateTimestamp(event)
+            const labelsCopy = labels
+            if (newOffset < lastLabel.onset){
+                lastLabel.offset = newOffset
+                labelsCopy[labels.length-1] = flipOnsetOffset(lastLabel)
+            } else{
+                labelsCopy[labels.length-1].offset = newOffset
+            }
+            setLabels(labelsCopy)
+            drawLine(newOffset,"#00FF00")
+            drawLineBetween(lastLabel,"#00FF00")
+            return
+        }
+
+        // Add onset
         const clickedTimestamp = calculateTimestamp(event)
         drawLine(clickedTimestamp, "#00FF00")
         addNewLabel(clickedTimestamp)
@@ -167,6 +255,21 @@ function ScalableSpec() {
         ctx.lineWidth = 2
         ctx.strokeStyle = hexColorCode
         ctx.stroke()
+    }
+
+    const drawLineBetween = (label, colorHex) => {
+        const xOnset = calculateXPosition(label.onset)
+        const xOffset = calculateXPosition(label.offset)
+        const ctx = canvasRef.current.getContext('2d');
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(xOnset, 300 / 2 )
+        ctx.lineTo(xOffset, 300 / 2)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = colorHex
+        ctx.stroke()
+        ctx.setLineDash([])
     }
 
     const getXClicked = (event) => {
@@ -191,7 +294,19 @@ function ScalableSpec() {
     const drawAllLabels = () => {
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
+            drawLine(label.offset, "#00FF00")
+            drawLineBetween(label,"#00FF00")
         }
+    }
+
+    const flipOnsetOffset = (label) => {
+        const newOnset = label.offset
+        const newOffset = label.onset
+
+        label.onset = newOnset
+        label.offset = newOffset
+
+        return label
     }
 
 
@@ -240,14 +355,14 @@ function ScalableSpec() {
                 <div>
                     <canvas
                         ref={canvasRef}
-                        width={1500}
+                        width={parent.innerWidth - 30}
                         height={300}
                         onMouseDown={handleLMBDown}
                     />
                     <canvas
                         ref={timeAxisRef}
-                        width={1500}
-                        height={30}
+                        width={parent.innerWidth - 30}
+                        height={40}
                     />
                     <div>
                         <button

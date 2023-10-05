@@ -12,8 +12,6 @@ class Label {
 }
 
 function ScalableSpec( { response, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
-    console.log(spectrogramIsLoading)
-
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -227,6 +225,39 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         addNewLabel(clickedTimestamp)
     }
 
+    const handleRightClick = (event) => {
+        event.preventDefault()
+        const xClicked = getXClicked(event)
+
+        if ( !checkIfPositionIsOccupied(xClicked ) ){
+            return
+        }
+
+        deleteLabel(xClicked)
+    }
+
+    const checkIfPositionIsOccupied = (xClicked) => {
+        return ( checkIfClickedOnOnset(xClicked) || checkIfClickedOnOffset(xClicked) )
+    }
+
+    const checkIfClickedOnOnset = (xClicked) => {
+        for (let label of labels){
+            const xOnset = calculateXPosition(label.onset)
+            if ( ( xOnset >= xClicked - 1 && xOnset <= xClicked + 1 ) ){
+                return label
+            }
+        }
+    }
+
+    const checkIfClickedOnOffset = (xClicked) => {
+        for (let label of labels){
+            const xOffset = calculateXPosition(label.offset)
+            if ( ( xOffset >= xClicked - 1 && xOffset <= xClicked + 1 ) ){
+                return label
+            }
+        }
+    }
+
     const drawLine = (timestamp, hexColorCode) => {
         const x = calculateXPosition(timestamp)
         const ctx = canvasRef.current.getContext('2d');
@@ -273,6 +304,15 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         setLabels(current => [...current, new Label (onset, undefined, activeClustername)])
     }
 
+    const deleteLabel = (xClicked) => {
+        const labelToBeDeleted = labels.find(
+            label => (calculateXPosition(label.onset) >= xClicked - 1  &&  calculateXPosition(label.onset) <= xClicked + 1 )
+                || (calculateXPosition(label.offset) >= xClicked - 1  &&  calculateXPosition(label.offset) <= xClicked + 1 )
+        )
+        const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
+        setLabels(filteredLabels)
+    }
+
     const drawAllLabels = () => {
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
@@ -307,7 +347,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
             renderTimeAxis();
         }
-    }, [spectrogram]);
+    }, [spectrogram, labels]);
 
     // When user zoomed in/out or scrolled:
     useEffect( () => {
@@ -338,12 +378,9 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
     // When a new CSV File was uploaded:
     useEffect( () => {
-        console.log('running use effect')
         if (!importedLabels){
-            console.log('aborted')
             return
         }
-        console.log(importedLabels)
         setLabels(importedLabels)
     }, [importedLabels])
 
@@ -357,6 +394,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                         width={parent.innerWidth}
                         height={300}
                         onMouseDown={handleLMBDown}
+                        onContextMenu={handleRightClick}
                     />
 
                     <canvas

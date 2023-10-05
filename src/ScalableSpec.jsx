@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -9,8 +11,9 @@ class Label {
     }
 }
 
-function ScalableSpec( { activeClustername }) {
-    const [selectedFile, setSelectedFile] = useState(null);
+function ScalableSpec( { response, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
+    console.log(spectrogramIsLoading)
+
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -23,27 +26,6 @@ function ScalableSpec( { activeClustername }) {
     const timeAxisRef = useRef(null);
 
     const [labels, setLabels] = useState([])
-
-    const onFileChange = event => {
-        setSelectedFile(event.target.files[0]);
-    };
-
-    const onUpload = async () => {
-        const formData = new FormData();
-        formData.append('newAudioFile', selectedFile);
-
-        try {
-            const response = await axios.post('http://localhost:8050/upload', formData);
-            setAudioDuration(response.data.audio_duration);
-            setAudioId(response.data.audio_id);
-            setClipDuration(response.data.audio_duration);
-            setCurrentStartTime(0);
-            setMaxScrollTime(0);
-            setScrollStep(response.data.audio_duration*0.05);
-        } catch (error) {
-            console.error("Error uploading file:", error);
-        }
-    };
 
     const getAudioClipSpec = async (start_time, duration) => {
         try {
@@ -310,8 +292,7 @@ function ScalableSpec( { activeClustername }) {
     }
 
 
-
-
+    // When a new spectrogram returned from the backend
     useEffect(() => {
         if (spectrogram) {
             const canvas = canvasRef.current;
@@ -320,48 +301,67 @@ function ScalableSpec( { activeClustername }) {
             image.onload = () => {
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 drawAllLabels()
+                passSpectrogramIsLoadingToApp(false)
             };
             image.src = `data:image/png;base64,${spectrogram}`;
-
 
             renderTimeAxis();
         }
     }, [spectrogram]);
 
+    // When user zoomed in/out or scrolled:
     useEffect( () => {
         if (!clipDuration){
             return
         }
+            passSpectrogramIsLoadingToApp(true)
             getAudioClipSpec(currentStartTime, clipDuration);
         },
         [currentStartTime, clipDuration]
     );
 
+    // When a new file is uploaded:
+    useEffect( () => {
+            if (!response){
+                return
+            }
+            setAudioDuration(response.data.audio_duration);
+            setAudioId(response.data.audio_id);
+            setClipDuration(response.data.audio_duration);
+            setCurrentStartTime(0);
+            setMaxScrollTime(0);
+            setScrollStep(response.data.audio_duration*0.05);
+            setLabels([])
+        },
+        [response]
+    )
+
+    // When a new CSV File was uploaded:
+    useEffect( () => {
+        console.log('running use effect')
+        if (!importedLabels){
+            console.log('aborted')
+            return
+        }
+        console.log(importedLabels)
+        setLabels(importedLabels)
+    }, [importedLabels])
 
 
     return (
         <div>
-            <input
-                type="file"
-                accept=".wav"
-                onChange={onFileChange}
-            />
-            <button
-                onClick={onUpload}
-            >
-                Upload
-            </button>
             {spectrogram && (
                 <div>
                     <canvas
                         ref={canvasRef}
-                        width={parent.innerWidth - 30}
+                        width={parent.innerWidth}
                         height={300}
                         onMouseDown={handleLMBDown}
                     />
+
                     <canvas
                         ref={timeAxisRef}
-                        width={parent.innerWidth - 30}
+                        width={parent.innerWidth}
                         height={40}
                     />
                     <div>
@@ -405,6 +405,7 @@ function ScalableSpec( { activeClustername }) {
                     </div>
                 </div>
             )}
+            {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>
     );
 }

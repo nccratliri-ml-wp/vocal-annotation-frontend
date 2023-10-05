@@ -8,7 +8,7 @@ import Searchbar from "./Searchbar.jsx"
 
 function App() {
     const audioDOMObject = useRef(null)
-    const [base64Url, setBase64Url] = useState(null)
+    const [response, setResponse] = useState(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
@@ -19,8 +19,8 @@ function App() {
         audioDOMObject.current.setAttribute('src', url)
     }
 
-    function passBase64UrlToApp(newUrl){
-        setBase64Url( newUrl )
+    function passResponseToApp(newResponse){
+        setResponse( newResponse )
     }
 
     function passAudioFileNameToApp(newAudioFileName){
@@ -45,10 +45,11 @@ function App() {
 
     return (
         <>
+            <Searchbar />
             <div id='files-upload-container'>
                 <AudioUpload
                     passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-                    passBase64UrlToApp={passBase64UrlToApp}
+                    passResponseToApp={passResponseToApp}
                     passAudioFileNameToApp={passAudioFileNameToApp}
                     passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
                 />
@@ -58,9 +59,12 @@ function App() {
                     passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 />
             </div>
-            <Searchbar />
             <ScalableSpec
+                response={response}
+                importedLabels={importedLabels}
                 activeClustername={activeClustername}
+                spectrogramIsLoading={spectrogramIsLoading}
+                passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
             />
             {/*
              <Visuals
@@ -76,7 +80,7 @@ function App() {
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}
-                base64Url={base64Url}
+                audioFileName={audioFileName}
             />
 
         </>

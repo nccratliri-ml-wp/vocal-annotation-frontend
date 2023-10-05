@@ -9,7 +9,7 @@ class ClusternameButton {
     }
 }
 
-function Clusternames( { passActiveClusternameToApp, importedClusternameButtons, base64Url } ){
+function Clusternames( { passActiveClusternameToApp, importedClusternameButtons, audioFileName } ){
     const [newClustername, setNewClustername] = useState('')
     const [clusternameButtons, setClusternameButtons] = useState([])
 
@@ -74,7 +74,7 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons,
     useEffect( () => {
         setClusternameButtons([])
 
-    }, [base64Url])
+    }, [audioFileName])
 
     // Whenever user deletes the active Clustername Button, the last button in the state array becomes active
     useEffect( () => {

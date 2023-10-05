@@ -1,7 +1,7 @@
 import {useState} from "react";
 import axios from "axios";
 
-function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
+function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
 
     const [audioFileName, setAudioFileName] = useState(null)
 
@@ -10,24 +10,27 @@ function AudioUpload({passAudioDOMObjectURLToApp, passBase64UrlToApp, passAudioF
     function handleFileDropped(newFile){
         const formData = new FormData();
         formData.append("newAudioFile", newFile)
+
+        upload(formData)
+
         passAudioFileNameToApp( newFile.name )
         setAudioFileName( newFile.name )
         passSpectrogramIsLoadingToApp(true)
 
         const url = URL.createObjectURL(newFile)
         passAudioDOMObjectURLToApp( url )
-
-        getSpectrogramFromBackend(formData)
     }
 
-    function getSpectrogramFromBackend(formData){
-        axios.post('/upload', formData)
-            .then(response => {
-                passBase64UrlToApp(response.data)
-                passSpectrogramIsLoadingToApp(false)
-            })
-            .catch((error) => console.log(error))
-    }
+    async function upload (formData) {
+
+        try {
+            const response = await axios.post('http://localhost:8050/upload', formData);
+            passResponseToApp(response)
+        } catch (error) {
+            console.error("Error uploading file:", error);
+        }
+    };
+
 
 
     // Drag & Drop implementation

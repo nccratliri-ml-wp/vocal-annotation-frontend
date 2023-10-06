@@ -66,8 +66,9 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
             ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
         }
     };
-    */
+     */
 
+    /*
     const renderTimeAxis = () => {
         const canvas = timeAxisRef.current;
         const ctx = canvas.getContext('2d');
@@ -135,6 +136,63 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
             }
             timestamp++
         }
+    }
+    */
+
+
+    const renderTimeAxis = () => {
+        const canvas = timeAxisRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+
+        // Drawing horizontal timeline
+        ctx.beginPath()
+        ctx.moveTo(0, canvas.height - 1)
+        ctx.lineTo(canvas.width, canvas.height - 1)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing first timestamp
+        ctx.beginPath()
+        ctx.moveTo(1, canvas.height)
+        ctx.lineTo(1, 0)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing last timestamp
+        ctx.beginPath()
+        ctx.moveTo(canvas.width - 1, canvas.height)
+        ctx.lineTo(canvas.width - 1, 0)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+
+        // Drawing lines in between
+        const oneSecondWidth = canvas.width / clipDuration * 1
+        const intervals = canvas.width / oneSecondWidth; // Number of intervals based on 50 pixels
+        const timeStep = clipDuration / intervals; // Time duration for each interval
+
+        for (let i = 0; i <= intervals; i++) {
+            const x = i * oneSecondWidth;
+            const time = currentStartTime + i * timeStep;
+
+            // Calculate text width to center the timestamp
+            const textWidth = ctx.measureText(time.toFixed(2)).width;
+
+            // Draw a vertical line above the position where the timestamp will be
+            ctx.beginPath();
+            ctx.moveTo(x, 5); // Start point of the line (5 pixels from the top)
+            ctx.lineTo(x, 15); // End point of the line (10 pixels long)
+            ctx.strokeStyle = '#9db4c0'
+            ctx.stroke();
+
+            // Display time with 2 decimal places followed by 's', positioned below the line
+            ctx.fillStyle = '#9db4c0'
+            ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
+        }
+
     }
 
 
@@ -221,7 +279,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
         // Add onset
         const clickedTimestamp = calculateTimestamp(event)
-        drawLine(clickedTimestamp, "#00FF00")
+        //drawLine(clickedTimestamp, "#00FF00")
         addNewLabel(clickedTimestamp)
     }
 
@@ -296,8 +354,8 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         return clipDuration * ratio + currentStartTime
     }
 
-    const calculateXPosition = (timeframe) => {
-        return ( timeframe * canvasRef.current.width / clipDuration ) - ( currentStartTime * canvasRef.current.width / clipDuration )
+    const calculateXPosition = (timestamp) => {
+        return ( timestamp * canvasRef.current.width / clipDuration ) - ( currentStartTime * canvasRef.current.width / clipDuration )
     }
 
     const addNewLabel = (onset) => {
@@ -354,7 +412,6 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         if (!clipDuration){
             return
         }
-            passSpectrogramIsLoadingToApp(true)
             getAudioClipSpec(currentStartTime, clipDuration);
         },
         [currentStartTime, clipDuration]
@@ -391,7 +448,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                 <div>
                     <canvas
                         ref={canvasRef}
-                        width={parent.innerWidth}
+                        width={parent.innerWidth -30}
                         height={300}
                         onMouseDown={handleLMBDown}
                         onContextMenu={handleRightClick}
@@ -399,7 +456,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
                     <canvas
                         ref={timeAxisRef}
-                        width={parent.innerWidth}
+                        width={parent.innerWidth -30}
                         height={40}
                     />
                     <div>

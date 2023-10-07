@@ -38,108 +38,6 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         }
     };
 
-    /*
-    const renderTimeAxis = () => {
-        const canvas = timeAxisRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
-
-        const intervals = canvas.width / 50; // Number of intervals based on 50 pixels
-        const timeStep = clipDuration / intervals; // Time duration for each interval
-
-        for (let i = 0; i <= intervals; i++) {
-            const x = i * 50;
-            const time = currentStartTime + i * timeStep;
-
-            // Calculate text width to center the timestamp
-            const textWidth = ctx.measureText(time.toFixed(2)).width;
-
-            // Draw a vertical line above the position where the timestamp will be
-            ctx.beginPath();
-            ctx.moveTo(x, 5); // Start point of the line (5 pixels from the top)
-            ctx.lineTo(x, 15); // End point of the line (10 pixels long)
-            ctx.strokeStyle = '#9db4c0'
-            ctx.stroke();
-
-            // Display time with 2 decimal places followed by 's', positioned below the line
-            ctx.fillStyle = '#9db4c0'
-            ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
-        }
-    };
-     */
-
-    /*
-    const renderTimeAxis = () => {
-        const canvas = timeAxisRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
-
-        const extraTimestamps = clipDuration !== audioDuration
-
-        // Drawing horizontal timeline
-        ctx.beginPath()
-        ctx.moveTo(0, canvas.height - 1)
-        ctx.lineTo(canvas.width, canvas.height - 1)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
-
-        // Drawing first timestamp
-        ctx.beginPath()
-        ctx.moveTo(1, canvas.height)
-        ctx.lineTo(1, 0)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
-
-        // Drawing last timestamp
-        ctx.beginPath()
-        ctx.moveTo(canvas.width - 1, canvas.height)
-        ctx.lineTo(canvas.width - 1, 0)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
-
-        // Drawing lines in between
-        const step = canvas.width / clipDuration
-        let timestamp =  clipDuration * (step / canvas.width)
-        for (let i = step; i < canvas.width; i += step) {
-            ctx.beginPath()
-            ctx.moveTo(i, canvas.height)
-            ctx.lineTo(i, 15)
-            ctx.lineWidth = 2
-            ctx.strokeStyle = '#9db4c0'
-            ctx.stroke()
-            ctx.font = "14px Arial";
-            ctx.fillStyle = '#9db4c0'
-            ctx.fillText(timestamp.toString() + '.00', i - 14, 12);
-            timestamp++
-        }
-
-        timestamp = clipDuration * (step / canvas.width)
-        for (let i = step/4; i < canvas.width; i += step/4) {
-            if (timestamp % 4 === 0){
-                timestamp++
-                continue;
-            }
-            ctx.beginPath()
-            ctx.moveTo(i, canvas.height)
-            ctx.lineTo(i, 25)
-            ctx.lineWidth = 1
-            ctx.strokeStyle = '#9db4c0'
-            ctx.stroke()
-            ctx.font = "10px Arial";
-            ctx.fillStyle = '#9db4c0'
-            if (extraTimestamps){
-                const timestampText = (timestamp/4).toString()
-                ctx.fillText(timestampText, i - 10, 20);
-            }
-            timestamp++
-        }
-    }
-    */
-
-
     const renderTimeAxis = () => {
         const canvas = timeAxisRef.current;
         const ctx = canvas.getContext('2d');
@@ -169,32 +67,29 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         ctx.strokeStyle = '#9db4c0'
         ctx.stroke()
 
-        // Drawing lines in between
-        const oneSecondWidth = canvas.width / clipDuration * 1
-        const intervals = canvas.width / oneSecondWidth; // Number of intervals based on 50 pixels
-        const timeStep = clipDuration / intervals; // Time duration for each interval
-
-        for (let i = 0; i <= intervals; i++) {
-            const x = i * oneSecondWidth;
-            const time = currentStartTime + i * timeStep;
-
-            // Calculate text width to center the timestamp
-            const textWidth = ctx.measureText(time.toFixed(2)).width;
-
-            // Draw a vertical line above the position where the timestamp will be
-            ctx.beginPath();
-            ctx.moveTo(x, 5); // Start point of the line (5 pixels from the top)
-            ctx.lineTo(x, 15); // End point of the line (10 pixels long)
-            ctx.strokeStyle = '#9db4c0'
-            ctx.stroke();
-
-            // Display time with 2 decimal places followed by 's', positioned below the line
-            ctx.fillStyle = '#9db4c0'
-            ctx.fillText(time.toFixed(2), x - textWidth / 2, 30);
+        // Drawing timestamps in between
+        for (let i=1; i < audioDuration; i++){
+            drawTimestamp(i, '#9db4c0')
         }
-
     }
 
+    const drawTimestamp = (timestamp, hexColorCode) => {
+        const canvas = timeAxisRef.current;
+        const x = ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
+        const ctx = timeAxisRef.current.getContext('2d');
+
+        // Draw line under Timestamp
+        ctx.beginPath()
+        ctx.moveTo(x, canvas.height)
+        ctx.lineTo(x, 15)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = hexColorCode
+        ctx.stroke()
+        // Draw timestamp
+        ctx.font = "14px Arial";
+        ctx.fillStyle = hexColorCode
+        ctx.fillText(timestamp.toString() + '.00', x - 14, 12);
+    }
 
     const onZoomIn = () => {
         const newDuration = Math.max(clipDuration / 2, 0.1);

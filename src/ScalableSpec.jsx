@@ -24,6 +24,8 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
     const timeAxisRef = useRef(null);
 
     const [labels, setLabels] = useState([])
+    let clickedLabel = undefined
+    let imgData = undefined
 
     const getAudioClipSpec = async (start_time, duration) => {
         try {
@@ -67,25 +69,37 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         ctx.strokeStyle = '#9db4c0'
         ctx.stroke()
 
+        const x = ( 1 * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
+        console.log(x)
+        let step = 1
+        if (x < 50){
+            step = 20
+        } if (x < 1){
+            step = 500
+        }
+        // TO DO: figure out formula instead of these if-statments to make it dynamically
+        // display hours and minutes for longer files
+        // display miliseconds as zooming in
+
         // Drawing timestamps in between
-        for (let i=1; i < audioDuration; i++){
+        for (let i=step; i < audioDuration; i+=step){
             drawTimestamp(i, '#9db4c0')
         }
     }
 
     const drawTimestamp = (timestamp, hexColorCode) => {
         const canvas = timeAxisRef.current;
-        const x = ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
         const ctx = timeAxisRef.current.getContext('2d');
+        const x = ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
 
-        // Draw line under Timestamp
+        // Draw line under Timestamp text
         ctx.beginPath()
         ctx.moveTo(x, canvas.height)
         ctx.lineTo(x, 15)
         ctx.lineWidth = 2
         ctx.strokeStyle = hexColorCode
         ctx.stroke()
-        // Draw timestamp
+        // Draw timestamp text
         ctx.font = "14px Arial";
         ctx.fillStyle = hexColorCode
         ctx.fillText(timestamp.toString() + '.00', x - 14, 12);
@@ -148,11 +162,30 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
 
 
-    /* ++++++++++++++++++ Label methods ++++++++++++++++++ */
+    /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
 
     const handleLMBDown = (event) => {
         if (event.button !== 0){
             return
+        }
+
+        const xClicked = getXClicked(event)
+
+        // Deal with click on Label
+        if ( checkIfPositionIsOccupied(xClicked) ){
+            // Deal with click on Onset
+            clickedLabel = checkIfClickedOnOnset(xClicked)
+            if ( clickedLabel ){
+                canvasRef.current.addEventListener('mousemove', dragOnset)
+                return
+            }
+
+            // Deal with click on Offset
+            clickedLabel = checkIfClickedOnOffset(xClicked)
+            if (clickedLabel){
+                canvasRef.current.addEventListener('mousemove', dragOffset)
+                return
+            }
         }
 
         // Add offset to existing label if necessary
@@ -174,8 +207,24 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
         // Add onset
         const clickedTimestamp = calculateTimestamp(event)
-        //drawLine(clickedTimestamp, "#00FF00")
         addNewLabel(clickedTimestamp)
+    }
+
+    const handleMouseUp = (event) => {
+        if (event.button !== 0) {
+            return
+        }
+        canvasRef.current.removeEventListener('mousemove', dragOnset)
+        canvasRef.current.removeEventListener('mousemove', dragOffset)
+        //canvasRef.current.removeEventListener('mousemove', dragPlayhead)
+
+        // flip onset with offset if necessary
+        if (clickedLabel){
+            if (clickedLabel.onset > clickedLabel.offset){
+                clickedLabel = flipOnsetOffset(clickedLabel)
+            }
+        }
+        clickedLabel = undefined
     }
 
     const handleRightClick = (event) => {
@@ -187,6 +236,29 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         }
 
         deleteLabel(xClicked)
+    }
+
+    const handleMouseMove = (event) => {
+        hoverLine(event)
+        //hoverLabel(event)
+    }
+
+
+    /* ++++++++++++++++++ Helper methods ++++++++++++++++++ */
+
+    const getXClicked = (event) => {
+        const rect = event.target.getBoundingClientRect()
+        return event.clientX - rect.left
+    }
+
+    const calculateTimestamp = (event) => {
+        const xClicked = getXClicked(event)
+        const ratio = (xClicked / canvasRef.current.width)
+        return clipDuration * ratio + currentStartTime
+    }
+
+    const calculateXPosition = (timestamp) => {
+        return ( timestamp * canvasRef.current.width / clipDuration ) - ( currentStartTime * canvasRef.current.width / clipDuration )
     }
 
     const checkIfPositionIsOccupied = (xClicked) => {
@@ -210,6 +282,8 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
             }
         }
     }
+
+    /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawLine = (timestamp, hexColorCode) => {
         const x = calculateXPosition(timestamp)
@@ -238,20 +312,16 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         ctx.setLineDash([])
     }
 
-    const getXClicked = (event) => {
-        const rect = event.target.getBoundingClientRect()
-        return event.clientX - rect.left
+    const drawAllLabels = () => {
+        for (let label of labels) {
+            drawLine(label.onset, "#00FF00")
+            drawLine(label.offset, "#00FF00")
+            drawLineBetween(label,"#00FF00")
+        }
     }
 
-    const calculateTimestamp = (event) => {
-        const xClicked = getXClicked(event)
-        const ratio = (xClicked / canvasRef.current.width)
-        return clipDuration * ratio + currentStartTime
-    }
 
-    const calculateXPosition = (timestamp) => {
-        return ( timestamp * canvasRef.current.width / clipDuration ) - ( currentStartTime * canvasRef.current.width / clipDuration )
-    }
+    /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
         setLabels(current => [...current, new Label (onset, undefined, activeClustername)])
@@ -266,14 +336,6 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         setLabels(filteredLabels)
     }
 
-    const drawAllLabels = () => {
-        for (let label of labels) {
-            drawLine(label.onset, "#00FF00")
-            drawLine(label.offset, "#00FF00")
-            drawLineBetween(label,"#00FF00")
-        }
-    }
-
     const flipOnsetOffset = (label) => {
         const newOnset = label.offset
         const newOffset = label.onset
@@ -284,15 +346,53 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         return label
     }
 
+    const updateOnset = (event) => {
+        clickedLabel.onset = calculateTimestamp(event)
+    }
 
-    // When a new spectrogram returned from the backend
+    const updateOffset  = (event) => {
+        clickedLabel.offset = calculateTimestamp(event)
+    }
+
+    const dragOnset = (event) => {
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
+        updateOnset(event)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imgData, 0, 0);
+        drawAllLabels()
+    }
+
+    const dragOffset = (event) => {
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
+        updateOffset(event)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imgData, 0, 0);
+        drawAllLabels()
+        //drawPlayhead(playHeadRef.current.timeframe)
+    }
+
+
+
+    const hoverLine = (event) => {
+        const xHovered = getXClicked(event)
+        if ( checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
+            canvasRef.current.style.cursor = 'col-resize'
+        } else {
+            canvasRef.current.style.cursor = 'default'
+        }
+    }
+
+    // When a new spectrogram is returned from the backend
     useEffect(() => {
         if (spectrogram) {
             const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
             const image = new Image();
             image.onload = () => {
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
                 passSpectrogramIsLoadingToApp(false)
             };
@@ -346,7 +446,9 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                         width={parent.innerWidth -30}
                         height={300}
                         onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
                     />
 
                     <canvas

@@ -61,6 +61,7 @@ function App() {
             </div>
             <ScalableSpec
                 response={response}
+                audioFileName={audioFileName}
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
                 spectrogramIsLoading={spectrogramIsLoading}

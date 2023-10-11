@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import Export from "./Export.jsx";
 
 class Label {
     constructor(onset, offset, clustername) {
@@ -11,7 +12,7 @@ class Label {
     }
 }
 
-function ScalableSpec( { response, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
+function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -24,9 +25,9 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
     const timeAxisRef = useRef(null);
 
     const [labels, setLabels] = useState([])
+    const imgData = useRef(null)
     let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
-    let imgData = undefined
 
     const getAudioClipSpec = async (start_time, duration) => {
         try {
@@ -73,7 +74,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         const x = ( 1 * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
         console.log(x)
         let step = 1
-        if (x < 50){
+        if (x < 30){
             step = 20
         } if (x < 1){
             step = 500
@@ -83,7 +84,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         // display miliseconds as zooming in
 
         // Drawing timestamps in between
-        for (let i=step; i < audioDuration; i+=step){
+        for (let i=1; i < audioDuration; i++){
             drawTimestamp(i, '#9db4c0')
         }
     }
@@ -257,11 +258,11 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.putImageData(imgData, 0, 0);
+            ctx.putImageData(imgData.current, 0, 0);
             drawAllLabels()
             //drawPlayhead(audioFile.currentTime)
             lastHoveredLabel.isHighlighted = false
-            console.log('drawing green')
+            //console.log('drawing green')
         }
 
         const mouseX = getXClicked(event)
@@ -276,7 +277,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
-                console.log('drawing yellow')
+                //console.log('drawing yellow')
                 break;
             }
         }
@@ -410,7 +411,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         const ctx = canvas.getContext('2d');
         updateOnset(event)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(imgData, 0, 0);
+        ctx.putImageData(imgData.current, 0, 0);
         drawAllLabels()
     }
 
@@ -419,10 +420,11 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         const ctx = canvas.getContext('2d');
         updateOffset(event)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(imgData, 0, 0);
+        ctx.putImageData(imgData.current, 0, 0);
         drawAllLabels()
         //drawPlayhead(playHeadRef.current.timeframe)
     }
+
 
     // When a new spectrogram is returned from the backend
     useEffect(() => {
@@ -432,7 +434,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
             const image = new Image();
             image.onload = () => {
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
                 passSpectrogramIsLoadingToApp(false)
             };
@@ -534,6 +536,10 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                         >
                             Console log labels
                         </button>
+                        <Export
+                            audioFileName={audioFileName}
+                            labels={labels}
+                        />
                     </div>
                 </div>
             )}

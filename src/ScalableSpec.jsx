@@ -25,6 +25,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
     const [labels, setLabels] = useState([])
     let clickedLabel = undefined
+    let lastHoveredLabel = {labelObject: null, isHighlighted: false}
     let imgData = undefined
 
     const getAudioClipSpec = async (start_time, duration) => {
@@ -160,8 +161,6 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
     };
 
 
-
-
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
 
     const handleLMBDown = (event) => {
@@ -240,7 +239,47 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
 
     const handleMouseMove = (event) => {
         hoverLine(event)
-        //hoverLabel(event)
+        hoverLabel(event)
+    }
+
+    const hoverLine = (event) => {
+        const xHovered = getXClicked(event)
+        if ( checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
+            canvasRef.current.style.cursor = 'col-resize'
+        } else {
+            canvasRef.current.style.cursor = 'default'
+        }
+    }
+
+    // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factoring in the future
+    const hoverLabel = (event) => {
+        if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.putImageData(imgData, 0, 0);
+            drawAllLabels()
+            //drawPlayhead(audioFile.currentTime)
+            lastHoveredLabel.isHighlighted = false
+            console.log('drawing green')
+        }
+
+        const mouseX = getXClicked(event)
+
+        for (let label of labels){
+            const onsetX = calculateXPosition(label.onset)
+            const offsetX = calculateXPosition(label.offset)
+            if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
+                drawLine(label.onset, "#f3e655") //"#f3e655"
+                drawLine(label.offset, "#f3e655")
+                drawLineBetween(label, "#f3e655")
+                drawClustername(label)
+                lastHoveredLabel.labelObject = label
+                lastHoveredLabel.isHighlighted = true
+                console.log('drawing yellow')
+                break;
+            }
+        }
     }
 
 
@@ -283,6 +322,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         }
     }
 
+
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawLine = (timestamp, hexColorCode) => {
@@ -310,6 +350,17 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         ctx.strokeStyle = colorHex
         ctx.stroke()
         ctx.setLineDash([])
+    }
+
+    const drawClustername = (label) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const xClustername = ( calculateXPosition(label.onset) + calculateXPosition(label.offset) ) / 2
+
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillStyle = '#f3e655'
+        ctx.fillText(label.clustername, xClustername, canvas.height / 2 - 5);
     }
 
     const drawAllLabels = () => {
@@ -371,17 +422,6 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
         ctx.putImageData(imgData, 0, 0);
         drawAllLabels()
         //drawPlayhead(playHeadRef.current.timeframe)
-    }
-
-
-
-    const hoverLine = (event) => {
-        const xHovered = getXClicked(event)
-        if ( checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
-            canvasRef.current.style.cursor = 'col-resize'
-        } else {
-            canvasRef.current.style.cursor = 'default'
-        }
     }
 
     // When a new spectrogram is returned from the backend
@@ -456,7 +496,7 @@ function ScalableSpec( { response, importedLabels, activeClustername, spectrogra
                         width={parent.innerWidth -30}
                         height={40}
                     />
-                    <div>
+                    <div id="controls-container">
                         <button
                             // onClick={onLeftScroll}
                             onMouseDown={startLeftScroll}

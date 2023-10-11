@@ -468,7 +468,6 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
             //console.log('drawing green')
         }
 
-
         const mouseX = getXClicked(event)
 
         for (let label of labels){
@@ -486,7 +485,6 @@ function Visuals( {audioFile, audioFileName, base64Url, spectrogramIsLoading, im
             }
         }
     }
-
 
     function handleMouseMove(event){
         hoverLine(event)

@@ -549,11 +549,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             -🔍
                         </button>
-                            <button
+                        {/*
+                        <button
                             onClick={() => console.log(labels)}
                         >
                             Console log labels
                         </button>
+                        */}
                         <Export
                             audioFileName={audioFileName}
                             labels={labels}

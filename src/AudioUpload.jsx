@@ -24,13 +24,12 @@ function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFi
     async function upload (formData) {
 
         try {
-            const response = await axios.post('http://localhost:8050/upload', formData);
+            const response = await axios.post('http://34.65.142.108:8050/upload', formData);
             passResponseToApp(response)
         } catch (error) {
             console.error("Error uploading file:", error);
         }
-    };
-
+    }
 
 
     // Drag & Drop implementation

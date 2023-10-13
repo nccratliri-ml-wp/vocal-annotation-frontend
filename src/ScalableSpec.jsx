@@ -31,7 +31,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const getAudioClipSpec = async (start_time, duration) => {
         try {
-            const response = await axios.post('http://localhost:8050/get-audio-clip-spec', {
+            const response = await axios.post('http://34.65.142.108:8050/get-audio-clip-spec', {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
@@ -71,25 +71,42 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.strokeStyle = '#9db4c0'
         ctx.stroke()
 
-        const x = ( 1 * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
-        console.log(x)
+        const minStepWidth1 = 2
+        const minStepWidth2 = 15
+        const minStepWidth3 = 30
         let step = 1
-        if (x < 30){
+        const stepWidth = ( canvas.width / clipDuration )
+
+        if (stepWidth < minStepWidth1){
+            step = 800
+        } else if (stepWidth < minStepWidth2) {
             step = 20
-        } if (x < 1){
-            step = 500
+        } else if (stepWidth < minStepWidth3) {
+            step = 2
         }
+
+        //console.log('stepWidth ' + stepWidth)
+        //console.log('step ' +step)
+
         // TO DO: figure out formula instead of these if-statments to make it dynamically
         // display hours and minutes for longer files
         // display miliseconds as zooming in
 
         // Drawing timestamps in between
-        for (let i=1; i < audioDuration; i++){
-            drawTimestamp(i, '#9db4c0')
+        for (let i=step; i < audioDuration; i+=step){
+            drawTimestamp(i, 15, '.00','#9db4c0')
         }
+        /*
+        for (let i=0; i < audioDuration; i+=(step/10)){
+            if (Number.isInteger (Math.ceil(i * 10) / 10)) {
+                continue;
+            }
+            drawTimestamp(i, 25,'','#9db4c0')
+        }
+         */
     }
 
-    const drawTimestamp = (timestamp, hexColorCode) => {
+    const drawTimestamp = (timestamp, lineHeight, ending, hexColorCode) => {
         const canvas = timeAxisRef.current;
         const ctx = timeAxisRef.current.getContext('2d');
         const x = ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
@@ -97,14 +114,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         // Draw line under Timestamp text
         ctx.beginPath()
         ctx.moveTo(x, canvas.height)
-        ctx.lineTo(x, 15)
+        ctx.lineTo(x, lineHeight)
         ctx.lineWidth = 2
         ctx.strokeStyle = hexColorCode
         ctx.stroke()
         // Draw timestamp text
         ctx.font = "14px Arial";
         ctx.fillStyle = hexColorCode
-        ctx.fillText(timestamp.toString() + '.00', x - 14, 12);
+        timestamp = Math.ceil(timestamp * 10) / 10
+        ctx.fillText(timestamp.toString() + ending, x - 14, lineHeight-5);
     }
 
     const onZoomIn = () => {
@@ -524,14 +542,14 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         <button
                             onClick={onZoomIn}
                         >
-                            Zoom In
+                            +🔍
                         </button>
                         <button
                             onClick={onZoomOut}
                         >
-                            Zoom Out
+                            -🔍
                         </button>
-                        <button
+                            <button
                             onClick={() => console.log(labels)}
                         >
                             Console log labels

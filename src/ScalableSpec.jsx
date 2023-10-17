@@ -29,6 +29,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const overviewRef = useRef(null)
     const newFileUploaded = useRef(null)
     const [overviewSpectrogram, setOverviewSpectrogram] = useState(null)
+    const overviewImgData = useRef(null)
 
     const [labels, setLabels] = useState([])
     const imgData = useRef(null)
@@ -44,7 +45,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             });
             setSpectrogram(response.data.spec);
             if (newFileUploaded.current){
-                console.log('drawing overview canvas')
                 setOverviewSpectrogram(response.data.spec)
                 newFileUploaded.current = false
             }
@@ -314,14 +314,14 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         return event.clientX - rect.left
     }
 
+    const calculateXPosition = (timestamp, canvas) => {
+        return ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
+    }
+
     const calculateTimestamp = (event) => {
         const xClicked = getXClicked(event)
         const ratio = (xClicked / canvasRef.current.width)
         return clipDuration * ratio + currentStartTime
-    }
-
-    const calculateXPosition = (timestamp, canvas) => {
-        return ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
     }
 
     const checkIfPositionIsOccupied = (xClicked) => {
@@ -451,14 +451,36 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     /* ++++++++++++++++++ Overview Bar Methods ++++++++++++++++++ */
 
-    const handleLMBDownOverview = () => {
-        drawViewport(currentStartTime, clipDuration, 'blue')
+    const handleLMBDownOverview = (event) => {
+        const xClicked = getXClicked(event)
+        const xStartFrame = calculateViewportFrame(currentStartTime)
+        const xEndFrame = calculateViewportFrame(currentStartTime + clipDuration)
+        if (xClicked >= xStartFrame && xClicked <= xEndFrame){
+            console.log('inside')
+        }
+    }
+
+    const handleMouseUpOverview = (event) => {
+        const xClicked = getXClicked(event)
+    }
+
+    const handleMouseMoveOverview = () => {
+
+    }
+
+    const calculateViewportFrame = (timestamp) => {
+        return timestamp * overviewRef.current.width / audioDuration
     }
 
     const drawViewport = (startFrame, endFrame, hexColorCode) => {
-        const ctx = overviewRef.current.getContext('2d');
-        const x1 = calculateXPosition(startFrame, overviewRef.current)
-        const x2 = calculateXPosition(endFrame, overviewRef.current)
+        const overviewCanvas = overviewRef.current
+        const ctx = overviewCanvas.getContext('2d');
+        ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
+        if (overviewImgData.current){
+            ctx.putImageData(overviewImgData.current, 0, 0);
+        }
+        const x1 = calculateViewportFrame(startFrame)
+        const x2 = calculateViewportFrame(endFrame)
 
         // Draw start frame
         ctx.beginPath()
@@ -470,6 +492,20 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         // Draw end frame
         ctx.beginPath()
         ctx.moveTo(x2, 0)
+        ctx.lineTo(x2, overviewRef.current.height)
+        ctx.lineWidth = 2
+        ctx.stroke()
+
+        // Draw Top line
+        ctx.beginPath()
+        ctx.moveTo(x1, 0)
+        ctx.lineTo(x2, 0)
+        ctx.lineWidth = 2
+        ctx.stroke()
+
+        // Draw Bottom line
+        ctx.beginPath()
+        ctx.moveTo(x1, overviewRef.current.height)
         ctx.lineTo(x2, overviewRef.current.height)
         ctx.lineWidth = 2
         ctx.stroke()
@@ -489,8 +525,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 */
 
-
-
     /* ++++++++++++++++++ UseEffects ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
@@ -503,11 +537,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
+                drawViewport(currentStartTime, currentStartTime + clipDuration, 'blue')
                 passSpectrogramIsLoadingToApp(false)
             };
             image.src = `data:image/png;base64,${spectrogram}`;
 
             renderTimeAxis();
+
         }
     }, [spectrogram, labels]);
 
@@ -515,10 +551,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     useEffect( () => {
         if (overviewSpectrogram){
             const overviewCanvas = overviewRef.current
-            const overviewCTX = overviewCanvas.getContext('2d');
+            const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true });
             const image = new Image();
             image.onload = () => {
                 overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
+                overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
+                drawViewport(currentStartTime, currentStartTime + clipDuration, 'blue')
             };
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
         }
@@ -569,6 +607,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         width={parent.innerWidth -30}
                         height={100}
                         onMouseDown={handleLMBDownOverview}
+                        onMouseUp={handleMouseUpOverview}
+                        onMouseMove={handleMouseMoveOverview}
                     />
                     <canvas
                         ref={canvasRef}

@@ -37,8 +37,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
     const getAudioClipSpec = async (start_time, duration) => {
+        const path1 = 'http://localhost:8050/get-audio-clip-spec'
+        const path2 = 'http://34.65.142.108:8050/get-audio-clip-spec'
+        const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-spec'
         try {
-            const response = await axios.post('http://localhost:8050/get-audio-clip-spec', { //34.65.142.108:8050
+            const response = await axios.post(path3, {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration

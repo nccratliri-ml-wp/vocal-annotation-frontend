@@ -537,7 +537,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'blue')
+                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
                 passSpectrogramIsLoadingToApp(false)
             };
             image.src = `data:image/png;base64,${spectrogram}`;
@@ -556,7 +556,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             image.onload = () => {
                 overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
                 overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'blue')
+                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
             };
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
         }

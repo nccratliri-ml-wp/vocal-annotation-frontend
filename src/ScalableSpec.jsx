@@ -42,6 +42,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-spec'
         try {
             const response = await axios.post(path3, {
+                audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
             });
@@ -515,17 +516,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
-    /*
-        const prevResponse = usePrevious(response)
+/*
+    const prevResponse = usePrevious(response)
 
-        function usePrevious(value){
-            const ref = useRef()
-            useEffect( () => {
-                ref.current = value
-            })
-            return ref.current
-        }
-    */
+    function usePrevious(value){
+        const ref = useRef()
+        useEffect( () => {
+            ref.current = value
+        })
+        return ref.current
+    }
+*/
 
     /* ++++++++++++++++++ UseEffects ++++++++++++++++++ */
 
@@ -566,9 +567,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     // When user zoomed in/out or scrolled:
     useEffect( () => {
-            if (!clipDuration){
-                return
-            }
+        if (!clipDuration){
+            return
+        }
             getAudioClipSpec(currentStartTime, clipDuration);
         },
         [currentStartTime, clipDuration]
@@ -660,7 +661,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             -🔍
                         </button>
-                        <button
+                            <button
                             onClick={() => console.log(labels)}
                         >
                             Console log labels

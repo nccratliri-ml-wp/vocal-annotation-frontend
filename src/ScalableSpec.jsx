@@ -12,14 +12,13 @@ class Label {
     }
 }
 
-
-
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
     const [clipDuration, setClipDuration] = useState(null);
     const [currentStartTime, setCurrentStartTime] = useState(0);
+    const [currentEndTime, setCurrentEndTime] = useState(0);
     const [maxScrollTime, setMaxScrollTime] = useState(0);
     const [scrollStep, setScrollStep] = useState(0);
     const [scrollInterval, setScrollInterval] = useState(null);
@@ -141,6 +140,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration*0.05);
+        setCurrentEndTime( currentStartTime + newDuration );
     };
 
     const onZoomOut = () => {
@@ -151,6 +151,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration*0.05);
         setCurrentStartTime( newStartTime );
+        setCurrentEndTime( newStartTime + newDuration );
     };
 
     const onScrollbarChange = async (event) => {
@@ -166,11 +167,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             const newStartTime = Math.max(prevStartTime - scrollStep, 0);
             return newStartTime;
         });
+        setCurrentEndTime(
+            prevEndTime => Math.max(prevEndTime - scrollStep, 0)
+        );
     };
 
     const onRightScroll = () => {
         setCurrentStartTime(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
+        );
+        setCurrentEndTime(
+            prevEndTime => Math.min(prevEndTime + scrollStep, maxScrollTime)
         );
     };
 
@@ -488,19 +495,21 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (newViewportStartFrame){
             console.log('setting new start frame: ' + newViewportStartFrame)
             setCurrentStartTime(newViewportStartFrame)
+            setClipDuration( currentEndTime - newViewportStartFrame )
         } else if (newViewportEndFrame){
             console.log('setting new end frame: ' + newViewportEndFrame)
-            setClipDuration(newViewportEndFrame)
+            setCurrentEndTime( newViewportEndFrame )
+            setClipDuration( newViewportEndFrame - currentStartTime )
         }
         newViewportStartFrame = null
         newViewportEndFrame = null
-
     }
 
     const dragStartFrame = (event) => {
         const xClicked = getXClicked(event)
         newViewportStartFrame = calculateViewportTimestamp(xClicked)
-        drawViewport(newViewportStartFrame, clipDuration, 'white')
+        console.log('current End Time: '+currentEndTime)
+        drawViewport(newViewportStartFrame, currentEndTime, 'white')
     }
 
     const dragEndFrame = (event) => {
@@ -580,7 +589,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
+                drawViewport(currentStartTime, currentEndTime, 'white')
                 passSpectrogramIsLoadingToApp(false)
             };
             image.src = `data:image/png;base64,${spectrogram}`;
@@ -599,7 +608,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             image.onload = () => {
                 overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
                 overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
+                drawViewport(currentStartTime, currentEndTime, 'white')
             };
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
         }
@@ -611,6 +620,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             return
         }
             getAudioClipSpec(currentStartTime, clipDuration);
+            console.log('current start time: ' + currentStartTime)
+            console.log('clip Duration: '  + clipDuration)
+            console.log('+++++ ++++++ +++++ ++++++ ++++++++')
         },
         [currentStartTime, clipDuration]
     );
@@ -625,6 +637,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setAudioId(response.data.audio_id);
             setClipDuration(response.data.audio_duration);
             setCurrentStartTime(0);
+            setCurrentEndTime(response.data.audio_duration)
             setMaxScrollTime(0);
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])

@@ -163,10 +163,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     };
 
     const onLeftScroll = () => {
-        setCurrentStartTime(prevStartTime => {
-            const newStartTime = Math.max(prevStartTime - scrollStep, 0);
-            return newStartTime;
-        });
+        setCurrentStartTime(
+            prevStartTime => Math.max(prevStartTime - scrollStep, 0)
+        );
         setCurrentEndTime(
             prevEndTime => Math.max(prevEndTime - scrollStep, 0)
         );
@@ -177,7 +176,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
         );
         setCurrentEndTime(
-            prevEndTime => Math.min(prevEndTime + scrollStep, maxScrollTime)
+            prevEndTime => Math.min(prevEndTime + scrollStep, audioDuration)
         );
     };
 
@@ -621,7 +620,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
             getAudioClipSpec(currentStartTime, clipDuration);
             console.log('current start time: ' + currentStartTime)
+            console.log('current end time: ' + currentEndTime)
             console.log('clip Duration: '  + clipDuration)
+            console.log('max scroll time: '+ maxScrollTime)
             console.log('+++++ ++++++ +++++ ++++++ ++++++++')
         },
         [currentStartTime, clipDuration]

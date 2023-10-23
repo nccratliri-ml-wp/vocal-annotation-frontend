@@ -31,6 +31,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const overviewImgData = useRef(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
+    let widthBetween_xStartTime_xClicked = null
+    let widthBetween_xEndTime_xClicked = null
 
     const [labels, setLabels] = useState([])
     const imgData = useRef(null)
@@ -152,14 +154,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setScrollStep(newDuration*0.05);
         setCurrentStartTime( newStartTime );
         setCurrentEndTime( newStartTime + newDuration );
-    };
-
-    const onScrollbarChange = async (event) => {
-        const position = event.target.value;
-        // Send a POST request to the server with the current scrollbar position
-        // For demonstration purposes, I'm just logging the position.
-        // You can send the position and audioId to the server as needed.
-        setCurrentStartTime(parseFloat(position));
     };
 
     const onLeftScroll = () => {
@@ -467,20 +461,25 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + clipDuration)
 
+        // Deal with click on Start Frame
         if (xClicked >= xStartFrame - 2 && xClicked <= xStartFrame + 2){
-            //console.log('clicked start frame')
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
             return
         }
 
+        // Deal with click on End Frame
         if (xClicked >= xEndFrame - 2 && xClicked <= xEndFrame + 2){
-            //console.log('clicked end frame')
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
             return
         }
 
+        // Deal with click inside viewport
         if (xClicked > xStartFrame && xClicked < xEndFrame){
-            //console.log('inside viewport')
+            const xStartTime = calculateViewportFrameX(currentStartTime)
+            const xCurrentEndTime = calculateViewportFrameX(currentEndTime)
+            widthBetween_xStartTime_xClicked = xClicked - xStartTime
+            widthBetween_xEndTime_xClicked = xCurrentEndTime - xClicked
+            overviewRef.current.addEventListener('mousemove', dragViewport)
         }
     }
 
@@ -490,24 +489,34 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
         overviewRef.current.removeEventListener('mousemove', dragStartFrame)
         overviewRef.current.removeEventListener('mousemove', dragEndFrame)
+        overviewRef.current.removeEventListener('mousemove', dragViewport)
 
-        if (newViewportStartFrame){
+        // Set new Viewport (Start & Endframe)
+        if (widthBetween_xStartTime_xClicked){
+            setCurrentStartTime(newViewportStartFrame)
+            setCurrentEndTime( newViewportEndFrame )
+            setClipDuration( newViewportEndFrame - newViewportStartFrame )
+        // Set new Start Frame
+        } else if (newViewportStartFrame){
             console.log('setting new start frame: ' + newViewportStartFrame)
             setCurrentStartTime(newViewportStartFrame)
             setClipDuration( currentEndTime - newViewportStartFrame )
+        // Set new End frame
         } else if (newViewportEndFrame){
             console.log('setting new end frame: ' + newViewportEndFrame)
             setCurrentEndTime( newViewportEndFrame )
             setClipDuration( newViewportEndFrame - currentStartTime )
         }
+
         newViewportStartFrame = null
         newViewportEndFrame = null
+        widthBetween_xStartTime_xClicked = null
+        widthBetween_xEndTime_xClicked = null
     }
 
     const dragStartFrame = (event) => {
         const xClicked = getXClicked(event)
         newViewportStartFrame = calculateViewportTimestamp(xClicked)
-        console.log('current End Time: '+currentEndTime)
         drawViewport(newViewportStartFrame, currentEndTime, 'white')
     }
 
@@ -515,6 +524,26 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const xClicked = getXClicked(event)
         newViewportEndFrame = calculateViewportTimestamp(xClicked)
         drawViewport(currentStartTime, newViewportEndFrame, 'white')
+    }
+
+    const dragViewport = (event) => {
+        const xClicked = getXClicked(event)
+        const viewportWidth = widthBetween_xStartTime_xClicked + widthBetween_xEndTime_xClicked
+        newViewportStartFrame = calculateViewportTimestamp(xClicked - widthBetween_xStartTime_xClicked)
+        newViewportEndFrame = calculateViewportTimestamp(xClicked + widthBetween_xEndTime_xClicked)
+        // Prevent Viewport Start Frame from going below 0
+        if (newViewportStartFrame < 0){
+            newViewportStartFrame = 0
+            newViewportEndFrame = calculateViewportTimestamp( viewportWidth )
+            return
+        }
+        // Prevent Viewport End Frame from going above the Audio Duration
+        if (newViewportEndFrame > audioDuration){
+            newViewportStartFrame = calculateViewportTimestamp(overviewRef.current.width - viewportWidth )
+            newViewportEndFrame = audioDuration
+            return
+        }
+        drawViewport(newViewportStartFrame, newViewportEndFrame, 'white')
     }
 
     const calculateViewportTimestamp = (xClicked) => {
@@ -689,16 +718,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             onMouseUp={stopScroll}
                             onMouseLeave={stopScroll}
                         >&larr; Left Scroll</button>
-                        {/*
-                        <input
-                            type="range"
-                            min="0"
-                            max={maxScrollTime}
-                            value={currentStartTime}
-                            step={scrollStep}
-                            onChange={onScrollbarChange}
-                        />
-                        */}
                         <button
                             // onClick={onRightScroll}
                             onMouseDown={startRightScroll}

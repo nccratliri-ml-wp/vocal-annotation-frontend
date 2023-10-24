@@ -498,12 +498,10 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setClipDuration( newViewportEndFrame - newViewportStartFrame )
         // Set new Start Frame
         } else if (newViewportStartFrame){
-            console.log('setting new start frame: ' + newViewportStartFrame)
             setCurrentStartTime(newViewportStartFrame)
             setClipDuration( currentEndTime - newViewportStartFrame )
         // Set new End frame
         } else if (newViewportEndFrame){
-            console.log('setting new end frame: ' + newViewportEndFrame)
             setCurrentEndTime( newViewportEndFrame )
             setClipDuration( newViewportEndFrame - currentStartTime )
         }
@@ -564,18 +562,18 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = 2
+        ctx.strokeStyle = hexColorCode
 
         // Draw start frame
         ctx.beginPath()
         ctx.moveTo(x1, 0)
-        ctx.lineTo(x1, overviewRef.current.height)
-        ctx.strokeStyle = hexColorCode
+        ctx.lineTo(x1, overviewCanvas.height)
         ctx.stroke()
 
         // Draw end frame
         ctx.beginPath()
         ctx.moveTo(x2, 0)
-        ctx.lineTo(x2, overviewRef.current.height)
+        ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
 
         // Draw Top line
@@ -586,11 +584,34 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
         // Draw Bottom line
         ctx.beginPath()
-        ctx.moveTo(x1, overviewRef.current.height)
-        ctx.lineTo(x2, overviewRef.current.height)
+        ctx.moveTo(x1, overviewCanvas.height)
+        ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
     }
 
+
+    /* ++++++++++++++++++ Audio  ++++++++++++++++++ */
+    const onPlay = async () => {
+        const path1 = 'http://localhost:8050/get-audio-clip-wav'
+        const path2 = 'http://34.65.142.108:8050/get-audio-clip-wav'
+        const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-wav'
+        try {
+            const response = await axios.post(path1, {
+                audio_id: audioId,
+                start_time: currentStartTime,
+                clip_duration: clipDuration
+            });
+            playAudio(response.data.wav);
+        } catch (error) {
+            console.error("Error fetching audio clip:", error);
+        }
+    };
+
+    const playAudio = (audioFile) => {
+        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
+        audio.play()
+        console.log(audio)
+    }
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
 /*
@@ -689,6 +710,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             {spectrogram && (
                 <div>
                     <canvas
+                        id='overview-canvas'
                         ref={overviewRef}
                         width={parent.innerWidth -30}
                         height={100}
@@ -711,7 +733,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         width={parent.innerWidth -30}
                         height={40}
                     />
-                    <div id="controls-container">
+                    <div id='controls-container'>
                         <button
                             // onClick={onLeftScroll}
                             onMouseDown={startLeftScroll}
@@ -736,10 +758,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             -🔍
                         </button>
-                            <button
+                        <button
                             onClick={() => console.log(labels)}
                         >
                             Console log labels
+                        </button>
+                        <button
+                            onClick={onPlay}
+                        >
+                            Play Audio
                         </button>
                         <Export
                             audioFileName={audioFileName}

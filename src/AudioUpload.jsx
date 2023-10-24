@@ -27,7 +27,7 @@ function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFi
         const path3 = 'https://988d-34-65-142-108.ngrok-free.app/upload'
 
         try {
-            const response = await axios.post(path1, formData); //34.65.142.108:8050
+            const response = await axios.post(path1, formData);
             passResponseToApp(response)
         } catch (error) {
             console.error("Error uploading file:", error);

@@ -18,6 +18,12 @@ class PlayHead{
     }
 }
 
+// debug async label issue
+// constant q drop down menu
+// waveform
+// overview timestamp on the viewport lines
+// make upload boxes smaller
+
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
@@ -54,7 +60,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const path2 = 'http://34.65.142.108:8050/get-audio-clip-spec'
         const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-spec'
         try {
-            const response = await axios.post(path1, {
+            const response = await axios.post(path3, {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
@@ -606,7 +612,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const path2 = 'http://34.65.142.108:8050/get-audio-clip-wav'
         const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-wav'
         try {
-            const response = await axios.post(path1, {
+            const response = await axios.post(path3, {
                 audio_id: audioId,
                 start_time: currentStartTime,
                 clip_duration: clipDuration

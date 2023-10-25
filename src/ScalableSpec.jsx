@@ -12,6 +12,12 @@ class Label {
     }
 }
 
+class PlayHead{
+    constructor(timeframe) {
+        this.timeframe = timeframe
+    }
+}
+
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
@@ -38,6 +44,10 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const imgData = useRef(null)
     let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
+
+    const playHeadRef = useRef(new PlayHead(0))
+    const [audioSnippet, setAudioSnippet] = useState(null)
+
 
     const getAudioClipSpec = async (start_time, duration) => {
         const path1 = 'http://localhost:8050/get-audio-clip-spec'
@@ -601,16 +611,35 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 start_time: currentStartTime,
                 clip_duration: clipDuration
             });
-            playAudio(response.data.wav);
+            //handleNewAudio(response.data.wav);
+            playAudio(response.data.wav)
         } catch (error) {
             console.error("Error fetching audio clip:", error);
         }
     };
 
+    const handleNewAudio = (newAudioBase64String) => {
+        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
+        setAudioSnippet(audio)
+    }
+
     const playAudio = (audioFile) => {
         const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
         audio.play()
-        console.log(audio)
+        drawPlayhead(5)
+    }
+
+    const drawPlayhead = (timeframe) => {
+        const canvas = canvasRef.current
+        const x = calculateXPosition(timeframe, canvas)
+        const ctx = canvas.getContext('2d');
+
+        ctx.beginPath()
+        ctx.moveTo(20, 0)
+        ctx.lineTo(30, canvas)
+        ctx.lineWidth = 20
+        ctx.strokeStyle = "white"
+        ctx.stroke()
     }
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
@@ -626,7 +655,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 */
 
-    /* ++++++++++++++++++ UseEffects ++++++++++++++++++ */
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
     useEffect(() => {
@@ -669,11 +698,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             return
         }
             getAudioClipSpec(currentStartTime, clipDuration);
-            console.log('current start time: ' + currentStartTime)
-            console.log('current end time: ' + currentEndTime)
-            console.log('clip Duration: '  + clipDuration)
-            console.log('max scroll time: '+ maxScrollTime)
-            console.log('+++++ ++++++ +++++ ++++++ ++++++++')
         },
         [currentStartTime, clipDuration]
     );

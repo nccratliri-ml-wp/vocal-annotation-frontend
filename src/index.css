@@ -24,45 +24,10 @@ html, body {
   margin: 10px 5px;
 }
 
-
-#visuals-container{
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: auto auto auto 1fr;
-  grid-template-areas:
-          "overview-canvas"
-          "canvas"
-          "controls"
-          "clusternames";
-}
-
 /* -------------------------- Spectrogram -------------------------- */
 
 #overview-canvas{
-  margin: 0 0 20px 0;
-  background: url('') no-repeat;
-  background-size: 100% 100%;
-  image-rendering: pixelated;
-}
-
-#canvas-container{
-  grid-area: canvas;
-  display: grid;
-  grid-template-columns: 1fr;
-  overflow-x: scroll;
-}
-
-#spectrogram-canvas{
-  grid-row-start: 1;
-  grid-column-start: 1;
-}
-
-#background-img{
-  grid-row-start: 1;
-  grid-column-start: 1;
-  background: url('') no-repeat;
-  background-size: 100% 100%;
-  image-rendering: pixelated;
+  margin: 0 0 8px 0;
 }
 
 /* -------------------------- Controls -------------------------- */
@@ -131,7 +96,6 @@ html, body {
 
 /* -------------------------- Drag & Drop Components -------------------------- */
 
-
 #files-upload-container{
   display: flex;
   justify-content: center;
@@ -184,16 +148,4 @@ html, body {
   font-size: 3rem;
 }
 
-
-/* -------------------------- SVG -------------------------- */
-
-#svg-container{
-  overflow-x: scroll;
-}
-
-#test-svg{
-  background: url('');
-  background-size: 100% 100%;
-  image-rendering: pixelated;
-}
 

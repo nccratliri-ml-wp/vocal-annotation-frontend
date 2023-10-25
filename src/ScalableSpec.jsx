@@ -12,7 +12,11 @@ class Label {
     }
 }
 
-
+class PlayHead{
+    constructor(timeframe) {
+        this.timeframe = timeframe
+    }
+}
 
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp }) {
     const [spectrogram, setSpectrogram] = useState(null);
@@ -20,6 +24,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const [audioId, setAudioId] = useState(null);
     const [clipDuration, setClipDuration] = useState(null);
     const [currentStartTime, setCurrentStartTime] = useState(0);
+    const [currentEndTime, setCurrentEndTime] = useState(0);
     const [maxScrollTime, setMaxScrollTime] = useState(0);
     const [scrollStep, setScrollStep] = useState(0);
     const [scrollInterval, setScrollInterval] = useState(null);
@@ -30,18 +35,26 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const newFileUploaded = useRef(null)
     const [overviewSpectrogram, setOverviewSpectrogram] = useState(null)
     const overviewImgData = useRef(null)
+    let newViewportStartFrame = null
+    let newViewportEndFrame = null
+    let widthBetween_xStartTime_xClicked = null
+    let widthBetween_xEndTime_xClicked = null
 
     const [labels, setLabels] = useState([])
     const imgData = useRef(null)
     let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
+    const playHeadRef = useRef(new PlayHead(0))
+    const [audioSnippet, setAudioSnippet] = useState(null)
+
+
     const getAudioClipSpec = async (start_time, duration) => {
         const path1 = 'http://localhost:8050/get-audio-clip-spec'
         const path2 = 'http://34.65.142.108:8050/get-audio-clip-spec'
         const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-spec'
         try {
-            const response = await axios.post(path3, {
+            const response = await axios.post(path1, {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
@@ -139,6 +152,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration*0.05);
+        setCurrentEndTime( currentStartTime + newDuration );
     };
 
     const onZoomOut = () => {
@@ -149,26 +163,24 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration*0.05);
         setCurrentStartTime( newStartTime );
-    };
-
-    const onScrollbarChange = async (event) => {
-        const position = event.target.value;
-        // Send a POST request to the server with the current scrollbar position
-        // For demonstration purposes, I'm just logging the position.
-        // You can send the position and audioId to the server as needed.
-        setCurrentStartTime(parseFloat(position));
+        setCurrentEndTime( newStartTime + newDuration );
     };
 
     const onLeftScroll = () => {
-        setCurrentStartTime(prevStartTime => {
-            const newStartTime = Math.max(prevStartTime - scrollStep, 0);
-            return newStartTime;
-        });
+        setCurrentStartTime(
+            prevStartTime => Math.max(prevStartTime - scrollStep, 0)
+        );
+        setCurrentEndTime(
+            prevEndTime => Math.max(prevEndTime - scrollStep, 0)
+        );
     };
 
     const onRightScroll = () => {
         setCurrentStartTime(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
+        );
+        setCurrentEndTime(
+            prevEndTime => Math.min(prevEndTime + scrollStep, audioDuration)
         );
     };
 
@@ -456,22 +468,97 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const handleLMBDownOverview = (event) => {
         const xClicked = getXClicked(event)
-        const xStartFrame = calculateViewportFrame(currentStartTime)
-        const xEndFrame = calculateViewportFrame(currentStartTime + clipDuration)
-        if (xClicked >= xStartFrame && xClicked <= xEndFrame){
-            console.log('inside')
+        const xStartFrame = calculateViewportFrameX(currentStartTime)
+        const xEndFrame = calculateViewportFrameX(currentStartTime + clipDuration)
+
+        // Deal with click on Start Frame
+        if (xClicked >= xStartFrame - 2 && xClicked <= xStartFrame + 2){
+            overviewRef.current.addEventListener('mousemove', dragStartFrame)
+            return
+        }
+
+        // Deal with click on End Frame
+        if (xClicked >= xEndFrame - 2 && xClicked <= xEndFrame + 2){
+            overviewRef.current.addEventListener('mousemove', dragEndFrame)
+            return
+        }
+
+        // Deal with click inside viewport
+        if (xClicked > xStartFrame && xClicked < xEndFrame){
+            const xStartTime = calculateViewportFrameX(currentStartTime)
+            const xCurrentEndTime = calculateViewportFrameX(currentEndTime)
+            widthBetween_xStartTime_xClicked = xClicked - xStartTime
+            widthBetween_xEndTime_xClicked = xCurrentEndTime - xClicked
+            overviewRef.current.addEventListener('mousemove', dragViewport)
         }
     }
 
     const handleMouseUpOverview = (event) => {
+        if (event.button !== 0) {
+            return
+        }
+        overviewRef.current.removeEventListener('mousemove', dragStartFrame)
+        overviewRef.current.removeEventListener('mousemove', dragEndFrame)
+        overviewRef.current.removeEventListener('mousemove', dragViewport)
+
+        // Set new Viewport (Start & Endframe)
+        if (widthBetween_xStartTime_xClicked){
+            setCurrentStartTime(newViewportStartFrame)
+            setCurrentEndTime( newViewportEndFrame )
+            setClipDuration( newViewportEndFrame - newViewportStartFrame )
+        // Set new Start Frame
+        } else if (newViewportStartFrame){
+            setCurrentStartTime(newViewportStartFrame)
+            setClipDuration( currentEndTime - newViewportStartFrame )
+        // Set new End frame
+        } else if (newViewportEndFrame){
+            setCurrentEndTime( newViewportEndFrame )
+            setClipDuration( newViewportEndFrame - currentStartTime )
+        }
+
+        newViewportStartFrame = null
+        newViewportEndFrame = null
+        widthBetween_xStartTime_xClicked = null
+        widthBetween_xEndTime_xClicked = null
+    }
+
+    const dragStartFrame = (event) => {
         const xClicked = getXClicked(event)
+        newViewportStartFrame = calculateViewportTimestamp(xClicked)
+        drawViewport(newViewportStartFrame, currentEndTime, 'white')
     }
 
-    const handleMouseMoveOverview = () => {
-
+    const dragEndFrame = (event) => {
+        const xClicked = getXClicked(event)
+        newViewportEndFrame = calculateViewportTimestamp(xClicked)
+        drawViewport(currentStartTime, newViewportEndFrame, 'white')
     }
 
-    const calculateViewportFrame = (timestamp) => {
+    const dragViewport = (event) => {
+        const xClicked = getXClicked(event)
+        const viewportWidth = widthBetween_xStartTime_xClicked + widthBetween_xEndTime_xClicked
+        newViewportStartFrame = calculateViewportTimestamp(xClicked - widthBetween_xStartTime_xClicked)
+        newViewportEndFrame = calculateViewportTimestamp(xClicked + widthBetween_xEndTime_xClicked)
+        // Prevent Viewport Start Frame from going below 0
+        if (newViewportStartFrame < 0){
+            newViewportStartFrame = 0
+            newViewportEndFrame = calculateViewportTimestamp( viewportWidth )
+            return
+        }
+        // Prevent Viewport End Frame from going above the Audio Duration
+        if (newViewportEndFrame > audioDuration){
+            newViewportStartFrame = calculateViewportTimestamp(overviewRef.current.width - viewportWidth )
+            newViewportEndFrame = audioDuration
+            return
+        }
+        drawViewport(newViewportStartFrame, newViewportEndFrame, 'white')
+    }
+
+    const calculateViewportTimestamp = (xClicked) => {
+        return audioDuration * (xClicked / overviewRef.current.width)
+    }
+
+    const calculateViewportFrameX = (timestamp) => {
         return timestamp * overviewRef.current.width / audioDuration
     }
 
@@ -482,38 +569,78 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (overviewImgData.current){
             ctx.putImageData(overviewImgData.current, 0, 0);
         }
-        const x1 = calculateViewportFrame(startFrame)
-        const x2 = calculateViewportFrame(endFrame)
+        const x1 = calculateViewportFrameX(startFrame)
+        const x2 = calculateViewportFrameX(endFrame)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = hexColorCode
 
         // Draw start frame
         ctx.beginPath()
         ctx.moveTo(x1, 0)
-        ctx.lineTo(x1, overviewRef.current.height)
-        ctx.strokeStyle = hexColorCode
+        ctx.lineTo(x1, overviewCanvas.height)
         ctx.stroke()
 
         // Draw end frame
         ctx.beginPath()
         ctx.moveTo(x2, 0)
-        ctx.lineTo(x2, overviewRef.current.height)
-        ctx.lineWidth = 2
+        ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
 
         // Draw Top line
         ctx.beginPath()
         ctx.moveTo(x1, 0)
         ctx.lineTo(x2, 0)
-        ctx.lineWidth = 2
         ctx.stroke()
 
         // Draw Bottom line
         ctx.beginPath()
-        ctx.moveTo(x1, overviewRef.current.height)
-        ctx.lineTo(x2, overviewRef.current.height)
-        ctx.lineWidth = 2
+        ctx.moveTo(x1, overviewCanvas.height)
+        ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
     }
 
+
+    /* ++++++++++++++++++ Audio  ++++++++++++++++++ */
+    const onPlay = async () => {
+        const path1 = 'http://localhost:8050/get-audio-clip-wav'
+        const path2 = 'http://34.65.142.108:8050/get-audio-clip-wav'
+        const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-wav'
+        try {
+            const response = await axios.post(path1, {
+                audio_id: audioId,
+                start_time: currentStartTime,
+                clip_duration: clipDuration
+            });
+            //handleNewAudio(response.data.wav);
+            playAudio(response.data.wav)
+        } catch (error) {
+            console.error("Error fetching audio clip:", error);
+        }
+    };
+
+    const handleNewAudio = (newAudioBase64String) => {
+        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
+        setAudioSnippet(audio)
+    }
+
+    const playAudio = (audioFile) => {
+        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
+        audio.play()
+        drawPlayhead(5)
+    }
+
+    const drawPlayhead = (timeframe) => {
+        const canvas = canvasRef.current
+        const x = calculateXPosition(timeframe, canvas)
+        const ctx = canvas.getContext('2d');
+
+        ctx.beginPath()
+        ctx.moveTo(20, 0)
+        ctx.lineTo(30, canvas)
+        ctx.lineWidth = 20
+        ctx.strokeStyle = "white"
+        ctx.stroke()
+    }
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
 /*
@@ -528,7 +655,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 */
 
-    /* ++++++++++++++++++ UseEffects ++++++++++++++++++ */
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
     useEffect(() => {
@@ -540,7 +667,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
+                drawViewport(currentStartTime, currentEndTime, 'white')
                 passSpectrogramIsLoadingToApp(false)
             };
             image.src = `data:image/png;base64,${spectrogram}`;
@@ -559,7 +686,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             image.onload = () => {
                 overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
                 overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-                drawViewport(currentStartTime, currentStartTime + clipDuration, 'white')
+                drawViewport(currentStartTime, currentEndTime, 'white')
             };
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
         }
@@ -585,6 +712,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setAudioId(response.data.audio_id);
             setClipDuration(response.data.audio_duration);
             setCurrentStartTime(0);
+            setCurrentEndTime(response.data.audio_duration)
             setMaxScrollTime(0);
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])
@@ -606,12 +734,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             {spectrogram && (
                 <div>
                     <canvas
+                        id='overview-canvas'
                         ref={overviewRef}
                         width={parent.innerWidth -30}
                         height={100}
                         onMouseDown={handleLMBDownOverview}
                         onMouseUp={handleMouseUpOverview}
-                        onMouseMove={handleMouseMoveOverview}
+                        onContextMenu={(event) => event.preventDefault()}
                     />
                     <canvas
                         ref={canvasRef}
@@ -628,21 +757,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         width={parent.innerWidth -30}
                         height={40}
                     />
-                    <div id="controls-container">
+                    <div id='controls-container'>
                         <button
                             // onClick={onLeftScroll}
                             onMouseDown={startLeftScroll}
                             onMouseUp={stopScroll}
                             onMouseLeave={stopScroll}
                         >&larr; Left Scroll</button>
-                        <input
-                            type="range"
-                            min="0"
-                            max={maxScrollTime}
-                            value={currentStartTime}
-                            step={scrollStep}
-                            onChange={onScrollbarChange}
-                        />
                         <button
                             // onClick={onRightScroll}
                             onMouseDown={startRightScroll}
@@ -661,10 +782,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             -🔍
                         </button>
-                            <button
+                        <button
                             onClick={() => console.log(labels)}
                         >
                             Console log labels
+                        </button>
+                        <button
+                            onClick={onPlay}
+                        >
+                            Play Audio
                         </button>
                         <Export
                             audioFileName={audioFileName}

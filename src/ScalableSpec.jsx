@@ -56,11 +56,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
 
     const getAudioClipSpec = async (start_time, duration) => {
-        const path1 = 'http://localhost:8050/get-audio-clip-spec'
-        const path2 = 'http://34.65.142.108:8050/get-audio-clip-spec'
-        const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-spec'
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
         try {
-            const response = await axios.post(path3, {
+            const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: start_time,
                 clip_duration: duration
@@ -608,11 +606,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     /* ++++++++++++++++++ Audio  ++++++++++++++++++ */
     const onPlay = async () => {
-        const path1 = 'http://localhost:8050/get-audio-clip-wav'
-        const path2 = 'http://34.65.142.108:8050/get-audio-clip-wav'
-        const path3 = 'https://988d-34-65-142-108.ngrok-free.app/get-audio-clip-wav'
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
-            const response = await axios.post(path3, {
+            const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: currentStartTime,
                 clip_duration: clipDuration

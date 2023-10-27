@@ -606,6 +606,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     /* ++++++++++++++++++ Audio  ++++++++++++++++++ */
     const onPlay = async () => {
+        // if audioSnippet is already loaded, don't request the same snippet again, but directly play the old one
+        if (audioSnippet){
+            playAudio()
+            return
+        }
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
@@ -613,36 +618,66 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 start_time: currentStartTime,
                 clip_duration: clipDuration
             });
-            //handleNewAudio(response.data.wav);
-            playAudio(response.data.wav)
+            handleNewAudio(response.data.wav);
         } catch (error) {
             console.error("Error fetching audio clip:", error);
         }
     };
 
     const handleNewAudio = (newAudioBase64String) => {
-        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
+        const audio = new Audio(`data:audio/ogg;base64,${newAudioBase64String}`);
         setAudioSnippet(audio)
     }
 
-    const playAudio = (audioFile) => {
-        const audio = new Audio(`data:audio/ogg;base64,${audioFile}`);
-        audio.play()
-        drawPlayhead(5)
+    const playAudio = () => {
+        audioSnippet.play()
+
+        loop(audioSnippet)
+    }
+
+    function loop(audio){
+        if (audio.paused){
+            return
+        }
+
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imgData.current, 0, 0);
+        drawAllLabels()
+        drawPlayhead(playHeadRef.current.timeframe + audio.currentTime)
+
+        window.requestAnimationFrame(() => loop(audio) )
+    }
+
+    const pauseAudio = () => {
+        audioSnippet.pause()
+        updatePlayHead(playHeadRef.current.timeframe + audioSnippet.currentTime)
+        console.log(playHeadRef.current.timeframe)
+    }
+
+    const stopAudio = () => {
+
     }
 
     const drawPlayhead = (timeframe) => {
         const canvas = canvasRef.current
-        const x = calculateXPosition(timeframe, canvas)
         const ctx = canvas.getContext('2d');
+        const x = calculateXPosition(timeframe, canvas)
 
         ctx.beginPath()
-        ctx.moveTo(20, 0)
-        ctx.lineTo(30, canvas)
-        ctx.lineWidth = 20
-        ctx.strokeStyle = "white"
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, canvas.height)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "red"
         ctx.stroke()
     }
+
+    const updatePlayHead = (newTimeframe) => {
+        playHeadRef.current.timeframe = newTimeframe
+    }
+
+
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
 /*
@@ -700,6 +735,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             return
         }
             getAudioClipSpec(currentStartTime, clipDuration);
+            setAudioSnippet(null)
         },
         [currentStartTime, clipDuration]
     );
@@ -718,6 +754,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setMaxScrollTime(0);
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])
+            setAudioSnippet(null)
+            playHeadRef.current.timeframe = 0
         },
         [response]
     )
@@ -729,6 +767,16 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
         setLabels(importedLabels)
     }, [importedLabels])
+
+    // When a new Audio Snippet returns from the backend:
+    useEffect( () => {
+        if (!audioSnippet){
+            return
+        }
+        updatePlayHead(currentStartTime)
+        playAudio()
+
+    }, [audioSnippet])
 
 
     return (
@@ -793,6 +841,16 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             onClick={onPlay}
                         >
                             Play Audio
+                        </button>
+                        <button
+                            onClick={pauseAudio}
+                        >
+                            Pause Audio
+                        </button>
+                        <button
+                            onClick={stopAudio}
+                        >
+                            Stop Audio
                         </button>
                         <Export
                             audioFileName={audioFileName}

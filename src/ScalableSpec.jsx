@@ -12,7 +12,7 @@ class Label {
     }
 }
 
-class PlayHead{
+class Playhead{
     constructor(timeframe) {
         this.timeframe = timeframe
     }
@@ -51,7 +51,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
-    const playHeadRef = useRef(new PlayHead(0))
+    const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
 
 
@@ -207,7 +207,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
 
     const handleLMBDown = (event) => {
+        // Ignore clicks from other mouse buttons
         if (event.button !== 0){
+            return
+        }
+
+        // Don't proceed if audio is currently playing
+        if (audioSnippet && !audioSnippet.paused){
             return
         }
 
@@ -271,6 +277,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const handleRightClick = (event) => {
         event.preventDefault()
+
+        // Don't proceed if audio is currently playing
+        if (audioSnippet && !audioSnippet.paused){
+            return
+        }
+
         const xClicked = getXClicked(event)
 
         if ( !checkIfPositionIsOccupied(xClicked ) ){
@@ -302,7 +314,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.putImageData(imgData.current, 0, 0);
             drawAllLabels()
-            //drawPlayhead(audioFile.currentTime)
+            drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
         }
@@ -455,6 +467,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.putImageData(imgData.current, 0, 0);
         drawAllLabels()
+        drawPlayhead(playheadRef.current.timeframe)
     }
 
     const dragOffset = (event) => {
@@ -464,7 +477,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.putImageData(imgData.current, 0, 0);
         drawAllLabels()
-        //drawPlayhead(playHeadRef.current.timeframe)
+        drawPlayhead(playheadRef.current.timeframe)
     }
 
 
@@ -632,11 +645,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const playAudio = () => {
         audioSnippet.play()
 
-        loop(audioSnippet)
+        loop()
     }
 
-    function loop(audio){
-        if (audio.paused){
+    function loop(){
+        if (audioSnippet.paused){
             return
         }
 
@@ -645,19 +658,33 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.putImageData(imgData.current, 0, 0);
         drawAllLabels()
-        drawPlayhead(playHeadRef.current.timeframe + audio.currentTime)
+        drawPlayhead(currentStartTime + audioSnippet.currentTime)
 
-        window.requestAnimationFrame(() => loop(audio) )
+        window.requestAnimationFrame(() => loop() )
     }
 
     const pauseAudio = () => {
+        if (!audioSnippet){
+            return
+        }
         audioSnippet.pause()
-        updatePlayHead(playHeadRef.current.timeframe + audioSnippet.currentTime)
-        console.log(playHeadRef.current.timeframe)
+        updatePlayhead(currentStartTime + audioSnippet.currentTime)
     }
 
     const stopAudio = () => {
+        if (!audioSnippet){
+            return
+        }
 
+        audioSnippet.pause()
+        audioSnippet.currentTime = currentStartTime
+        updatePlayhead(currentStartTime)
+
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imgData.current, 0, 0);
+        drawAllLabels()
     }
 
     const drawPlayhead = (timeframe) => {
@@ -673,24 +700,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.stroke()
     }
 
-    const updatePlayHead = (newTimeframe) => {
-        playHeadRef.current.timeframe = newTimeframe
+    const updatePlayhead = (newTimeframe) => {
+        playheadRef.current.timeframe = newTimeframe
     }
-
-
 
     /* ++++++++++++++++++ Custom Hooks ++++++++++++++++++ */
-/*
-    const prevResponse = usePrevious(response)
 
-    function usePrevious(value){
-        const ref = useRef()
-        useEffect( () => {
-            ref.current = value
-        })
-        return ref.current
-    }
-*/
+
 
     /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
@@ -704,6 +720,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                 imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 drawAllLabels()
+                drawPlayhead(playheadRef.current.timeframe)
                 drawViewport(currentStartTime, currentEndTime, 'white')
                 passSpectrogramIsLoadingToApp(false)
             };
@@ -734,8 +751,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (!clipDuration){
             return
         }
-            getAudioClipSpec(currentStartTime, clipDuration);
+            stopAudio()
             setAudioSnippet(null)
+            getAudioClipSpec(currentStartTime, clipDuration);
         },
         [currentStartTime, clipDuration]
     );
@@ -755,7 +773,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])
             setAudioSnippet(null)
-            playHeadRef.current.timeframe = 0
+            playheadRef.current.timeframe = 0
         },
         [response]
     )
@@ -773,7 +791,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (!audioSnippet){
             return
         }
-        updatePlayHead(currentStartTime)
+        updatePlayhead(currentStartTime)
         playAudio()
 
     }, [audioSnippet])

@@ -98,13 +98,19 @@ html, body {
 
 #files-upload-container{
   display: flex;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
   margin: 30px;
 }
 
+#searchbar {
+}
+
 .form-file-upload {
-  height: 8rem;
-  width: 16rem;
+  align-self: center;
+  height: 6rem;
+  width: 12rem;
   margin: 10px;
   max-width: 100%;
   text-align: center;
@@ -149,3 +155,20 @@ html, body {
 }
 
 
+/* -------------------------- Spec Type Form -------------------------- */
+
+#spec-type-form{
+  color: #f6fffe;
+}
+
+#spec-type-label{
+  color: #f6fffe;
+}
+
+
+/* -------------------------- Waveform -------------------------- */
+
+#waveform-container{
+  height: 150px;
+  width: 100%
+}

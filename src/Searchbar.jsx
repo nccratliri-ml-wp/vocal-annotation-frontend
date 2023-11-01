@@ -75,7 +75,7 @@ function Searchbar (){
     }
 
     return (
-        <div style={{ width: 500}}>
+        <div id='searchbar' style={{ width: 500}}>
             <ReactSearchAutocomplete
                 items={items}
                 onSearch={handleOnSearch}

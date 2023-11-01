@@ -5,6 +5,7 @@ import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
+import SpecType from "./SpecType.jsx";
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -14,6 +15,7 @@ function App() {
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
+    const [specType, setSpecType] = useState('standard')
 
     function passAudioDOMObjectURLToApp(url){
         audioDOMObject.current.setAttribute('src', url)
@@ -43,10 +45,14 @@ function App() {
         setSpectrogramIsLoading( boolean )
     }
 
+    function passSpecTypeToApp( chosenSpecType){
+        setSpecType( chosenSpecType )
+    }
+
     return (
         <>
-            <Searchbar />
             <div id='files-upload-container'>
+                <Searchbar />
                 <AudioUpload
                     passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
                     passResponseToApp={passResponseToApp}
@@ -58,6 +64,10 @@ function App() {
                     passLabelsToApp={passLabelsToApp}
                     passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 />
+                <SpecType
+                    specType={specType}
+                    passSpecTypeToApp={passSpecTypeToApp}
+                />
             </div>
             <ScalableSpec
                 response={response}
@@ -66,6 +76,7 @@ function App() {
                 activeClustername={activeClustername}
                 spectrogramIsLoading={spectrogramIsLoading}
                 passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
+                specType={specType}
             />
             {/*
              <Visuals

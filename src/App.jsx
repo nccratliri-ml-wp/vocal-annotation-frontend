@@ -15,7 +15,7 @@ function App() {
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
-    const [specType, setSpecType] = useState('standard')
+    const [specType, setSpecType] = useState('log-mel')
 
     function passAudioDOMObjectURLToApp(url){
         audioDOMObject.current.setAttribute('src', url)

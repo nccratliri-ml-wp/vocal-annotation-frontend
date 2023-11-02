@@ -19,7 +19,7 @@ function SpecType( {specType, passSpecTypeToApp} ) {
                 value={specType}
                 onChange={handleChange}
             >
-                <FormControlLabel value="standard" control={<Radio />} label="Standard" />
+                <FormControlLabel value="log-mel" control={<Radio />} label="Log-mel" />
                 <FormControlLabel value="constant-q" control={<Radio />} label="Constant Q" />
             </RadioGroup>
         </FormControl>

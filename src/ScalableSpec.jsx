@@ -21,9 +21,12 @@ class Playhead{
 
 // debug async label issue
 // + constant q drop down menu
-// waveform
+// + waveform
 // + overview timestamp on the viewport lines
 // + compress layout
+// foldable elements
+// on change of spec type reload spectrogram
+
 
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType }) {
     const [spectrogram, setSpectrogram] = useState(null);
@@ -68,7 +71,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 audio_id: audioId,
                 start_time: startTime,
                 clip_duration: duration,
-                //spec_type: spectrogramType  //either 'standard' or 'constant-q'
+                spec_cal_method: spectrogramType  //either 'log-mel' or 'constant-q'
             });
             setSpectrogram(response.data.spec);
             if (newFileUploaded.current){
@@ -196,7 +199,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     };
 
     const startLeftScroll = () => {
-        const interval = setInterval(onLeftScroll, 100);
+        const interval = setInterval(onLeftScroll, 200);
         console.log(interval)
         setScrollInterval(interval);
     };
@@ -874,10 +877,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         <div>
             {spectrogram && (
                 <div>
-                    <div
-                        id='waveform-container'
-                        ref={waveformContainerRef}>
-                    </div>
+
                     <canvas
                         id='overview-canvas'
                         ref={overviewRef}
@@ -888,6 +888,10 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         onContextMenu={(event) => event.preventDefault()}
                         onMouseMove={handleMouseMoveOverview}
                     />
+                    <div
+                        id='waveform-container'
+                        ref={waveformContainerRef}>
+                    </div>
                     <canvas
                         ref={canvasRef}
                         width={parent.innerWidth -30}

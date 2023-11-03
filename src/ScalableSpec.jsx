@@ -195,13 +195,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     };
 
     const startLeftScroll = () => {
-        const interval = setInterval(onLeftScroll, 200);
-        console.log(interval)
+        const interval = setInterval(onLeftScroll, 100);
         setScrollInterval(interval);
     };
 
     const startRightScroll = () => {
-        console.log('right scroll')
         const interval = setInterval(onRightScroll, 100);
         setScrollInterval(interval);
     };
@@ -427,6 +425,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const drawAllLabels = () => {
+        console.log('drawing all labels')
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
             drawLine(label.offset, "#00FF00")
@@ -766,29 +765,34 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     // When a new spectrogram is returned from the backend
     useEffect(() => {
-        if (!spectrogram) {
-            return
-        }
+        if (!spectrogram) return
+
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const image = new Image();
         image.addEventListener('load', () => {
+            console.log('drawing spec')
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
             drawAllLabels()
+            //drawPlayhead(playheadRef.current.timeframe)
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
             passSpectrogramIsLoadingToApp(false)
-
         })
         image.src = `data:image/png;base64,${spectrogram}`;
         renderTimeAxis();
 
     }, [spectrogram, labels]);
 
+    // When a label is added, deleted, or changed
+    useEffect( () => {
+
+    }, [labels])
+
     // When the first spec is returned from the backend (equals to Overview Spec)
     useEffect( () => {
-        getAudio()
-        if (overviewSpectrogram){
+        if (!overviewSpectrogram) return
+            getAudio()
             const overviewCanvas = overviewRef.current
             const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true });
             const image = new Image();
@@ -798,26 +802,27 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 drawViewport(currentStartTime, currentEndTime, 'white', 2)
             });
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
-        }
+
     }, [overviewSpectrogram])
 
     // When user zoomed in/out or scrolled:
     useEffect( () => {
-        if (!clipDuration){
-            return
-        }
-            stopAudio()
+            if (!clipDuration) return
+
+            if (audioSnippet) {
+                audioSnippet.pause()
+                audioSnippet.currentTime = currentStartTime
+            }
+
             getAudio()
             getAudioClipSpec(currentStartTime, clipDuration, specType);
-        },
-        [currentStartTime, clipDuration]
+        }, [currentStartTime, clipDuration]
     );
 
     // When a new file is uploaded:
     useEffect( () => {
-            if (!response){
-                return
-            }
+            if (!response) return
+
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration);
             setAudioId(response.data.audio_id);
@@ -828,33 +833,22 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])
             playheadRef.current.timeframe = 0
-        },
-        [response]
-    )
+        }, [response])
 
     // When a new CSV File was uploaded:
     useEffect( () => {
-        if (!importedLabels){
-            return
-        }
+        if (!importedLabels) return
         setLabels(importedLabels)
     }, [importedLabels])
 
 
     // Draw Waveform
     useEffect(() => {
-        if(!waveformContainerRef.current) {
-            return
-        }
-        console.log('running waveform use effect')
+        if (!waveformContainerRef.current) return
 
-        if(!audioSnippet){
-            return
-        }
+        if (!audioSnippet) return
 
-        if (waveform){
-            waveform.destroy()
-        }
+        if (waveform) waveform.destroy()
 
         const newWaveform = WaveSurfer.create({
             container: waveformContainerRef.current,
@@ -863,7 +857,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             interact: false
         })
         setWaveform( newWaveform )
-
     }, [audioSnippet])
 
 

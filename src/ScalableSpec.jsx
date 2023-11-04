@@ -425,7 +425,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const drawAllLabels = () => {
-        console.log('drawing all labels')
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
             drawLine(label.offset, "#00FF00")
@@ -771,7 +770,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const image = new Image();
         image.addEventListener('load', () => {
-            console.log('drawing spec')
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
             drawAllLabels()
@@ -805,7 +803,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     }, [overviewSpectrogram])
 
-    // When user zoomed in/out or scrolled:
+    // When user zoomed in/out, scrolled
     useEffect( () => {
             if (!clipDuration) return
 
@@ -817,6 +815,19 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             getAudio()
             getAudioClipSpec(currentStartTime, clipDuration, specType);
         }, [currentStartTime, clipDuration]
+    );
+
+    // When user changed spectrogram type
+    useEffect( () => {
+            if (!clipDuration) return
+
+            if (audioSnippet) {
+                audioSnippet.pause()
+                audioSnippet.currentTime = currentStartTime
+            }
+
+            getAudioClipSpec(currentStartTime, clipDuration, specType);
+        }, [specType]
     );
 
     // When a new file is uploaded:

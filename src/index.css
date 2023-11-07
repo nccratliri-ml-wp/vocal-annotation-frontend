@@ -173,3 +173,14 @@ html, body {
   height: 150px;
   width: 100%
 }
+
+
+
+#background-img{
+  border-top: 3px solid yellow;
+  border-bottom: 3px solid yellow;
+  background: url('') no-repeat;
+  height: 100px;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}

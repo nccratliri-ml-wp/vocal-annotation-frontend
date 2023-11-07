@@ -21,9 +21,10 @@ class Playhead{
 
 // debug async label issue
 // foldable elements
-// on change of spec type reload spectrogram
+// + on change of spec type reload spectrogram
 // compress audio
-
+let drawLabelsCount = 0
+let apiCallCount = 0
 
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType }) {
     const [spectrogram, setSpectrogram] = useState(null);
@@ -56,9 +57,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const [audioSnippet, setAudioSnippet] = useState(null)
 
     //const image = new Image();
+    const backgroundImageRef = useRef(null)
 
     const [waveform, setWaveform] = useState(null)
     const waveformContainerRef = useRef(null)
+
+    const [rightScrollActive, setRightScrollActive] = useState(false)
+
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
@@ -195,13 +200,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     };
 
     const startLeftScroll = () => {
-        const interval = setInterval(onLeftScroll, 200);
-        console.log(interval)
+        const interval = setInterval(onLeftScroll, 100);
         setScrollInterval(interval);
     };
 
     const startRightScroll = () => {
-        console.log('right scroll')
         const interval = setInterval(onRightScroll, 100);
         setScrollInterval(interval);
     };
@@ -427,6 +430,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const drawAllLabels = () => {
+        console.log('drew all labels')
         for (let label of labels) {
             drawLine(label.onset, "#00FF00")
             drawLine(label.offset, "#00FF00")
@@ -734,61 +738,94 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         playheadRef.current.timeframe = newTimeframe
     }
 
-    /* ++++++++++++++++++ Waveform ++++++++++++++++++ */
+    /* ++++++++++++++++++ New Right Scroll ++++++++++++++++++ */
 
-
-    /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
-
-    /*
-    const handleImageLoaded = async (image) => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        drawViewport(currentStartTime, currentEndTime, 'white', 2)
-        passSpectrogramIsLoadingToApp(false)
+    const activateRightScroll = () => {
+        setCurrentStartTime( prevStartTime => prevStartTime + 0.5 )
     }
 
-    // When a new spectrogram is returned from the backend
+    const deactivateRightScroll = () => {
+        console.log('deactivated right scroll')
+        setRightScrollActive(false)
+
+    }
+
+    const newRightScroll = () => {
+
+        if (!rightScrollActive) return
+
+        scrollLoop()
+    }
+
+    const scrollLoop = () => {
+        console.log(rightScrollActive)
+
+        window.requestAnimationFrame(() => scrollLoop() )
+    }
+
+
+
+
+/*
+    function populateSpectrogramCanvas(){
+        console.log('populating')
+        backgroundImageRef.current.style.backgroundImage = `url(data:image/png;base64,${spectrogram})`
+    }
+
     useEffect(() => {
-        if (!spectrogram) {
-            return
-        }
+        if (!spectrogram) return
 
-        const image = new Image();
-        image.addEventListener('load', () => handleImageLoaded(image).then(drawAllLabels))
-        image.src = `data:image/png;base64,${spectrogram}`;
-
-        renderTimeAxis();
-    }, [spectrogram, labels]);
-    */
-
-
-    // When a new spectrogram is returned from the backend
-    useEffect(() => {
-        if (!spectrogram) {
-            return
-        }
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d', { willReadFrequently: false });
         const image = new Image();
         image.addEventListener('load', () => {
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
             drawAllLabels()
+            //drawPlayhead(playheadRef.current.timeframe)
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
             passSpectrogramIsLoadingToApp(false)
+        })
+        //image.src = `data:image/png;base64,${spectrogram}`;
+        renderTimeAxis();
 
+        populateSpectrogramCanvas(spectrogram)
+        drawAllLabels()
+        //drawPlayhead(playheadRef.current.timeframe)
+        drawViewport(currentStartTime, currentEndTime, 'white', 2)
+        passSpectrogramIsLoadingToApp(false)
+
+    }, [spectrogram, labels]);
+*/
+
+
+    /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
+
+    // When a new spectrogram is returned from the backend
+    useEffect(() => {
+        if (!spectrogram) return
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d', { willReadFrequently: false });
+        const image = new Image();
+        image.addEventListener('load', () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            drawAllLabels()
+            //drawPlayhead(playheadRef.current.timeframe)
+            drawViewport(currentStartTime, currentEndTime, 'white', 2)
+            passSpectrogramIsLoadingToApp(false)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
         renderTimeAxis();
 
     }, [spectrogram, labels]);
 
+
     // When the first spec is returned from the backend (equals to Overview Spec)
     useEffect( () => {
-        getAudio()
-        if (overviewSpectrogram){
+        if (!overviewSpectrogram) return
+            getAudio()
             const overviewCanvas = overviewRef.current
             const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true });
             const image = new Image();
@@ -798,26 +835,40 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 drawViewport(currentStartTime, currentEndTime, 'white', 2)
             });
             image.src = `data:image/png;base64,${overviewSpectrogram}`;
-        }
+
     }, [overviewSpectrogram])
 
-    // When user zoomed in/out or scrolled:
+    // When user zoomed in/out, scrolled
     useEffect( () => {
-        if (!clipDuration){
-            return
-        }
-            stopAudio()
+            if (!clipDuration) return
+
+            if (audioSnippet) {
+                audioSnippet.pause()
+                audioSnippet.currentTime = currentStartTime
+            }
+
             getAudio()
             getAudioClipSpec(currentStartTime, clipDuration, specType);
-        },
-        [currentStartTime, clipDuration]
+        }, [currentStartTime, clipDuration]
+    );
+
+    // When user changed spectrogram type
+    useEffect( () => {
+            if (!clipDuration) return
+
+            if (audioSnippet) {
+                audioSnippet.pause()
+                audioSnippet.currentTime = currentStartTime
+            }
+
+            getAudioClipSpec(currentStartTime, clipDuration, specType);
+        }, [specType]
     );
 
     // When a new file is uploaded:
     useEffect( () => {
-            if (!response){
-                return
-            }
+            if (!response) return
+
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration);
             setAudioId(response.data.audio_id);
@@ -828,33 +879,22 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setScrollStep(response.data.audio_duration*0.05);
             setLabels([])
             playheadRef.current.timeframe = 0
-        },
-        [response]
-    )
+        }, [response])
 
     // When a new CSV File was uploaded:
     useEffect( () => {
-        if (!importedLabels){
-            return
-        }
+        if (!importedLabels) return
         setLabels(importedLabels)
     }, [importedLabels])
 
 
     // Draw Waveform
     useEffect(() => {
-        if(!waveformContainerRef.current) {
-            return
-        }
-        console.log('running waveform use effect')
+        if (!waveformContainerRef.current) return
 
-        if(!audioSnippet){
-            return
-        }
+        if (!audioSnippet) return
 
-        if (waveform){
-            waveform.destroy()
-        }
+        if (waveform) waveform.destroy()
 
         const newWaveform = WaveSurfer.create({
             container: waveformContainerRef.current,
@@ -863,8 +903,18 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             interact: false
         })
         setWaveform( newWaveform )
-
     }, [audioSnippet])
+
+/*
+    // When scroll gets activated
+    useEffect( () => {
+        if (!rightScrollActive) {
+            return
+        }
+
+        newRightScroll()
+    }, [rightScrollActive])
+*/
 
 
     return (
@@ -886,6 +936,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         id='waveform-container'
                         ref={waveformContainerRef}>
                     </div>
+                    {/*<div id='background-img' ref={backgroundImageRef}>
+                    </div> */}
                     <canvas
                         ref={canvasRef}
                         width={parent.innerWidth -30}
@@ -952,6 +1004,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             audioFileName={audioFileName}
                             labels={labels}
                         />
+                        {/*
+                        <button
+                            onMouseDown={activateRightScroll}
+                        >
+                            New Right Scroll
+                        </button>
+                        */}
                     </div>
                 </div>
             )}

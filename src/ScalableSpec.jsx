@@ -55,13 +55,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
 
-    //const image = new Image();
-    const backgroundImageRef = useRef(null)
-
     const [waveform, setWaveform] = useState(null)
     const waveformContainerRef = useRef(null)
-
-    const [rightScrollActive, setRightScrollActive] = useState(false)
 
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
@@ -774,7 +769,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const image = new Image();
 
         image.addEventListener('load', () => {
-            const start = Date.now();
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
             drawAllLabels()
@@ -782,8 +776,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             renderTimeAxis();
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
             passSpectrogramIsLoadingToApp(false)
-            const end = Date.now();
-            console.log(`Execution time: ${end - start} ms`);
         })
 
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -793,6 +785,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
      */
 
     // When the first spec is returned from the backend (equals to Overview Spec)
+
     useEffect( () => {
         if (!overviewSpectrogram) return
             getAudioClipSpec(currentStartTime, currentEndTime, specType)
@@ -859,6 +852,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setLabels(importedLabels)
     }, [importedLabels])
 
+    /*
     // Draw Waveform
     useEffect(() => {
         if (!waveformContainerRef.current) return
@@ -875,17 +869,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         })
         setWaveform( newWaveform )
     }, [audioSnippet])
-
-/*
-    // When scroll gets activated
-    useEffect( () => {
-        if (!rightScrollActive) {
-            return
-        }
-
-        newRightScroll()
-    }, [rightScrollActive])
 */
+
 
 
     return (

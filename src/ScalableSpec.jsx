@@ -57,8 +57,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
 
-    //const [waveform, setWaveform] = useState(null)
-    //const waveformContainerRef = useRef(null)
+    const [waveform, setWaveform] = useState(null)
+    const waveformContainerRef = useRef(null)
+
+    const waveformCanvasRef = useRef(null)
+    const [audioArray, setAudioArray] = useState(null)
 
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
@@ -71,7 +74,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 spec_cal_method: spectrogramType
             });
             drawStuff(response.data.spec)
-            console.log(clipDuration)
             setSpectrogram(response.data.spec);
             if (newFileUploaded.current){
                 setOverviewSpectrogram(response.data.spec)
@@ -736,6 +738,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         playheadRef.current.timeframe = newTimeframe
     }
 
+
     /* ++++++++++++++++++ Audio Waveform ++++++++++++++++++ */
 
     const getAudioArray = async () => {
@@ -744,9 +747,10 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: currentStartTime,
-                clip_duration: clipDuration
+                clip_duration: clipDuration,
+                target_length: 100000
             });
-            //console.log(response.data.wav_array)
+            setAudioArray(response.data.wav_array)
         } catch (error) {
             console.error("Error fetching audio clip:", error);
         }
@@ -768,7 +772,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             renderTimeAxis();
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
             passSpectrogramIsLoadingToApp(false)
-
         })
 
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -779,18 +782,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
-
     useEffect(() => {
         if (!spectrogram) return
         drawStuff(spectrogram)
     }, [labels]);
 
     // When the first spec is returned from the backend (equals to Overview Spec)
-
     useEffect( () => {
         if (!overviewSpectrogram) return
             getAudioClipSpec(currentStartTime, currentEndTime, specType)
             getAudio()
+            getAudioArray()
             const overviewCanvas = overviewRef.current
             const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
             const image = new Image();
@@ -814,7 +816,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
             //getAudio()
             getAudioClipSpec(currentStartTime, clipDuration, specType);
-            //getAudioArray()
+            getAudioArray()
         }, [currentStartTime, clipDuration]
     );
 
@@ -854,7 +856,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setLabels(importedLabels)
     }, [importedLabels])
 
-    /*
+/*
     // Draw Waveform
     useEffect(() => {
         if (!waveformContainerRef.current) return
@@ -873,6 +875,31 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }, [audioSnippet])
 */
 
+    // Draw Waveform
+    useEffect( () => {
+        if (!waveformCanvasRef.current) return
+
+        const canvas = waveformCanvasRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
+        canvas.width = window.innerWidth -30;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const scale = 50;
+        const centerY = canvas.height / 2;
+        ctx.strokeStyle = '#ddd8ff';
+
+        for (let i = 0; i < audioArray.length; i++) {
+            const datapoint = audioArray[i];
+            const y = centerY + scale * Math.sin(datapoint);
+
+            ctx.beginPath();
+            ctx.moveTo(i * (canvas.width / audioArray.length), y);
+            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * Math.sin(audioArray[i + 1]));
+            ctx.stroke();
+        }
+    }, [audioArray])
+
 
 
     return (
@@ -889,13 +916,16 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         onContextMenu={(event) => event.preventDefault()}
                         onMouseMove={handleMouseMoveOverview}
                     />
-                    {/*
-                    <div
+                    {/*<div
                         id='waveform-container'
                         ref={waveformContainerRef}>
-                    </div>
-                    */}
-
+                    </div>*/}
+                    <canvas
+                        id='waveform-canvas'
+                        ref={waveformCanvasRef}>
+                        width={parent.innerWidth -30}
+                        height={100}
+                    </canvas>
                     <canvas
                         ref={canvasRef}
                         width={parent.innerWidth -30}
@@ -905,7 +935,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         onContextMenu={handleRightClick}
                         onMouseMove={handleMouseMove}
                     />
-
                     <canvas
                         ref={timeAxisRef}
                         width={parent.innerWidth -30}

@@ -20,14 +20,14 @@ class Playhead{
 }
 
 // debug async label issue
-// viewport timestamp immediate update
-// plot waveform with array of floats
-// key value pairs as paremeters
+// +viewport timestamp immediate update
+// +plot waveform with array of floats
+// +key value pairs as paremeters
 // foldable elements
 // show green dot at the bottom of the overview spec for every label
 
 
-function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType }) {
+function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, parameters }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -66,13 +66,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
+        const requestParameters = {
+            ...parameters,
+            audio_id: audioId,
+            start_time: startTime,
+            clip_duration: duration,
+            //spec_cal_method: spectrogramType
+        }
         try {
-            const response = await axios.post(path, {
-                audio_id: audioId,
-                start_time: startTime,
-                clip_duration: duration,
-                spec_cal_method: spectrogramType
-            });
+            const response = await axios.post(path, requestParameters);
             drawStuff(response.data.spec)
             setSpectrogram(response.data.spec);
             if (newFileUploaded.current){
@@ -635,7 +637,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         // Draw Viewport Timestamps
         ctx.font = `15px Arial`;
         ctx.fillStyle = hexColorCode
-        const timestampText = (Math.round(currentStartTime * 100) / 100).toString()
+        const timestampText = (Math.round(startFrame * 100) / 100).toString()
         ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
     }
 
@@ -678,8 +680,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const playAudio = () => {
-        audioSnippet.play()
-        loop()
+        getAudio()
     }
 
     function loop(){
@@ -791,7 +792,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     useEffect( () => {
         if (!overviewSpectrogram) return
             getAudioClipSpec(currentStartTime, currentEndTime, specType)
-            getAudio()
+            //getAudio()
             getAudioArray()
             const overviewCanvas = overviewRef.current
             const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
@@ -814,7 +815,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 audioSnippet.currentTime = currentStartTime
             }
 
-            //getAudio()
             getAudioClipSpec(currentStartTime, clipDuration, specType);
             getAudioArray()
         }, [currentStartTime, clipDuration]
@@ -830,7 +830,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             }
 
             getAudioClipSpec(currentStartTime, clipDuration, specType);
-        }, [specType]
+        }, [specType, parameters]
     );
 
     // When a new file is uploaded:
@@ -880,27 +880,36 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (!waveformCanvasRef.current) return
 
         const canvas = waveformCanvasRef.current
-        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
+        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
         canvas.width = window.innerWidth -30;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
 
         const scale = 50;
-        const centerY = canvas.height / 2;
-        ctx.strokeStyle = '#ddd8ff';
+        const centerY = canvas.height / 2
+        ctx.strokeStyle = '#ddd8ff'
 
         for (let i = 0; i < audioArray.length; i++) {
-            const datapoint = audioArray[i];
-            const y = centerY + scale * Math.sin(datapoint);
+            const datapoint = audioArray[i]
+            const y = centerY + scale * Math.sin(datapoint)
 
-            ctx.beginPath();
-            ctx.moveTo(i * (canvas.width / audioArray.length), y);
-            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * Math.sin(audioArray[i + 1]));
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.moveTo(i * (canvas.width / audioArray.length), y)
+            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * Math.sin(audioArray[i + 1]))
+            ctx.stroke()
         }
     }, [audioArray])
 
+    useEffect(() => {
+        console.log(parameters);
+    }, [parameters]);
 
+    useEffect( () => {
+        if (!audioSnippet) return
+
+        audioSnippet.play()
+        loop()
+    }, [audioSnippet])
 
     return (
         <div>

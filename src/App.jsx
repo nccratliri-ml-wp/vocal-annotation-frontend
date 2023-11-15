@@ -1,4 +1,4 @@
-import {useState, useRef} from 'react'
+import {useState, useRef, useEffect} from 'react'
 import Visuals from "./Visuals.jsx"
 import Clusternames from "./Clusternames.jsx"
 import AudioUpload from "./AudioUpload.jsx"
@@ -6,6 +6,7 @@ import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
 import SpecType from "./SpecType.jsx";
+import Parameters from "./Parameters.jsx";
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -16,6 +17,7 @@ function App() {
     const [activeClustername, setActiveClustername] = useState()
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [specType, setSpecType] = useState('log-mel')
+    const [parameters, setParameters] = useState({})
 
     function passAudioDOMObjectURLToApp(url){
         audioDOMObject.current.setAttribute('src', url)
@@ -45,8 +47,12 @@ function App() {
         setSpectrogramIsLoading( boolean )
     }
 
-    function passSpecTypeToApp( chosenSpecType){
+    function passSpecTypeToApp(chosenSpecType){
         setSpecType( chosenSpecType )
+    }
+
+    function passParametersToApp (newParametersObject){
+        setParameters( newParametersObject )
     }
 
     return (
@@ -68,6 +74,10 @@ function App() {
                     specType={specType}
                     passSpecTypeToApp={passSpecTypeToApp}
                 />
+                <Parameters
+                    parameters={parameters}
+                    passParametersToApp={passParametersToApp}
+                />
             </div>
             <ScalableSpec
                 response={response}
@@ -77,6 +87,7 @@ function App() {
                 spectrogramIsLoading={spectrogramIsLoading}
                 passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
                 specType={specType}
+                parameters={parameters}
             />
             {/*
              <Visuals

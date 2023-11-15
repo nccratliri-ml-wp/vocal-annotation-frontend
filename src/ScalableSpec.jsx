@@ -71,7 +71,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             audio_id: audioId,
             start_time: startTime,
             clip_duration: duration,
-            //spec_cal_method: spectrogramType
+            spec_cal_method: spectrogramType
         }
         try {
             const response = await axios.post(path, requestParameters);
@@ -875,7 +875,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }, [audioSnippet])
 */
 
-    // Draw Waveform
+    // When a new audio array is returned from the backend
     useEffect( () => {
         if (!waveformCanvasRef.current) return
 
@@ -895,15 +895,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
             ctx.beginPath()
             ctx.moveTo(i * (canvas.width / audioArray.length), y)
-            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * Math.sin(audioArray[i + 1]))
+            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * audioArray[i + 1])
             ctx.stroke()
         }
     }, [audioArray])
 
-    useEffect(() => {
-        console.log(parameters);
-    }, [parameters]);
-
+    // When a new audio snippet is returned from the backend
     useEffect( () => {
         if (!audioSnippet) return
 

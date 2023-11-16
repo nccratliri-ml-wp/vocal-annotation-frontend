@@ -43,7 +43,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const [currentEndTime, setCurrentEndTime] = useState(0);
     const [maxScrollTime, setMaxScrollTime] = useState(0);
     const [scrollStep, setScrollStep] = useState(0);
-    const [scrollInterval, setScrollInterval] = useState(null);
     const canvasRef = useRef(null);
     const timeAxisRef = useRef(null);
 
@@ -68,6 +67,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const [audioArray, setAudioArray] = useState(null)
 
 
+    /* ++++++++++++++++++ Spectrogram fetching methods ++++++++++++++++++ */
+
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
         const requestParameters = {
@@ -79,7 +80,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
         try {
             const response = await axios.post(path, requestParameters);
-            drawStuff(response.data.spec)
+            drawEditorCanvases(response.data.spec)
             setSpectrogram(response.data.spec);
             if (newFileUploaded.current){
                 setOverviewSpectrogram(response.data.spec)
@@ -90,82 +91,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
     };
 
-    const renderTimeAxis = () => {
-        const canvas = timeAxisRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
 
-        // Drawing horizontal timeline
-        ctx.beginPath()
-        ctx.moveTo(0, canvas.height - 1)
-        ctx.lineTo(canvas.width, canvas.height - 1)
-        ctx.stroke()
-
-        // Drawing first timestamp
-        ctx.beginPath()
-        ctx.moveTo(1, canvas.height)
-        ctx.lineTo(1, 0)
-        ctx.stroke()
-
-        // Drawing last timestamp
-        ctx.beginPath()
-        ctx.moveTo(canvas.width - 1, canvas.height)
-        ctx.lineTo(canvas.width - 1, 0)
-        ctx.stroke()
-
-        // Drawing timestamps in between
-        const withText = clipDuration < audioDuration
-
-        let step = Math.floor(audioDuration / 10 / 10) * 10
-        if (step < 1){
-            step = 1
-        }
-
-        // Draw 1st level
-        for (let i=step; i < audioDuration; i+=step){
-            drawTimestamp(i, 15, '.00', 14,true, false)
-        }
-
-        step = step * 0.1
-        // Draw 2nd level
-        // TO DO: figure out why this breaks at 4.5
-        for (let i=step; i < audioDuration; i+=step){
-            drawTimestamp(i, 30, '', 10,withText, true)
-        }
-
-        // Draw 3rd level
-
-    }
-
-    const drawTimestamp = (timestamp, lineHeight, ending, fontSize, withText, withFloor) => {
-        const canvas = timeAxisRef.current;
-        const ctx = timeAxisRef.current.getContext('2d');
-        const x = (timestamp * canvas.width / clipDuration) - ( currentStartTime * canvas.width / clipDuration )
-
-        // Draw line under Timestamp text
-        ctx.beginPath()
-        ctx.moveTo(x, canvas.height)
-        ctx.lineTo(x, lineHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
-        // Draw timestamp text
-        ctx.font = `${fontSize}px Arial`;
-        ctx.fillStyle = '#9db4c0'
-
-        if (withFloor){
-            timestamp = Math.floor(timestamp * 100) / 100
-        }
-
-        const timestampText = timestamp.toString() + ending
-        const textWidth = ctx.measureText(timestampText).width;
-
-        if (withText) {
-            ctx.fillText(timestamp.toString() + ending, x - textWidth / 2, lineHeight-5);
-        }
-    }
+    /* ++++++++++++++++++ Zoom & Scroll methods ++++++++++++++++++ */
 
     const onZoomIn = () => {
         const newDuration = Math.max(clipDuration / 2, 0.1);
@@ -187,7 +114,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setCurrentEndTime( newStartTime + newDuration );
     };
 
-    const onLeftScroll = () => {
+    const leftScroll = () => {
         setCurrentStartTime(
             prevStartTime => Math.max(prevStartTime - scrollStep, 0)
         );
@@ -196,28 +123,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         );
     };
 
-    const onRightScroll = () => {
+    const rightScroll = () => {
         setCurrentStartTime(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
         );
         setCurrentEndTime(
             prevEndTime => Math.min(prevEndTime + scrollStep, audioDuration)
         );
-    };
-
-    const startLeftScroll = () => {
-        const interval = setInterval(onLeftScroll, 100);
-        setScrollInterval(interval);
-    };
-
-    const startRightScroll = () => {
-        const interval = setInterval(onRightScroll, 100);
-        setScrollInterval(interval);
-    };
-
-    const stopScroll = () => {
-        clearInterval(scrollInterval);
-        setScrollInterval(null);
     };
 
 
@@ -396,6 +308,115 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
+
+    const drawEditorCanvases = (spectrogram) => {
+        if (!canvasRef.current) return
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
+        const image = new Image();
+
+        // Draw Spectrogram and labels
+        image.addEventListener('load', () => {
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            drawAllLabels()
+            //drawPlayhead(playheadRef.current.timeframe)
+            passSpectrogramIsLoadingToApp(false)
+        })
+        image.src = `data:image/png;base64,${spectrogram}`;
+
+        // Draw Time Axis and Viewport
+        drawTimeAxis()
+        drawViewport(currentStartTime, currentEndTime, 'white', 2)
+    }
+
+    const drawOverviewSpectrogram = () =>{
+        const overviewCanvas = overviewRef.current
+        const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
+        const image = new Image();
+        image.addEventListener('load',  () => {
+            overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
+            overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
+        });
+        image.src = `data:image/png;base64,${overviewSpectrogram}`;
+    }
+
+    const drawTimeAxis = () => {
+        const canvas = timeAxisRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+
+        // Drawing horizontal timeline
+        ctx.beginPath()
+        ctx.moveTo(0, canvas.height - 1)
+        ctx.lineTo(canvas.width, canvas.height - 1)
+        ctx.stroke()
+
+        // Drawing first timestamp
+        ctx.beginPath()
+        ctx.moveTo(1, canvas.height)
+        ctx.lineTo(1, 0)
+        ctx.stroke()
+
+        // Drawing last timestamp
+        ctx.beginPath()
+        ctx.moveTo(canvas.width - 1, canvas.height)
+        ctx.lineTo(canvas.width - 1, 0)
+        ctx.stroke()
+
+        // Drawing timestamps in between
+        const withText = clipDuration < audioDuration
+
+        let step = Math.floor(audioDuration / 10 / 10) * 10
+        if (step < 1){
+            step = 1
+        }
+
+        // Draw 1st level
+        for (let i=step; i < audioDuration; i+=step){
+            drawTimestamp(i, 15, '.00', 14,true, false)
+        }
+
+        step = step * 0.1
+        // Draw 2nd level
+        // TO DO: figure out why this breaks at 4.5
+        for (let i=step; i < audioDuration; i+=step){
+            drawTimestamp(i, 30, '', 10,withText, true)
+        }
+
+        // Draw 3rd level
+    }
+
+    const drawTimestamp = (timestamp, lineHeight, ending, fontSize, withText, withFloor) => {
+        const canvas = timeAxisRef.current;
+        const ctx = timeAxisRef.current.getContext('2d');
+        const x = (timestamp * canvas.width / clipDuration) - ( currentStartTime * canvas.width / clipDuration )
+
+        // Draw line under Timestamp text
+        ctx.beginPath()
+        ctx.moveTo(x, canvas.height)
+        ctx.lineTo(x, lineHeight)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#9db4c0'
+        ctx.stroke()
+        // Draw timestamp text
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillStyle = '#9db4c0'
+
+        if (withFloor){
+            timestamp = Math.floor(timestamp * 100) / 100
+        }
+
+        const timestampText = timestamp.toString() + ending
+        const textWidth = ctx.measureText(timestampText).width;
+
+        if (withText) {
+            ctx.fillText(timestamp.toString() + ending, x - textWidth / 2, lineHeight-5);
+        }
+    }
 
     const drawLine = (timestamp, hexColorCode) => {
         const x = calculateXPosition(timestamp, canvasRef.current)
@@ -662,7 +683,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }
     }
 
-    /* ++++++++++++++++++ Audio ++++++++++++++++++ */
+    /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
     const getAudio = async () => {
         setAudioSnippet(null)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
@@ -684,13 +705,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const playAudio = () => {
-
+        audioSnippet.play()
+        loop()
     }
 
     function loop(){
-        if (audioSnippet.paused){
-            return
-        }
+        if (audioSnippet.paused) return
 
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d');
@@ -703,17 +723,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const pauseAudio = () => {
-        if (!audioSnippet){
-            return
-        }
+        if (!audioSnippet) return
         audioSnippet.pause()
         updatePlayhead(currentStartTime + audioSnippet.currentTime)
     }
 
     const stopAudio = () => {
-        if (!audioSnippet){
-            return
-        }
+        if (!audioSnippet) return
 
         audioSnippet.pause()
         audioSnippet.currentTime = currentStartTime
@@ -784,51 +800,20 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
 
-    const drawStuff = (spectrogram) => {
-        if (!canvasRef.current) return
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
-        const image = new Image();
-
-        image.addEventListener('load', () => {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            imgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            drawAllLabels()
-            //drawPlayhead(playheadRef.current.timeframe)
-            renderTimeAxis();
-            drawViewport(currentStartTime, currentEndTime, 'white', 2)
-            passSpectrogramIsLoadingToApp(false)
-        })
-
-        image.src = `data:image/png;base64,${spectrogram}`;
-    }
-
-
-
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
     useEffect(() => {
         if (!spectrogram) return
-        drawStuff(spectrogram)
-    }, [labels]);
+        drawEditorCanvases(spectrogram)
+    }, [labels])
 
     // When the first spec is returned from the backend (equals to Overview Spec)
     useEffect( () => {
         if (!overviewSpectrogram) return
-            getAudioClipSpec(currentStartTime, currentEndTime, specType)
-            //getAudio()
-            getAudioArray()
-            const overviewCanvas = overviewRef.current
-            const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
-            const image = new Image();
-            image.addEventListener('load',  () => {
-                overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
-                overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-                //drawViewport(currentStartTime, currentEndTime, 'white', 2)
-            });
-            image.src = `data:image/png;base64,${overviewSpectrogram}`;
+        drawOverviewSpectrogram(overviewSpectrogram)
+        getAudioClipSpec(currentStartTime, currentEndTime, specType)
+        getAudioArray()
 
     }, [overviewSpectrogram])
 
@@ -859,7 +844,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         }, [specType, parameters]
     );
 
-    // When a new file is uploaded:
+    // When a new audio file is uploaded:
     useEffect( () => {
             if (!response) return
 
@@ -870,18 +855,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setCurrentStartTime(0);
             setCurrentEndTime(response.data.audio_duration)
             setMaxScrollTime(0);
-            setScrollStep(response.data.audio_duration*0.05);
+            setScrollStep(response.data.audio_duration*0.1);
             setLabels([])
             playheadRef.current.timeframe = 0
 
         }, [response])
 
-    // When a new CSV File was uploaded:
+    // When a new CSV File was uploaded
     useEffect( () => {
         if (!importedLabels) return
         setLabels(importedLabels)
     }, [importedLabels])
-
 
     // When a new audio array is returned from the backend
     useEffect( () => {
@@ -892,9 +876,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     // When a new audio snippet is returned from the backend
     useEffect( () => {
         if (!audioSnippet) return
-
-        audioSnippet.play()
-        loop()
+        playAudio()
     }, [audioSnippet])
 
     return (
@@ -911,10 +893,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         onContextMenu={(event) => event.preventDefault()}
                         onMouseMove={handleMouseMoveOverview}
                     />
-                    {/*<div
-                        id='waveform-container'
-                        ref={waveformContainerRef}>
-                    </div>*/}
                     <canvas
                         id='waveform-canvas'
                         ref={waveformCanvasRef}>
@@ -937,17 +915,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                     />
                     <div id='controls-container'>
                         <button
-                            //onClick={onLeftScroll}
-                            onMouseDown={startLeftScroll}
-                            onMouseUp={stopScroll}
-                            onMouseLeave={stopScroll}
-
-                        >&larr; Left Scroll</button>
+                            onClick={leftScroll}
+                        >
+                            &larr; Left Scroll
+                        </button>
                         <button
-                            // onClick={onRightScroll}
-                            onMouseDown={startRightScroll}
-                            onMouseUp={stopScroll}
-                            onMouseLeave={stopScroll}
+                            onMouseDown={rightScroll}
                         >
                             Right Scroll &rarr;
                         </button>
@@ -969,17 +942,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         <button
                             onClick={getAudio}
                         >
-                            Play Audio
+                            ▶
                         </button>
                         <button
                             onClick={pauseAudio}
                         >
-                            Pause Audio
+                            ⏸
                         </button>
                         <button
                             onClick={stopAudio}
                         >
-                            Stop Audio
+                            ⏹
                         </button>
                         <Export
                             audioFileName={audioFileName}

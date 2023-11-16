@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import WaveSurfer from 'wavesurfer.js'
 import Export from "./Export.jsx";
 
 class Label {
@@ -19,10 +18,18 @@ class Playhead{
     }
 }
 
-// debug async label issue
-// +viewport timestamp immediate update
-// +plot waveform with array of floats
-// +key value pairs as paremeters
+// clean up code
+// remove onScroll method, add single scroll on single click (at each side of the spec canvas, half transparent)
+// add button on each side of the viewport endframe becomes the new viewport startframe
+// fix issue: on upload of a new file, right scroll doesn't work when adjusting the viewport manually
+// parameters to add: n_fft, bins_per_octave
+//log-mel -> n_fft
+//constant-q -> bins_per_octave
+// labels should display on the waveform too
+// add audio play window
+// draw label text to top or waveform
+// more detailed timeline
+// add visual distinguishment between onset and offset
 // foldable elements
 // show green dot at the bottom of the overview spec for every label
 
@@ -56,9 +63,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
-
-    const [waveform, setWaveform] = useState(null)
-    const waveformContainerRef = useRef(null)
 
     const waveformCanvasRef = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
@@ -443,7 +447,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label (onset, undefined, activeClustername)])
+        setLabels(current => [...current, new Label(onset, undefined, activeClustername) ])
     }
 
     const deleteLabel = (xClicked) => {
@@ -680,7 +684,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const playAudio = () => {
-        getAudio()
+
     }
 
     function loop(){
@@ -740,7 +744,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
 
-    /* ++++++++++++++++++ Audio Waveform ++++++++++++++++++ */
+    /* ++++++++++++++++++ Waveform ++++++++++++++++++ */
 
     const getAudioArray = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-for-visualization'
@@ -756,6 +760,28 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             console.error("Error fetching audio clip:", error);
         }
     };
+
+    const drawWaveform = () => {
+        const canvas = waveformCanvasRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
+        canvas.width = window.innerWidth -30;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        const scale = 50;
+        const centerY = canvas.height / 2
+        ctx.strokeStyle = '#ddd8ff'
+
+        for (let i = 0; i < audioArray.length; i++) {
+            const datapoint = audioArray[i]
+            const y = centerY + scale * Math.sin(datapoint)
+
+            ctx.beginPath()
+            ctx.moveTo(i * (canvas.width / audioArray.length), y)
+            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * audioArray[i + 1])
+            ctx.stroke()
+        }
+    }
 
 
     const drawStuff = (spectrogram) => {
@@ -856,48 +882,11 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         setLabels(importedLabels)
     }, [importedLabels])
 
-/*
-    // Draw Waveform
-    useEffect(() => {
-        if (!waveformContainerRef.current) return
-
-        if (!audioSnippet) return
-
-        if (waveform) waveform.destroy()
-
-        const newWaveform = WaveSurfer.create({
-            container: waveformContainerRef.current,
-            waveColor: '#f4f5ff', //'#4F4A85'
-            url: audioSnippet.src,
-            interact: false
-        })
-        setWaveform( newWaveform )
-    }, [audioSnippet])
-*/
 
     // When a new audio array is returned from the backend
     useEffect( () => {
         if (!waveformCanvasRef.current) return
-
-        const canvas = waveformCanvasRef.current
-        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
-        canvas.width = window.innerWidth -30;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-        const scale = 50;
-        const centerY = canvas.height / 2
-        ctx.strokeStyle = '#ddd8ff'
-
-        for (let i = 0; i < audioArray.length; i++) {
-            const datapoint = audioArray[i]
-            const y = centerY + scale * Math.sin(datapoint)
-
-            ctx.beginPath()
-            ctx.moveTo(i * (canvas.width / audioArray.length), y)
-            ctx.lineTo((i + 1) * (canvas.width / audioArray.length), centerY + scale * audioArray[i + 1])
-            ctx.stroke()
-        }
+        drawWaveform()
     }, [audioArray])
 
     // When a new audio snippet is returned from the backend
@@ -978,7 +967,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             Console log labels
                         </button>
                         <button
-                            onClick={playAudio}
+                            onClick={getAudio}
                         >
                             Play Audio
                         </button>

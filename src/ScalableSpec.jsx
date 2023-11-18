@@ -18,7 +18,6 @@ class Playhead{
     }
 }
 
-// clean up code
 // remove onScroll method, add single scroll on single click (at each side of the spec canvas, half transparent)
 // add button on each side of the viewport endframe becomes the new viewport startframe
 // fix issue: on upload of a new file, right scroll doesn't work when adjusting the viewport manually
@@ -33,6 +32,7 @@ class Playhead{
 // foldable elements
 // show green dot at the bottom of the overview spec for every label
 
+const SCROLL_STEP_RATIO = 0.1
 
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, parameters }) {
     const [spectrogram, setSpectrogram] = useState(null);
@@ -99,7 +99,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const newMaxScrollTime = Math.max(audioDuration - newDuration, 0);
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration*0.05);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
         setCurrentEndTime( currentStartTime + newDuration );
     };
 
@@ -109,7 +109,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const newStartTime = Math.min( Math.max(  audioDuration - newDuration, 0), currentStartTime);
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration*0.05);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
         setCurrentStartTime( newStartTime );
         setCurrentEndTime( newStartTime + newDuration );
     };
@@ -224,6 +224,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const handleMouseMove = (event) => {
         hoverLine(event)
         hoverLabel(event)
+        //hoverScrollButtons(event)
     }
 
     const hoverLine = (event) => {
@@ -263,6 +264,24 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 //console.log('drawing yellow')
                 break;
             }
+        }
+    }
+
+    const hoverScrollButtons = (event) => {
+        const xHovered = getXClicked(event)
+        const leftScrollBtn = document.getElementById('left-scroll-btn');
+        if (xHovered < 80){
+            leftScrollBtn.style.display = 'block';
+        } else {
+            leftScrollBtn.style.display = 'none';
+        }
+    }
+
+    const handleMouseLeave = (event) => {
+        return
+        const leftScrollBtn = document.getElementById('left-scroll-btn');
+        if (leftScrollBtn && !leftScrollBtn.contains(event.relatedTarget)) {
+            leftScrollBtn.style.display = 'none';
         }
     }
 
@@ -855,7 +874,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             setCurrentStartTime(0);
             setCurrentEndTime(response.data.audio_duration)
             setMaxScrollTime(0);
-            setScrollStep(response.data.audio_duration*0.1);
+            setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO);
             setLabels([])
             playheadRef.current.timeframe = 0
 
@@ -899,31 +918,35 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         width={parent.innerWidth -30}
                         height={100}
                     </canvas>
-                    <canvas
-                        ref={canvasRef}
-                        width={parent.innerWidth -30}
-                        height={300}
-                        onMouseDown={handleLMBDown}
-                        onMouseUp={handleMouseUp}
-                        onContextMenu={handleRightClick}
-                        onMouseMove={handleMouseMove}
-                    />
+                    <div
+                        id='spec-canvas-container'
+                    >
+                        <canvas
+                            id='spec-canvas'
+                            ref={canvasRef}
+                            width={parent.innerWidth -30}
+                            height={300}
+                            onMouseDown={handleLMBDown}
+                            onMouseUp={handleMouseUp}
+                            onContextMenu={handleRightClick}
+                            onMouseMove={handleMouseMove}
+                            onMouseLeave={handleMouseLeave}
+                        />
+                        <button
+                            id='left-scroll-btn'
+                            onClick={leftScroll}
+                        />
+                        <button
+                            id='right-scroll-btn'
+                            onClick={rightScroll}
+                        />
+                    </div>
                     <canvas
                         ref={timeAxisRef}
                         width={parent.innerWidth -30}
                         height={40}
                     />
                     <div id='controls-container'>
-                        <button
-                            onClick={leftScroll}
-                        >
-                            &larr; Left Scroll
-                        </button>
-                        <button
-                            onMouseDown={rightScroll}
-                        >
-                            Right Scroll &rarr;
-                        </button>
                         <button
                             onClick={onZoomIn}
                         >

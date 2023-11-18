@@ -26,6 +26,17 @@ html, body {
 
 /* -------------------------- Spectrogram -------------------------- */
 
+#spec-canvas-container{
+  position: relative;
+  width: auto;
+  height: 300px;
+  margin: 0 0 10px 0;
+}
+
+#spec-canvas{
+  position: absolute;
+}
+
 #overview-canvas{
   margin: 0 0 8px 0;
 }
@@ -51,6 +62,48 @@ html, body {
 
 #controls-container > button:hover{
   background-color: whitesmoke;
+}
+
+#left-scroll-btn{
+  /*display: none;*/
+  position:absolute;
+  left: 10px;
+  top: 100px;
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-right: 30px solid #ffffff;
+  border-left: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+#left-scroll-btn:active {
+  border-right: 30px solid #ddd8ff;
+}
+
+#right-scroll-btn{
+  /*display: none;*/
+  position:absolute;
+  right: 0;
+  top: 100px;
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-left: 30px solid #ffffff;
+  border-right: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+#right-scroll-btn:active {
+  border-left: 30px solid #ddd8ff;
 }
 
 

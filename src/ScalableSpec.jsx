@@ -18,7 +18,7 @@ class Playhead{
     }
 }
 
-// remove onScroll method, add single scroll on single click (at each side of the spec canvas, half transparent)
+// + remove onScroll method, add single scroll on single click (at each side of the spec canvas, half transparent)
 // add button on each side of the viewport endframe becomes the new viewport startframe
 // fix issue: on upload of a new file, right scroll doesn't work when adjusting the viewport manually
 // parameters to add: n_fft, bins_per_octave
@@ -31,6 +31,7 @@ class Playhead{
 // add visual distinguishment between onset and offset
 // foldable elements
 // show green dot at the bottom of the overview spec for every label
+// flip viewport start frame and endframe
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -583,17 +584,29 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
         // Set new Viewport (Start & Endframe)
         if (widthBetween_xStartTime_xClicked){
-            setCurrentStartTime(newViewportStartFrame)
+            const newDuration = newViewportEndFrame - newViewportStartFrame
+            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
+            setCurrentStartTime( newViewportStartFrame )
             setCurrentEndTime( newViewportEndFrame )
-            setClipDuration( newViewportEndFrame - newViewportStartFrame )
+            setClipDuration( newDuration )
+            setMaxScrollTime( newMaxScrollTime )
+            setScrollStep(newDuration * SCROLL_STEP_RATIO)
         // Set new Start Frame
         } else if (newViewportStartFrame){
+            const newDuration = currentEndTime - newViewportStartFrame
+            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
             setCurrentStartTime(newViewportStartFrame)
-            setClipDuration( currentEndTime - newViewportStartFrame )
+            setClipDuration( newDuration )
+            setMaxScrollTime( newMaxScrollTime )
+            setScrollStep(newDuration * SCROLL_STEP_RATIO);
         // Set new End frame
         } else if (newViewportEndFrame){
+            const newDuration = newViewportEndFrame - currentStartTime
+            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
             setCurrentEndTime( newViewportEndFrame )
-            setClipDuration( newViewportEndFrame - currentStartTime )
+            setClipDuration( newDuration )
+            setMaxScrollTime( newMaxScrollTime )
+            setScrollStep(newDuration * SCROLL_STEP_RATIO);
         }
 
         newViewportStartFrame = null

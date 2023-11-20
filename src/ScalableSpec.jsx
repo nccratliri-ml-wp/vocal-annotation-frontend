@@ -20,7 +20,7 @@ class Playhead{
 
 // + remove onScroll method, add single scroll on single click (at each side of the spec canvas, half transparent)
 // add button on each side of the viewport endframe becomes the new viewport startframe
-// fix issue: on upload of a new file, right scroll doesn't work when adjusting the viewport manually
+// + fix issue: on upload of a new file, right scroll doesn't work when adjusting the viewport manually
 // parameters to add: n_fft, bins_per_octave
 //log-mel -> n_fft
 //constant-q -> bins_per_octave
@@ -47,23 +47,27 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const canvasRef = useRef(null);
     const timeAxisRef = useRef(null);
 
+    // Overview Window
     const overviewRef = useRef(null)
+    const overviewImgData = useRef(null)
     const newFileUploaded = useRef(null)
     const [overviewSpectrogram, setOverviewSpectrogram] = useState(null)
-    const overviewImgData = useRef(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
     let widthBetween_xStartTime_xClicked = null
     let widthBetween_xEndTime_xClicked = null
 
-    const [labels, setLabels] = useState([])
+    // Labels
     const imgData = useRef(null)
+    const [labels, setLabels] = useState([])
     let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
+    // Audio
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
 
+    // Waveform
     const waveformCanvasRef = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
 
@@ -655,6 +659,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         return timestamp * overviewRef.current.width / audioDuration
     }
 
+    const updateViewportScrollButtons = (startFrame, endFrame) => {
+        const leftScrollBtn = document.getElementById('left-scroll-overview-btn')
+        const rightScrollBtn = document.getElementById('right-scroll-overview-btn')
+        const xLeftBtn = calculateViewportFrameX(startFrame) - 15
+        const xRightBtn = calculateViewportFrameX(endFrame) + 5
+        leftScrollBtn.style.left = `${xLeftBtn}px`
+        rightScrollBtn.style.left = `${xRightBtn}px`
+    }
+
     const drawViewport = (startFrame, endFrame, hexColorCode, lineWidth) => {
         const overviewCanvas = overviewRef.current
         const ctx = overviewCanvas.getContext('2d');
@@ -696,6 +709,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         ctx.fillStyle = hexColorCode
         const timestampText = (Math.round(startFrame * 100) / 100).toString()
         ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
+
+        // Update Scroll Button positions
+        updateViewportScrollButtons(startFrame, endFrame)
     }
 
     const handleMouseMoveOverview = (event) => {
@@ -713,6 +729,24 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         } else {
             overviewRef.current.style.cursor = 'default'
         }
+    }
+
+    const leftScrollOverview = () => {
+        setCurrentStartTime(
+            prevStartTime => Math.max(prevStartTime - clipDuration, 0)
+        );
+        setCurrentEndTime(
+            prevEndTime => Math.max(prevEndTime - clipDuration, clipDuration)
+        );
+    }
+
+    const rightScrollOverview = () => {
+        setCurrentStartTime(
+            prevStartTime => Math.min(prevStartTime + clipDuration, maxScrollTime)
+        );
+        setCurrentEndTime(
+            prevEndTime => Math.min(prevEndTime + clipDuration, audioDuration)
+        );
     }
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
@@ -915,16 +949,29 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         <div>
             {spectrogram && (
                 <div>
-                    <canvas
-                        id='overview-canvas'
-                        ref={overviewRef}
-                        width={parent.innerWidth -30}
-                        height={100}
-                        onMouseDown={handleLMBDownOverview}
-                        onMouseUp={handleMouseUpOverview}
-                        onContextMenu={(event) => event.preventDefault()}
-                        onMouseMove={handleMouseMoveOverview}
-                    />
+                    <div
+                        id='overview-canvas-container'
+                    >
+                        <canvas
+                            id='overview-canvas'
+                            ref={overviewRef}
+                            width={parent.innerWidth -30}
+                            height={100}
+                            onMouseDown={handleLMBDownOverview}
+                            onMouseUp={handleMouseUpOverview}
+                            onContextMenu={(event) => event.preventDefault()}
+                            onMouseMove={handleMouseMoveOverview}
+                        />
+                        <button
+                            id='left-scroll-overview-btn'
+                            onClick={leftScrollOverview}
+                        />
+                        <button
+                            id='right-scroll-overview-btn'
+                            onClick={rightScrollOverview}
+                        />
+                    </div>
+
                     <canvas
                         id='waveform-canvas'
                         ref={waveformCanvasRef}>

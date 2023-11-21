@@ -24,6 +24,7 @@ html, body {
   margin: 10px 5px;
 }
 
+
 /* -------------------------- Spectrogram -------------------------- */
 
 #spec-canvas-container{
@@ -112,7 +113,6 @@ html, body {
 }
 
 #left-scroll-btn{
-  /*display: none;*/
   position:absolute;
   left: 10px;
   top: 100px;
@@ -269,5 +269,7 @@ html, body {
 
 /* -------------------------- Waveform -------------------------- */
 
-
+#waveform-canvas{
+  display: block;
+}
 

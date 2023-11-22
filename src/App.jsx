@@ -17,6 +17,8 @@ function App() {
     const [activeClustername, setActiveClustername] = useState()
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [specType, setSpecType] = useState('log-mel')
+    const [nfft, setNfft] = useState(null)
+    const [nbins, setNbins] = useState(null)
     const [parameters, setParameters] = useState({})
 
     function passAudioDOMObjectURLToApp(url){
@@ -51,6 +53,14 @@ function App() {
         setSpecType( chosenSpecType )
     }
 
+    function passNfftToApp( chosenNfft ){
+        setNfft( chosenNfft )
+    }
+
+    function passNbinsToApp ( chosenNbins ){
+        setNbins (chosenNbins)
+    }
+
     function passParametersToApp (newParametersObject){
         setParameters( newParametersObject )
     }
@@ -73,11 +83,15 @@ function App() {
                 <SpecType
                     specType={specType}
                     passSpecTypeToApp={passSpecTypeToApp}
+                    passNfftToApp={passNfftToApp}
+                    passNbinsToApp={passNbinsToApp}
                 />
+                {/*
                 <Parameters
                     parameters={parameters}
                     passParametersToApp={passParametersToApp}
                 />
+                */}
             </div>
             <ScalableSpec
                 response={response}
@@ -87,6 +101,8 @@ function App() {
                 spectrogramIsLoading={spectrogramIsLoading}
                 passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
                 specType={specType}
+                nfft={nfft}
+                nbins={nbins}
                 parameters={parameters}
             />
             {/*

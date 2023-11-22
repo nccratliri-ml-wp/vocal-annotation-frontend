@@ -22,12 +22,7 @@ function Parameters( {parameters, passParametersToApp} ) {
                 const newKeyValuePair = { [keyInput]: valueInput };
 
                 // Update both the parameters state and the parameterList state
-                /*
-                setParameters({
-                    ...parameters,
-                    [keyInput]: valueInput,
-                });
-                */
+
                 passParametersToApp({
                         ...parameters,
                         [keyInput]: valueInput,

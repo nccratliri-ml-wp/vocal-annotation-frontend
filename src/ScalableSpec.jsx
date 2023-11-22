@@ -35,7 +35,7 @@ class Playhead{
 
 const SCROLL_STEP_RATIO = 0.1
 
-function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, parameters }) {
+function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, nfft, nbins, parameters }) {
     const [spectrogram, setSpectrogram] = useState(null);
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -76,12 +76,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
+        console.log(nbins)
         const requestParameters = {
-            ...parameters,
+            //...parameters,
             audio_id: audioId,
             start_time: startTime,
             clip_duration: duration,
-            spec_cal_method: spectrogramType
+            spec_cal_method: spectrogramType,
+            nfft: nfft,
+            n_bins: nbins,
         }
         try {
             const response = await axios.post(path, requestParameters);

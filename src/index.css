@@ -262,8 +262,27 @@ html, body {
   color: #f6fffe;
 }
 
-#spec-type-label{
+#spec-type-label,
+#n-fft-label,
+#bins-per-octave-label{
   color: #f6fffe;
+}
+
+#spec-type-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: row; /* Align input fields horizontally */
+  align-items: center; /* Center align input fields vertically */
+}
+
+.input-field {
+  background-color: white;
+  margin-left: 8px; /* Add margin for spacing between radio buttons and input fields */
+  /* Add any additional styling for the input fields here */
 }
 
 

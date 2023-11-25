@@ -986,7 +986,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             onMouseUp={handleMouseUp}
                             onContextMenu={handleRightClick}
                             onMouseMove={handleMouseMove}
-                            onMouseLeave={handleMouseLeave}
                         />
                         <button
                             id='left-scroll-btn'

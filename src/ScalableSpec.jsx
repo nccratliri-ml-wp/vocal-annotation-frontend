@@ -21,6 +21,8 @@ class Playhead{
 
 // Global variables
 const SCROLL_STEP_RATIO = 0.1
+const LABEL_COLOR = "#00FF00"
+const LABEL_COLOR_HOVERED = "#f3e655"
 
 function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, nfft, nbins, parameters }) {
     // General
@@ -86,7 +88,12 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const getSpecAndAudioArray = async () => {
         try {
-            const [newSpec, newAudioArray] = await Promise.all([getAudioClipSpec(currentStartTime, clipDuration, specType), getAudioArray()])
+            const [newSpec, newAudioArray] = await Promise.all(
+                [
+                    getAudioClipSpec(currentStartTime, clipDuration, specType),
+                    getAudioArray()
+                ]
+            )
             drawEditorCanvases(newSpec, newAudioArray)
             setSpectrogram(newSpec)
             setAudioArray(newAudioArray)
@@ -159,6 +166,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             clickedLabel = checkIfClickedOnOnset(xClicked)
             if ( clickedLabel ){
                 specCanvasRef.current.addEventListener('mousemove', dragOnset)
+                waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
                 return
             }
 
@@ -166,6 +174,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             clickedLabel = checkIfClickedOnOffset(xClicked)
             if (clickedLabel){
                 specCanvasRef.current.addEventListener('mousemove', dragOffset)
+                waveformCanvasRef.current.addEventListener('mousemove', dragOffset)
                 return
             }
         }
@@ -182,8 +191,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            drawLine(newOffset,"#00FF00")
-            drawLineBetween(lastLabel,"#00FF00")
+            drawLine(newOffset,LABEL_COLOR)
+            drawLineBetween(lastLabel,LABEL_COLOR)
             return
         }
 
@@ -197,6 +206,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
         specCanvasRef.current.removeEventListener('mousemove', dragOnset)
         specCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
+
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         // flip onset with offset if necessary
@@ -215,34 +227,37 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         if (audioSnippet && !audioSnippet.paused) return
 
         const xClicked = getXClicked(event)
-
         if ( !checkIfPositionIsOccupied(xClicked ) ) return
-
         deleteLabel(xClicked)
     }
 
     const handleMouseMove = (event) => {
         hoverLine(event)
         hoverLabel(event)
-        //hoverScrollButtons(event)
     }
 
     const hoverLine = (event) => {
         const xHovered = getXClicked(event)
         if ( checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
             specCanvasRef.current.style.cursor = 'col-resize'
+            waveformCanvasRef.current.style.cursor = 'col-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'
+            waveformCanvasRef.current.style.cursor = 'default'
         }
     }
 
     // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factoring in the future
     const hoverLabel = (event) => {
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
-            const canvas = specCanvasRef.current;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.putImageData(specImgData.current, 0, 0);
+            const specCVS = specCanvasRef.current;
+            const specCTX = specCVS.getContext('2d');
+            const waveformCVS = waveformCanvasRef.current
+            const waveformCTX = waveformCVS.getContext('2d')
+            specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
+            specCTX.putImageData(specImgData.current, 0, 0);
+            waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
+            waveformCTX.putImageData(waveformImgData.current, 0, 0)
             drawAllLabels()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
@@ -255,9 +270,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
             const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
             if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
-                drawLine(label.onset, "#f3e655") //"#f3e655"
-                drawLine(label.offset, "#f3e655")
-                drawLineBetween(label, "#f3e655")
+                drawLine(label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label.offset, LABEL_COLOR_HOVERED)
+                drawLineBetween(label, LABEL_COLOR_HOVERED)
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
@@ -443,12 +458,13 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const drawLineBetween = (label, colorHex) => {
         const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
         const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-        const ctx = specCanvasRef.current.getContext('2d');
+        const cvs = waveformCanvasRef.current
+        const ctx = cvs.getContext('2d');
 
         ctx.beginPath()
         ctx.setLineDash([1, 1])
-        ctx.moveTo(xOnset, 300 / 2 )
-        ctx.lineTo(xOffset, 300 / 2)
+        ctx.moveTo(xOnset, cvs.height)
+        ctx.lineTo(xOffset, cvs.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
         ctx.stroke()
@@ -456,21 +472,21 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     }
 
     const drawClustername = (label) => {
-        const canvas = specCanvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const xClustername = ( calculateXPosition(label.onset, specCanvasRef.current) + calculateXPosition(label.offset, specCanvasRef.current) ) / 2
+        const cvs = waveformCanvasRef.current;
+        const ctx = cvs.getContext('2d');
+        const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
 
-        ctx.font = "bold 20px Arial";
+        ctx.font = "16px Arial";
         ctx.textAlign = "center";
         ctx.fillStyle = '#f3e655'
-        ctx.fillText(label.clustername, xClustername, canvas.height / 2 - 5);
+        ctx.fillText(label.clustername, xClustername, cvs.height - 6);
     }
 
     const drawAllLabels = () => {
         for (let label of labels) {
-            drawLine(label.onset, "#00FF00")
-            drawLine(label.offset, "#00FF00")
-            drawLineBetween(label,"#00FF00")
+            drawLine(label.onset, LABEL_COLOR)
+            drawLine(label.offset, LABEL_COLOR)
+            drawLineBetween(label,LABEL_COLOR)
         }
     }
 
@@ -849,8 +865,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
         canvas.width = window.innerWidth -30;
 
-        //ctx.clearRect(0, 0, canvas.width, canvas.height)
-
         const scale = 50;
         const centerY = canvas.height / 2
         ctx.strokeStyle = '#ddd8ff'
@@ -967,12 +981,15 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             onClick={rightScrollOverview}
                         />
                     </div>
-
                     <canvas
                         id='waveform-canvas'
                         ref={waveformCanvasRef}
                         width={parent.innerWidth -30}
                         height={150}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
                     />
                     <div
                         id='spec-canvas-container'

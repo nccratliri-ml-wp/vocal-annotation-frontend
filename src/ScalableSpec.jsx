@@ -1056,7 +1056,9 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             Console log labels
                         </button>
+                        {/*}
                         <CanvasButton onCanvasCreate={addCanvas} />
+                        */}
                         <button
                             onClick={getAudio}
                         >

@@ -3,6 +3,7 @@ import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
+import CanvasButton from "./CanvasButton.jsx";
 
 // Classes
 class Label {
@@ -953,9 +954,19 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
         playAudio()
     }, [audioSnippet])
 
+
+    const [canvases, setCanvases] = useState([])
+    const canvasRefs = useRef([])
+
+    const addCanvas = (canvas) => {
+        setCanvases([...canvases, canvasRefs.current.length]); // Use index as a key
+        canvasRefs.current.push(canvas)
+    }
+
+
     return (
         <div>
-            {spectrogram && (
+
                 <div
                     id='editor-container'
                 >
@@ -1013,6 +1024,17 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                             onClick={rightScroll}
                         />
                     </div>
+                    {canvases.map((canvasIndex) => (
+                        <div key={canvasIndex}>
+                            <p>Canvas {canvasIndex + 1}</p>
+                            <canvas
+                                ref={(el) => (canvasRefs.current[canvasIndex] = el)}
+                                className={'new-canvas'}
+                                width={parent.innerWidth -30}
+                                height={100}
+                            />
+                        </div>
+                    ))}
                     <canvas
                         ref={timeAxisRef}
                         width={parent.innerWidth -30}
@@ -1034,6 +1056,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         >
                             Console log labels
                         </button>
+                        <CanvasButton onCanvasCreate={addCanvas} />
                         <button
                             onClick={getAudio}
                         >
@@ -1055,7 +1078,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                         />
                     </div>
                 </div>
-            )}
+
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>
     );

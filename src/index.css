@@ -292,3 +292,7 @@ html, body {
   display: block;
 }
 
+
+.new-canvas{
+  border: 1px solid red;
+}

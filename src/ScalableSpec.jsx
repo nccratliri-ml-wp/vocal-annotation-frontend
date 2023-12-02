@@ -72,8 +72,6 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
     const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
-        console.log('bins: ' + binsPerOctave)
-        console.log('nfft: ' + nfft)
         const requestParameters = {
             //...parameters,
             audio_id: audioId,

@@ -36,12 +36,10 @@ function SpecType({ specType, passSpecTypeToApp, passNfftToApp, passBinsPerOctav
     }
 
     function submitNfft(){
-        console.log('submitted nfft: '+ nFft)
         passNfftToApp(nFft)
     }
 
     function submitBins(){
-        console.log('submitted binsPerOctave: '+ binsPerOctave)
         passBinsPerOctaveToApp(binsPerOctave)
     }
 

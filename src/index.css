@@ -285,6 +285,9 @@ html, body {
   /* Add any additional styling for the input fields here */
 }
 
+.submit-btn{
+  width: 60px;
+}
 
 /* -------------------------- Waveform -------------------------- */
 

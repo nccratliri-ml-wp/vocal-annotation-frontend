@@ -7,7 +7,7 @@ import FormLabel from '@mui/material/FormLabel';
 import Input from '@mui/material/Input';
 import Box from '@mui/material/Box';
 
-function SpecType({ specType, passSpecTypeToApp, passNfftToApp, passNbinsToApp }) {
+function SpecType({ specType, passSpecTypeToApp, passNfftToApp, passBinsPerOctaveToApp }) {
     const [nFft, setNFft] = useState("");
     const [binsPerOctave, setBinsPerOctave] = useState("");
 
@@ -31,8 +31,16 @@ function SpecType({ specType, passSpecTypeToApp, passNfftToApp, passNbinsToApp }
 
     function handleKeyDownBins(event) {
         if (event.key === 'Enter') {
-            passNbinsToApp(event.target.value)
+            passBinsPerOctaveToApp(event.target.value)
         }
+    }
+
+    function submitNfft(){
+        passNfftToApp(nFft)
+    }
+
+    function submitBins(){
+        passBinsPerOctaveToApp(binsPerOctave)
     }
 
     return (
@@ -55,28 +63,38 @@ function SpecType({ specType, passSpecTypeToApp, passNfftToApp, passNbinsToApp }
                         {specType === "log-mel" && (
                             <FormControl>
                                 <FormLabel id="n-fft-label">N FFT</FormLabel>
-                                <Input
-                                    type="number"
-                                    id="n-fft"
-                                    value={nFft}
-                                    onChange={handleNFftChange}
-                                    onKeyDown={handleKeyDownNfft}
-                                    className="input-field"
-                                />
+                                <div>
+                                    <Input
+                                        type="number"
+                                        id="n-fft"
+                                        value={nFft}
+                                        onChange={handleNFftChange}
+                                        onKeyDown={handleKeyDownNfft}
+                                        className="input-field"
+                                    />
+                                    <button onClick={submitNfft} className="submit-btn">
+                                        Submit
+                                    </button>
+                                </div>
                             </FormControl>
                         )}
 
                         {specType === "constant-q" && (
                             <FormControl>
                                 <FormLabel id="bins-per-octave-label">Bins per Octave</FormLabel>
-                                <Input
-                                    type="number"
-                                    id="bins-per-octave"
-                                    value={binsPerOctave}
-                                    onChange={handleBinsPerOctaveChange}
-                                    onKeyDown={handleKeyDownBins}
-                                    className="input-field"
-                                />
+                                <div>
+                                    <Input
+                                        type="number"
+                                        id="bins-per-octave"
+                                        value={binsPerOctave}
+                                        onChange={handleBinsPerOctaveChange}
+                                        onKeyDown={handleKeyDownBins}
+                                        className="input-field"
+                                    />
+                                    <button onClick={submitBins} className="submit-btn">
+                                        Submit
+                                    </button>
+                                </div>
                             </FormControl>
                         )}
                     </Box>

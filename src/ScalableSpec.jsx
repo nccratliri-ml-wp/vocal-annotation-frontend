@@ -25,7 +25,7 @@ const SCROLL_STEP_RATIO = 0.1
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 
-function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, nfft, nbins, parameters }) {
+function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, nfft, binsPerOctave, parameters }) {
     // General
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -78,8 +78,8 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             start_time: startTime,
             clip_duration: duration,
             spec_cal_method: spectrogramType,
-            nfft: nfft,
-            n_bins: nbins,
+            n_fft: nfft,
+            bins_per_octave: binsPerOctave,
         }
 
         const response = await axios.post(path, requestParameters)
@@ -909,7 +909,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, clipDuration]
+        }, [currentStartTime, clipDuration, nfft, binsPerOctave]
     );
 
     // When user changed spectrogram type

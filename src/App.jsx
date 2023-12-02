@@ -18,7 +18,7 @@ function App() {
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [specType, setSpecType] = useState('log-mel')
     const [nfft, setNfft] = useState(null)
-    const [nbins, setNbins] = useState(null)
+    const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
 
     function passAudioDOMObjectURLToApp(url){
@@ -57,8 +57,8 @@ function App() {
         setNfft( chosenNfft )
     }
 
-    function passNbinsToApp ( chosenNbins ){
-        setNbins (chosenNbins)
+    function passBinsPerOctaveToApp ( binsPerOctave ){
+        setBinsPerOctave (binsPerOctave)
     }
 
     function passParametersToApp (newParametersObject){
@@ -84,7 +84,7 @@ function App() {
                     specType={specType}
                     passSpecTypeToApp={passSpecTypeToApp}
                     passNfftToApp={passNfftToApp}
-                    passNbinsToApp={passNbinsToApp}
+                    passBinsPerOctaveToApp={passBinsPerOctaveToApp}
                 />
                 {/*
                 <Parameters
@@ -102,7 +102,7 @@ function App() {
                 passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
                 specType={specType}
                 nfft={nfft}
-                nbins={nbins}
+                binsPerOctave={binsPerOctave}
                 parameters={parameters}
             />
             {/*

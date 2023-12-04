@@ -1,7 +1,7 @@
 import {useState} from "react";
 import axios from "axios";
 
-function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFileNameToApp, passSpectrogramIsLoadingToApp} ){
+function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFileNameToApp} ){
 
     const [audioFileName, setAudioFileName] = useState(null)
 
@@ -15,7 +15,6 @@ function AudioUpload({passAudioDOMObjectURLToApp, passResponseToApp, passAudioFi
 
         passAudioFileNameToApp( newFile.name )
         setAudioFileName( newFile.name )
-        passSpectrogramIsLoadingToApp(true)
 
         const url = URL.createObjectURL(newFile)
         passAudioDOMObjectURLToApp( url )

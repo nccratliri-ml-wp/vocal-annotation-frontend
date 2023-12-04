@@ -15,7 +15,6 @@ function App() {
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
-    const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [specType, setSpecType] = useState('log-mel')
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
@@ -45,10 +44,6 @@ function App() {
         setActiveClustername( chosenClustername )
     }
 
-    function passSpectrogramIsLoadingToApp(boolean){
-        setSpectrogramIsLoading( boolean )
-    }
-
     function passSpecTypeToApp(chosenSpecType){
         setSpecType( chosenSpecType )
     }
@@ -73,7 +68,7 @@ function App() {
                     passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
                     passResponseToApp={passResponseToApp}
                     passAudioFileNameToApp={passAudioFileNameToApp}
-                    passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
+                    //passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
                 />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
                 <CSVReader
@@ -94,12 +89,20 @@ function App() {
                 */}
             </div>
             <ScalableSpec
-                response={response}
-                audioFileName={audioFileName}
+                //response={response}
+                //audioFileName={audioFileName}
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
-                spectrogramIsLoading={spectrogramIsLoading}
-                passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
+                specType={specType}
+                nfft={nfft}
+                binsPerOctave={binsPerOctave}
+                parameters={parameters}
+            />
+            <ScalableSpec
+                //response={response}
+                //audioFileName={audioFileName}
+                importedLabels={importedLabels}
+                activeClustername={activeClustername}
                 specType={specType}
                 nfft={nfft}
                 binsPerOctave={binsPerOctave}

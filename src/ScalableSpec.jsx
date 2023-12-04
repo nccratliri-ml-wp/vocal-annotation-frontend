@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
 import CanvasButton from "./CanvasButton.jsx";
+import FileUpload from "./FileUpload.jsx";
 
 // Classes
 class Label {
@@ -25,7 +26,7 @@ const SCROLL_STEP_RATIO = 0.1
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 
-function ScalableSpec( { response, audioFileName, importedLabels, activeClustername, spectrogramIsLoading, passSpectrogramIsLoadingToApp, specType, nfft, binsPerOctave, parameters }) {
+function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClustername, /*spectrogramIsLoading, passSpectrogramIsLoadingToApp,*/ specType, nfft, binsPerOctave, parameters }) {
     // General
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -67,6 +68,26 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
 
+    // File Upload
+    const [selectedFile, setSelectedFile] = useState(null)
+    const [base64String, setBase64String] = useState(null)
+    const [response, setResponse] = useState(null)
+    const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
+
+
+    /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
+    const passSelectedFileToScalableSpec = ( newFile ) => {
+        setSelectedFile( newFile )
+    }
+
+    const passResponseToScalableSpec = ( newResponse ) => {
+        setResponse( newResponse )
+    }
+
+    const passSpectrogramIsLoadingToScalableSpec = ( boolean ) => {
+        setSpectrogramIsLoading( boolean )
+    }
+
 
     /* ++++++++++++++++++ Spectrogram fetching methods ++++++++++++++++++ */
 
@@ -96,6 +117,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
                 ]
             )
             drawEditorCanvases(newSpec, newAudioArray)
+            setSpectrogramIsLoading(false)
             setSpectrogram(newSpec)
             setAudioArray(newAudioArray)
             if (newFileUploaded.current){
@@ -340,7 +362,7 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
             drawWaveform(newAudioArray)
             drawAllLabels()
             //drawPlayhead(playheadRef.current.timeframe)
-            passSpectrogramIsLoadingToApp(false)
+            //passSpectrogramIsLoadingToApp(false)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
 
@@ -965,120 +987,121 @@ function ScalableSpec( { response, audioFileName, importedLabels, activeClustern
 
 
     return (
-        <div>
-
-                <div
-                    id='editor-container'
-                >
-                    <div
-                        id='overview-canvas-container'
-                    >
-                        <canvas
-                            id='overview-canvas'
-                            ref={overviewRef}
-                            width={parent.innerWidth -30}
-                            height={100}
-                            onMouseDown={handleLMBDownOverview}
-                            onMouseUp={handleMouseUpOverview}
-                            onContextMenu={(event) => event.preventDefault()}
-                            onMouseMove={handleMouseMoveOverview}
-                        />
-                        <button
-                            id='left-scroll-overview-btn'
-                            onClick={leftScrollOverview}
-                        />
-                        <button
-                            id='right-scroll-overview-btn'
-                            onClick={rightScrollOverview}
-                        />
-                    </div>
+        <div
+            id='editor-container'
+        >
+            <FileUpload
+                passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
+                passResponseToScalableSpec={passResponseToScalableSpec}
+                passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+            />
+            <div
+                id='overview-canvas-container'
+            >
+                <canvas
+                    id='overview-canvas'
+                    ref={overviewRef}
+                    width={parent.innerWidth -30}
+                    height={100}
+                    onMouseDown={handleLMBDownOverview}
+                    onMouseUp={handleMouseUpOverview}
+                    onContextMenu={(event) => event.preventDefault()}
+                    onMouseMove={handleMouseMoveOverview}
+                />
+                <button
+                    id='left-scroll-overview-btn'
+                    onClick={leftScrollOverview}
+                />
+                <button
+                    id='right-scroll-overview-btn'
+                    onClick={rightScrollOverview}
+                />
+            </div>
+            <canvas
+                id='waveform-canvas'
+                ref={waveformCanvasRef}
+                width={parent.innerWidth -30}
+                height={150}
+                onMouseDown={handleLMBDown}
+                onMouseUp={handleMouseUp}
+                onContextMenu={handleRightClick}
+                onMouseMove={handleMouseMove}
+            />
+            <div
+                id='spec-canvas-container'
+            >
+                <canvas
+                    id='spec-canvas'
+                    ref={specCanvasRef}
+                    width={parent.innerWidth -30}
+                    height={300}
+                    onMouseDown={handleLMBDown}
+                    onMouseUp={handleMouseUp}
+                    onContextMenu={handleRightClick}
+                    onMouseMove={handleMouseMove}
+                />
+                <button
+                    id='left-scroll-btn'
+                    onClick={leftScroll}
+                />
+                <button
+                    id='right-scroll-btn'
+                    onClick={rightScroll}
+                />
+            </div>
+            {canvases.map((canvasIndex) => (
+                <div key={canvasIndex}>
+                    <p>Canvas {canvasIndex + 1}</p>
                     <canvas
-                        id='waveform-canvas'
-                        ref={waveformCanvasRef}
+                        ref={(el) => (canvasRefs.current[canvasIndex] = el)}
+                        className={'new-canvas'}
                         width={parent.innerWidth -30}
-                        height={150}
-                        onMouseDown={handleLMBDown}
-                        onMouseUp={handleMouseUp}
-                        onContextMenu={handleRightClick}
-                        onMouseMove={handleMouseMove}
+                        height={100}
                     />
-                    <div
-                        id='spec-canvas-container'
-                    >
-                        <canvas
-                            id='spec-canvas'
-                            ref={specCanvasRef}
-                            width={parent.innerWidth -30}
-                            height={300}
-                            onMouseDown={handleLMBDown}
-                            onMouseUp={handleMouseUp}
-                            onContextMenu={handleRightClick}
-                            onMouseMove={handleMouseMove}
-                        />
-                        <button
-                            id='left-scroll-btn'
-                            onClick={leftScroll}
-                        />
-                        <button
-                            id='right-scroll-btn'
-                            onClick={rightScroll}
-                        />
-                    </div>
-                    {canvases.map((canvasIndex) => (
-                        <div key={canvasIndex}>
-                            <p>Canvas {canvasIndex + 1}</p>
-                            <canvas
-                                ref={(el) => (canvasRefs.current[canvasIndex] = el)}
-                                className={'new-canvas'}
-                                width={parent.innerWidth -30}
-                                height={100}
-                            />
-                        </div>
-                    ))}
-                    <canvas
-                        ref={timeAxisRef}
-                        width={parent.innerWidth -30}
-                        height={40}
-                    />
-                    <div id='controls-container'>
-                        <button
-                            onClick={onZoomIn}
-                        >
-                            +🔍
-                        </button>
-                        <button
-                            onClick={onZoomOut}
-                        >
-                            -🔍
-                        </button>
-                        <button
-                            onClick={() => console.log(labels)}
-                        >
-                            Console log labels
-                        </button>
-                        <CanvasButton onCanvasCreate={addCanvas} />
-                        <button
-                            onClick={getAudio}
-                        >
-                            ▶
-                        </button>
-                        <button
-                            onClick={pauseAudio}
-                        >
-                            ⏸
-                        </button>
-                        <button
-                            onClick={stopAudio}
-                        >
-                            ⏹
-                        </button>
-                        <Export
-                            audioFileName={audioFileName}
-                            labels={labels}
-                        />
-                    </div>
                 </div>
-
+            ))}
+            <canvas
+                ref={timeAxisRef}
+                width={parent.innerWidth -30}
+                height={40}
+            />
+            <div id='controls-container'>
+                <button
+                    onClick={onZoomIn}
+                >
+                    +🔍
+                </button>
+                <button
+                    onClick={onZoomOut}
+                >
+                    -🔍
+                </button>
+                <button
+                    onClick={() => console.log(labels)}
+                >
+                    Console log labels
+                </button>
+                <CanvasButton onCanvasCreate={addCanvas} />
+                <button
+                    onClick={getAudio}
+                >
+                    ▶
+                </button>
+                <button
+                    onClick={pauseAudio}
+                >
+                    ⏸
+                </button>
+                <button
+                    onClick={stopAudio}
+                >
+                    ⏹
+                </button>
+                <Export
+                    audioFileName={'Example Audio File Name'}
+                    labels={labels}
+                />
+            </div>
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>
     );

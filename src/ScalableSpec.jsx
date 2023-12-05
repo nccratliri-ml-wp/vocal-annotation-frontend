@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import {nanoid} from "nanoid";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
 import CanvasButton from "./CanvasButton.jsx";
 import FileUpload from "./FileUpload.jsx";
+import AudioTrack from "./AudioTrack.jsx";
+
 
 // Classes
 class Label {
@@ -70,7 +73,6 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
 
     // File Upload
     const [selectedFile, setSelectedFile] = useState(null)
-    const [base64String, setBase64String] = useState(null)
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
@@ -881,7 +883,6 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
         return response.data.wav_array
     };
 
-
     const drawWaveform = (newAudioArray) => {
         if (!waveformCanvasRef.current) return
         const canvas = waveformCanvasRef.current
@@ -1049,16 +1050,8 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
                     onClick={rightScroll}
                 />
             </div>
-            {canvases.map((canvasIndex) => (
-                <div key={canvasIndex}>
-                    <p>Canvas {canvasIndex + 1}</p>
-                    <canvas
-                        ref={(el) => (canvasRefs.current[canvasIndex] = el)}
-                        className={'new-canvas'}
-                        width={parent.innerWidth -30}
-                        height={100}
-                    />
-                </div>
+            {canvases.map( () => (
+                <AudioTrack key={nanoid()} />
             ))}
             <canvas
                 ref={timeAxisRef}

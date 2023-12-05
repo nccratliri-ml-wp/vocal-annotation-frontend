@@ -64,12 +64,6 @@ function App() {
         <>
             <div id='files-upload-container'>
                 <Searchbar />
-                <AudioUpload
-                    passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-                    passResponseToApp={passResponseToApp}
-                    passAudioFileNameToApp={passAudioFileNameToApp}
-                    //passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
-                />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
                 <CSVReader
                     passLabelsToApp={passLabelsToApp}

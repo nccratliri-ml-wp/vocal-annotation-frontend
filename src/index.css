@@ -296,6 +296,6 @@ html, body {
 }
 
 
-.audio-track{
-  border: 1px solid red;
+.file-import-export-container{
+  display: flex;
 }

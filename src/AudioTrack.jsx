@@ -175,7 +175,6 @@ function AudioTrack (){
         <div
             className='audio-track'
         >
-            <p>New Canvas </p>
             <FileUpload
                 passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
                 passResponseToScalableSpec={passResponseToScalableSpec}

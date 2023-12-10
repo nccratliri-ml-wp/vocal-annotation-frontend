@@ -29,7 +29,12 @@ const SCROLL_STEP_RATIO = 0.1
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 
-function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClustername, /*spectrogramIsLoading, passSpectrogramIsLoadingToApp,*/ specType, nfft, binsPerOctave, parameters }) {
+function ScalableSpec( { /*response, audioFileName,*/
+                           importedLabels,
+                           activeClustername,
+                           /*spectrogramIsLoading, passSpectrogramIsLoadingToApp,*/
+                           specType, nfft, binsPerOctave, parameters,
+                           showOverview}) {
     // General
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -357,7 +362,7 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
         const image = new Image();
 
-        // Draw Spectrogram and labels
+        // Draw Spectrogram, Waveform and labels
         image.addEventListener('load', () => {
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             specImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -368,9 +373,11 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
         })
         image.src = `data:image/png;base64,${spectrogram}`;
 
-        // Draw Time Axis, Viewport and Waveform
-        drawTimeAxis()
-        drawViewport(currentStartTime, currentEndTime, 'white', 2)
+        // Draw Time Axis, Viewport
+        if (showOverview){
+            drawTimeAxis()
+            drawViewport(currentStartTime, currentEndTime, 'white', 2)
+        }
     }
 
     const drawOverviewSpectrogram = () =>{
@@ -917,7 +924,7 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
 
     // When the first spec is returned from the backend (equals to Overview Spec)
     useEffect( () => {
-        if (!overviewSpectrogram) return
+        if (!overviewSpectrogram || !showOverview) return
         drawOverviewSpectrogram(overviewSpectrogram)
         getSpecAndAudioArray()
     }, [overviewSpectrogram])
@@ -978,46 +985,88 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
     }, [audioSnippet])
 
 
-    const [canvases, setCanvases] = useState([])
-    const canvasRefs = useRef([])
-
-    const addCanvas = (canvas) => {
-        setCanvases([...canvases, canvasRefs.current.length]); // Use index as a key
-        canvasRefs.current.push(canvas)
-    }
-
-
     return (
         <div
             id='editor-container'
         >
-            <FileUpload
-                passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
-                passResponseToScalableSpec={passResponseToScalableSpec}
-                passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-            />
-            <div
-                id='overview-canvas-container'
-            >
-                <canvas
-                    id='overview-canvas'
-                    ref={overviewRef}
-                    width={parent.innerWidth -30}
-                    height={100}
-                    onMouseDown={handleLMBDownOverview}
-                    onMouseUp={handleMouseUpOverview}
-                    onContextMenu={(event) => event.preventDefault()}
-                    onMouseMove={handleMouseMoveOverview}
+            {showOverview &&
+                <div id='controls-container'>
+                    <button
+                        onClick={onZoomIn}
+                    >
+                        +🔍
+                    </button>
+                    <button
+                        onClick={onZoomOut}
+                    >
+                        -🔍
+                    </button>
+                    <button
+                        onClick={() => console.log(labels)}
+                    >
+                        Console log labels
+                    </button>
+                    <button
+                        onClick={getAudio}
+                    >
+                        ▶
+                    </button>
+                    <button
+                        onClick={pauseAudio}
+                    >
+                        ⏸
+                    </button>
+                    <button
+                        onClick={stopAudio}
+                    >
+                        ⏹
+                    </button>
+                </div>
+            }
+            <div className='file-import-export-container' >
+                <FileUpload
+                    passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
+                    passResponseToScalableSpec={passResponseToScalableSpec}
+                    passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                 />
-                <button
-                    id='left-scroll-overview-btn'
-                    onClick={leftScrollOverview}
-                />
-                <button
-                    id='right-scroll-overview-btn'
-                    onClick={rightScrollOverview}
+                <Export
+                    audioFileName={'Example Audio File Name'}
+                    labels={labels}
                 />
             </div>
+            {showOverview &&
+                <canvas
+                    ref={timeAxisRef}
+                    width={parent.innerWidth - 30}
+                    height={40}
+                />
+            }
+            {showOverview &&
+                <div
+                    id='overview-canvas-container'
+                >
+                    <>
+                        <canvas
+                            id='overview-canvas'
+                            ref={overviewRef}
+                            width={parent.innerWidth - 30}
+                            height={100}
+                            onMouseDown={handleLMBDownOverview}
+                            onMouseUp={handleMouseUpOverview}
+                            onContextMenu={(event) => event.preventDefault()}
+                            onMouseMove={handleMouseMoveOverview}
+                        />
+                        <button
+                            id='left-scroll-overview-btn'
+                            onClick={leftScrollOverview}
+                        />
+                        <button
+                            id='right-scroll-overview-btn'
+                            onClick={rightScrollOverview}
+                        />
+                    </>
+                </div>
+            }
             <canvas
                 id='waveform-canvas'
                 ref={waveformCanvasRef}
@@ -1041,59 +1090,18 @@ function ScalableSpec( { /*response, audioFileName,*/ importedLabels, activeClus
                     onContextMenu={handleRightClick}
                     onMouseMove={handleMouseMove}
                 />
-                <button
-                    id='left-scroll-btn'
-                    onClick={leftScroll}
-                />
-                <button
-                    id='right-scroll-btn'
-                    onClick={rightScroll}
-                />
-            </div>
-            {canvases.map( () => (
-                <AudioTrack key={nanoid()} />
-            ))}
-            <canvas
-                ref={timeAxisRef}
-                width={parent.innerWidth -30}
-                height={40}
-            />
-            <div id='controls-container'>
-                <button
-                    onClick={onZoomIn}
-                >
-                    +🔍
-                </button>
-                <button
-                    onClick={onZoomOut}
-                >
-                    -🔍
-                </button>
-                <button
-                    onClick={() => console.log(labels)}
-                >
-                    Console log labels
-                </button>
-                <CanvasButton onCanvasCreate={addCanvas} />
-                <button
-                    onClick={getAudio}
-                >
-                    ▶
-                </button>
-                <button
-                    onClick={pauseAudio}
-                >
-                    ⏸
-                </button>
-                <button
-                    onClick={stopAudio}
-                >
-                    ⏹
-                </button>
-                <Export
-                    audioFileName={'Example Audio File Name'}
-                    labels={labels}
-                />
+                {showOverview &&
+                    <>
+                        <button
+                            id='left-scroll-btn'
+                            onClick={leftScroll}
+                        />
+                        <button
+                            id='right-scroll-btn'
+                            onClick={rightScroll}
+                        />
+                    </>
+                }
             </div>
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>

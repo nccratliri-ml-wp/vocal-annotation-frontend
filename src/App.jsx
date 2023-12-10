@@ -91,6 +91,8 @@ function App() {
                 nfft={nfft}
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
+                showOverview={true}
+
             />
             <ScalableSpec
                 //response={response}
@@ -101,18 +103,9 @@ function App() {
                 nfft={nfft}
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
-            />
-            {/*
-             <Visuals
-                audioFile={audioDOMObject.current}
-                audioFileName={audioFileName}
-                base64Url={base64Url}
-                spectrogramIsLoading={spectrogramIsLoading}
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-            />
-            */}
+                showOverview={false}
 
+            />
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

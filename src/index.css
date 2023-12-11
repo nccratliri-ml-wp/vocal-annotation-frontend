@@ -27,28 +27,28 @@ html, body {
 
 /* -------------------------- Spectrogram -------------------------- */
 
-#spec-canvas-container{
+.spec-canvas-container{
   position: relative;
   width: auto;
   height: 300px;
   margin: 0 0 10px 0;
 }
 
-#spec-canvas{
+.spec-canvas{
   position: absolute;
 }
 
 
 /* -------------------------- Overview Window -------------------------- */
 
-#overview-canvas-container{
+.overview-canvas-container{
   position: relative;
   width: auto;
   height: 100px;
   margin: 0 0 8px 0;
 }
 
-#overview-canvas{
+.overview-canvas{
   position: absolute;
 }
 
@@ -112,7 +112,7 @@ html, body {
   background-color: whitesmoke;
 }
 
-#left-scroll-btn{
+.left-scroll-btn{
   position:absolute;
   left: 10px;
   top: 100px;
@@ -128,11 +128,11 @@ html, body {
   padding: 0;
 }
 
-#left-scroll-btn:active {
+.left-scroll-btn:active {
   border-right: 30px solid #ddd8ff;
 }
 
-#right-scroll-btn{
+.right-scroll-btn{
   /*display: none;*/
   position:absolute;
   right: 0;
@@ -149,7 +149,7 @@ html, body {
   padding: 0;
 }
 
-#right-scroll-btn:active {
+.right-scroll-btn:active {
   border-left: 30px solid #ddd8ff;
 }
 
@@ -291,7 +291,7 @@ html, body {
 
 /* -------------------------- Waveform -------------------------- */
 
-#waveform-canvas{
+.waveform-canvas{
   display: block;
 }
 

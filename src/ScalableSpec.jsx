@@ -958,7 +958,7 @@ function ScalableSpec( { /*response, audioFileName,*/
     // When a new audio file is uploaded:
     useEffect( () => {
             if (!response) return
-
+            console.log(response.data.audio_id)
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration);
             setAudioId(response.data.audio_id);
@@ -985,9 +985,10 @@ function ScalableSpec( { /*response, audioFileName,*/
     }, [audioSnippet])
 
 
+
     return (
         <div
-            id='editor-container'
+            className='editor-container'
         >
             {showOverview &&
                 <div id='controls-container'>
@@ -1043,11 +1044,11 @@ function ScalableSpec( { /*response, audioFileName,*/
             }
             {showOverview &&
                 <div
-                    id='overview-canvas-container'
+                    className='overview-canvas-container'
                 >
                     <>
                         <canvas
-                            id='overview-canvas'
+                            className='overview-canvas'
                             ref={overviewRef}
                             width={parent.innerWidth - 30}
                             height={100}
@@ -1068,7 +1069,7 @@ function ScalableSpec( { /*response, audioFileName,*/
                 </div>
             }
             <canvas
-                id='waveform-canvas'
+                className='waveform-canvas'
                 ref={waveformCanvasRef}
                 width={parent.innerWidth -30}
                 height={150}
@@ -1078,10 +1079,10 @@ function ScalableSpec( { /*response, audioFileName,*/
                 onMouseMove={handleMouseMove}
             />
             <div
-                id='spec-canvas-container'
+                className='spec-canvas-container'
             >
                 <canvas
-                    id='spec-canvas'
+                    className='spec-canvas'
                     ref={specCanvasRef}
                     width={parent.innerWidth -30}
                     height={300}
@@ -1093,11 +1094,11 @@ function ScalableSpec( { /*response, audioFileName,*/
                 {showOverview &&
                     <>
                         <button
-                            id='left-scroll-btn'
+                            className='left-scroll-btn'
                             onClick={leftScroll}
                         />
                         <button
-                            id='right-scroll-btn'
+                            className='right-scroll-btn'
                             onClick={rightScroll}
                         />
                     </>

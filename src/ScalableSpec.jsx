@@ -1040,6 +1040,7 @@ function ScalableSpec( { /*response, audioFileName,*/
                     ref={timeAxisRef}
                     width={parent.innerWidth - 30}
                     height={40}
+                    onContextMenu={(event) => event.preventDefault()}
                 />
             }
             {showOverview &&

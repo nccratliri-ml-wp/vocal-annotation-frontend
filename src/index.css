@@ -25,6 +25,11 @@ html, body {
 }
 
 
+.editor-container{
+  margin: 0 0 100px 0;
+}
+
+
 /* -------------------------- Spectrogram -------------------------- */
 
 .spec-canvas-container{

@@ -91,19 +91,27 @@ function App() {
                 nfft={nfft}
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
-                showOverview={true}
+                showOverviewInitialValue={true}
 
             />
             <ScalableSpec
-                //response={response}
-                //audioFileName={audioFileName}
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
                 specType={specType}
                 nfft={nfft}
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
-                showOverview={false}
+                showOverviewInitialValue={false}
+
+            />
+            <ScalableSpec
+                importedLabels={importedLabels}
+                activeClustername={activeClustername}
+                specType={specType}
+                nfft={nfft}
+                binsPerOctave={binsPerOctave}
+                parameters={parameters}
+                showOverviewInitialValue={false}
 
             />
             <Clusternames

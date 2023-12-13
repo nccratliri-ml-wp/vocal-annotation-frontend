@@ -34,7 +34,7 @@ function ScalableSpec( { /*response, audioFileName,*/
                            activeClustername,
                            /*spectrogramIsLoading, passSpectrogramIsLoadingToApp,*/
                            specType, nfft, binsPerOctave, parameters,
-                           showOverview}) {
+                           showOverviewInitialValue}) {
     // General
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -80,6 +80,10 @@ function ScalableSpec( { /*response, audioFileName,*/
     const [selectedFile, setSelectedFile] = useState(null)
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
+
+
+
+    const [showOverview, setShowOverview] = useState(showOverviewInitialValue)
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -392,28 +396,28 @@ function ScalableSpec( { /*response, audioFileName,*/
     }
 
     const drawTimeAxis = () => {
-        const canvas = timeAxisRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+        const canvas = timeAxisRef.current
+        const ctx = canvas.getContext('2d')
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = '#9db4c0'
 
         // Drawing horizontal timeline
         ctx.beginPath()
-        ctx.moveTo(0, canvas.height - 1)
-        ctx.lineTo(canvas.width, canvas.height - 1)
+        ctx.moveTo(0, 0)
+        ctx.lineTo(canvas.width, 0)
         ctx.stroke()
 
         // Drawing first timestamp
         ctx.beginPath()
-        ctx.moveTo(1, canvas.height)
-        ctx.lineTo(1, 0)
+        ctx.moveTo(1, 0)
+        ctx.lineTo(1, canvas.height)
         ctx.stroke()
 
         // Drawing last timestamp
         ctx.beginPath()
-        ctx.moveTo(canvas.width - 1, canvas.height)
-        ctx.lineTo(canvas.width - 1, 0)
+        ctx.moveTo(canvas.width - 1, 0)
+        ctx.lineTo(canvas.width - 1, canvas.height)
         ctx.stroke()
 
         // Drawing timestamps in between
@@ -426,14 +430,14 @@ function ScalableSpec( { /*response, audioFileName,*/
 
         // Draw 1st level
         for (let i=step; i < audioDuration; i+=step){
-            drawTimestamp(i, 15, '.00', 14,true, false)
+            drawTimestamp(i, 30, '.00', 14,true, false)
         }
 
         step = step * 0.1
         // Draw 2nd level
         // TO DO: figure out why this breaks at 4.5
         for (let i=step; i < audioDuration; i+=step){
-            drawTimestamp(i, 30, '', 10,withText, true)
+            drawTimestamp(i, 15, '', 10,withText, true)
         }
 
         // Draw 3rd level
@@ -446,7 +450,7 @@ function ScalableSpec( { /*response, audioFileName,*/
 
         // Draw line under Timestamp text
         ctx.beginPath()
-        ctx.moveTo(x, canvas.height)
+        ctx.moveTo(x, 0)
         ctx.lineTo(x, lineHeight)
         ctx.lineWidth = 2
         ctx.strokeStyle = '#9db4c0'
@@ -463,7 +467,7 @@ function ScalableSpec( { /*response, audioFileName,*/
         const textWidth = ctx.measureText(timestampText).width;
 
         if (withText) {
-            ctx.fillText(timestamp.toString() + ending, x - textWidth / 2, lineHeight-5);
+            ctx.fillText(timestamp.toString() + ending, x - textWidth / 2, lineHeight+10);
         }
     }
 
@@ -927,7 +931,7 @@ function ScalableSpec( { /*response, audioFileName,*/
         if (!overviewSpectrogram || !showOverview) return
         drawOverviewSpectrogram(overviewSpectrogram)
         getSpecAndAudioArray()
-    }, [overviewSpectrogram])
+    }, [overviewSpectrogram, showOverview])
 
     // When user zoomed in/out, scrolled
     useEffect( () => {
@@ -958,6 +962,7 @@ function ScalableSpec( { /*response, audioFileName,*/
     // When a new audio file is uploaded:
     useEffect( () => {
             if (!response) return
+
             console.log(response.data.audio_id)
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration);
@@ -985,6 +990,10 @@ function ScalableSpec( { /*response, audioFileName,*/
     }, [audioSnippet])
 
 
+
+    const toggleOverview = () => {
+        setShowOverview(!showOverview)
+    }
 
     return (
         <div
@@ -1034,15 +1043,12 @@ function ScalableSpec( { /*response, audioFileName,*/
                     audioFileName={'Example Audio File Name'}
                     labels={labels}
                 />
+                <button
+                    onClick={toggleOverview}
+                >
+                    Toggle Overview
+                </button>
             </div>
-            {showOverview &&
-                <canvas
-                    ref={timeAxisRef}
-                    width={parent.innerWidth - 30}
-                    height={40}
-                    onContextMenu={(event) => event.preventDefault()}
-                />
-            }
             {showOverview &&
                 <div
                     className='overview-canvas-container'
@@ -1058,16 +1064,28 @@ function ScalableSpec( { /*response, audioFileName,*/
                             onContextMenu={(event) => event.preventDefault()}
                             onMouseMove={handleMouseMoveOverview}
                         />
-                        <button
-                            id='left-scroll-overview-btn'
-                            onClick={leftScrollOverview}
-                        />
-                        <button
-                            id='right-scroll-overview-btn'
-                            onClick={rightScrollOverview}
-                        />
+                        {response &&
+                            <>
+                                <button
+                                    id='left-scroll-overview-btn'
+                                    onClick={leftScrollOverview}
+                                />
+                                <button
+                                    id='right-scroll-overview-btn'
+                                    onClick={rightScrollOverview}
+                                />
+                            </>
+                        }
                     </>
                 </div>
+            }
+            {showOverview &&
+                <canvas
+                    ref={timeAxisRef}
+                    width={parent.innerWidth - 30}
+                    height={40}
+                    onContextMenu={(event) => event.preventDefault()}
+                />
             }
             <canvas
                 className='waveform-canvas'
@@ -1092,7 +1110,7 @@ function ScalableSpec( { /*response, audioFileName,*/
                     onContextMenu={handleRightClick}
                     onMouseMove={handleMouseMove}
                 />
-                {showOverview &&
+                {showOverview && spectrogram &&
                     <>
                         <button
                             className='left-scroll-btn'

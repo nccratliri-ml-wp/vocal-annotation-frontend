@@ -1,16 +1,12 @@
-import {useState, useRef, useEffect} from 'react'
-import Visuals from "./Visuals.jsx"
+import {useState, useRef} from 'react'
 import Clusternames from "./Clusternames.jsx"
-import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
 import SpecType from "./SpecType.jsx";
-import Parameters from "./Parameters.jsx";
 
 function App() {
     const audioDOMObject = useRef(null)
-    const [response, setResponse] = useState(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
@@ -19,18 +15,8 @@ function App() {
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
+    const [longestTrackDuration, setLongestTrackDuration] = useState(null)
 
-    function passAudioDOMObjectURLToApp(url){
-        audioDOMObject.current.setAttribute('src', url)
-    }
-
-    function passResponseToApp(newResponse){
-        setResponse( newResponse )
-    }
-
-    function passAudioFileNameToApp(newAudioFileName){
-        setAudioFileName( newAudioFileName )
-    }
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -60,6 +46,13 @@ function App() {
         setParameters( newParametersObject )
     }
 
+    function passLongestTrackDurationToApp( newTrackDuration ){
+        //setLongestTrackDuration( prevLongestTrackDuration => newTrackDuration > prevLongestTrackDuration? newTrackDuration : prevLongestTrackDuration )
+        if (longestTrackDuration > newTrackDuration) return
+        setLongestTrackDuration( newTrackDuration )
+
+    }
+
     return (
         <>
             <div id='files-upload-container'>
@@ -83,8 +76,6 @@ function App() {
                 */}
             </div>
             <ScalableSpec
-                //response={response}
-                //audioFileName={audioFileName}
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
                 specType={specType}
@@ -92,7 +83,8 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={true}
-
+                longestTrackDuration={longestTrackDuration}
+                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
             />
             <ScalableSpec
                 importedLabels={importedLabels}
@@ -102,7 +94,8 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={false}
-
+                longestTrackDuration={longestTrackDuration}
+                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
             />
             <ScalableSpec
                 importedLabels={importedLabels}
@@ -112,7 +105,8 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={false}
-
+                longestTrackDuration={longestTrackDuration}
+                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
             />
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}

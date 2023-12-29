@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import {nanoid} from "nanoid";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
-import CanvasButton from "./CanvasButton.jsx";
 import FileUpload from "./FileUpload.jsx";
-import AudioTrack from "./AudioTrack.jsx";
-
 
 // Classes
 class Label {
@@ -29,12 +25,19 @@ const SCROLL_STEP_RATIO = 0.1
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 
-function ScalableSpec( { /*response, audioFileName,*/
-                           importedLabels,
-                           activeClustername,
-                           /*spectrogramIsLoading, passSpectrogramIsLoadingToApp,*/
-                           specType, nfft, binsPerOctave, parameters,
-                           showOverviewInitialValue}) {
+function ScalableSpec(
+                        {
+                            //audioFileName,
+                            importedLabels,
+                            activeClustername,
+                            specType, nfft, binsPerOctave, parameters,
+                            showOverviewInitialValue,
+                            longestTrackDuration,
+                            passLongestTrackDurationToApp
+                        }
+                    )
+                {
+
     // General
     const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
@@ -918,6 +921,13 @@ function ScalableSpec( { /*response, audioFileName,*/
     }
 
 
+    /* ++++++++++++++++++ Toggle ++++++++++++++++++ */
+
+    const toggleOverview = () => {
+        setShowOverview(!showOverview)
+    }
+
+
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
@@ -944,7 +954,7 @@ function ScalableSpec( { /*response, audioFileName,*/
 
             getSpecAndAudioArray()
         }, [currentStartTime, clipDuration, nfft, binsPerOctave]
-    );
+    )
 
     // When user changed spectrogram type
     useEffect( () => {
@@ -957,21 +967,23 @@ function ScalableSpec( { /*response, audioFileName,*/
 
             getSpecAndAudioArray()
         }, [specType, parameters]
-    );
+    )
 
     // When a new audio file is uploaded:
     useEffect( () => {
             if (!response) return
 
-            console.log(response.data.audio_id)
+            //console.log(response.data.audio_id)
+            const addedSilence = longestTrackDuration - response.data.audio_duration
+
             newFileUploaded.current = true
-            setAudioDuration(response.data.audio_duration);
-            setAudioId(response.data.audio_id);
-            setClipDuration(response.data.audio_duration);
-            setCurrentStartTime(0);
-            setCurrentEndTime(response.data.audio_duration)
-            setMaxScrollTime(0);
-            setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO);
+            setAudioDuration(response.data.audio_duration + addedSilence)
+            setAudioId(response.data.audio_id)
+            setClipDuration(response.data.audio_duration + addedSilence)
+            setCurrentStartTime(0)
+            setCurrentEndTime(response.data.audio_duration + addedSilence)
+            setMaxScrollTime(0)
+            setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
             setLabels([])
             playheadRef.current.timeframe = 0
 
@@ -989,11 +1001,21 @@ function ScalableSpec( { /*response, audioFileName,*/
         playAudio()
     }, [audioSnippet])
 
+    // When longestTrackDuration is updated in the App component
+    useEffect( ()=> {
+        if (!longestTrackDuration || !response) return
 
+        const addedSilence = longestTrackDuration - response.data.audio_duration
 
-    const toggleOverview = () => {
-        setShowOverview(!showOverview)
-    }
+        setAudioDuration(response.data.audio_duration + addedSilence)
+        setClipDuration(response.data.audio_duration + addedSilence)
+        setCurrentStartTime(0)
+        setCurrentEndTime(response.data.audio_duration + addedSilence)
+        setMaxScrollTime(0)
+        playheadRef.current.timeframe = 0
+
+    }, [longestTrackDuration])
+
 
     return (
         <div
@@ -1038,6 +1060,7 @@ function ScalableSpec( { /*response, audioFileName,*/
                     passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
                     passResponseToScalableSpec={passResponseToScalableSpec}
                     passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                    passLongestTrackDurationToApp={passLongestTrackDurationToApp}
                 />
                 <Export
                     audioFileName={'Example Audio File Name'}

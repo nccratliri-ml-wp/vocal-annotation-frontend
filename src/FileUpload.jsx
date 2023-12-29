@@ -1,6 +1,7 @@
+import React from "react";
 import axios from "axios";
 
-function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec} ) {
+function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passLongestTrackDurationToApp} ) {
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -25,6 +26,7 @@ function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec
         try {
             const response = await axios.post(path, formData)
             passResponseToScalableSpec( response )
+            passLongestTrackDurationToApp( response.data.audio_duration )
         } catch (error) {
             console.error("Error uploading file:", error)
         }

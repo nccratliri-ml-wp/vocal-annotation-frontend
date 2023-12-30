@@ -33,7 +33,8 @@ function ScalableSpec(
                             specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
                             longestTrackDuration,
-                            passLongestTrackDurationToApp
+                            passLongestTrackDurationToApp,
+                            deleteOutdatedLongestTrackDurationInApp
                         }
                     )
                 {
@@ -953,7 +954,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, clipDuration, nfft, binsPerOctave]
+        }, [currentStartTime, clipDuration, audioId, nfft, binsPerOctave]
     )
 
     // When user changed spectrogram type
@@ -973,9 +974,12 @@ function ScalableSpec(
     useEffect( () => {
             if (!response) return
 
-            //console.log(response.data.audio_id)
             const addedSilence = longestTrackDuration - response.data.audio_duration
-
+            console.log('+++++ +++++')
+            console.log(longestTrackDuration)
+            console.log(response.data.audio_duration)
+            console.log(addedSilence)
+            console.log(response.data.audio_duration + addedSilence)
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration + addedSilence)
             setAudioId(response.data.audio_id)
@@ -1003,6 +1007,7 @@ function ScalableSpec(
 
     // When longestTrackDuration is updated in the App component
     useEffect( ()=> {
+        console.log('running this effect')
         if (!longestTrackDuration || !response) return
 
         const addedSilence = longestTrackDuration - response.data.audio_duration
@@ -1061,6 +1066,8 @@ function ScalableSpec(
                     passResponseToScalableSpec={passResponseToScalableSpec}
                     passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                     passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+                    deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+                    previousAudioDuration={response? response.data.audio_duration : undefined}
                 />
                 <Export
                     audioFileName={'Example Audio File Name'}

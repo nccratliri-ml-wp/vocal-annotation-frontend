@@ -15,7 +15,7 @@ function App() {
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
-    const [longestTrackDuration, setLongestTrackDuration] = useState(null)
+    const [trackDurations, setTrackDurations] = useState([])
 
 
     function passLabelsToApp(newLabels){
@@ -47,10 +47,13 @@ function App() {
     }
 
     function passLongestTrackDurationToApp( newTrackDuration ){
-        //setLongestTrackDuration( prevLongestTrackDuration => newTrackDuration > prevLongestTrackDuration? newTrackDuration : prevLongestTrackDuration )
-        if (longestTrackDuration > newTrackDuration) return
-        setLongestTrackDuration( newTrackDuration )
+        setTrackDurations( prevState => [...prevState, newTrackDuration])
+    }
 
+    function deleteOutdatedLongestTrackDurationInApp( outdatedLongestTrackDuration ) {
+        const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== outdatedLongestTrackDuration)
+        console.log(newTrackDurations)
+        setTrackDurations( newTrackDurations )
     }
 
     return (
@@ -83,8 +86,9 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={true}
-                longestTrackDuration={longestTrackDuration}
+                longestTrackDuration={Math.max(...trackDurations)}
                 passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
             />
             <ScalableSpec
                 importedLabels={importedLabels}
@@ -94,8 +98,9 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={false}
-                longestTrackDuration={longestTrackDuration}
+                longestTrackDuration={Math.max(...trackDurations)}
                 passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
             />
             <ScalableSpec
                 importedLabels={importedLabels}
@@ -105,8 +110,9 @@ function App() {
                 binsPerOctave={binsPerOctave}
                 parameters={parameters}
                 showOverviewInitialValue={false}
-                longestTrackDuration={longestTrackDuration}
+                longestTrackDuration={Math.max(...trackDurations)}
                 passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
             />
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}

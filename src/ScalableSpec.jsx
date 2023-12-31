@@ -395,6 +395,7 @@ function ScalableSpec(
         image.addEventListener('load',  () => {
             overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
             overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
+            drawViewport(currentStartTime, currentEndTime, 'white', 2)
         });
         image.src = `data:image/png;base64,${overviewSpectrogram}`;
     }
@@ -908,9 +909,19 @@ function ScalableSpec(
         const centerY = canvas.height / 2
         ctx.strokeStyle = '#ddd8ff'
 
+        /*
+        const initialLength = newAudioArray.length
+        const initialDuration = response.data.audio_duration
+        const k = initialLength * initialDuration
+
+        const newLength = k / audioDuration
+
+        console.log('new length ' +newLength)
+        */
+
         for (let i = 0; i < newAudioArray.length; i++) {
             const datapoint = newAudioArray[i]
-            const y = centerY + scale * Math.sin(datapoint)
+            const y = centerY + scale * datapoint
 
             ctx.beginPath()
             ctx.moveTo(i * (canvas.width / newAudioArray.length), y)
@@ -941,8 +952,8 @@ function ScalableSpec(
     useEffect( () => {
         if (!overviewSpectrogram || !showOverview) return
         drawOverviewSpectrogram(overviewSpectrogram)
-        getSpecAndAudioArray()
-    }, [overviewSpectrogram, showOverview])
+        //getSpecAndAudioArray()
+    }, [overviewSpectrogram, showOverview, longestTrackDuration])
 
     // When user zoomed in/out, scrolled
     useEffect( () => {
@@ -975,11 +986,13 @@ function ScalableSpec(
             if (!response) return
 
             const addedSilence = longestTrackDuration - response.data.audio_duration
+            /*
             console.log('+++++ +++++')
             console.log(longestTrackDuration)
             console.log(response.data.audio_duration)
             console.log(addedSilence)
             console.log(response.data.audio_duration + addedSilence)
+             */
             newFileUploaded.current = true
             setAudioDuration(response.data.audio_duration + addedSilence)
             setAudioId(response.data.audio_id)
@@ -1007,11 +1020,11 @@ function ScalableSpec(
 
     // When longestTrackDuration is updated in the App component
     useEffect( ()=> {
-        console.log('running this effect')
         if (!longestTrackDuration || !response) return
 
         const addedSilence = longestTrackDuration - response.data.audio_duration
 
+        newFileUploaded.current = true
         setAudioDuration(response.data.audio_duration + addedSilence)
         setClipDuration(response.data.audio_duration + addedSilence)
         setCurrentStartTime(0)

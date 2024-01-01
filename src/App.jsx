@@ -52,7 +52,6 @@ function App() {
 
     function deleteOutdatedLongestTrackDurationInApp( outdatedLongestTrackDuration ) {
         const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== outdatedLongestTrackDuration)
-        console.log(newTrackDurations)
         setTrackDurations( newTrackDurations )
     }
 

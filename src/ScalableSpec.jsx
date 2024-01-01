@@ -919,13 +919,17 @@ function ScalableSpec(
         console.log('new length ' +newLength)
         */
 
-        for (let i = 0; i < newAudioArray.length; i++) {
-            const datapoint = newAudioArray[i]
+
+        const silenceArray = new Array(50000).fill(0);
+        const combinedArray = [...newAudioArray, ...silenceArray]
+
+        for (let i = 0; i < combinedArray.length; i++) {
+            const datapoint = combinedArray[i]
             const y = centerY + scale * datapoint
 
             ctx.beginPath()
-            ctx.moveTo(i * (canvas.width / newAudioArray.length), y)
-            ctx.lineTo((i + 1) * (canvas.width / newAudioArray.length), centerY + scale * newAudioArray[i + 1])
+            ctx.moveTo(i * (canvas.width / combinedArray.length), y)
+            ctx.lineTo((i + 1) * (canvas.width / combinedArray.length), centerY + scale * combinedArray[i + 1])
             ctx.stroke()
         }
 

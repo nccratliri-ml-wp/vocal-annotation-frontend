@@ -903,37 +903,30 @@ function ScalableSpec(
         if (!waveformCanvasRef.current) return
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
-        canvas.width = window.innerWidth -30;
+        canvas.width = window.innerWidth -30
 
-        const scale = 50;
+        const scale = 50
         const centerY = canvas.height / 2
+        const ratio = Math.min((response.data.audio_duration - currentStartTime) / clipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
-        /*
-        const initialLength = newAudioArray.length
-        const initialDuration = response.data.audio_duration
-        const k = initialLength * initialDuration
-
-        const newLength = k / audioDuration
-
-        console.log('new length ' +newLength)
-        */
-
-
-        const silenceArray = new Array(50000).fill(0);
-        const combinedArray = [...newAudioArray, ...silenceArray]
-
-        for (let i = 0; i < combinedArray.length; i++) {
-            const datapoint = combinedArray[i]
+        for (let i=0; i < newAudioArray.length; i++) {
+            const datapoint = newAudioArray[i]
             const y = centerY + scale * datapoint
 
             ctx.beginPath()
-            ctx.moveTo(i * (canvas.width / combinedArray.length), y)
-            ctx.lineTo((i + 1) * (canvas.width / combinedArray.length), centerY + scale * combinedArray[i + 1])
+            ctx.moveTo(i * canvas.width * ratio / newAudioArray.length, y)
+            ctx.lineTo((i + 1) * canvas.width * ratio / newAudioArray.length, centerY + scale * newAudioArray[i + 1])
             ctx.stroke()
         }
 
-        waveformImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        // Draw flat line representing silence
+        ctx.beginPath()
+        ctx.moveTo(canvas.width * ratio ,centerY)
+        ctx.lineTo(canvas.width, centerY)
+        ctx.stroke()
+
+        waveformImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height)
     }
 
 

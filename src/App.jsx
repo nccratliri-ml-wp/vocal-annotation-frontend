@@ -1,9 +1,10 @@
-import {useState, useRef} from 'react'
+import {useState, useRef, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
 import SpecType from "./SpecType.jsx";
+import {nanoid} from "nanoid";
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -16,7 +17,22 @@ function App() {
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
     const [trackDurations, setTrackDurations] = useState([])
-
+    const [tracks, setTracks] = useState([
+        <ScalableSpec
+            key={nanoid()}
+            importedLabels={importedLabels}
+            activeClustername={activeClustername}
+            specType={specType}
+            nfft={nfft}
+            binsPerOctave={binsPerOctave}
+            parameters={parameters}
+            showOverviewInitialValue={true}
+            longestTrackDuration={Math.max(...trackDurations)}
+            trackDurations={trackDurations}
+            passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+            deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+        />
+    ])
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -46,14 +62,34 @@ function App() {
         setParameters( newParametersObject )
     }
 
-    function passLongestTrackDurationToApp( newTrackDuration ){
-        setTrackDurations( prevState => [...prevState, newTrackDuration])
+    function passLongestTrackDurationToApp( newTrackDuration ) {
+        setTrackDurations(prevState => [...prevState, newTrackDuration])
     }
 
     function deleteOutdatedLongestTrackDurationInApp( outdatedLongestTrackDuration ) {
         const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== outdatedLongestTrackDuration)
         setTrackDurations( newTrackDurations )
     }
+
+    function addTrack(){
+        setTracks(prevState => [...prevState,
+            <ScalableSpec
+                key={nanoid()}
+                importedLabels={importedLabels}
+                activeClustername={activeClustername}
+                specType={specType}
+                nfft={nfft}
+                binsPerOctave={binsPerOctave}
+                parameters={parameters}
+                showOverviewInitialValue={false}
+                longestTrackDuration={Math.max(...trackDurations)}
+                trackDurations={trackDurations}
+                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
+                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+            />
+        ])
+    }
+
 
     return (
         <>
@@ -77,6 +113,13 @@ function App() {
                 />
                 */}
             </div>
+            {tracks}
+            <button
+                onClick={addTrack}
+                >
+                Add Track
+            </button>
+            {/*
             <ScalableSpec
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
@@ -89,6 +132,7 @@ function App() {
                 passLongestTrackDurationToApp={passLongestTrackDurationToApp}
                 deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
             />
+
             <ScalableSpec
                 importedLabels={importedLabels}
                 activeClustername={activeClustername}
@@ -113,6 +157,7 @@ function App() {
                 passLongestTrackDurationToApp={passLongestTrackDurationToApp}
                 deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
             />
+            */}
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

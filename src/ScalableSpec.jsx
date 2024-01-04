@@ -33,6 +33,7 @@ function ScalableSpec(
                             specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
                             longestTrackDuration,
+                            trackDurations,
                             passLongestTrackDurationToApp,
                             deleteOutdatedLongestTrackDurationInApp
                         }
@@ -982,7 +983,8 @@ function ScalableSpec(
     useEffect( () => {
             if (!response) return
 
-            const addedSilence = longestTrackDuration - response.data.audio_duration
+            const addedSilence = longestTrackDuration === -Infinity? 0 : longestTrackDuration - response.data.audio_duration
+
             /*
             console.log('+++++ +++++')
             console.log(longestTrackDuration)
@@ -1016,7 +1018,7 @@ function ScalableSpec(
     }, [audioSnippet])
 
     // When longestTrackDuration is updated in the App component
-    useEffect( ()=> {
+    useEffect( () => {
         if (!longestTrackDuration || !response) return
 
         const addedSilence = longestTrackDuration - response.data.audio_duration

@@ -17,6 +17,12 @@ function App() {
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
     const [trackDurations, setTrackDurations] = useState([])
+    const [showTracks, setShowTracks] = useState({
+        track_1: true,
+        track_2: false,
+        track_3: false
+    })
+    /*
     const [tracks, setTracks] = useState([
         <ScalableSpec
             key={nanoid()}
@@ -29,10 +35,11 @@ function App() {
             showOverviewInitialValue={true}
             longestTrackDuration={Math.max(...trackDurations)}
             trackDurations={trackDurations}
-            passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-            deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+            passTrackDurationToApp={passTrackDurationToApp}
+            deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
         />
     ])
+    */
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -62,16 +69,28 @@ function App() {
         setParameters( newParametersObject )
     }
 
-    function passLongestTrackDurationToApp( newTrackDuration ) {
+    function passTrackDurationToApp( newTrackDuration ) {
         setTrackDurations(prevState => [...prevState, newTrackDuration])
     }
 
-    function deleteOutdatedLongestTrackDurationInApp( outdatedLongestTrackDuration ) {
-        const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== outdatedLongestTrackDuration)
+    function deletePreviousTrackDurationInApp( previousTrackDuration ) {
+        const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== previousTrackDuration)
         setTrackDurations( newTrackDurations )
     }
 
     function addTrack(){
+        const firstFalseTrack = Object.keys(showTracks).find(
+            trackKey => !showTracks[trackKey]
+        )
+
+        if (!firstFalseTrack) return
+
+        setShowTracks({
+            ...showTracks,
+            [firstFalseTrack]: true
+        })
+
+        /*
         setTracks(prevState => [...prevState,
             <ScalableSpec
                 key={nanoid()}
@@ -83,13 +102,19 @@ function App() {
                 parameters={parameters}
                 showOverviewInitialValue={false}
                 longestTrackDuration={Math.max(...trackDurations)}
-                trackDurations={trackDurations}
-                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+                passTrackDurationToApp={passTrackDurationToApp}
+                deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
             />
         ])
+         */
     }
 
+    function removeTrackInApp( trackID ){
+        setShowTracks({
+            ...showTracks,
+            [trackID]: false
+        })
+    }
 
     return (
         <>
@@ -113,51 +138,59 @@ function App() {
                 />
                 */}
             </div>
-            {tracks}
+            {showTracks.track_1 &&
+                <ScalableSpec
+                    id='track_1'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={true}
+                    longestTrackDuration={Math.max(...trackDurations)}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_2 &&
+                <ScalableSpec
+                    id='track_2'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={false}
+                    longestTrackDuration={Math.max(...trackDurations)}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_3 &&
+                <ScalableSpec
+                    id='track_3'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={false}
+                    longestTrackDuration={Math.max(...trackDurations)}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
             <button
                 onClick={addTrack}
-                >
+            >
                 Add Track
             </button>
-            {/*
-            <ScalableSpec
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-                specType={specType}
-                nfft={nfft}
-                binsPerOctave={binsPerOctave}
-                parameters={parameters}
-                showOverviewInitialValue={true}
-                longestTrackDuration={Math.max(...trackDurations)}
-                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
-            />
-
-            <ScalableSpec
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-                specType={specType}
-                nfft={nfft}
-                binsPerOctave={binsPerOctave}
-                parameters={parameters}
-                showOverviewInitialValue={false}
-                longestTrackDuration={Math.max(...trackDurations)}
-                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
-            />
-            <ScalableSpec
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-                specType={specType}
-                nfft={nfft}
-                binsPerOctave={binsPerOctave}
-                parameters={parameters}
-                showOverviewInitialValue={false}
-                longestTrackDuration={Math.max(...trackDurations)}
-                passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-                deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
-            />
-            */}
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

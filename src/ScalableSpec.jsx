@@ -28,14 +28,15 @@ const LABEL_COLOR_HOVERED = "#f3e655"
 function ScalableSpec(
                         {
                             //audioFileName,
+                            id,
                             importedLabels,
                             activeClustername,
                             specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
                             longestTrackDuration,
-                            trackDurations,
-                            passLongestTrackDurationToApp,
-                            deleteOutdatedLongestTrackDurationInApp
+                            passTrackDurationToApp,
+                            deletePreviousTrackDurationInApp,
+                            removeTrackInApp
                         }
                     )
                 {
@@ -937,6 +938,13 @@ function ScalableSpec(
         setShowOverview(!showOverview)
     }
 
+    const handleRemoveTrack = () => {
+        if (response){
+            deletePreviousTrackDurationInApp( response.data.audio_duration )
+        }
+        removeTrackInApp(id)
+    }
+
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
@@ -1077,8 +1085,8 @@ function ScalableSpec(
                     passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
                     passResponseToScalableSpec={passResponseToScalableSpec}
                     passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                    passLongestTrackDurationToApp={passLongestTrackDurationToApp}
-                    deleteOutdatedLongestTrackDurationInApp={deleteOutdatedLongestTrackDurationInApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     previousAudioDuration={response? response.data.audio_duration : undefined}
                 />
                 <Export
@@ -1089,6 +1097,11 @@ function ScalableSpec(
                     onClick={toggleOverview}
                 >
                     Toggle Overview
+                </button>
+                <button
+                    onClick={handleRemoveTrack}
+                >
+                    Remove Track
                 </button>
             </div>
             {showOverview &&

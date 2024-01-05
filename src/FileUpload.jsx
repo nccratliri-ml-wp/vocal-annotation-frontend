@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 
-function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passLongestTrackDurationToApp, deleteOutdatedLongestTrackDurationInApp, previousAudioDuration} ) {
+function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passTrackDurationToApp, deletePreviousTrackDurationInApp, previousAudioDuration} ) {
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -26,11 +26,8 @@ function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec
         try {
             const response = await axios.post(path, formData)
             passResponseToScalableSpec( response )
-            // If the new audio track is shorter than the previous one, remove the outdated track duration from trackDurations state in the App component
-            if (previousAudioDuration > response.data.audio_duration){
-                deleteOutdatedLongestTrackDurationInApp( previousAudioDuration )
-            }
-            passLongestTrackDurationToApp( response.data.audio_duration )
+            deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
+            passTrackDurationToApp( response.data.audio_duration )
         } catch (error) {
             console.error("Error uploading file:", error)
         }

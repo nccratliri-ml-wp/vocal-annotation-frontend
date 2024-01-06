@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
@@ -22,24 +22,13 @@ function App() {
         track_2: false,
         track_3: false
     })
-    /*
-    const [tracks, setTracks] = useState([
-        <ScalableSpec
-            key={nanoid()}
-            importedLabels={importedLabels}
-            activeClustername={activeClustername}
-            specType={specType}
-            nfft={nfft}
-            binsPerOctave={binsPerOctave}
-            parameters={parameters}
-            showOverviewInitialValue={true}
-            longestTrackDuration={Math.max(...trackDurations)}
-            trackDurations={trackDurations}
-            passTrackDurationToApp={passTrackDurationToApp}
-            deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-        />
-    ])
-    */
+
+
+    // General
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(0);
+
+
+
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -74,8 +63,15 @@ function App() {
     }
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
-        const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== previousTrackDuration)
-        setTrackDurations( newTrackDurations )
+        //const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== previousTrackDuration)
+        //setTrackDurations( newTrackDurations )
+        const indexToRemove = trackDurations.indexOf(previousTrackDuration)
+
+        if (indexToRemove === -1) return
+
+        const newTrackDurations = [...trackDurations]
+        newTrackDurations.splice(indexToRemove, 1)
+        setTrackDurations(newTrackDurations)
     }
 
     function addTrack(){
@@ -89,24 +85,6 @@ function App() {
             ...showTracks,
             [firstFalseTrack]: true
         })
-
-        /*
-        setTracks(prevState => [...prevState,
-            <ScalableSpec
-                key={nanoid()}
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-                specType={specType}
-                nfft={nfft}
-                binsPerOctave={binsPerOctave}
-                parameters={parameters}
-                showOverviewInitialValue={false}
-                longestTrackDuration={Math.max(...trackDurations)}
-                passTrackDurationToApp={passTrackDurationToApp}
-                deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-            />
-        ])
-         */
     }
 
     function removeTrackInApp( trackID ){
@@ -116,8 +94,29 @@ function App() {
         })
     }
 
+
+    /* ++++++++++++++++++ Controls ++++++++++++++++++ */
+
+    function passAudioDurationToApp(){
+
+    }
+
+    function onZoomIn (){
+        console.log('Zooming in.')
+    }
+
+    function onZoomOut (){
+        console.log('Zooming out.')
+    }
+
+    useEffect( () => {
+        const newGlobalDuration = Math.max(...trackDurations) === -Infinity? 0 : Math.max(...trackDurations)
+        setGlobalAudioDuration(newGlobalDuration)
+    }, [trackDurations])
+
     return (
         <>
+            {'global Audio duration: '+globalAudioDuration}
             <div id='files-upload-container'>
                 <Searchbar />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
@@ -138,6 +137,16 @@ function App() {
                 />
                 */}
             </div>
+            <button
+                onClick={onZoomIn}
+            >
+                +🔍
+            </button>
+            <button
+                onClick={onZoomOut}
+            >
+                -🔍
+            </button>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
@@ -148,7 +157,7 @@ function App() {
                     binsPerOctave={binsPerOctave}
                     parameters={parameters}
                     showOverviewInitialValue={true}
-                    longestTrackDuration={Math.max(...trackDurations)}
+                    globalAudioDuration={globalAudioDuration}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
@@ -164,7 +173,7 @@ function App() {
                     binsPerOctave={binsPerOctave}
                     parameters={parameters}
                     showOverviewInitialValue={false}
-                    longestTrackDuration={Math.max(...trackDurations)}
+                    globalAudioDuration={globalAudioDuration}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
@@ -180,7 +189,7 @@ function App() {
                     binsPerOctave={binsPerOctave}
                     parameters={parameters}
                     showOverviewInitialValue={false}
-                    longestTrackDuration={Math.max(...trackDurations)}
+                    globalAudioDuration={globalAudioDuration}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}

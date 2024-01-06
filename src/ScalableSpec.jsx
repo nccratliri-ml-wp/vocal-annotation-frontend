@@ -33,7 +33,7 @@ function ScalableSpec(
                             activeClustername,
                             specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
-                            longestTrackDuration,
+                            globalAudioDuration,
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
                             removeTrackInApp
@@ -42,7 +42,6 @@ function ScalableSpec(
                 {
 
     // General
-    const [audioDuration, setAudioDuration] = useState(0);
     const [audioId, setAudioId] = useState(null);
     const [clipDuration, setClipDuration] = useState(null);
     const [currentStartTime, setCurrentStartTime] = useState(0);
@@ -61,7 +60,7 @@ function ScalableSpec(
     // Overview Window
     const overviewRef = useRef(null)
     const overviewImgData = useRef(null)
-    const newFileUploaded = useRef(null)
+    const newOverviewSpecNeeded = useRef(null)
     const [overviewSpectrogram, setOverviewSpectrogram] = useState(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
@@ -137,9 +136,9 @@ function ScalableSpec(
             setSpectrogramIsLoading(false)
             setSpectrogram(newSpec)
             setAudioArray(newAudioArray)
-            if (newFileUploaded.current){
+            if (newOverviewSpecNeeded.current){
                 setOverviewSpectrogram(newSpec)
-                newFileUploaded.current = false
+                newOverviewSpecNeeded.current = false
             }
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -152,7 +151,7 @@ function ScalableSpec(
 
     const onZoomIn = () => {
         const newDuration = Math.max(clipDuration / 2, 0.1);
-        const newMaxScrollTime = Math.max(audioDuration - newDuration, 0);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration * SCROLL_STEP_RATIO);
@@ -160,9 +159,9 @@ function ScalableSpec(
     };
 
     const onZoomOut = () => {
-        const newDuration = Math.min(clipDuration * 2, audioDuration);
-        const newMaxScrollTime = Math.max(audioDuration - newDuration, 0);
-        const newStartTime = Math.min( Math.max(  audioDuration - newDuration, 0), currentStartTime);
+        const newDuration = Math.min(clipDuration * 2, globalAudioDuration);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
+        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
         setClipDuration(newDuration);
         setMaxScrollTime(newMaxScrollTime);
         setScrollStep(newDuration * SCROLL_STEP_RATIO);
@@ -184,7 +183,7 @@ function ScalableSpec(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
         );
         setCurrentEndTime(
-            prevEndTime => Math.min(prevEndTime + scrollStep, audioDuration)
+            prevEndTime => Math.min(prevEndTime + scrollStep, globalAudioDuration)
         );
     };
 
@@ -428,22 +427,22 @@ function ScalableSpec(
         ctx.stroke()
 
         // Drawing timestamps in between
-        const withText = clipDuration < audioDuration
+        const withText = clipDuration < globalAudioDuration
 
-        let step = Math.floor(audioDuration / 10 / 10) * 10
+        let step = Math.floor(globalAudioDuration / 10 / 10) * 10
         if (step < 1){
             step = 1
         }
 
         // Draw 1st level
-        for (let i=step; i < audioDuration; i+=step){
+        for (let i=step; i < globalAudioDuration; i+=step){
             drawTimestamp(i, 30, '.00', 14,true, false)
         }
 
         step = step * 0.1
         // Draw 2nd level
         // TO DO: figure out why this breaks at 4.5
-        for (let i=step; i < audioDuration; i+=step){
+        for (let i=step; i < globalAudioDuration; i+=step){
             drawTimestamp(i, 15, '', 10,withText, true)
         }
 
@@ -650,7 +649,7 @@ function ScalableSpec(
         // Set new Viewport (Start & Endframe)
         if (widthBetween_xStartTime_xClicked){
             const newDuration = newViewportEndFrame - newViewportStartFrame
-            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
+            const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             setCurrentStartTime( newViewportStartFrame )
             setCurrentEndTime( newViewportEndFrame )
             setClipDuration( newDuration )
@@ -659,7 +658,7 @@ function ScalableSpec(
         // Set new Start Frame
         } else if (newViewportStartFrame){
             const newDuration = currentEndTime - newViewportStartFrame
-            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
+            const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             setCurrentStartTime(newViewportStartFrame)
             setClipDuration( newDuration )
             setMaxScrollTime( newMaxScrollTime )
@@ -667,7 +666,7 @@ function ScalableSpec(
         // Set new End frame
         } else if (newViewportEndFrame){
             const newDuration = newViewportEndFrame - currentStartTime
-            const newMaxScrollTime = Math.max(audioDuration - newDuration, 0)
+            const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             setCurrentEndTime( newViewportEndFrame )
             setClipDuration( newDuration )
             setMaxScrollTime( newMaxScrollTime )
@@ -704,20 +703,20 @@ function ScalableSpec(
             return
         }
         // Prevent Viewport End Frame from going above the Audio Duration
-        if (newViewportEndFrame > audioDuration){
+        if (newViewportEndFrame > globalAudioDuration){
             newViewportStartFrame = calculateViewportTimestamp(overviewRef.current.width - viewportWidth )
-            newViewportEndFrame = audioDuration
+            newViewportEndFrame = globalAudioDuration
             return
         }
         drawViewport(newViewportStartFrame, newViewportEndFrame, 'white', 4)
     }
 
     const calculateViewportTimestamp = (xClicked) => {
-        return audioDuration * (xClicked / overviewRef.current.width)
+        return globalAudioDuration * (xClicked / overviewRef.current.width)
     }
 
     const calculateViewportFrameX = (timestamp) => {
-        return timestamp * overviewRef.current.width / audioDuration
+        return timestamp * overviewRef.current.width / globalAudioDuration
     }
 
     const updateViewportScrollButtons = (startFrame, endFrame) => {
@@ -806,7 +805,7 @@ function ScalableSpec(
             prevStartTime => Math.min(prevStartTime + clipDuration, maxScrollTime)
         );
         setCurrentEndTime(
-            prevEndTime => Math.min(prevEndTime + clipDuration, audioDuration)
+            prevEndTime => Math.min(prevEndTime + clipDuration, globalAudioDuration)
         );
     }
 
@@ -958,8 +957,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!overviewSpectrogram || !showOverview) return
         drawOverviewSpectrogram(overviewSpectrogram)
-        //getSpecAndAudioArray()
-    }, [overviewSpectrogram, showOverview, longestTrackDuration])
+    }, [overviewSpectrogram, showOverview, globalAudioDuration])
 
     // When user zoomed in/out, scrolled
     useEffect( () => {
@@ -991,25 +989,16 @@ function ScalableSpec(
     useEffect( () => {
             if (!response) return
 
-            const addedSilence = longestTrackDuration === -Infinity? 0 : longestTrackDuration - response.data.audio_duration
-
-            /*
-            console.log('+++++ +++++')
-            console.log(longestTrackDuration)
-            console.log(response.data.audio_duration)
-            console.log(addedSilence)
-            console.log(response.data.audio_duration + addedSilence)
-             */
-            newFileUploaded.current = true
-            setAudioDuration(response.data.audio_duration + addedSilence)
+            //newOverviewSpecNeeded.current = true
             setAudioId(response.data.audio_id)
-            setClipDuration(response.data.audio_duration + addedSilence)
-            setCurrentStartTime(0)
-            setCurrentEndTime(response.data.audio_duration + addedSilence)
-            setMaxScrollTime(0)
-            setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
+            //setAudioDuration(globalAudioDuration)
+            //setClipDuration(globalAudioDuration)
+            //setCurrentStartTime(0)
+            //setCurrentEndTime(globalAudioDuration)
+            //setMaxScrollTime(0)
+            //setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
             setLabels([])
-            playheadRef.current.timeframe = 0
+            //playheadRef.current.timeframe = 0
 
         }, [response])
 
@@ -1025,62 +1014,28 @@ function ScalableSpec(
         playAudio()
     }, [audioSnippet])
 
-    // When longestTrackDuration is updated in the App component
+    // When globalAudioDuration is updated in the App component
     useEffect( () => {
-        if (!longestTrackDuration || !response) return
+        if (!globalAudioDuration || !response) return
 
-        const addedSilence = longestTrackDuration - response.data.audio_duration
-
-        newFileUploaded.current = true
-        setAudioDuration(response.data.audio_duration + addedSilence)
-        setClipDuration(response.data.audio_duration + addedSilence)
+        newOverviewSpecNeeded.current = true
+        //setAudioDuration(globalAudioDuration)
+        setClipDuration(globalAudioDuration)
         setCurrentStartTime(0)
-        setCurrentEndTime(response.data.audio_duration + addedSilence)
+        setCurrentEndTime(globalAudioDuration)
         setMaxScrollTime(0)
+        setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
         playheadRef.current.timeframe = 0
 
-    }, [longestTrackDuration])
+    }, [response, globalAudioDuration])
+
 
 
     return (
         <div
             className='editor-container'
         >
-            {showOverview &&
-                <div id='controls-container'>
-                    <button
-                        onClick={onZoomIn}
-                    >
-                        +🔍
-                    </button>
-                    <button
-                        onClick={onZoomOut}
-                    >
-                        -🔍
-                    </button>
-                    <button
-                        onClick={() => console.log(labels)}
-                    >
-                        Console log labels
-                    </button>
-                    <button
-                        onClick={getAudio}
-                    >
-                        ▶
-                    </button>
-                    <button
-                        onClick={pauseAudio}
-                    >
-                        ⏸
-                    </button>
-                    <button
-                        onClick={stopAudio}
-                    >
-                        ⏹
-                    </button>
-                </div>
-            }
-            <div className='file-import-export-container' >
+            <div className='track-controls' >
                 <FileUpload
                     passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
                     passResponseToScalableSpec={passResponseToScalableSpec}
@@ -1102,6 +1057,26 @@ function ScalableSpec(
                     onClick={handleRemoveTrack}
                 >
                     Remove Track
+                </button>
+                <button
+                    onClick={() => console.log(labels)}
+                >
+                    Console log labels
+                </button>
+                <button
+                    onClick={getAudio}
+                >
+                    ▶
+                </button>
+                <button
+                    onClick={pauseAudio}
+                >
+                    ⏸
+                </button>
+                <button
+                    onClick={stopAudio}
+                >
+                    ⏹
                 </button>
             </div>
             {showOverview &&

@@ -4,7 +4,8 @@ import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
 import SpecType from "./SpecType.jsx";
-import {nanoid} from "nanoid";
+
+const SCROLL_STEP_RATIO = 0.1
 
 function App() {
     const audioDOMObject = useRef(null)
@@ -26,7 +27,11 @@ function App() {
 
     // General
     const [globalAudioDuration, setGlobalAudioDuration] = useState(0);
-
+    const [globalClipDuration, setGlobalClipDuration] = useState(0)
+    const [currentStartTime, setCurrentStartTime] = useState(0);
+    const [currentEndTime, setCurrentEndTime] = useState(0);
+    const [maxScrollTime, setMaxScrollTime] = useState(0);
+    const [scrollStep, setScrollStep] = useState(0);
 
 
 
@@ -97,16 +102,45 @@ function App() {
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
-    function passAudioDurationToApp(){
 
+    function passClipDurationToApp( newClipDuration ){
+        setGlobalClipDuration( newClipDuration )
+    }
+
+    function passCurrentStartTimeToApp( newCurrentStartTime ){
+        setCurrentStartTime( newCurrentStartTime )
+    }
+
+    function passCurrentEndTimeToApp( newCurrentEndTime ){
+        setCurrentEndTime( newCurrentEndTime )
+    }
+
+    function passMaxScrollTimeToApp( newMaxScrollTime ){
+        setMaxScrollTime( newMaxScrollTime )
+    }
+
+    function passScrollStepToApp( newScrollStep ){
+        setScrollStep( newScrollStep )
     }
 
     function onZoomIn (){
-        console.log('Zooming in.')
+        const newDuration = Math.max(globalClipDuration / 2, 0.1);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
+        setGlobalClipDuration(newDuration);
+        setMaxScrollTime(newMaxScrollTime);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
+        setCurrentEndTime( currentStartTime + newDuration );
     }
 
     function onZoomOut (){
-        console.log('Zooming out.')
+        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
+        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
+        setGlobalClipDuration(newDuration);
+        setMaxScrollTime(newMaxScrollTime);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
+        setCurrentStartTime( newStartTime );
+        setCurrentEndTime( newStartTime + newDuration );
     }
 
     useEffect( () => {
@@ -116,7 +150,7 @@ function App() {
 
     return (
         <>
-            {'global Audio duration: '+globalAudioDuration}
+            {'global Clip duration: '+globalClipDuration}
             <div id='files-upload-container'>
                 <Searchbar />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
@@ -158,6 +192,17 @@ function App() {
                     parameters={parameters}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
@@ -174,6 +219,17 @@ function App() {
                     parameters={parameters}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
@@ -190,6 +246,17 @@ function App() {
                     parameters={parameters}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}

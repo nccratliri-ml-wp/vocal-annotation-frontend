@@ -21,7 +21,6 @@ class Playhead{
 }
 
 // Global variables
-const SCROLL_STEP_RATIO = 0.1
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 
@@ -34,6 +33,17 @@ function ScalableSpec(
                             specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
                             globalAudioDuration,
+                            globalClipDuration,
+                            passClipDurationToApp,
+                            currentStartTime,
+                            currentEndTime,
+                            maxScrollTime,
+                            scrollStep,
+                            SCROLL_STEP_RATIO,
+                            passScrollStepToApp,
+                            passMaxScrollTimeToApp,
+                            passCurrentEndTimeToApp,
+                            passCurrentStartTimeToApp,
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
                             removeTrackInApp
@@ -43,11 +53,6 @@ function ScalableSpec(
 
     // General
     const [audioId, setAudioId] = useState(null);
-    const [clipDuration, setClipDuration] = useState(null);
-    const [currentStartTime, setCurrentStartTime] = useState(0);
-    const [currentEndTime, setCurrentEndTime] = useState(0);
-    const [maxScrollTime, setMaxScrollTime] = useState(0);
-    const [scrollStep, setScrollStep] = useState(0);
 
     // Spectrogram
     const specCanvasRef = useRef(null);
@@ -107,14 +112,14 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Spectrogram fetching methods ++++++++++++++++++ */
 
-    const getAudioClipSpec = async (startTime, duration, spectrogramType) => {
+    const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
         const requestParameters = {
             //...parameters,
             audio_id: audioId,
-            start_time: startTime,
-            clip_duration: duration,
-            spec_cal_method: spectrogramType,
+            start_time: currentStartTime,
+            clip_duration: globalClipDuration,
+            spec_cal_method: specType,
             n_fft: nfft,
             bins_per_octave: binsPerOctave,
         }
@@ -128,7 +133,7 @@ function ScalableSpec(
         try {
             const [newSpec, newAudioArray] = await Promise.all(
                 [
-                    getAudioClipSpec(currentStartTime, clipDuration, specType),
+                    getAudioClipSpec(),
                     getAudioArray()
                 ]
             )
@@ -150,39 +155,39 @@ function ScalableSpec(
     /* ++++++++++++++++++ Zoom & Scroll methods ++++++++++++++++++ */
 
     const onZoomIn = () => {
-        const newDuration = Math.max(clipDuration / 2, 0.1);
+        const newDuration = Math.max(globalClipDuration / 2, 0.1);
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        setClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentEndTime( currentStartTime + newDuration );
+        passClipDurationToApp(newDuration);
+        passMaxScrollTimeToApp(newMaxScrollTime);
+        passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
+        passCurrentEndTimeToApp( currentStartTime + newDuration );
     };
 
     const onZoomOut = () => {
-        const newDuration = Math.min(clipDuration * 2, globalAudioDuration);
+        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
         const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
-        setClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentStartTime( newStartTime );
-        setCurrentEndTime( newStartTime + newDuration );
+        passClipDurationToApp(newDuration);
+        passMaxScrollTimeToApp(newMaxScrollTime);
+        passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
+        passCurrentStartTimeToApp( newStartTime );
+        passCurrentEndTimeToApp( newStartTime + newDuration );
     };
 
     const leftScroll = () => {
-        setCurrentStartTime(
+        passCurrentStartTimeToApp(
             prevStartTime => Math.max(prevStartTime - scrollStep, 0)
         );
-        setCurrentEndTime(
-            prevEndTime => Math.max(prevEndTime - scrollStep, clipDuration)
+        passCurrentEndTimeToApp(
+            prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration)
         );
     };
 
     const rightScroll = () => {
-        setCurrentStartTime(
+        passCurrentStartTimeToApp(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
         );
-        setCurrentEndTime(
+        passCurrentEndTimeToApp(
             prevEndTime => Math.min(prevEndTime + scrollStep, globalAudioDuration)
         );
     };
@@ -330,13 +335,13 @@ function ScalableSpec(
     }
 
     const calculateXPosition = (timestamp, canvas) => {
-        return ( timestamp * canvas.width / clipDuration ) - ( currentStartTime * canvas.width / clipDuration )
+        return ( timestamp * canvas.width / globalClipDuration ) - ( currentStartTime * canvas.width / globalClipDuration )
     }
 
     const calculateTimestamp = (event) => {
         const xClicked = getXClicked(event)
         const ratio = (xClicked / specCanvasRef.current.width)
-        return clipDuration * ratio + currentStartTime
+        return globalClipDuration * ratio + currentStartTime
     }
 
     const checkIfPositionIsOccupied = (xClicked) => {
@@ -427,7 +432,7 @@ function ScalableSpec(
         ctx.stroke()
 
         // Drawing timestamps in between
-        const withText = clipDuration < globalAudioDuration
+        const withText = globalClipDuration < globalAudioDuration
 
         let step = Math.floor(globalAudioDuration / 10 / 10) * 10
         if (step < 1){
@@ -452,7 +457,7 @@ function ScalableSpec(
     const drawTimestamp = (timestamp, lineHeight, ending, fontSize, withText, withFloor) => {
         const canvas = timeAxisRef.current;
         const ctx = timeAxisRef.current.getContext('2d');
-        const x = (timestamp * canvas.width / clipDuration) - ( currentStartTime * canvas.width / clipDuration )
+        const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
 
         // Draw line under Timestamp text
         ctx.beginPath()
@@ -608,7 +613,7 @@ function ScalableSpec(
     const handleLMBDownOverview = (event) => {
         const xClicked = getXClicked(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
-        const xEndFrame = calculateViewportFrameX(currentStartTime + clipDuration)
+        const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
         // Deal with click on Start Frame
         if (xClicked >= xStartFrame - 2 && xClicked <= xStartFrame + 2){
@@ -650,27 +655,27 @@ function ScalableSpec(
         if (widthBetween_xStartTime_xClicked){
             const newDuration = newViewportEndFrame - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-            setCurrentStartTime( newViewportStartFrame )
-            setCurrentEndTime( newViewportEndFrame )
-            setClipDuration( newDuration )
-            setMaxScrollTime( newMaxScrollTime )
-            setScrollStep(newDuration * SCROLL_STEP_RATIO)
+            passCurrentStartTimeToApp( newViewportStartFrame )
+            passCurrentEndTimeToApp( newViewportEndFrame )
+            passClipDurationToApp( newDuration )
+            passMaxScrollTimeToApp( newMaxScrollTime )
+            passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
         // Set new Start Frame
         } else if (newViewportStartFrame){
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-            setCurrentStartTime(newViewportStartFrame)
-            setClipDuration( newDuration )
-            setMaxScrollTime( newMaxScrollTime )
-            setScrollStep(newDuration * SCROLL_STEP_RATIO);
+            passCurrentStartTimeToApp(newViewportStartFrame)
+            passClipDurationToApp( newDuration )
+            passMaxScrollTimeToApp( newMaxScrollTime )
+            passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
         // Set new End frame
         } else if (newViewportEndFrame){
             const newDuration = newViewportEndFrame - currentStartTime
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-            setCurrentEndTime( newViewportEndFrame )
-            setClipDuration( newDuration )
-            setMaxScrollTime( newMaxScrollTime )
-            setScrollStep(newDuration * SCROLL_STEP_RATIO);
+            passCurrentEndTimeToApp( newViewportEndFrame )
+            passClipDurationToApp( newDuration )
+            passMaxScrollTimeToApp( newMaxScrollTime )
+            passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
         }
 
         newViewportStartFrame = null
@@ -781,7 +786,7 @@ function ScalableSpec(
     const hoverViewportFrame = (event) => {
         const xHovered = getXClicked(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
-        const xEndFrame = calculateViewportFrameX(currentStartTime + clipDuration)
+        const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
         // Deal with click on Start Frame
         if ( (xHovered >= xStartFrame - 2 && xHovered <= xStartFrame + 2) || (xHovered >= xEndFrame - 2 && xHovered <= xEndFrame + 2) ){
@@ -792,20 +797,20 @@ function ScalableSpec(
     }
 
     const leftScrollOverview = () => {
-        setCurrentStartTime(
-            prevStartTime => Math.max(prevStartTime - clipDuration, 0)
+        passCurrentStartTimeToApp(
+            prevStartTime => Math.max(prevStartTime - globalClipDuration, 0)
         );
-        setCurrentEndTime(
-            prevEndTime => Math.max(prevEndTime - clipDuration, clipDuration)
+        passCurrentEndTimeToApp(
+            prevEndTime => Math.max(prevEndTime - globalClipDuration, globalClipDuration)
         );
     }
 
     const rightScrollOverview = () => {
-        setCurrentStartTime(
-            prevStartTime => Math.min(prevStartTime + clipDuration, maxScrollTime)
+        passCurrentStartTimeToApp(
+            prevStartTime => Math.min(prevStartTime + globalClipDuration, maxScrollTime)
         );
-        setCurrentEndTime(
-            prevEndTime => Math.min(prevEndTime + clipDuration, globalAudioDuration)
+        passCurrentEndTimeToApp(
+            prevEndTime => Math.min(prevEndTime + globalClipDuration, globalAudioDuration)
         );
     }
 
@@ -817,7 +822,7 @@ function ScalableSpec(
             const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: currentStartTime,
-                clip_duration: clipDuration
+                clip_duration: globalClipDuration
             });
             handleNewAudio(response.data.wav);
         } catch (error) {
@@ -892,7 +897,7 @@ function ScalableSpec(
         const requestParameters = {
             audio_id: audioId,
             start_time: currentStartTime,
-            clip_duration: clipDuration,
+            clip_duration: globalClipDuration,
             target_length: 100000
         }
 
@@ -908,7 +913,7 @@ function ScalableSpec(
 
         const scale = 50
         const centerY = canvas.height / 2
-        const ratio = Math.min((response.data.audio_duration - currentStartTime) / clipDuration, 1)
+        const ratio = Math.min((response.data.audio_duration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
         for (let i=0; i < newAudioArray.length; i++) {
@@ -961,7 +966,7 @@ function ScalableSpec(
 
     // When user zoomed in/out, scrolled
     useEffect( () => {
-            if (!clipDuration) return
+            if (!globalClipDuration || !response) return
 
             if (audioSnippet) {
                 audioSnippet.pause()
@@ -969,12 +974,12 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, clipDuration, audioId, nfft, binsPerOctave]
+        }, [currentStartTime, globalClipDuration, audioId, nfft, binsPerOctave]
     )
 
     // When user changed spectrogram type
     useEffect( () => {
-            if (!clipDuration) return
+            if (!globalClipDuration || !response) return
 
             if (audioSnippet) {
                 audioSnippet.pause()
@@ -994,7 +999,7 @@ function ScalableSpec(
             //setAudioDuration(globalAudioDuration)
             //setClipDuration(globalAudioDuration)
             //setCurrentStartTime(0)
-            //setCurrentEndTime(globalAudioDuration)
+            //passCurrentEndTimeToApp(globalAudioDuration)
             //setMaxScrollTime(0)
             //setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
             setLabels([])
@@ -1020,11 +1025,12 @@ function ScalableSpec(
 
         newOverviewSpecNeeded.current = true
         //setAudioDuration(globalAudioDuration)
-        setClipDuration(globalAudioDuration)
-        setCurrentStartTime(0)
-        setCurrentEndTime(globalAudioDuration)
-        setMaxScrollTime(0)
-        setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
+        //setClipDuration(globalAudioDuration)
+        passClipDurationToApp(globalAudioDuration)
+        passCurrentStartTimeToApp(0)
+        passCurrentEndTimeToApp(globalAudioDuration)
+        passMaxScrollTimeToApp(0)
+        passScrollStepToApp(globalAudioDuration * SCROLL_STEP_RATIO)
         playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration])

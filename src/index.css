@@ -96,6 +96,10 @@ html, body {
 }
 
 /* -------------------------- Controls -------------------------- */
+.track-controls{
+  display: flex;
+}
+
 
 #controls-container{
   grid-area: controls;
@@ -301,6 +305,3 @@ html, body {
 }
 
 
-.track-controls{
-  display: flex;
-}

@@ -68,8 +68,6 @@ function App() {
     }
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
-        //const newTrackDurations = trackDurations.filter( trackDuration => trackDuration !== previousTrackDuration)
-        //setTrackDurations( newTrackDurations )
         const indexToRemove = trackDurations.indexOf(previousTrackDuration)
 
         if (indexToRemove === -1) return
@@ -150,7 +148,7 @@ function App() {
 
     return (
         <>
-            {'global Clip duration: '+globalClipDuration}
+            {'global audio duration: '+globalAudioDuration}
             <div id='files-upload-container'>
                 <Searchbar />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
@@ -171,16 +169,18 @@ function App() {
                 />
                 */}
             </div>
-            <button
-                onClick={onZoomIn}
-            >
-                +🔍
-            </button>
-            <button
-                onClick={onZoomOut}
-            >
-                -🔍
-            </button>
+            <div id='controls-container'>
+                <button
+                    onClick={onZoomIn}
+                >
+                    +🔍
+                </button>
+                <button
+                    onClick={onZoomOut}
+                >
+                    -🔍
+                </button>
+            </div>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'

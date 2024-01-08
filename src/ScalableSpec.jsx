@@ -141,7 +141,8 @@ function ScalableSpec(
             setSpectrogramIsLoading(false)
             setSpectrogram(newSpec)
             setAudioArray(newAudioArray)
-            if (newOverviewSpecNeeded.current){
+            if (newOverviewSpecNeeded.current && showOverview){
+                console.log('setting overview spec in ' + id)
                 setOverviewSpectrogram(newSpec)
                 newOverviewSpecNeeded.current = false
             }
@@ -291,7 +292,7 @@ function ScalableSpec(
         }
     }
 
-    // this isn't very neat or ressourceful, but it works well enough for now. possible candidate for re-factoring in the future
+    // this isn't very neat or resourceful, but it works well enough for now. possible candidate for re-factoring in the future
     const hoverLabel = (event) => {
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
             const specCVS = specCanvasRef.current;
@@ -383,7 +384,6 @@ function ScalableSpec(
             drawWaveform(newAudioArray)
             drawAllLabels()
             //drawPlayhead(playheadRef.current.timeframe)
-            //passSpectrogramIsLoadingToApp(false)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
 
@@ -961,8 +961,9 @@ function ScalableSpec(
     // When the first spec is returned from the backend (equals to Overview Spec)
     useEffect( () => {
         if (!overviewSpectrogram || !showOverview) return
+        console.log('running overview useeffect in ' + id)
         drawOverviewSpectrogram(overviewSpectrogram)
-    }, [overviewSpectrogram, showOverview, globalAudioDuration])
+    }, [overviewSpectrogram, showOverview])
 
     // When user zoomed in/out, scrolled
     useEffect( () => {
@@ -979,6 +980,7 @@ function ScalableSpec(
 
     // When user changed spectrogram type
     useEffect( () => {
+            // Is this really needed? test if this dependency array can be added above
             if (!globalClipDuration || !response) return
 
             if (audioSnippet) {
@@ -1024,8 +1026,6 @@ function ScalableSpec(
         if (!globalAudioDuration || !response) return
 
         newOverviewSpecNeeded.current = true
-        //setAudioDuration(globalAudioDuration)
-        //setClipDuration(globalAudioDuration)
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
         passCurrentEndTimeToApp(globalAudioDuration)
@@ -1034,8 +1034,6 @@ function ScalableSpec(
         playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration])
-
-
 
     return (
         <div

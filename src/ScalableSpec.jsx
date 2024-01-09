@@ -40,6 +40,8 @@ function ScalableSpec(
                             maxScrollTime,
                             scrollStep,
                             SCROLL_STEP_RATIO,
+                            newOverviewSpecNeeded,
+                            passNewOverviewSpecNeededToApp,
                             passScrollStepToApp,
                             passMaxScrollTimeToApp,
                             passCurrentEndTimeToApp,
@@ -65,8 +67,6 @@ function ScalableSpec(
     // Overview Window
     const overviewRef = useRef(null)
     const overviewImgData = useRef(null)
-    const newOverviewSpecNeeded = useRef(null)
-    const [overviewSpectrogram, setOverviewSpectrogram] = useState(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
     let widthBetween_xStartTime_xClicked = null
@@ -141,11 +141,6 @@ function ScalableSpec(
             setSpectrogramIsLoading(false)
             setSpectrogram(newSpec)
             setAudioArray(newAudioArray)
-            if (newOverviewSpecNeeded.current && showOverview){
-                console.log('setting overview spec in ' + id)
-                setOverviewSpectrogram(newSpec)
-                newOverviewSpecNeeded.current = false
-            }
         } catch (error) {
             console.error('Error fetching data:', error)
             alert(error+' \nPlease try again later.')
@@ -153,27 +148,7 @@ function ScalableSpec(
     }
 
 
-    /* ++++++++++++++++++ Zoom & Scroll methods ++++++++++++++++++ */
-
-    const onZoomIn = () => {
-        const newDuration = Math.max(globalClipDuration / 2, 0.1);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        passClipDurationToApp(newDuration);
-        passMaxScrollTimeToApp(newMaxScrollTime);
-        passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
-        passCurrentEndTimeToApp( currentStartTime + newDuration );
-    };
-
-    const onZoomOut = () => {
-        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
-        passClipDurationToApp(newDuration);
-        passMaxScrollTimeToApp(newMaxScrollTime);
-        passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
-        passCurrentStartTimeToApp( newStartTime );
-        passCurrentEndTimeToApp( newStartTime + newDuration );
-    };
+    /* ++++++++++++++++++ Scroll methods ++++++++++++++++++ */
 
     const leftScroll = () => {
         passCurrentStartTimeToApp(
@@ -389,12 +364,16 @@ function ScalableSpec(
 
         // Draw Time Axis, Viewport
         if (showOverview){
+            if (newOverviewSpecNeeded){
+                drawOverviewSpectrogram(spectrogram)
+                passNewOverviewSpecNeededToApp(false)
+            }
             drawTimeAxis()
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         }
     }
 
-    const drawOverviewSpectrogram = () =>{
+    const drawOverviewSpectrogram = (spectrogram) => {
         const overviewCanvas = overviewRef.current
         const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
         const image = new Image();
@@ -403,7 +382,7 @@ function ScalableSpec(
             overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         });
-        image.src = `data:image/png;base64,${overviewSpectrogram}`;
+        image.src = `data:image/png;base64,${spectrogram}`;
     }
 
     const drawTimeAxis = () => {
@@ -958,13 +937,6 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels])
 
-    // When the first spec is returned from the backend (equals to Overview Spec)
-    useEffect( () => {
-        if (!overviewSpectrogram || !showOverview) return
-        console.log('running overview useeffect in ' + id)
-        drawOverviewSpectrogram(overviewSpectrogram)
-    }, [overviewSpectrogram, showOverview])
-
     // When user zoomed in/out, scrolled
     useEffect( () => {
             if (!globalClipDuration || !response) return
@@ -1025,7 +997,8 @@ function ScalableSpec(
     useEffect( () => {
         if (!globalAudioDuration || !response) return
 
-        newOverviewSpecNeeded.current = true
+        //newOverviewSpecNeeded.current = true
+        passNewOverviewSpecNeededToApp(true)
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
         passCurrentEndTimeToApp(globalAudioDuration)

@@ -32,8 +32,10 @@ function App() {
     const [currentEndTime, setCurrentEndTime] = useState(0);
     const [maxScrollTime, setMaxScrollTime] = useState(0);
     const [scrollStep, setScrollStep] = useState(0);
+    const [newOverviewSpecNeeded, setNewOverviewSpecNeeded] = useState(true)
 
 
+    /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -66,6 +68,32 @@ function App() {
     function passTrackDurationToApp( newTrackDuration ) {
         setTrackDurations(prevState => [...prevState, newTrackDuration])
     }
+
+    function passClipDurationToApp( newClipDuration ){
+        setGlobalClipDuration( newClipDuration )
+    }
+
+    function passCurrentStartTimeToApp( newCurrentStartTime ){
+        setCurrentStartTime( newCurrentStartTime )
+    }
+
+    function passCurrentEndTimeToApp( newCurrentEndTime ){
+        setCurrentEndTime( newCurrentEndTime )
+    }
+
+    function passMaxScrollTimeToApp( newMaxScrollTime ){
+        setMaxScrollTime( newMaxScrollTime )
+    }
+
+    function passScrollStepToApp( newScrollStep ){
+        setScrollStep( newScrollStep )
+    }
+
+    function passNewOverviewSpecNeededToApp( boolean ){
+        setNewOverviewSpecNeeded( boolean )
+    }
+
+    /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
         const indexToRemove = trackDurations.indexOf(previousTrackDuration)
@@ -100,27 +128,6 @@ function App() {
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
-
-    function passClipDurationToApp( newClipDuration ){
-        setGlobalClipDuration( newClipDuration )
-    }
-
-    function passCurrentStartTimeToApp( newCurrentStartTime ){
-        setCurrentStartTime( newCurrentStartTime )
-    }
-
-    function passCurrentEndTimeToApp( newCurrentEndTime ){
-        setCurrentEndTime( newCurrentEndTime )
-    }
-
-    function passMaxScrollTimeToApp( newMaxScrollTime ){
-        setMaxScrollTime( newMaxScrollTime )
-    }
-
-    function passScrollStepToApp( newScrollStep ){
-        setScrollStep( newScrollStep )
-    }
-
     function onZoomIn (){
         const newDuration = Math.max(globalClipDuration / 2, 0.1);
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
@@ -141,10 +148,14 @@ function App() {
         setCurrentEndTime( newStartTime + newDuration );
     }
 
+
+    /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
+
     useEffect( () => {
         const newGlobalDuration = Math.max(...trackDurations) === -Infinity? 0 : Math.max(...trackDurations)
         setGlobalAudioDuration(newGlobalDuration)
     }, [trackDurations])
+
 
     return (
         <>
@@ -198,6 +209,8 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -225,6 +238,8 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -252,6 +267,8 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}

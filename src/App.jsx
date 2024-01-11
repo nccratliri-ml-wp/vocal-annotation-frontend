@@ -1,37 +1,42 @@
-import {useState, useRef, useEffect} from 'react'
-import Visuals from "./Visuals.jsx"
+import React, {useState, useRef, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
-import AudioUpload from "./AudioUpload.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
 import SpecType from "./SpecType.jsx";
-import Parameters from "./Parameters.jsx";
+
+const SCROLL_STEP_RATIO = 0.1
 
 function App() {
     const audioDOMObject = useRef(null)
-    const [response, setResponse] = useState(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
-    const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [specType, setSpecType] = useState('log-mel')
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
 
-    function passAudioDOMObjectURLToApp(url){
-        audioDOMObject.current.setAttribute('src', url)
-    }
+    const [trackDurations, setTrackDurations] = useState([])
+    const [showTracks, setShowTracks] = useState({
+        track_1: true,
+        track_2: false,
+        track_3: false
+    })
 
-    function passResponseToApp(newResponse){
-        setResponse( newResponse )
-    }
 
-    function passAudioFileNameToApp(newAudioFileName){
-        setAudioFileName( newAudioFileName )
-    }
+    // General
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(0);
+    const [globalClipDuration, setGlobalClipDuration] = useState(0)
+    const [currentStartTime, setCurrentStartTime] = useState(0);
+    const [currentEndTime, setCurrentEndTime] = useState(0);
+    const [maxScrollTime, setMaxScrollTime] = useState(0);
+    const [scrollStep, setScrollStep] = useState(0);
+    const [newOverviewSpecNeeded, setNewOverviewSpecNeeded] = useState(true)
+
+
+    /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passLabelsToApp(newLabels){
         setImportedLabels( newLabels )
@@ -43,10 +48,6 @@ function App() {
 
     function passActiveClusternameToApp(chosenClustername){
         setActiveClustername( chosenClustername )
-    }
-
-    function passSpectrogramIsLoadingToApp(boolean){
-        setSpectrogramIsLoading( boolean )
     }
 
     function passSpecTypeToApp(chosenSpecType){
@@ -65,16 +66,103 @@ function App() {
         setParameters( newParametersObject )
     }
 
+    function passTrackDurationToApp( newTrackDuration ) {
+        setTrackDurations(prevState => [...prevState, newTrackDuration])
+    }
+
+    function passClipDurationToApp( newClipDuration ){
+        setGlobalClipDuration( newClipDuration )
+    }
+
+    function passCurrentStartTimeToApp( newCurrentStartTime ){
+        setCurrentStartTime( newCurrentStartTime )
+    }
+
+    function passCurrentEndTimeToApp( newCurrentEndTime ){
+        setCurrentEndTime( newCurrentEndTime )
+    }
+
+    function passMaxScrollTimeToApp( newMaxScrollTime ){
+        setMaxScrollTime( newMaxScrollTime )
+    }
+
+    function passScrollStepToApp( newScrollStep ){
+        setScrollStep( newScrollStep )
+    }
+
+    function passNewOverviewSpecNeededToApp( boolean ){
+        setNewOverviewSpecNeeded( boolean )
+    }
+
+    /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
+
+    function deletePreviousTrackDurationInApp( previousTrackDuration ) {
+        const indexToRemove = trackDurations.indexOf(previousTrackDuration)
+
+        if (indexToRemove === -1) return
+
+        const newTrackDurations = [...trackDurations]
+        newTrackDurations.splice(indexToRemove, 1)
+        setTrackDurations(newTrackDurations)
+    }
+
+    function addTrack(){
+        const firstFalseTrack = Object.keys(showTracks).find(
+            trackKey => !showTracks[trackKey]
+        )
+
+        if (!firstFalseTrack) return
+
+        setShowTracks({
+            ...showTracks,
+            [firstFalseTrack]: true
+        })
+    }
+
+    function removeTrackInApp( trackID ){
+        setShowTracks({
+            ...showTracks,
+            [trackID]: false
+        })
+    }
+
+
+    /* ++++++++++++++++++ Controls ++++++++++++++++++ */
+
+    function onZoomIn (){
+        const newDuration = Math.max(globalClipDuration / 2, 0.1);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
+        setGlobalClipDuration(newDuration);
+        setMaxScrollTime(newMaxScrollTime);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
+        setCurrentEndTime( currentStartTime + newDuration );
+    }
+
+    function onZoomOut (){
+        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
+        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
+        setGlobalClipDuration(newDuration);
+        setMaxScrollTime(newMaxScrollTime);
+        setScrollStep(newDuration * SCROLL_STEP_RATIO);
+        setCurrentStartTime( newStartTime );
+        setCurrentEndTime( newStartTime + newDuration );
+    }
+
+
+    /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
+
+    useEffect( () => {
+        const newGlobalDuration = Math.max(...trackDurations) === -Infinity? 0 : Math.max(...trackDurations)
+        setGlobalAudioDuration(newGlobalDuration)
+    }, [trackDurations])
+
+
     return (
         <>
+            {'global audio duration: '+globalAudioDuration}
             <div id='files-upload-container'>
                 <Searchbar />
-                <AudioUpload
-                    passAudioDOMObjectURLToApp={passAudioDOMObjectURLToApp}
-                    passResponseToApp={passResponseToApp}
-                    passAudioFileNameToApp={passAudioFileNameToApp}
-                    passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
-                />
                 <audio preload="metadata" ref={audioDOMObject}></audio>
                 <CSVReader
                     passLabelsToApp={passLabelsToApp}
@@ -93,29 +181,110 @@ function App() {
                 />
                 */}
             </div>
-            <ScalableSpec
-                response={response}
-                audioFileName={audioFileName}
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-                spectrogramIsLoading={spectrogramIsLoading}
-                passSpectrogramIsLoadingToApp={passSpectrogramIsLoadingToApp}
-                specType={specType}
-                nfft={nfft}
-                binsPerOctave={binsPerOctave}
-                parameters={parameters}
-            />
-            {/*
-             <Visuals
-                audioFile={audioDOMObject.current}
-                audioFileName={audioFileName}
-                base64Url={base64Url}
-                spectrogramIsLoading={spectrogramIsLoading}
-                importedLabels={importedLabels}
-                activeClustername={activeClustername}
-            />
-            */}
-
+            <div id='controls-container'>
+                <button
+                    onClick={onZoomIn}
+                >
+                    +🔍
+                </button>
+                <button
+                    onClick={onZoomOut}
+                >
+                    -🔍
+                </button>
+            </div>
+            {showTracks.track_1 &&
+                <ScalableSpec
+                    id='track_1'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={true}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_2 &&
+                <ScalableSpec
+                    id='track_2'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_3 &&
+                <ScalableSpec
+                    id='track_3'
+                    importedLabels={importedLabels}
+                    activeClustername={activeClustername}
+                    specType={specType}
+                    nfft={nfft}
+                    binsPerOctave={binsPerOctave}
+                    parameters={parameters}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            <button
+                onClick={addTrack}
+            >
+                Add Track
+            </button>
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

@@ -17,6 +17,7 @@ function App() {
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
     const [parameters, setParameters] = useState({})
+
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
         track_1: true,

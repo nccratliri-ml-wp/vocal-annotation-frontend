@@ -915,11 +915,7 @@ function ScalableSpec(
     }
 
 
-    /* ++++++++++++++++++ Toggle ++++++++++++++++++ */
-
-    const toggleOverview = () => {
-        setShowOverview(!showOverview)
-    }
+    /* ++++++++++++++++++  ++++++++++++++++++ */
 
     const handleRemoveTrack = () => {
         if (response){
@@ -1025,11 +1021,6 @@ function ScalableSpec(
                     audioFileName={'Example Audio File Name'}
                     labels={labels}
                 />
-                <button
-                    onClick={toggleOverview}
-                >
-                    Toggle Overview
-                </button>
                 <button
                     onClick={handleRemoveTrack}
                 >

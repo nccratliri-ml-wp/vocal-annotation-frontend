@@ -8,7 +8,6 @@ import SpecType from "./SpecType.jsx";
 const SCROLL_STEP_RATIO = 0.1
 
 function App() {
-    const audioDOMObject = useRef(null)
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
@@ -22,7 +21,24 @@ function App() {
     const [showTracks, setShowTracks] = useState({
         track_1: true,
         track_2: false,
-        track_3: false
+        track_3: false,
+        track_4: false,
+        track_5: false,
+        track_6: false,
+        track_7: false,
+        track_8: false,
+        track_9: false,
+        track_10: false,
+        track_11: false,
+        track_12: false,
+        track_13: false,
+        track_14: false,
+        track_15: false,
+        track_16: false,
+        track_17: false,
+        track_18: false,
+        track_19: false,
+        track_20: false,
     })
 
 
@@ -163,23 +179,6 @@ function App() {
             {'global audio duration: '+globalAudioDuration}
             <div id='files-upload-container'>
                 <Searchbar />
-                <audio preload="metadata" ref={audioDOMObject}></audio>
-                <CSVReader
-                    passLabelsToApp={passLabelsToApp}
-                    passClusterNameButtonsToApp={passClusterNameButtonsToApp}
-                />
-                <SpecType
-                    specType={specType}
-                    passSpecTypeToApp={passSpecTypeToApp}
-                    passNfftToApp={passNfftToApp}
-                    passBinsPerOctaveToApp={passBinsPerOctaveToApp}
-                />
-                {/*
-                <Parameters
-                    parameters={parameters}
-                    passParametersToApp={passParametersToApp}
-                />
-                */}
             </div>
             <div id='controls-container'>
                 <button
@@ -196,12 +195,7 @@ function App() {
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
-                    importedLabels={importedLabels}
                     activeClustername={activeClustername}
-                    specType={specType}
-                    nfft={nfft}
-                    binsPerOctave={binsPerOctave}
-                    parameters={parameters}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -225,12 +219,7 @@ function App() {
             {showTracks.track_2 &&
                 <ScalableSpec
                     id='track_2'
-                    importedLabels={importedLabels}
                     activeClustername={activeClustername}
-                    specType={specType}
-                    nfft={nfft}
-                    binsPerOctave={binsPerOctave}
-                    parameters={parameters}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -254,12 +243,415 @@ function App() {
             {showTracks.track_3 &&
                 <ScalableSpec
                     id='track_3'
-                    importedLabels={importedLabels}
                     activeClustername={activeClustername}
-                    specType={specType}
-                    nfft={nfft}
-                    binsPerOctave={binsPerOctave}
-                    parameters={parameters}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_4 &&
+                <ScalableSpec
+                    id='track_4'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_5 &&
+                <ScalableSpec
+                    id='track_5'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_6 &&
+                <ScalableSpec
+                    id='track_6'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_7 &&
+                <ScalableSpec
+                    id='track_7'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_8 &&
+                <ScalableSpec
+                    id='track_8'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_9 &&
+                <ScalableSpec
+                    id='track_9'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_10 &&
+                <ScalableSpec
+                    id='track_10'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_11 &&
+                <ScalableSpec
+                    id='track_11'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_12 &&
+                <ScalableSpec
+                    id='track_12'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_13 &&
+                <ScalableSpec
+                    id='track_13'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_14 &&
+                <ScalableSpec
+                    id='track_14'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_15 &&
+                <ScalableSpec
+                    id='track_15'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_16 &&
+                <ScalableSpec
+                    id='track_16'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_17 &&
+                <ScalableSpec
+                    id='track_17'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_18 &&
+                <ScalableSpec
+                    id='track_18'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_19 &&
+                <ScalableSpec
+                    id='track_19'
+                    activeClustername={activeClustername}
+                    showOverviewInitialValue={false}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    scrollStep={scrollStep}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    newOverviewSpecNeeded={newOverviewSpecNeeded}
+                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    passTrackDurationToApp={passTrackDurationToApp}
+                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                    removeTrackInApp={removeTrackInApp}
+                />
+            }
+            {showTracks.track_20 &&
+                <ScalableSpec
+                    id='track_20'
+                    activeClustername={activeClustername}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}

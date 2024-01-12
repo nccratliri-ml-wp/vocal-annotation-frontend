@@ -26,11 +26,8 @@ const LABEL_COLOR_HOVERED = "#f3e655"
 
 function ScalableSpec(
                         {
-                            //audioFileName,
                             id,
-                            importedLabels,
                             activeClustername,
-                            specType, nfft, binsPerOctave, parameters,
                             showOverviewInitialValue,
                             globalAudioDuration,
                             globalClipDuration,
@@ -87,7 +84,6 @@ function ScalableSpec(
     const [audioArray, setAudioArray] = useState(null)
 
     // File Upload
-    const [selectedFile, setSelectedFile] = useState(null)
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
@@ -97,10 +93,6 @@ function ScalableSpec(
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
-    const passSelectedFileToScalableSpec = ( newFile ) => {
-        setSelectedFile( newFile )
-    }
-
     const passResponseToScalableSpec = ( newResponse ) => {
         setResponse( newResponse )
     }
@@ -119,9 +111,9 @@ function ScalableSpec(
             audio_id: audioId,
             start_time: currentStartTime,
             clip_duration: globalClipDuration,
-            spec_cal_method: specType,
-            n_fft: nfft,
-            bins_per_octave: binsPerOctave,
+            //spec_cal_method: specType,
+            //n_fft: nfft,
+            //bins_per_octave: binsPerOctave,
         }
 
         const response = await axios.post(path, requestParameters)
@@ -943,45 +935,27 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, globalClipDuration, audioId, nfft, binsPerOctave]
+        }, [currentStartTime, globalClipDuration, audioId]
     )
 
-    // When user changed spectrogram type
-    useEffect( () => {
-            // Is this really needed? test if this dependency array can be added above
-            if (!globalClipDuration || !response) return
-
-            if (audioSnippet) {
-                audioSnippet.pause()
-                audioSnippet.currentTime = currentStartTime
-            }
-
-            getSpecAndAudioArray()
-        }, [specType, parameters]
-    )
 
     // When a new audio file is uploaded:
     useEffect( () => {
             if (!response) return
 
-            //newOverviewSpecNeeded.current = true
             setAudioId(response.data.audio_id)
-            //setAudioDuration(globalAudioDuration)
-            //setClipDuration(globalAudioDuration)
-            //setCurrentStartTime(0)
-            //passCurrentEndTimeToApp(globalAudioDuration)
-            //setMaxScrollTime(0)
-            //setScrollStep(response.data.audio_duration * SCROLL_STEP_RATIO)
             setLabels([])
             //playheadRef.current.timeframe = 0
 
         }, [response])
 
     // When a new CSV File was uploaded
+    /*
     useEffect( () => {
         if (!importedLabels) return
         setLabels(importedLabels)
     }, [importedLabels])
+    */
 
     // When a new audio snippet is returned from the backend
     useEffect( () => {
@@ -993,7 +967,6 @@ function ScalableSpec(
     useEffect( () => {
         if (!globalAudioDuration || !response) return
 
-        //newOverviewSpecNeeded.current = true
         passNewOverviewSpecNeededToApp(true)
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
@@ -1010,7 +983,6 @@ function ScalableSpec(
         >
             <div className='track-controls' >
                 <FileUpload
-                    passSelectedFileToScalableSpec={passSelectedFileToScalableSpec}
                     passResponseToScalableSpec={passResponseToScalableSpec}
                     passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                     passTrackDurationToApp={passTrackDurationToApp}

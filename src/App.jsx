@@ -145,7 +145,7 @@ function App() {
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
-    function onZoomIn (){
+    function onZoomIn(){
         const newDuration = Math.max(globalClipDuration / 2, 0.1);
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
         setGlobalClipDuration(newDuration);
@@ -154,7 +154,7 @@ function App() {
         setCurrentEndTime( currentStartTime + newDuration );
     }
 
-    function onZoomOut (){
+    function onZoomOut(){
         const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
         const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
@@ -165,6 +165,23 @@ function App() {
         setCurrentEndTime( newStartTime + newDuration );
     }
 
+    function leftScroll() {
+        setCurrentStartTime(
+            prevStartTime => Math.max(prevStartTime - scrollStep, 0)
+        )
+        setCurrentEndTime(
+            prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration)
+        )
+    }
+
+    function rightScroll() {
+        setCurrentStartTime(
+            prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
+        )
+        setCurrentEndTime(
+            prevEndTime => Math.min(prevEndTime + scrollStep, globalAudioDuration)
+        )
+    }
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
@@ -176,11 +193,19 @@ function App() {
 
     return (
         <>
-            {'global audio duration: '+globalAudioDuration}
             <div id='files-upload-container'>
                 <Searchbar />
             </div>
-            <div id='controls-container'>
+            <Clusternames
+                passActiveClusternameToApp={passActiveClusternameToApp}
+                importedClusternameButtons={importedClusternameButtons}
+                audioFileName={audioFileName}
+            />
+            <div className='controls-container'>
+                <button
+                    id='left-scroll-btn'
+                    onClick={leftScroll}
+                />
                 <button
                     onClick={onZoomIn}
                 >
@@ -191,6 +216,10 @@ function App() {
                 >
                     -🔍
                 </button>
+                <button
+                    id='right-scroll-btn'
+                    onClick={rightScroll}
+                />
             </div>
             {showTracks.track_1 &&
                 <ScalableSpec
@@ -677,12 +706,6 @@ function App() {
             >
                 Add Track
             </button>
-            <Clusternames
-                passActiveClusternameToApp={passActiveClusternameToApp}
-                importedClusternameButtons={importedClusternameButtons}
-                audioFileName={audioFileName}
-            />
-
         </>
     )
 }

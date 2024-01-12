@@ -101,14 +101,14 @@ html, body {
 }
 
 
-#controls-container{
+.controls-container{
   grid-area: controls;
   display: flex;
   padding: 2rem;
   justify-content: center;
 }
 
-#controls-container > button{
+.controls-container > button{
   height: 45px;
   width: 60px;
   border: none;
@@ -117,49 +117,54 @@ html, body {
   background-color: #dddddd;
 }
 
-#controls-container > button:hover{
+.controls-container > button:hover{
   background-color: whitesmoke;
 }
 
-.left-scroll-btn{
-  position:absolute;
-  left: 10px;
-  top: 100px;
+.controls-container > button:active{
+  background-color: #b2c0d5;
+}
+
+#left-scroll-btn{
+  margin: 0 10px 0 0;
   width: 0;
   height: 0;
-  border-top: 50px solid transparent;
-  border-bottom: 50px solid transparent;
-  border-right: 30px solid #ffffff;
+  border-top: 24px solid transparent;
+  border-bottom: 24px solid transparent;
+  border-right: 28px solid #dddddd;
   border-left: transparent;
-  cursor: pointer;
   background: none;
   border-radius: 0;
-  padding: 0;
+  cursor: pointer;
 }
 
-.left-scroll-btn:active {
-  border-right: 30px solid #ddd8ff;
+#left-scroll-btn:hover {
+  border-right: 28px solid whitesmoke;
 }
 
-.right-scroll-btn{
-  /*display: none;*/
-  position:absolute;
-  right: 0;
-  top: 100px;
+#left-scroll-btn:active {
+  border-right: 28px solid #b2c0d5;
+}
+
+#right-scroll-btn{
+  margin: 0 0 0 10px;
   width: 0;
   height: 0;
-  border-top: 50px solid transparent;
-  border-bottom: 50px solid transparent;
-  border-left: 30px solid #ffffff;
+  border-top: 24px solid transparent;
+  border-bottom: 24px solid transparent;
+  border-left: 28px solid #dddddd;
   border-right: transparent;
-  cursor: pointer;
   background: none;
   border-radius: 0;
-  padding: 0;
+  cursor: pointer;
 }
 
-.right-scroll-btn:active {
-  border-left: 30px solid #ddd8ff;
+#right-scroll-btn:hover {
+  border-left: 28px solid whitesmoke;
+}
+
+#right-scroll-btn:active {
+  border-left: 28px solid #ddd8ff;
 }
 
 

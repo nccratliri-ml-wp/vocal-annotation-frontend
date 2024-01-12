@@ -139,28 +139,6 @@ function ScalableSpec(
         }
     }
 
-
-    /* ++++++++++++++++++ Scroll methods ++++++++++++++++++ */
-
-    const leftScroll = () => {
-        passCurrentStartTimeToApp(
-            prevStartTime => Math.max(prevStartTime - scrollStep, 0)
-        );
-        passCurrentEndTimeToApp(
-            prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration)
-        );
-    };
-
-    const rightScroll = () => {
-        passCurrentStartTimeToApp(
-            prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
-        );
-        passCurrentEndTimeToApp(
-            prevEndTime => Math.min(prevEndTime + scrollStep, globalAudioDuration)
-        );
-    };
-
-
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
 
     const handleLMBDown = (event) => {
@@ -1080,7 +1058,8 @@ function ScalableSpec(
                     onContextMenu={handleRightClick}
                     onMouseMove={handleMouseMove}
                 />
-                {showOverview && spectrogram &&
+                {/*
+                   {showOverview && spectrogram &&
                     <>
                         <button
                             className='left-scroll-btn'
@@ -1092,6 +1071,7 @@ function ScalableSpec(
                         />
                     </>
                 }
+                */}
             </div>
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>

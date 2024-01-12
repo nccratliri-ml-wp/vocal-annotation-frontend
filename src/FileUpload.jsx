@@ -1,12 +1,11 @@
 import React from "react";
 import axios from "axios";
 
-function FileUpload( {passSelectedFileToScalableSpec, passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passTrackDurationToApp, deletePreviousTrackDurationInApp, previousAudioDuration} ) {
+function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passTrackDurationToApp, deletePreviousTrackDurationInApp, previousAudioDuration} ) {
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file && file.type === 'audio/wav') {
-            passSelectedFileToScalableSpec( file )
             passSpectrogramIsLoadingToScalableSpec( true )
             upload(file)
         } else {

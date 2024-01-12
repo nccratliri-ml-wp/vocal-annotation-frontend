@@ -1,0 +1,307 @@
+/* -------------------------- General -------------------------- */
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #051923;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  height: 100%;
+}
+
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 10px 5px;
+}
+
+
+.editor-container{
+  margin: 0 0 100px 0;
+}
+
+
+/* -------------------------- Spectrogram -------------------------- */
+
+.spec-canvas-container{
+  position: relative;
+  width: auto;
+  height: 300px;
+  margin: 0 0 10px 0;
+}
+
+.spec-canvas{
+  position: absolute;
+}
+
+
+/* -------------------------- Overview Window -------------------------- */
+
+.overview-canvas-container{
+  position: relative;
+  width: auto;
+  height: 100px;
+  margin: 0 0 30px 0;
+}
+
+.overview-canvas{
+  position: absolute;
+}
+
+#left-scroll-overview-btn{
+  position:absolute;
+  top: 40px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid #ffffff;
+  border-left: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+#left-scroll-overview-btn:active {
+  border-right: 10px solid #ddd8ff;
+}
+
+#right-scroll-overview-btn{
+  position:absolute;
+  top: 40px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid #ffffff;
+  border-right: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+#right-scroll-overview-btn:active {
+  border-left: 10px solid #ddd8ff;
+}
+
+/* -------------------------- Controls -------------------------- */
+.track-controls{
+  display: flex;
+}
+
+
+#controls-container{
+  grid-area: controls;
+  display: flex;
+  padding: 2rem;
+  justify-content: center;
+}
+
+#controls-container > button{
+  height: 45px;
+  width: 60px;
+  border: none;
+  border-radius: 4px;
+  margin: 2px;
+  background-color: #dddddd;
+}
+
+#controls-container > button:hover{
+  background-color: whitesmoke;
+}
+
+.left-scroll-btn{
+  position:absolute;
+  left: 10px;
+  top: 100px;
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-right: 30px solid #ffffff;
+  border-left: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.left-scroll-btn:active {
+  border-right: 30px solid #ddd8ff;
+}
+
+.right-scroll-btn{
+  /*display: none;*/
+  position:absolute;
+  right: 0;
+  top: 100px;
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-left: 30px solid #ffffff;
+  border-right: transparent;
+  cursor: pointer;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.right-scroll-btn:active {
+  border-left: 30px solid #ddd8ff;
+}
+
+
+/* -------------------------- Clusternames -------------------------- */
+
+#clusternames-container{
+  grid-area: clusternames;
+  background-color: #082536;
+}
+
+#clustername-input-field{
+  border: none;
+  height: 30px;
+  margin: 15px;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+}
+
+#clustername-input-field:focus{
+  outline: none;
+}
+
+#clustername-buttons-container{
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 10px;
+}
+
+#clustername-buttons-container > div{
+  /*max-width: fit-content;*/
+  background-color: #f6fffe;
+  margin: 5px;
+  padding: 2px 30px;
+  color: #36d5a8;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
+}
+#clustername-buttons-container > div[isactive='true']{
+  background-color: #36d5a8;
+  color: #f6fffe;
+}
+
+/* -------------------------- Drag & Drop Components -------------------------- */
+
+#files-upload-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 30px;
+}
+
+#searchbar {
+}
+
+.form-file-upload {
+  align-self: center;
+  height: 6rem;
+  width: 12rem;
+  margin: 10px;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.input-file-upload {
+  display: none;
+}
+
+.label-file-upload {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  border-radius: 10px;
+  border-style: dashed;
+  padding: 10px;
+  color: #cbd5e1;
+  border-color: #86a9ce;
+  background-color: #082536;
+}
+
+.label-file-upload[isdragactive='true'] {
+  background-color: #114b6e;
+}
+
+.drag-file-element {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.file-icon{
+  font-size: 3rem;
+}
+
+
+/* -------------------------- Spec Type Form -------------------------- */
+
+#spec-type-form{
+  color: #f6fffe;
+}
+
+#spec-type-label,
+#n-fft-label,
+#bins-per-octave-label{
+  color: #f6fffe;
+}
+
+#spec-type-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: row; /* Align input fields horizontally */
+  align-items: center; /* Center align input fields vertically */
+}
+
+.input-field {
+  background-color: white;
+  margin-left: 8px; /* Add margin for spacing between radio buttons and input fields */
+  /* Add any additional styling for the input fields here */
+}
+
+.submit-btn{
+  width: 60px;
+}
+
+/* -------------------------- Waveform -------------------------- */
+
+.waveform-canvas{
+  display: block;
+}
+
+

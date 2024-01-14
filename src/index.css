@@ -26,7 +26,7 @@ html, body {
 
 
 .editor-container{
-  margin: 0 0 100px 0;
+  margin: 0 0 0 0;
 }
 
 
@@ -35,7 +35,7 @@ html, body {
 .spec-canvas-container{
   position: relative;
   width: auto;
-  height: 300px;
+  height: 150px;
   margin: 0 0 10px 0;
 }
 
@@ -49,8 +49,8 @@ html, body {
 .overview-canvas-container{
   position: relative;
   width: auto;
-  height: 100px;
-  margin: 0 0 30px 0;
+  height: 20px;
+  margin: 0 0 10px 0;
 }
 
 .overview-canvas{
@@ -59,7 +59,7 @@ html, body {
 
 #left-scroll-overview-btn{
   position:absolute;
-  top: 40px;
+  top: 0;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -78,7 +78,7 @@ html, body {
 
 #right-scroll-overview-btn{
   position:absolute;
-  top: 40px;
+  top: 0;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -99,7 +99,6 @@ html, body {
 .track-controls{
   display: flex;
 }
-
 
 .controls-container{
   grid-area: controls;
@@ -289,14 +288,13 @@ html, body {
 
 .input-container {
   display: flex;
-  flex-direction: row; /* Align input fields horizontally */
-  align-items: center; /* Center align input fields vertically */
+  flex-direction: row;
+  align-items: center;
 }
 
 .input-field {
   background-color: white;
-  margin-left: 8px; /* Add margin for spacing between radio buttons and input fields */
-  /* Add any additional styling for the input fields here */
+  margin-left: 8px;
 }
 
 .submit-btn{

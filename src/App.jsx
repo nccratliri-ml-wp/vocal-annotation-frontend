@@ -193,9 +193,6 @@ function App() {
 
     return (
         <>
-            <div id='files-upload-container'>
-                <Searchbar />
-            </div>
             <Clusternames
                 passActiveClusternameToApp={passActiveClusternameToApp}
                 importedClusternameButtons={importedClusternameButtons}

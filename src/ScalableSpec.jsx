@@ -344,6 +344,7 @@ function ScalableSpec(
     }
 
     const drawOverviewSpectrogram = (spectrogram) => {
+        return
         const overviewCanvas = overviewRef.current
         const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
         const image = new Image();
@@ -692,7 +693,7 @@ function ScalableSpec(
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = lineWidth
-        ctx.strokeStyle = hexColorCode
+        ctx.strokeStyle = 'red'
 
         // Draw start frame
         ctx.beginPath()
@@ -706,23 +707,21 @@ function ScalableSpec(
         ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
 
-        // Draw Top line
+        // Draw Scroll Bar
+        ctx.lineWidth = 20
+        ctx.strokeStyle = hexColorCode
         ctx.beginPath()
-        ctx.moveTo(x1, 0)
-        ctx.lineTo(x2, 0)
-        ctx.stroke()
-
-        // Draw Bottom line
-        ctx.beginPath()
-        ctx.moveTo(x1, overviewCanvas.height)
-        ctx.lineTo(x2, overviewCanvas.height)
+        ctx.moveTo(x1, overviewCanvas.height/2)
+        ctx.lineTo(x2, overviewCanvas.height/2)
         ctx.stroke()
 
         // Draw Viewport Timestamps
+        /*
         ctx.font = `15px Arial`;
-        ctx.fillStyle = hexColorCode
+        ctx.fillStyle = 'red'
         const timestampText = (Math.round(startFrame * 100) / 100).toString()
         ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
+         */
 
         // Update Scroll Button positions
         updateViewportScrollButtons(startFrame, endFrame)
@@ -860,7 +859,7 @@ function ScalableSpec(
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
         canvas.width = window.innerWidth -30
 
-        const scale = 50
+        const scale = 35
         const centerY = canvas.height / 2
         const ratio = Math.min((response.data.audio_duration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
@@ -959,6 +958,44 @@ function ScalableSpec(
         <div
             className='editor-container'
         >
+            {showOverview &&
+                <div
+                    className='overview-canvas-container'
+                >
+                    <>
+                        <canvas
+                            className='overview-canvas'
+                            ref={overviewRef}
+                            width={parent.innerWidth - 30}
+                            height={20}
+                            onMouseDown={handleLMBDownOverview}
+                            onMouseUp={handleMouseUpOverview}
+                            onContextMenu={(event) => event.preventDefault()}
+                            onMouseMove={handleMouseMoveOverview}
+                        />
+                        {response &&
+                            <>
+                                <button
+                                    id='left-scroll-overview-btn'
+                                    onClick={leftScrollOverview}
+                                />
+                                <button
+                                    id='right-scroll-overview-btn'
+                                    onClick={rightScrollOverview}
+                                />
+                            </>
+                        }
+                    </>
+                </div>
+            }
+            {showOverview &&
+                <canvas
+                    ref={timeAxisRef}
+                    width={parent.innerWidth - 30}
+                    height={40}
+                    onContextMenu={(event) => event.preventDefault()}
+                />
+            }
             <div className='track-controls' >
                 <FileUpload
                     passResponseToScalableSpec={passResponseToScalableSpec}
@@ -997,49 +1034,11 @@ function ScalableSpec(
                     ⏹
                 </button>
             </div>
-            {showOverview &&
-                <div
-                    className='overview-canvas-container'
-                >
-                    <>
-                        <canvas
-                            className='overview-canvas'
-                            ref={overviewRef}
-                            width={parent.innerWidth - 30}
-                            height={100}
-                            onMouseDown={handleLMBDownOverview}
-                            onMouseUp={handleMouseUpOverview}
-                            onContextMenu={(event) => event.preventDefault()}
-                            onMouseMove={handleMouseMoveOverview}
-                        />
-                        {response &&
-                            <>
-                                <button
-                                    id='left-scroll-overview-btn'
-                                    onClick={leftScrollOverview}
-                                />
-                                <button
-                                    id='right-scroll-overview-btn'
-                                    onClick={rightScrollOverview}
-                                />
-                            </>
-                        }
-                    </>
-                </div>
-            }
-            {showOverview &&
-                <canvas
-                    ref={timeAxisRef}
-                    width={parent.innerWidth - 30}
-                    height={40}
-                    onContextMenu={(event) => event.preventDefault()}
-                />
-            }
             <canvas
                 className='waveform-canvas'
                 ref={waveformCanvasRef}
                 width={parent.innerWidth -30}
-                height={150}
+                height={80}
                 onMouseDown={handleLMBDown}
                 onMouseUp={handleMouseUp}
                 onContextMenu={handleRightClick}
@@ -1052,7 +1051,7 @@ function ScalableSpec(
                     className='spec-canvas'
                     ref={specCanvasRef}
                     width={parent.innerWidth -30}
-                    height={300}
+                    height={150}
                     onMouseDown={handleLMBDown}
                     onMouseUp={handleMouseUp}
                     onContextMenu={handleRightClick}

@@ -1007,11 +1007,13 @@ function ScalableSpec(
                     audioFileName={'Example Audio File Name'}
                     labels={labels}
                 />
-                <button
-                    onClick={handleRemoveTrack}
-                >
-                    Remove Track
-                </button>
+                {id !== 'track_1' &&
+                    <button
+                        onClick={handleRemoveTrack}
+                    >
+                        Remove Track
+                    </button>
+                }
                 <button
                     onClick={() => console.log(labels)}
                 >

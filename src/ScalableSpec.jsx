@@ -569,14 +569,14 @@ function ScalableSpec(
         if (xClicked >= xStartFrame - 2 && xClicked <= xStartFrame + 2){
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
-            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
         }
 
         // Deal with click on End Frame
         if (xClicked >= xEndFrame - 2 && xClicked <= xEndFrame + 2){
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
-            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
         }
 
@@ -693,7 +693,6 @@ function ScalableSpec(
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = lineWidth
-        ctx.strokeStyle = 'red'
 
         // Draw start frame
         ctx.beginPath()
@@ -708,7 +707,7 @@ function ScalableSpec(
         ctx.stroke()
 
         // Draw Scroll Bar
-        ctx.lineWidth = 20
+        ctx.lineWidth = overviewCanvas.height
         ctx.strokeStyle = hexColorCode
         ctx.beginPath()
         ctx.moveTo(x1, overviewCanvas.height/2)
@@ -967,7 +966,7 @@ function ScalableSpec(
                             className='overview-canvas'
                             ref={overviewRef}
                             width={parent.innerWidth - 30}
-                            height={20}
+                            height={40}
                             onMouseDown={handleLMBDownOverview}
                             onMouseUp={handleMouseUpOverview}
                             onContextMenu={(event) => event.preventDefault()}

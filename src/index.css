@@ -49,7 +49,7 @@ html, body {
 .overview-canvas-container{
   position: relative;
   width: auto;
-  height: 20px;
+  height: 40px;
   margin: 0 0 10px 0;
 }
 
@@ -59,14 +59,14 @@ html, body {
 
 #left-scroll-overview-btn{
   position:absolute;
-  top: 0;
+  top: 10px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
   border-right: 10px solid #ffffff;
   border-left: transparent;
-  cursor: pointer;
+  /*cursor: pointer;*/
   background: none;
   border-radius: 0;
   padding: 0;
@@ -78,14 +78,14 @@ html, body {
 
 #right-scroll-overview-btn{
   position:absolute;
-  top: 0;
+  top: 10px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
   border-left: 10px solid #ffffff;
   border-right: transparent;
-  cursor: pointer;
+  /*cursor: pointer;*/
   background: none;
   border-radius: 0;
   padding: 0;

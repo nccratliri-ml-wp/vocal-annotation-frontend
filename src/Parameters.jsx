@@ -50,53 +50,56 @@ function Parameters({ passParametersToScalableSpec }) {
         <div
             className="parameters"
         >
-            <label>
-                <input
-                    type="radio"
-                    value="log-mel"
-                    checked={selectedMethod === 'log-mel'}
-                    onChange={() => handleRadioChange('log-mel')}
-                />
-                Log-Mel
-            </label>
 
-            {showNFftInput && (
-                <>
-                    <label>
-                        N-FFT:
-                        <input
-                            type="number"
-                            value={nFftValue}
-                            onChange={handleNFftInputChange}
-                        />
-                    </label>
-                    <button onClick={handleNFftSubmit}>Submit</button>
-                </>
-            )}
+            <div>
+                <label>
+                    <input
+                        type="radio"
+                        value="log-mel"
+                        checked={selectedMethod === 'log-mel'}
+                        onChange={() => handleRadioChange('log-mel')}
+                    />
+                    Log-Mel
+                </label>
+                {showNFftInput && (
+                    <>
+                        <label>
+                            N-FFT:
+                            <input
+                                type="number"
+                                value={nFftValue}
+                                onChange={handleNFftInputChange}
+                            />
+                        </label>
+                        <button onClick={handleNFftSubmit}>Submit</button>
+                    </>
+                )}
+            </div>
 
-            <label>
-                <input
-                    type="radio"
-                    value="constant-q"
-                    checked={selectedMethod === 'constant-q'}
-                    onChange={() => handleRadioChange('constant-q')}
-                />
-                Constant-Q
-            </label>
-
-            {showBinsPerOctaveInput && (
-                <>
-                    <label>
-                        Bins per Octave:
-                        <input
-                            type="number"
-                            value={binsPerOctaveValue}
-                            onChange={handleBinsPerOctaveInputChange}
-                        />
-                    </label>
-                    <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
-                </>
-            )}
+            <div>
+                <label>
+                    <input
+                        type="radio"
+                        value="constant-q"
+                        checked={selectedMethod === 'constant-q'}
+                        onChange={() => handleRadioChange('constant-q')}
+                    />
+                    Constant-Q
+                </label>
+                {showBinsPerOctaveInput && (
+                    <>
+                        <label>
+                            Bins per Octave:
+                            <input
+                                type="number"
+                                value={binsPerOctaveValue}
+                                onChange={handleBinsPerOctaveInputChange}
+                            />
+                        </label>
+                        <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
+                    </>
+                )}
+            </div>
 
         </div>
     );

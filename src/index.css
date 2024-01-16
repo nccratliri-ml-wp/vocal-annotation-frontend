@@ -272,7 +272,12 @@ html, body {
 /* -------------------------- Parameters -------------------------- */
 
 .parameters{
+  display: flex;
+  flex-direction: column;
+}
 
+.parameters > div > label{
+  margin: 0 0 0 10px;
 }
 
 /* -------------------------- Waveform -------------------------- */

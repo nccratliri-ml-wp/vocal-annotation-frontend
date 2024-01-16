@@ -888,7 +888,7 @@ function ScalableSpec(
     }
 
 
-    /* ++++++++++++++++++  ++++++++++++++++++ */
+    /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
 
     const handleRemoveTrack = () => {
         if (response){
@@ -906,7 +906,7 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels])
 
-    // When user zoomed in/out, scrolled
+    // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
             if (!globalClipDuration || !response) return
 
@@ -916,7 +916,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, globalClipDuration, audioId]
+        }, [currentStartTime, globalClipDuration, audioId, parameters]
     )
 
 
@@ -1066,20 +1066,6 @@ function ScalableSpec(
                     onContextMenu={handleRightClick}
                     onMouseMove={handleMouseMove}
                 />
-                {/*
-                   {showOverview && spectrogram &&
-                    <>
-                        <button
-                            className='left-scroll-btn'
-                            onClick={leftScroll}
-                        />
-                        <button
-                            className='right-scroll-btn'
-                            onClick={rightScroll}
-                        />
-                    </>
-                }
-                */}
             </div>
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>

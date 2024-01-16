@@ -269,36 +269,10 @@ html, body {
 }
 
 
-/* -------------------------- Spec Type Form -------------------------- */
+/* -------------------------- Parameters -------------------------- */
 
-#spec-type-form{
-  color: #f6fffe;
-}
+.parameters{
 
-#spec-type-label,
-#n-fft-label,
-#bins-per-octave-label{
-  color: #f6fffe;
-}
-
-#spec-type-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.input-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.input-field {
-  background-color: white;
-  margin-left: 8px;
-}
-
-.submit-btn{
-  width: 60px;
 }
 
 /* -------------------------- Waveform -------------------------- */

@@ -1,87 +1,146 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState } from 'react';
 
-function Parameters( {parameters, passParametersToApp} ) {
-    const [keyInput, setKeyInput] = useState("");
-    const [valueInput, setValueInput] = useState("");
-    //const [parameters, setParameters] = useState({});
-    const [parameterList, setParameterList] = useState([]);
-    const valueInputRef = useRef(null);
+function Parameters({ passParametersToScalableSpec }) {
+    const [selectedMethod, setSelectedMethod] = useState('log-mel');
+    const [nFftValue, setNFftValue] = useState('');
+    const [binsPerOctaveValue, setBinsPerOctaveValue] = useState('')
+    const [showNFftInput, setShowNFftInput] = useState(false);
+    const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
-    const handleKeyChange = (event) => {
-        setKeyInput(event.target.value);
+    const handleRadioChange = (method) => {
+        setSelectedMethod(method);
+        setShowNFftInput(method === 'log-mel');
+        setShowBinsPerOctaveInput(method === 'constant-q')
+        passParametersToScalableSpec({ spec_cal_method: method, n_fft: nFftValue, bins_per_octave: binsPerOctaveValue }); //to be deleted probably to not trigger uneccessary calls to backend
     };
 
-    const handleValueChange = (event) => {
-        setValueInput(event.target.value);
+    const handleNFftInputChange = (event) => {
+        setNFftValue(event.target.value);
     };
 
-    const handleKeyPress = (event) => {
-        if (event.key === "Enter") {
-            if (keyInput !== "" && valueInput !== "") {
-                // If both keyInput and valueInput are not empty, create a new key-value pair
-                const newKeyValuePair = { [keyInput]: valueInput };
-
-                // Update both the parameters state and the parameterList state
-
-                passParametersToApp({
-                        ...parameters,
-                        [keyInput]: valueInput,
-                    })
-                setParameterList((prevList) => [...prevList, newKeyValuePair]);
-
-                // Clear both key and value inputs
-                setKeyInput("");
-                setValueInput("");
-            } else if (keyInput !== "") {
-                // If only keyInput is not empty, focus on the value input
-                valueInputRef.current.focus();
-            }
+    const handleNFftSubmit = () => {
+        const nFft = parseInt(nFftValue, 10);
+        if (!isNaN(nFft)) {
+            passParametersToScalableSpec(
+                {
+                    spec_cal_method: 'log-mel',
+                    n_fft: nFft,
+                    bins_per_octave: binsPerOctaveValue
+                }
+            )
         }
     };
 
-    const handleRemove = (key) => {
-        // Remove the key-value pair from both parameters object and parameterList
-        const { [key]: removedKey, ...newParameters } = parameters;
-        const newParameterList = parameterList.filter((item) => Object.keys(item)[0] !== key);
+    const handleBinsPerOctaveInputChange = (event) => {
+        setBinsPerOctaveValue(event.target.value)
+    }
 
-        //setParameters(newParameters);
-        passParametersToApp(newParameters)
-        setParameterList(newParameterList);
-    };
+    const handleBinsPerOctaveSubmit = () => {
+        const binsPerOctave = parseInt(binsPerOctaveValue, 10)
+        if (!isNaN(binsPerOctave)){
+            passParametersToScalableSpec({
+                spec_cal_method: 'constant-q',
+                n_fft: nFftValue,
+                bins_per_octave: binsPerOctave
+            })
+        }
+    }
 
     return (
-        <div>
-            <form>
+        <div
+            className="parameters"
+        >
+            <label>
                 <input
-                    id="parameter-key-input"
-                    type="text"
-                    required="required"
-                    placeholder="key"
-                    value={keyInput}
-                    onChange={handleKeyChange}
-                    onKeyPress={handleKeyPress}
+                    type="radio"
+                    value="log-mel"
+                    checked={selectedMethod === 'log-mel'}
+                    onChange={() => handleRadioChange('log-mel')}
                 />
+                Log-Mel
+            </label>
+
+            {showNFftInput && (
+                <>
+                    <label>
+                        N-FFT:
+                        <input
+                            type="number"
+                            value={nFftValue}
+                            onChange={handleNFftInputChange}
+                        />
+                    </label>
+                    <button onClick={handleNFftSubmit}>Submit</button>
+                </>
+            )}
+
+            <label>
                 <input
-                    id="parameter-value-input"
-                    type="text"
-                    required="required"
-                    placeholder="value"
-                    value={valueInput}
-                    onChange={handleValueChange}
-                    onKeyPress={handleKeyPress}
-                    ref={valueInputRef}
+                    type="radio"
+                    value="constant-q"
+                    checked={selectedMethod === 'constant-q'}
+                    onChange={() => handleRadioChange('constant-q')}
                 />
-            </form>
-            <ul>
-                {parameterList.map((item, index) => (
-                    <li key={index}>
-                        {Object.keys(item)[0]}: {Object.values(item)[0]}
-                        <button onClick={() => handleRemove(Object.keys(item)[0])}>❌</button>
-                    </li>
-                ))}
-            </ul>
+                Constant-Q
+            </label>
+
+            {showBinsPerOctaveInput && (
+                <>
+                    <label>
+                        Bins per Octave:
+                        <input
+                            type="number"
+                            value={binsPerOctaveValue}
+                            onChange={handleBinsPerOctaveInputChange}
+                        />
+                    </label>
+                    <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
+                </>
+            )}
+
         </div>
     );
 }
 
 export default Parameters;
+
+
+
+/*
+import React, { useState } from 'react'
+
+function Parameters({ passParametersToScalableSpec }) {
+
+    const [selectedMethod, setSelectedMethod] = useState('log-mel')
+
+    const handleRadioChange = (method) => {
+        setSelectedMethod(method)
+        passParametersToScalableSpec({ spec_cal_method: method })
+    }
+
+    return (
+        <div>
+            <label>
+                <input
+                    type="radio"
+                    value="log-mel"
+                    checked={selectedMethod === 'log-mel'}
+                    onChange={() => handleRadioChange('log-mel')}
+                />
+                Log-Mel
+            </label>
+            <label>
+                <input
+                    type="radio"
+                    value="constant-q"
+                    checked={selectedMethod === 'constant-q'}
+                    onChange={() => handleRadioChange('constant-q')}
+                />
+                Constant-Q
+            </label>
+        </div>
+    )
+}
+
+export default Parameters
+*/

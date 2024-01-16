@@ -3,7 +3,6 @@ import Clusternames from "./Clusternames.jsx"
 import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Searchbar from "./Searchbar.jsx"
-import SpecType from "./SpecType.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -15,7 +14,6 @@ function App() {
     const [specType, setSpecType] = useState('log-mel')
     const [nfft, setNfft] = useState(null)
     const [binsPerOctave, setBinsPerOctave] = useState(null)
-    const [parameters, setParameters] = useState({})
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -76,10 +74,6 @@ function App() {
 
     function passBinsPerOctaveToApp ( binsPerOctave ){
         setBinsPerOctave (binsPerOctave)
-    }
-
-    function passParametersToApp (newParametersObject){
-        setParameters( newParametersObject )
     }
 
     function passTrackDurationToApp( newTrackDuration ) {

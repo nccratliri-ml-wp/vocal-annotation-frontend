@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
 import FileUpload from "./FileUpload.jsx";
+import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
@@ -87,9 +88,10 @@ function ScalableSpec(
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
-
-
     const [showOverview, setShowOverview] = useState(showOverviewInitialValue)
+    const [parameters, setParameters] = useState({
+        spec_cal_method: 'log-mel'
+    })
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -101,17 +103,20 @@ function ScalableSpec(
         setSpectrogramIsLoading( boolean )
     }
 
+    const passParametersToScalableSpec = ( newParameters ) => {
+        setParameters( newParameters )
+    }
 
     /* ++++++++++++++++++ Spectrogram fetching methods ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
         const requestParameters = {
-            //...parameters,
+            ...parameters,
             audio_id: audioId,
             start_time: currentStartTime,
             clip_duration: globalClipDuration,
-            //spec_cal_method: specType,
+            //spec_cal_method: 'constant-q',
             //n_fft: nfft,
             //bins_per_octave: binsPerOctave,
         }
@@ -883,7 +888,7 @@ function ScalableSpec(
     }
 
 
-    /* ++++++++++++++++++  ++++++++++++++++++ */
+    /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
 
     const handleRemoveTrack = () => {
         if (response){
@@ -901,7 +906,7 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels])
 
-    // When user zoomed in/out, scrolled
+    // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
             if (!globalClipDuration || !response) return
 
@@ -911,7 +916,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, globalClipDuration, audioId]
+        }, [currentStartTime, globalClipDuration, audioId, parameters]
     )
 
 
@@ -1034,6 +1039,9 @@ function ScalableSpec(
                 >
                     ⏹
                 </button>
+                <Parameters
+                    passParametersToScalableSpec={passParametersToScalableSpec}
+                />
             </div>
             <canvas
                 className='waveform-canvas'
@@ -1058,20 +1066,6 @@ function ScalableSpec(
                     onContextMenu={handleRightClick}
                     onMouseMove={handleMouseMove}
                 />
-                {/*
-                   {showOverview && spectrogram &&
-                    <>
-                        <button
-                            className='left-scroll-btn'
-                            onClick={leftScroll}
-                        />
-                        <button
-                            className='right-scroll-btn'
-                            onClick={rightScroll}
-                        />
-                    </>
-                }
-                */}
             </div>
             {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>

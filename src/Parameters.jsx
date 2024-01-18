@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 
 function Parameters({ passParametersToScalableSpec }) {
-    const [selectedMethod, setSelectedMethod] = useState('log-mel');
-    const [nFftValue, setNFftValue] = useState('');
+    const [selectedMethod, setSelectedMethod] = useState('log-mel')
+    const [nFftValue, setNFftValue] = useState('')
     const [binsPerOctaveValue, setBinsPerOctaveValue] = useState('')
-    const [showNFftInput, setShowNFftInput] = useState(false);
+    const [showNFftInput, setShowNFftInput] = useState(true)
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
     const handleRadioChange = (method) => {
-        setSelectedMethod(method);
-        setShowNFftInput(method === 'log-mel');
+        setSelectedMethod(method)
+        setShowNFftInput(method === 'log-mel')
         setShowBinsPerOctaveInput(method === 'constant-q')
-        passParametersToScalableSpec({ spec_cal_method: method, n_fft: nFftValue, bins_per_octave: binsPerOctaveValue }); //to be deleted probably to not trigger uneccessary calls to backend
-    };
+        passParametersToScalableSpec({ spec_cal_method: method, n_fft: nFftValue, bins_per_octave: binsPerOctaveValue }) //to be deleted probably to not trigger uneccessary calls to backend
+    }
 
     const handleNFftInputChange = (event) => {
-        setNFftValue(event.target.value);
-    };
+        setNFftValue(event.target.value)
+    }
 
     const handleNFftSubmit = () => {
-        const nFft = parseInt(nFftValue, 10);
+        const nFft = parseInt(nFftValue, 10)
         if (!isNaN(nFft)) {
             passParametersToScalableSpec(
                 {
@@ -29,7 +29,7 @@ function Parameters({ passParametersToScalableSpec }) {
                 }
             )
         }
-    };
+    }
 
     const handleBinsPerOctaveInputChange = (event) => {
         setBinsPerOctaveValue(event.target.value)
@@ -102,7 +102,7 @@ function Parameters({ passParametersToScalableSpec }) {
             </div>
 
         </div>
-    );
+    )
 }
 
 export default Parameters;

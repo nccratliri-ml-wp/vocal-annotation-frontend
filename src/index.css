@@ -30,19 +30,17 @@ html, body {
 }
 
 
-/* -------------------------- Spectrogram -------------------------- */
+/* -------------------------- Track -------------------------- */
 
-.spec-canvas-container{
-  position: relative;
-  width: auto;
-  height: 150px;
-  margin: 0 0 10px 0;
+.track-container{
+  display: flex;
 }
 
-.spec-canvas{
-  position: absolute;
-}
+.track-controls{
+  display: flex;
+  flex-direction: column;
 
+}
 
 /* -------------------------- Overview Window -------------------------- */
 
@@ -95,15 +93,15 @@ html, body {
   border-left: 10px solid #ddd8ff;
 }
 
-/* -------------------------- Controls -------------------------- */
-.track-controls{
-  display: flex;
-}
+/* -------------------------- Global Controls -------------------------- */
 
 .controls-container{
-  grid-area: controls;
-  display: flex;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 2rem;
+  display: flex;
   justify-content: center;
 }
 
@@ -170,7 +168,6 @@ html, body {
 /* -------------------------- Clusternames -------------------------- */
 
 #clusternames-container{
-  grid-area: clusternames;
   background-color: #082536;
 }
 

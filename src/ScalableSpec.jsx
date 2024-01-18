@@ -1000,74 +1000,76 @@ function ScalableSpec(
                     onContextMenu={(event) => event.preventDefault()}
                 />
             }
-            <div className='track-controls' >
-                <FileUpload
-                    passResponseToScalableSpec={passResponseToScalableSpec}
-                    passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                    passTrackDurationToApp={passTrackDurationToApp}
-                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-                    previousAudioDuration={response? response.data.audio_duration : undefined}
-                />
-                <Export
-                    audioFileName={'Example Audio File Name'}
-                    labels={labels}
-                />
-                {id !== 'track_1' &&
+            <div className='track-container'>
+                <div className='track-controls' >
+                    <FileUpload
+                        passResponseToScalableSpec={passResponseToScalableSpec}
+                        passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                        passTrackDurationToApp={passTrackDurationToApp}
+                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                        previousAudioDuration={response? response.data.audio_duration : undefined}
+                    />
+                    <Export
+                        audioFileName={'Example Audio File Name'}
+                        labels={labels}
+                    />
+                    {id !== 'track_1' &&
+                        <button
+                            onClick={handleRemoveTrack}
+                        >
+                            Remove Track
+                        </button>
+                    }
                     <button
-                        onClick={handleRemoveTrack}
+                        onClick={() => console.log(labels)}
                     >
-                        Remove Track
+                        Console log labels
                     </button>
-                }
-                <button
-                    onClick={() => console.log(labels)}
-                >
-                    Console log labels
-                </button>
-                <button
-                    onClick={getAudio}
-                >
-                    ▶
-                </button>
-                <button
-                    onClick={pauseAudio}
-                >
-                    ⏸
-                </button>
-                <button
-                    onClick={stopAudio}
-                >
-                    ⏹
-                </button>
-                <Parameters
-                    passParametersToScalableSpec={passParametersToScalableSpec}
-                />
+                    <button
+                        onClick={getAudio}
+                    >
+                        ▶
+                    </button>
+                    <button
+                        onClick={pauseAudio}
+                    >
+                        ⏸
+                    </button>
+                    <button
+                        onClick={stopAudio}
+                    >
+                        ⏹
+                    </button>
+                    <Parameters
+                        passParametersToScalableSpec={passParametersToScalableSpec}
+                    />
+                </div>
+
+                <div>
+                    <canvas
+                        className='waveform-canvas'
+                        ref={waveformCanvasRef}
+                        width={parent.innerWidth -30}
+                        height={80}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    <canvas
+                        className='spec-canvas'
+                        ref={specCanvasRef}
+                        width={parent.innerWidth -30}
+                        height={150}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
+                </div>
+
             </div>
-            <canvas
-                className='waveform-canvas'
-                ref={waveformCanvasRef}
-                width={parent.innerWidth -30}
-                height={80}
-                onMouseDown={handleLMBDown}
-                onMouseUp={handleMouseUp}
-                onContextMenu={handleRightClick}
-                onMouseMove={handleMouseMove}
-            />
-            <div
-                className='spec-canvas-container'
-            >
-                <canvas
-                    className='spec-canvas'
-                    ref={specCanvasRef}
-                    width={parent.innerWidth -30}
-                    height={150}
-                    onMouseDown={handleLMBDown}
-                    onMouseUp={handleMouseUp}
-                    onContextMenu={handleRightClick}
-                    onMouseMove={handleMouseMove}
-                />
-            </div>
-            {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>
     );
 }

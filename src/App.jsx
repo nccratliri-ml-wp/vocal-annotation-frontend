@@ -195,6 +195,9 @@ function App() {
                     onClick={rightScroll}
                 />
             </div>
+            <div id='blank-space'>
+            </div>
+            <div id='all-tracks'>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
@@ -680,6 +683,7 @@ function App() {
             >
                 Add Track
             </button>
+            </div>
         </>
     )
 }

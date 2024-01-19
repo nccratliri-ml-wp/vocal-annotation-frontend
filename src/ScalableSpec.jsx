@@ -962,43 +962,35 @@ function ScalableSpec(
         <div
             className='editor-container'
         >
-            {showOverview &&
-                <div
-                    className='overview-canvas-container'
-                >
-                    <>
-                        <canvas
-                            className='overview-canvas'
-                            ref={overviewRef}
-                            width={parent.innerWidth - 30}
-                            height={40}
-                            onMouseDown={handleLMBDownOverview}
-                            onMouseUp={handleMouseUpOverview}
-                            onContextMenu={(event) => event.preventDefault()}
-                            onMouseMove={handleMouseMoveOverview}
-                        />
-                        {response &&
-                            <>
-                                <button
-                                    id='left-scroll-overview-btn'
-                                    onClick={leftScrollOverview}
-                                />
-                                <button
-                                    id='right-scroll-overview-btn'
-                                    onClick={rightScrollOverview}
-                                />
-                            </>
-                        }
-                    </>
-                </div>
-            }
-            {showOverview &&
-                <canvas
-                    ref={timeAxisRef}
-                    width={parent.innerWidth - 30}
-                    height={40}
-                    onContextMenu={(event) => event.preventDefault()}
-                />
+
+            {showOverview && response &&
+                <>
+                    <canvas
+                        className='overview-canvas'
+                        ref={overviewRef}
+                        width={parent.innerWidth - 30}
+                        height={40}
+                        onMouseDown={handleLMBDownOverview}
+                        onMouseUp={handleMouseUpOverview}
+                        onContextMenu={(event) => event.preventDefault()}
+                        onMouseMove={handleMouseMoveOverview}
+                    />
+                    <button
+                        id='left-scroll-overview-btn'
+                        onClick={leftScrollOverview}
+                    />
+                    <button
+                        id='right-scroll-overview-btn'
+                        onClick={rightScrollOverview}
+                    />
+                    <canvas
+                        className='time-axis-canvas'
+                        ref={timeAxisRef}
+                        width={parent.innerWidth - 30}
+                        height={40}
+                        onContextMenu={(event) => event.preventDefault()}
+                    />
+                </>
             }
             <div className='track-container'>
                 <div className='track-controls' >

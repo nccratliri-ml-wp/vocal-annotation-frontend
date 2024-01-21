@@ -39,8 +39,12 @@ html, body {
 .track-controls{
   display: flex;
   flex-direction: column;
-  min-width: 200px;
+  width: 200px;
 
+}
+
+.overview-time-axis-container{
+  margin: 0 0 0 200px;
 }
 
 /* -------------------------- Overview Window -------------------------- */
@@ -290,6 +294,8 @@ html, body {
 .waveform-canvas{
   display: block;
 }
+
+
 
 
 #blank-space{

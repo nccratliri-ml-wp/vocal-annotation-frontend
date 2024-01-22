@@ -692,9 +692,11 @@ function ScalableSpec(
         const overviewCanvas = overviewRef.current
         const ctx = overviewCanvas.getContext('2d');
         ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
+        /*
         if (overviewImgData.current){
             ctx.putImageData(overviewImgData.current, 0, 0);
         }
+         */
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = lineWidth
@@ -1020,21 +1022,23 @@ function ScalableSpec(
                     >
                         Console log labels
                     </button>
-                    <button
-                        onClick={getAudio}
-                    >
-                        ▶
-                    </button>
-                    <button
-                        onClick={pauseAudio}
-                    >
-                        ⏸
-                    </button>
-                    <button
-                        onClick={stopAudio}
-                    >
-                        ⏹
-                    </button>
+                    <div className='audio-controls'>
+                        <button
+                            onClick={getAudio}
+                        >
+                            ▶
+                        </button>
+                        <button
+                            onClick={pauseAudio}
+                        >
+                            ⏸
+                        </button>
+                        <button
+                            onClick={stopAudio}
+                        >
+                            ⏹
+                        </button>
+                    </div>
                     <Parameters
                         passParametersToScalableSpec={passParametersToScalableSpec}
                     />

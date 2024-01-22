@@ -70,8 +70,9 @@ function Parameters({ passParametersToScalableSpec }) {
                                 value={nFftValue}
                                 onChange={handleNFftInputChange}
                             />
+                            <button onClick={handleNFftSubmit}>Submit</button>
                         </label>
-                        <button onClick={handleNFftSubmit}>Submit</button>
+
                     </>
                 )}
             </div>
@@ -89,14 +90,15 @@ function Parameters({ passParametersToScalableSpec }) {
                 {showBinsPerOctaveInput && (
                     <>
                         <label>
-                            Bins per Octave:
+                            BPO:
                             <input
                                 type="number"
                                 value={binsPerOctaveValue}
                                 onChange={handleBinsPerOctaveInputChange}
                             />
+                            <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
                         </label>
-                        <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
+
                     </>
                 )}
             </div>

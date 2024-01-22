@@ -24,9 +24,8 @@ html, body {
   margin: 0;
 }
 
-
-.editor-container{
-
+.overview-time-axis-container{
+  margin: 0 0 0 200px;
 }
 
 
@@ -34,17 +33,21 @@ html, body {
 
 .track-container{
   display: flex;
+  margin: 0 0 10px 0;
 }
 
 .track-controls{
   display: flex;
   flex-direction: column;
   width: 200px;
-
 }
 
-.overview-time-axis-container{
-  margin: 0 0 0 200px;
+.track-controls > button{
+  width: 87px;
+}
+
+.audio-controls{
+  display: flex;
 }
 
 /* -------------------------- Overview Window -------------------------- */
@@ -180,6 +183,7 @@ html, body {
   position: fixed;
   top: 20px;
   z-index: 1;
+  display: flex;
   background-color: #082536;
 }
 
@@ -286,8 +290,14 @@ html, body {
 }
 
 .parameters > div > label{
-  margin: 0 0 0 10px;
+  display: flex;
 }
+
+.parameters > div > label > input{
+  width: 40px;
+}
+
+
 
 /* -------------------------- Waveform -------------------------- */
 

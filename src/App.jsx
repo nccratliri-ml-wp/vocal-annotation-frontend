@@ -201,6 +201,7 @@ function App() {
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
+                    trackDurations={trackDurations}
                     activeClustername={activeClustername}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}

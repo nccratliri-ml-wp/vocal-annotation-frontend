@@ -28,6 +28,7 @@ const LABEL_COLOR_HOVERED = "#f3e655"
 function ScalableSpec(
                         {
                             id,
+                            trackDurations,
                             activeClustername,
                             showOverviewInitialValue,
                             globalAudioDuration,
@@ -340,7 +341,7 @@ function ScalableSpec(
         // Draw Time Axis, Viewport
         if (showOverview){
             if (newOverviewSpecNeeded){
-                drawOverviewSpectrogram(spectrogram)
+                drawOverviewSpectrogram()
                 passNewOverviewSpecNeededToApp(false)
             }
             drawTimeAxis()
@@ -348,17 +349,29 @@ function ScalableSpec(
         }
     }
 
-    const drawOverviewSpectrogram = (spectrogram) => {
-        return
-        const overviewCanvas = overviewRef.current
-        const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
-        const image = new Image();
-        image.addEventListener('load',  () => {
-            overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
-            overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-            drawViewport(currentStartTime, currentEndTime, 'white', 2)
-        });
-        image.src = `data:image/png;base64,${spectrogram}`;
+    const drawOverviewSpectrogram = () => {
+        const canvas = overviewRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true});
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#b6b1ff'
+
+        let y = 5
+
+        for (let trackDuration of trackDurations){
+            const ratio = trackDuration / globalAudioDuration
+            const trackWidth = canvas.width * ratio
+
+            ctx.beginPath()
+            ctx.moveTo(0, y)
+            ctx.lineTo(trackWidth, y)
+            ctx.stroke()
+
+            y = y + 5
+        }
+        overviewImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        drawViewport(currentStartTime, currentEndTime, 'white', 2)
     }
 
     const drawTimeAxis = () => {
@@ -692,11 +705,11 @@ function ScalableSpec(
         const overviewCanvas = overviewRef.current
         const ctx = overviewCanvas.getContext('2d');
         ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
-        /*
+
         if (overviewImgData.current){
             ctx.putImageData(overviewImgData.current, 0, 0);
         }
-         */
+
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = lineWidth
@@ -910,6 +923,12 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels])
+
+    useEffect( () => {
+        if (!overviewRef.current) return
+        drawOverviewSpectrogram()
+        }, [trackDurations]
+    )
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {

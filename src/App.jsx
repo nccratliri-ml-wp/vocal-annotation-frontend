@@ -1,8 +1,6 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
-import CSVReader from "./CSVReader.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
-import Searchbar from "./Searchbar.jsx"
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -11,9 +9,6 @@ function App() {
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
     const [activeClustername, setActiveClustername] = useState()
-    const [specType, setSpecType] = useState('log-mel')
-    const [nfft, setNfft] = useState(null)
-    const [binsPerOctave, setBinsPerOctave] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -62,18 +57,6 @@ function App() {
 
     function passActiveClusternameToApp(chosenClustername){
         setActiveClustername( chosenClustername )
-    }
-
-    function passSpecTypeToApp(chosenSpecType){
-        setSpecType( chosenSpecType )
-    }
-
-    function passNfftToApp( chosenNfft ){
-        setNfft( chosenNfft )
-    }
-
-    function passBinsPerOctaveToApp ( binsPerOctave ){
-        setBinsPerOctave (binsPerOctave)
     }
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -212,9 +195,13 @@ function App() {
                     onClick={rightScroll}
                 />
             </div>
+            <div id='blank-space'>
+            </div>
+            <div id='all-tracks'>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
+                    trackDurations={trackDurations}
                     activeClustername={activeClustername}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
@@ -697,6 +684,7 @@ function App() {
             >
                 Add Track
             </button>
+            </div>
         </>
     )
 }

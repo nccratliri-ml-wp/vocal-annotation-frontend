@@ -28,6 +28,7 @@ const LABEL_COLOR_HOVERED = "#f3e655"
 function ScalableSpec(
                         {
                             id,
+                            trackDurations,
                             activeClustername,
                             showOverviewInitialValue,
                             globalAudioDuration,
@@ -340,7 +341,7 @@ function ScalableSpec(
         // Draw Time Axis, Viewport
         if (showOverview){
             if (newOverviewSpecNeeded){
-                drawOverviewSpectrogram(spectrogram)
+                drawOverviewSpectrogram()
                 passNewOverviewSpecNeededToApp(false)
             }
             drawTimeAxis()
@@ -348,17 +349,29 @@ function ScalableSpec(
         }
     }
 
-    const drawOverviewSpectrogram = (spectrogram) => {
-        return
-        const overviewCanvas = overviewRef.current
-        const overviewCTX = overviewCanvas.getContext('2d', { willReadFrequently: true, alpha: false });
-        const image = new Image();
-        image.addEventListener('load',  () => {
-            overviewCTX.drawImage(image, 0, 0, overviewCanvas.width, overviewCanvas.height)
-            overviewImgData.current = overviewCTX.getImageData(0, 0, overviewCanvas.width, overviewCanvas.height);
-            drawViewport(currentStartTime, currentEndTime, 'white', 2)
-        });
-        image.src = `data:image/png;base64,${spectrogram}`;
+    const drawOverviewSpectrogram = () => {
+        const canvas = overviewRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true});
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#b6b1ff'
+
+        let y = 5
+
+        for (let trackDuration of trackDurations){
+            const ratio = trackDuration / globalAudioDuration
+            const trackWidth = canvas.width * ratio
+
+            ctx.beginPath()
+            ctx.moveTo(0, y)
+            ctx.lineTo(trackWidth, y)
+            ctx.stroke()
+
+            y = y + 5
+        }
+        overviewImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        drawViewport(currentStartTime, currentEndTime, 'white', 2)
     }
 
     const drawTimeAxis = () => {
@@ -682,8 +695,8 @@ function ScalableSpec(
     const updateViewportScrollButtons = (startFrame, endFrame) => {
         const leftScrollBtn = document.getElementById('left-scroll-overview-btn')
         const rightScrollBtn = document.getElementById('right-scroll-overview-btn')
-        const xLeftBtn = calculateViewportFrameX(startFrame) - 15
-        const xRightBtn = calculateViewportFrameX(endFrame) + 5
+        const xLeftBtn = calculateViewportFrameX(startFrame) + 185
+        const xRightBtn = calculateViewportFrameX(endFrame) + 205
         leftScrollBtn.style.left = `${xLeftBtn}px`
         rightScrollBtn.style.left = `${xRightBtn}px`
     }
@@ -692,12 +705,15 @@ function ScalableSpec(
         const overviewCanvas = overviewRef.current
         const ctx = overviewCanvas.getContext('2d');
         ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
+
         if (overviewImgData.current){
             ctx.putImageData(overviewImgData.current, 0, 0);
         }
+
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
         ctx.lineWidth = lineWidth
+        ctx.strokeStyle = hexColorCode
 
         // Draw start frame
         ctx.beginPath()
@@ -711,21 +727,23 @@ function ScalableSpec(
         ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
 
-        // Draw Scroll Bar
-        ctx.lineWidth = overviewCanvas.height
-        ctx.strokeStyle = hexColorCode
+        // Draw Top line
         ctx.beginPath()
-        ctx.moveTo(x1, overviewCanvas.height/2)
-        ctx.lineTo(x2, overviewCanvas.height/2)
+        ctx.moveTo(x1, 0)
+        ctx.lineTo(x2, 0)
+        ctx.stroke()
+
+        // Draw Bottom line
+        ctx.beginPath()
+        ctx.moveTo(x1, overviewCanvas.height)
+        ctx.lineTo(x2, overviewCanvas.height)
         ctx.stroke()
 
         // Draw Viewport Timestamps
-        /*
         ctx.font = `15px Arial`;
-        ctx.fillStyle = 'red'
+        ctx.fillStyle = hexColorCode
         const timestampText = (Math.round(startFrame * 100) / 100).toString()
         ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
-         */
 
         // Update Scroll Button positions
         updateViewportScrollButtons(startFrame, endFrame)
@@ -861,7 +879,7 @@ function ScalableSpec(
         if (!waveformCanvasRef.current) return
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
-        canvas.width = window.innerWidth -30
+        canvas.width = parent.innerWidth - 200
 
         const scale = 35
         const centerY = canvas.height / 2
@@ -905,6 +923,12 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels])
+
+    useEffect( () => {
+        if (!overviewRef.current) return
+        drawOverviewSpectrogram()
+        }, [trackDurations]
+    )
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
@@ -962,112 +986,108 @@ function ScalableSpec(
         <div
             className='editor-container'
         >
-            {showOverview &&
-                <div
-                    className='overview-canvas-container'
-                >
-                    <>
-                        <canvas
-                            className='overview-canvas'
-                            ref={overviewRef}
-                            width={parent.innerWidth - 30}
-                            height={40}
-                            onMouseDown={handleLMBDownOverview}
-                            onMouseUp={handleMouseUpOverview}
-                            onContextMenu={(event) => event.preventDefault()}
-                            onMouseMove={handleMouseMoveOverview}
-                        />
-                        {response &&
-                            <>
-                                <button
-                                    id='left-scroll-overview-btn'
-                                    onClick={leftScrollOverview}
-                                />
-                                <button
-                                    id='right-scroll-overview-btn'
-                                    onClick={rightScrollOverview}
-                                />
-                            </>
-                        }
-                    </>
+
+            {showOverview && response &&
+                <div className='overview-time-axis-container'>
+                    <canvas
+                        className='overview-canvas'
+                        ref={overviewRef}
+                        width={parent.innerWidth - 200}
+                        height={40}
+                        onMouseDown={handleLMBDownOverview}
+                        onMouseUp={handleMouseUpOverview}
+                        onContextMenu={(event) => event.preventDefault()}
+                        onMouseMove={handleMouseMoveOverview}
+                    />
+                    <button
+                        id='left-scroll-overview-btn'
+                        onClick={leftScrollOverview}
+                    />
+                    <button
+                        id='right-scroll-overview-btn'
+                        onClick={rightScrollOverview}
+                    />
+                    <canvas
+                        className='time-axis-canvas'
+                        ref={timeAxisRef}
+                        width={parent.innerWidth - 200}
+                        height={40}
+                        onContextMenu={(event) => event.preventDefault()}
+                    />
                 </div>
             }
-            {showOverview &&
-                <canvas
-                    ref={timeAxisRef}
-                    width={parent.innerWidth - 30}
-                    height={40}
-                    onContextMenu={(event) => event.preventDefault()}
-                />
-            }
-            <div className='track-controls' >
-                <FileUpload
-                    passResponseToScalableSpec={passResponseToScalableSpec}
-                    passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                    passTrackDurationToApp={passTrackDurationToApp}
-                    deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-                    previousAudioDuration={response? response.data.audio_duration : undefined}
-                />
-                <Export
-                    audioFileName={'Example Audio File Name'}
-                    labels={labels}
-                />
-                {id !== 'track_1' &&
+            <div className='track-container'>
+                <div className='track-controls' >
+                    <FileUpload
+                        passResponseToScalableSpec={passResponseToScalableSpec}
+                        passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                        passTrackDurationToApp={passTrackDurationToApp}
+                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                        previousAudioDuration={response? response.data.audio_duration : undefined}
+                    />
+                    <Export
+                        audioFileName={'Example Audio File Name'}
+                        labels={labels}
+                    />
+                    {id !== 'track_1' &&
+                        <button
+                            onClick={handleRemoveTrack}
+                        >
+                            Remove Track
+                        </button>
+                    }
                     <button
-                        onClick={handleRemoveTrack}
+                        onClick={() => console.log(labels)}
                     >
-                        Remove Track
+                        Console log labels
                     </button>
-                }
-                <button
-                    onClick={() => console.log(labels)}
-                >
-                    Console log labels
-                </button>
-                <button
-                    onClick={getAudio}
-                >
-                    ▶
-                </button>
-                <button
-                    onClick={pauseAudio}
-                >
-                    ⏸
-                </button>
-                <button
-                    onClick={stopAudio}
-                >
-                    ⏹
-                </button>
-                <Parameters
-                    passParametersToScalableSpec={passParametersToScalableSpec}
-                />
+                    <div className='audio-controls'>
+                        <button
+                            onClick={getAudio}
+                        >
+                            ▶
+                        </button>
+                        <button
+                            onClick={pauseAudio}
+                        >
+                            ⏸
+                        </button>
+                        <button
+                            onClick={stopAudio}
+                        >
+                            ⏹
+                        </button>
+                    </div>
+                    <Parameters
+                        passParametersToScalableSpec={passParametersToScalableSpec}
+                    />
+                </div>
+
+                <div>
+                    <canvas
+                        className='waveform-canvas'
+                        ref={waveformCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={80}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    <canvas
+                        className='spec-canvas'
+                        ref={specCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={150}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
+                </div>
+
             </div>
-            <canvas
-                className='waveform-canvas'
-                ref={waveformCanvasRef}
-                width={parent.innerWidth -30}
-                height={80}
-                onMouseDown={handleLMBDown}
-                onMouseUp={handleMouseUp}
-                onContextMenu={handleRightClick}
-                onMouseMove={handleMouseMove}
-            />
-            <div
-                className='spec-canvas-container'
-            >
-                <canvas
-                    className='spec-canvas'
-                    ref={specCanvasRef}
-                    width={parent.innerWidth -30}
-                    height={150}
-                    onMouseDown={handleLMBDown}
-                    onMouseUp={handleMouseUp}
-                    onContextMenu={handleRightClick}
-                    onMouseMove={handleMouseMove}
-                />
-            </div>
-            {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
         </div>
     );
 }

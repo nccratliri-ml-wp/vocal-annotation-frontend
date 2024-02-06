@@ -400,7 +400,8 @@ function ScalableSpec(
         ctx.stroke()
 
         // Drawing timestamps in between
-        const withText = globalClipDuration < globalAudioDuration
+        const convertMethod = globalClipDuration > 3600 ? convertSecondsToHours : convertSecondsToMinutes
+        let withText = globalClipDuration < globalAudioDuration * 0.25
 
         let step = Math.floor(globalAudioDuration / 10 / 10) * 10
         if (step < 1){
@@ -409,22 +410,39 @@ function ScalableSpec(
 
         // Draw 1st level
         for (let i=step; i < globalAudioDuration; i+=step){
-            drawTimestamp(i, 30, '.00', 14,true, false)
+            const timestampText = convertMethod(i)
+            drawTimestamp(i, timestampText, 27, 14,true)
         }
 
-        step = step * 0.1
         // Draw 2nd level
-        // TO DO: figure out why this breaks at 4.5
+        step = step / 10
+        let count = 0
         for (let i=step; i < globalAudioDuration; i+=step){
-            drawTimestamp(i, 15, '', 10,withText, true)
+            i = Math.round(i * 10) / 10
+            count++
+            if (count % 10 === 0 ) continue // This prevents the 2nd level timestamp from drawing over the already existing 1st level timestamp
+            const timestampText = convertMethod(i)
+            drawTimestamp(i, timestampText,15, 10,withText)
         }
 
-        // Draw 3rd level
+        //Draw 3rd level
+        withText = globalClipDuration < globalAudioDuration * 0.025
+        if (!withText) return
+        step = step / 10
+        count = 0
+        for (let i=step; i<globalAudioDuration; i+=step){
+            i = Math.round(i * 10) / 10
+            count++
+            if (count % 10 === 0 ) continue
+            const timestampText = convertMethod(i)
+            drawTimestamp(i, timestampText,5, 8,withText)
+        }
+
     }
 
-    const drawTimestamp = (timestamp, lineHeight, ending, fontSize, withText, withFloor) => {
-        const canvas = timeAxisRef.current;
-        const ctx = timeAxisRef.current.getContext('2d');
+    const drawTimestamp = (timestamp, timestampText, lineHeight, fontSize, withText) => {
+        const canvas = timeAxisRef.current
+        const ctx = timeAxisRef.current.getContext('2d')
         const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
 
         // Draw line under Timestamp text
@@ -434,21 +452,42 @@ function ScalableSpec(
         ctx.lineWidth = 2
         ctx.strokeStyle = '#9db4c0'
         ctx.stroke()
+
         // Draw timestamp text
-        ctx.font = `${fontSize}px Arial`;
+        ctx.font = `${fontSize}px Arial`
         ctx.fillStyle = '#9db4c0'
 
-        if (withFloor){
-            timestamp = Math.floor(timestamp * 100) / 100
-        }
-
-        const timestampText = timestamp.toString() + ending
-        const textWidth = ctx.measureText(timestampText).width;
+        const textWidth = ctx.measureText(timestampText).width
 
         if (withText) {
-            ctx.fillText(timestamp.toString() + ending, x - textWidth / 2, lineHeight+10);
+            ctx.fillText(timestampText, x - textWidth / 2, lineHeight+12)
         }
     }
+
+    const convertSecondsToMinutes = (seconds) => {
+        const minutes = Math.floor(seconds / 60)
+        const remainingSeconds = seconds % 60
+        const milliseconds = Math.round((seconds - Math.floor(seconds)) * 1000)
+
+        const timeString = minutes.toString().padStart(2, '0') + ':' +
+            Math.floor(remainingSeconds).toString().padStart(2, '0') + '.' +
+            milliseconds.toString().padStart(1, '0')
+
+        return timeString
+    }
+
+    const convertSecondsToHours = (seconds) => {
+        const hours = Math.floor(seconds / 3600)
+        let remainingSeconds = seconds % 3600
+        const minutes = Math.floor(remainingSeconds / 60)
+        remainingSeconds %= 60
+        const secondsStr = remainingSeconds.toFixed(0).padStart(2, '0')
+
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secondsStr}`
+
+        return timeString
+    }
+
 
     const drawLine = (timestamp, hexColorCode) => {
         const x = calculateXPosition(timestamp, specCanvasRef.current)

@@ -418,7 +418,7 @@ function ScalableSpec(
         step = step / 10
         let count = 0
         for (let i=step; i < globalAudioDuration; i+=step){
-            i = Math.round(i * 10) / 10
+            //i = Math.round(i * 10) / 10
             count++
             if (count % 10 === 0 ) continue // This prevents the 2nd level timestamp from drawing over the already existing 1st level timestamp
             const timestampText = convertMethod(i)
@@ -426,12 +426,14 @@ function ScalableSpec(
         }
 
         //Draw 3rd level
-        withText = globalClipDuration < globalAudioDuration * 0.025
-        if (!withText) return
+        if (globalClipDuration > globalAudioDuration * 0.025) return
+        withText = globalClipDuration < globalAudioDuration * 0.01
+
         step = step / 10
         count = 0
         for (let i=step; i<globalAudioDuration; i+=step){
-            i = Math.round(i * 10) / 10
+            //i = parseFloat(i.toFixed(0))
+            i = (i * 10) / 10
             count++
             if (count % 10 === 0 ) continue
             const timestampText = convertMethod(i)

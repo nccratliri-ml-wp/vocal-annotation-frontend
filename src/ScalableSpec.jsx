@@ -47,7 +47,9 @@ function ScalableSpec(
                             passCurrentStartTimeToApp,
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
-                            removeTrackInApp
+                            removeTrackInApp,
+                            passActiveLabelToApp,
+                            activeLabel
                         }
                     )
                 {
@@ -117,9 +119,6 @@ function ScalableSpec(
             audio_id: audioId,
             start_time: currentStartTime,
             clip_duration: globalClipDuration,
-            //spec_cal_method: 'constant-q',
-            //n_fft: nfft,
-            //bins_per_octave: binsPerOctave,
         }
 
         const response = await axios.post(path, requestParameters)
@@ -187,7 +186,8 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            drawLine(newOffset,LABEL_COLOR)
+            //drawLine(newOffset,LABEL_COLOR)
+            passActiveLabelToApp( new Label(lastLabel.onset, newOffset, activeClustername) )
             drawLineBetween(lastLabel,LABEL_COLOR)
             return
         }
@@ -195,6 +195,7 @@ function ScalableSpec(
         // Add onset
         const clickedTimestamp = calculateTimestamp(event)
         addNewLabel(clickedTimestamp)
+        passActiveLabelToApp( new Label(clickedTimestamp, undefined, activeClustername))
     }
 
     const handleMouseUp = (event) => {
@@ -228,6 +229,9 @@ function ScalableSpec(
     }
 
     const handleMouseMove = (event) => {
+        if (activeLabel && activeLabel.offset) {
+            passActiveLabelToApp(null)
+        }
         hoverLine(event)
         hoverLabel(event)
     }
@@ -334,6 +338,7 @@ function ScalableSpec(
             specImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
             drawWaveform(newAudioArray)
             drawAllLabels()
+            drawActiveLabel()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -518,13 +523,11 @@ function ScalableSpec(
         const ctx = cvs.getContext('2d');
 
         ctx.beginPath()
-        ctx.setLineDash([1, 1])
         ctx.moveTo(xOnset, cvs.height)
         ctx.lineTo(xOffset, cvs.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
         ctx.stroke()
-        ctx.setLineDash([])
     }
 
     const drawClustername = (label) => {
@@ -540,10 +543,20 @@ function ScalableSpec(
 
     const drawAllLabels = () => {
         for (let label of labels) {
-            drawLine(label.onset, LABEL_COLOR)
-            drawLine(label.offset, LABEL_COLOR)
+            /*
+            if ( label === labels[labels.length-1] ) {
+                drawLine(label.onset, LABEL_COLOR)
+                drawLine(label.offset, LABEL_COLOR)
+            }
+             */
             drawLineBetween(label,LABEL_COLOR)
         }
+    }
+
+    const drawActiveLabel = () => {
+        if (!activeLabel) return
+        drawLine(activeLabel.onset, '#009dff')
+        drawLine(activeLabel.offset, '#009dff')
     }
 
 
@@ -963,7 +976,7 @@ function ScalableSpec(
     useEffect(() => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, audioArray)
-    }, [labels])
+    }, [labels, activeLabel])
 
     useEffect( () => {
         if (!overviewRef.current) return

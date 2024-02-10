@@ -4,6 +4,14 @@ import ScalableSpec from "./ScalableSpec.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
+class Label {
+    constructor(onset, offset, clustername) {
+        this.onset = onset
+        this.offset = offset
+        this.clustername = clustername
+    }
+}
+
 function App() {
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
@@ -36,14 +44,15 @@ function App() {
 
 
     // General
-    const [globalAudioDuration, setGlobalAudioDuration] = useState(0);
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(0)
     const [globalClipDuration, setGlobalClipDuration] = useState(0)
-    const [currentStartTime, setCurrentStartTime] = useState(0);
-    const [currentEndTime, setCurrentEndTime] = useState(0);
-    const [maxScrollTime, setMaxScrollTime] = useState(0);
-    const [scrollStep, setScrollStep] = useState(0);
+    const [currentStartTime, setCurrentStartTime] = useState(0)
+    const [currentEndTime, setCurrentEndTime] = useState(0)
+    const [maxScrollTime, setMaxScrollTime] = useState(0)
+    const [scrollStep, setScrollStep] = useState(0)
     const [newOverviewSpecNeeded, setNewOverviewSpecNeeded] = useState(true)
 
+    const [activeLabel, setActiveLabel] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -87,6 +96,10 @@ function App() {
         setNewOverviewSpecNeeded( boolean )
     }
 
+    function passActiveLabelToApp( newActiveLabel ){
+        setActiveLabel( newActiveLabel )
+    }
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
@@ -123,23 +136,23 @@ function App() {
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
     function onZoomIn(){
-        const newDuration = Math.max(globalClipDuration / 2, 0.1);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        setGlobalClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentEndTime( currentStartTime + newDuration );
+        const newDuration = Math.max(globalClipDuration / 2, 0.1)
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setScrollStep(newDuration * SCROLL_STEP_RATIO)
+        setCurrentEndTime( currentStartTime + newDuration )
     }
 
     function onZoomOut(){
-        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
-        setGlobalClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentStartTime( newStartTime );
-        setCurrentEndTime( newStartTime + newDuration );
+        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration)
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setScrollStep(newDuration * SCROLL_STEP_RATIO)
+        setCurrentStartTime( newStartTime )
+        setCurrentEndTime( newStartTime + newDuration )
     }
 
     function leftScroll() {
@@ -221,6 +234,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_2 &&
@@ -245,6 +260,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_3 &&

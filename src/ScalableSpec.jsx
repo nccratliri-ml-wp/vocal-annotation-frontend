@@ -187,7 +187,7 @@ function ScalableSpec(
             }
             setLabels(labelsCopy)
             //drawLine(newOffset,LABEL_COLOR)
-            passActiveLabelToApp( new Label(lastLabel.onset, newOffset, activeClustername) )
+            passActiveLabelToApp( labelsCopy[labels.length-1] )
             drawLineBetween(lastLabel,LABEL_COLOR)
             return
         }
@@ -208,12 +208,14 @@ function ScalableSpec(
 
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
-        // flip onset with offset if necessary
         if (clickedLabel){
+            // flip onset with offset if necessary
             if (clickedLabel.onset > clickedLabel.offset){
                 clickedLabel = flipOnsetOffset(clickedLabel)
             }
+            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined))
         }
+
         clickedLabel = undefined
     }
 
@@ -226,12 +228,10 @@ function ScalableSpec(
         const xClicked = getXClicked(event)
         if ( !checkIfPositionIsOccupied(xClicked ) ) return
         deleteLabel(xClicked)
+        passActiveLabelToApp(null)
     }
 
     const handleMouseMove = (event) => {
-        if (activeLabel && activeLabel.offset) {
-            passActiveLabelToApp(null)
-        }
         hoverLine(event)
         hoverLabel(event)
     }
@@ -261,7 +261,7 @@ function ScalableSpec(
             drawAllLabels()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
-            //console.log('drawing green')
+            console.log('drawing green')
         }
 
         const mouseX = getXClicked(event)
@@ -270,14 +270,21 @@ function ScalableSpec(
             const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
             const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
             if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
-                drawLine(label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label.offset, LABEL_COLOR_HOVERED)
-                drawLineBetween(label, LABEL_COLOR_HOVERED)
+                if (activeLabel !== label){
+                    passActiveLabelToApp(label)
+                }
+                drawActiveLabel()
+                drawLineBetween(label, LABEL_COLOR)
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
-                //console.log('drawing yellow')
-                break;
+                console.log('drawing yellow')
+                //break;
+            } else{
+                console.log('setting active to null')
+                if (activeLabel) {
+                    passActiveLabelToApp(null)
+                }
             }
         }
     }
@@ -502,18 +509,22 @@ function ScalableSpec(
         const waveformCTX = waveformCanvasRef.current.getContext('2d')
 
         specCTX.beginPath()
+        specCTX.setLineDash([1, 1])
         specCTX.moveTo(x, 0)
         specCTX.lineTo(x, specCanvasRef.current.height)
         specCTX.lineWidth = 2
         specCTX.strokeStyle = hexColorCode
         specCTX.stroke()
+        specCTX.setLineDash([])
 
         waveformCTX.beginPath()
+        waveformCTX.setLineDash([1, 1])
         waveformCTX.moveTo(x, 0)
         waveformCTX.lineTo(x, waveformCanvasRef.current.height)
         waveformCTX.lineWidth = 2
         waveformCTX.strokeStyle = hexColorCode
         waveformCTX.stroke()
+        waveformCTX.setLineDash([])
     }
 
     const drawLineBetween = (label, colorHex) => {
@@ -543,20 +554,21 @@ function ScalableSpec(
 
     const drawAllLabels = () => {
         for (let label of labels) {
-            /*
-            if ( label === labels[labels.length-1] ) {
-                drawLine(label.onset, LABEL_COLOR)
-                drawLine(label.offset, LABEL_COLOR)
-            }
-             */
             drawLineBetween(label,LABEL_COLOR)
+            // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
+            if (!label.offset){
+                drawLine(label.onset, LABEL_COLOR_HOVERED)
+            }
         }
     }
 
     const drawActiveLabel = () => {
         if (!activeLabel) return
-        drawLine(activeLabel.onset, '#009dff')
-        drawLine(activeLabel.offset, '#009dff')
+
+        const hexColorCode = !activeLabel.offset? LABEL_COLOR_HOVERED : LABEL_COLOR
+
+        drawLine(activeLabel.onset, hexColorCode)
+        drawLine(activeLabel.offset, hexColorCode)
     }
 
 

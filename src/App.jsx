@@ -4,14 +4,6 @@ import ScalableSpec from "./ScalableSpec.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
-class Label {
-    constructor(onset, offset, clustername) {
-        this.onset = onset
-        this.offset = offset
-        this.clustername = clustername
-    }
-}
-
 function App() {
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
@@ -50,7 +42,6 @@ function App() {
     const [currentEndTime, setCurrentEndTime] = useState(0)
     const [maxScrollTime, setMaxScrollTime] = useState(0)
     const [scrollStep, setScrollStep] = useState(0)
-    const [newOverviewSpecNeeded, setNewOverviewSpecNeeded] = useState(true)
 
     const [activeLabel, setActiveLabel] = useState(null)
 
@@ -90,10 +81,6 @@ function App() {
 
     function passScrollStepToApp( newScrollStep ){
         setScrollStep( newScrollStep )
-    }
-
-    function passNewOverviewSpecNeededToApp( boolean ){
-        setNewOverviewSpecNeeded( boolean )
     }
 
     function passActiveLabelToApp( newActiveLabel ){
@@ -224,8 +211,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -250,8 +235,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -276,8 +259,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -300,8 +281,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -324,8 +303,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -348,8 +325,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -372,8 +347,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -396,8 +369,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -420,8 +391,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -444,8 +413,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -468,8 +435,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -492,8 +457,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -516,8 +479,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -540,8 +501,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -564,8 +523,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -588,8 +545,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -612,8 +567,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -636,8 +589,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -660,8 +611,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -684,8 +633,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}

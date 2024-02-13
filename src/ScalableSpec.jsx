@@ -39,8 +39,6 @@ function ScalableSpec(
                             maxScrollTime,
                             scrollStep,
                             SCROLL_STEP_RATIO,
-                            newOverviewSpecNeeded,
-                            passNewOverviewSpecNeededToApp,
                             passScrollStepToApp,
                             passMaxScrollTimeToApp,
                             passCurrentEndTimeToApp,
@@ -67,7 +65,6 @@ function ScalableSpec(
 
     // Overview Window
     const overviewRef = useRef(null)
-    const overviewImgData = useRef(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
     let widthBetween_xStartTime_xClicked = null
@@ -91,7 +88,6 @@ function ScalableSpec(
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
-    const [showOverview, setShowOverview] = useState(showOverviewInitialValue)
     const [parameters, setParameters] = useState({
         spec_cal_method: 'log-mel'
     })
@@ -155,7 +151,7 @@ function ScalableSpec(
 
         const xClicked = getXClicked(event)
 
-        // Deal with click on Label
+        // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfPositionIsOccupied(xClicked) ){
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(xClicked)
@@ -174,10 +170,20 @@ function ScalableSpec(
             }
         }
 
+        // Deal with click inside an existing label
+        if (checkIfClickedOnLabel (xClicked) ) {
+            alert('Labels of the same individual may not stretch across one another.')
+            return
+        }
+
         // Add offset to existing label if necessary
         const lastLabel = labels[labels.length-1]
         if (labels.length > 0 && lastLabel.offset === undefined){
             const newOffset = calculateTimestamp(event)
+            if (!checkIfNewOffsetIsValid(lastLabel.onset, newOffset) ){
+                alert('Labels of the same individual may not stretch across one another.')
+                return
+            }
             const labelsCopy = labels
             if (newOffset < lastLabel.onset){
                 lastLabel.offset = newOffset
@@ -209,6 +215,12 @@ function ScalableSpec(
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         if (clickedLabel){
+            const xClicked = getXClicked(event)
+            if (checkIfClickedOnLabel(xClicked) ){
+                clickedLabel = undefined
+                console.log('Labels of the same individual may not stretch across one another.')
+                return
+            }
             // flip onset with offset if necessary
             if (clickedLabel.onset > clickedLabel.offset){
                 clickedLabel = flipOnsetOffset(clickedLabel)
@@ -226,12 +238,15 @@ function ScalableSpec(
         if (audioSnippet && !audioSnippet.paused) return
 
         const xClicked = getXClicked(event)
-        if ( !checkIfPositionIsOccupied(xClicked ) ) return
         deleteLabel(xClicked)
         passActiveLabelToApp(null)
     }
 
     const handleMouseMove = (event) => {
+        // Active label get sets to zero once user has set the offset of a label and moved his mouse
+        if (activeLabel && activeLabel.offset){
+            passActiveLabelToApp(null)
+        }
         hoverLine(event)
         hoverLabel(event)
     }
@@ -261,7 +276,7 @@ function ScalableSpec(
             drawAllLabels()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
-            console.log('drawing green')
+            //console.log('drawing green')
         }
 
         const mouseX = getXClicked(event)
@@ -270,21 +285,18 @@ function ScalableSpec(
             const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
             const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
             if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
+                /*
                 if (activeLabel !== label){
                     passActiveLabelToApp(label)
                 }
                 drawActiveLabel()
+                */
                 drawLineBetween(label, LABEL_COLOR)
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
-                console.log('drawing yellow')
-                //break;
-            } else{
-                console.log('setting active to null')
-                if (activeLabel) {
-                    passActiveLabelToApp(null)
-                }
+                //console.log('drawing yellow')
+                break;
             }
         }
     }
@@ -329,6 +341,35 @@ function ScalableSpec(
         }
     }
 
+    const checkIfClickedOnLabel = (xClicked) => {
+        for (let label of labels) {
+            const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
+            const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
+            if (xClicked >= onsetX && xClicked <= offsetX) {
+                return label
+            }
+        }
+    }
+
+    const checkIfNewOffsetIsValid = (currentOnset, newOffset) =>{
+        for (let label of labels){
+            if (label.onset > currentOnset && label.onset < newOffset){
+                return false
+            }
+            if (label.offset > currentOnset && label.offset < newOffset){
+                return false
+            }
+            if (label.onset > newOffset && label.onset < currentOnset){
+                return false
+            }
+            if (label.offset > newOffset && label.offset < currentOnset){
+                return false
+            }
+        }
+        return true
+    }
+
+
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
@@ -351,39 +392,10 @@ function ScalableSpec(
         image.src = `data:image/png;base64,${spectrogram}`;
 
         // Draw Time Axis, Viewport
-        if (showOverview){
-            if (newOverviewSpecNeeded){
-                drawOverviewSpectrogram()
-                passNewOverviewSpecNeededToApp(false)
-            }
+        if (showOverviewInitialValue){
             drawTimeAxis()
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         }
-    }
-
-    const drawOverviewSpectrogram = () => {
-        const canvas = overviewRef.current
-        const ctx = canvas.getContext('2d', { willReadFrequently: true});
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#b6b1ff'
-
-        let y = 5
-
-        for (let trackDuration of trackDurations){
-            const ratio = trackDuration / globalAudioDuration
-            const trackWidth = canvas.width * ratio
-
-            ctx.beginPath()
-            ctx.moveTo(0, y)
-            ctx.lineTo(trackWidth, y)
-            ctx.stroke()
-
-            y = y + 5
-        }
-        overviewImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        drawViewport(currentStartTime, currentEndTime, 'white', 2)
     }
 
     const drawTimeAxis = () => {
@@ -579,10 +591,7 @@ function ScalableSpec(
     }
 
     const deleteLabel = (xClicked) => {
-        const labelToBeDeleted = labels.find(
-            label => (calculateXPosition(label.onset, specCanvasRef.current) >= xClicked - 1  &&  calculateXPosition(label.onset, specCanvasRef.current) <= xClicked + 1 )
-                || (calculateXPosition(label.offset, specCanvasRef.current) >= xClicked - 1  &&  calculateXPosition(label.offset, specCanvasRef.current) <= xClicked + 1 )
-        )
+        const labelToBeDeleted = checkIfClickedOnLabel(xClicked)
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
     }
@@ -761,8 +770,8 @@ function ScalableSpec(
     const updateViewportScrollButtons = (startFrame, endFrame) => {
         const leftScrollBtn = document.getElementById('left-scroll-overview-btn')
         const rightScrollBtn = document.getElementById('right-scroll-overview-btn')
-        const xLeftBtn = calculateViewportFrameX(startFrame) + 185
-        const xRightBtn = calculateViewportFrameX(endFrame) + 205
+        const xLeftBtn = calculateViewportFrameX(startFrame) + 205
+        const xRightBtn = calculateViewportFrameX(endFrame) + 185
         leftScrollBtn.style.left = `${xLeftBtn}px`
         rightScrollBtn.style.left = `${xRightBtn}px`
     }
@@ -772,9 +781,13 @@ function ScalableSpec(
         const ctx = overviewCanvas.getContext('2d');
         ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
 
-        if (overviewImgData.current){
-            ctx.putImageData(overviewImgData.current, 0, 0);
-        }
+        // Draw horizontal line representing the audio track
+        ctx.lineWidth = 2
+        ctx.strokeStyle = '#b6b1ff'
+        ctx.beginPath()
+        ctx.moveTo(0, 5)
+        ctx.lineTo(overviewCanvas.width, 5)
+        ctx.stroke()
 
         const x1 = calculateViewportFrameX(startFrame)
         const x2 = calculateViewportFrameX(endFrame)
@@ -806,7 +819,7 @@ function ScalableSpec(
         ctx.stroke()
 
         // Draw Viewport Timestamps
-        ctx.font = `15px Arial`;
+        ctx.font = `10px Arial`;
         ctx.fillStyle = hexColorCode
         const timestampText = (Math.round(startFrame * 100) / 100).toString()
         ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
@@ -990,12 +1003,6 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, audioArray)
     }, [labels, activeLabel])
 
-    useEffect( () => {
-        if (!overviewRef.current) return
-        drawOverviewSpectrogram()
-        }, [trackDurations]
-    )
-
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
             if (!globalClipDuration || !response) return
@@ -1038,7 +1045,6 @@ function ScalableSpec(
     useEffect( () => {
         if (!globalAudioDuration || !response) return
 
-        passNewOverviewSpecNeededToApp(true)
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
         passCurrentEndTimeToApp(globalAudioDuration)
@@ -1053,7 +1059,7 @@ function ScalableSpec(
             className='editor-container'
         >
 
-            {showOverview && response &&
+            {showOverviewInitialValue && response &&
                 <div className='overview-time-axis-container'>
                     <canvas
                         className='overview-canvas'
@@ -1106,6 +1112,9 @@ function ScalableSpec(
                         onClick={() => console.log(labels)}
                     >
                         Console log labels
+                    </button>
+                    <button onClick={checkIfNewOffsetIsValid}>
+                        Test
                     </button>
                     <div className='audio-controls'>
                         <button

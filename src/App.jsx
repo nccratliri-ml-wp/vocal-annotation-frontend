@@ -267,6 +267,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_4 &&
@@ -289,6 +291,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_5 &&
@@ -311,6 +315,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_6 &&
@@ -333,6 +339,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_7 &&
@@ -355,6 +363,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_8 &&
@@ -377,6 +387,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_9 &&
@@ -399,6 +411,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_10 &&
@@ -421,6 +435,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_11 &&
@@ -443,6 +459,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_12 &&
@@ -465,6 +483,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_13 &&
@@ -487,6 +507,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_14 &&
@@ -509,6 +531,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_15 &&
@@ -531,6 +555,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_16 &&
@@ -553,6 +579,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_17 &&
@@ -575,6 +603,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_18 &&
@@ -597,6 +627,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_19 &&
@@ -619,6 +651,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_20 &&
@@ -641,6 +675,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             <button

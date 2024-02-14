@@ -8,10 +8,12 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, clustername) {
+    constructor(onset, offset, clustername, y, individual) {
         this.onset = onset
         this.offset = offset
         this.clustername = clustername
+        this.y = y
+        this.individual = individual
     }
 }
 
@@ -201,7 +203,7 @@ function ScalableSpec(
         // Add onset
         const clickedTimestamp = calculateTimestamp(event)
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(clickedTimestamp, undefined, activeClustername))
+        passActiveLabelToApp( new Label(clickedTimestamp, undefined, activeClustername, 80))
     }
 
     const handleMouseUp = (event) => {
@@ -215,17 +217,11 @@ function ScalableSpec(
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         if (clickedLabel){
-            const xClicked = getXClicked(event)
-            if (checkIfClickedOnLabel(xClicked) ){
-                clickedLabel = undefined
-                console.log('Labels of the same individual may not stretch across one another.')
-                return
-            }
             // flip onset with offset if necessary
             if (clickedLabel.onset > clickedLabel.offset){
                 clickedLabel = flipOnsetOffset(clickedLabel)
             }
-            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined))
+            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined, 80))
         }
 
         clickedLabel = undefined
@@ -291,7 +287,7 @@ function ScalableSpec(
                 }
                 drawActiveLabel()
                 */
-                drawLineBetween(label, LABEL_COLOR)
+                drawLineBetween(label, LABEL_COLOR_HOVERED)
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
@@ -307,6 +303,11 @@ function ScalableSpec(
     const getXClicked = (event) => {
         const rect = event.target.getBoundingClientRect()
         return event.clientX - rect.left
+    }
+
+    const getYClicked = (event) => {
+        const rect = event.target.getBoundingClientRect()
+        return event.clientY - rect.top
     }
 
     const calculateXPosition = (timestamp, canvas) => {
@@ -542,14 +543,46 @@ function ScalableSpec(
     const drawLineBetween = (label, colorHex) => {
         const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
         const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-        const cvs = waveformCanvasRef.current
-        const ctx = cvs.getContext('2d');
+        let cvs = waveformCanvasRef.current
+        let ctx = cvs.getContext('2d');
 
-        ctx.beginPath()
-        ctx.moveTo(xOnset, cvs.height)
-        ctx.lineTo(xOffset, cvs.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
+
+        // Draw horizontal line
+        ctx.beginPath()
+        ctx.moveTo(xOnset, label.y)
+        ctx.lineTo(xOffset, label.y)
+        ctx.stroke()
+
+        // Draw short Onset line
+        ctx.beginPath()
+        ctx.moveTo(xOnset, label.y - 3 )
+        ctx.lineTo(xOnset, label.y + 3)
+        ctx.stroke()
+
+        // Draw short Offset line
+        ctx.beginPath()
+        ctx.moveTo(xOffset, label.y - 3 )
+        ctx.lineTo(xOffset, label.y + 3)
+        ctx.stroke()
+
+        cvs = specCanvasRef.current
+        ctx = cvs.getContext('2d');
+
+        ctx.lineWidth = 2
+        ctx.strokeStyle = colorHex
+
+        // Draw short Onset line
+        ctx.beginPath()
+        ctx.moveTo(xOnset, 0 )
+        ctx.lineTo(xOnset, 3)
+        ctx.stroke()
+
+        // Draw short Offset line
+        ctx.beginPath()
+        ctx.moveTo(xOffset, 0 )
+        ctx.lineTo(xOffset, 3)
         ctx.stroke()
     }
 
@@ -587,7 +620,7 @@ function ScalableSpec(
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label(onset, undefined, activeClustername) ])
+        setLabels(current => [...current, new Label(onset, undefined, activeClustername, 80) ])
     }
 
     const deleteLabel = (xClicked) => {

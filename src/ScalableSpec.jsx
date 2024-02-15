@@ -26,6 +26,7 @@ class Playhead{
 // Global variables
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
+const LABEL_HEIGHT = 0
 
 function ScalableSpec(
                         {
@@ -93,6 +94,10 @@ function ScalableSpec(
     const [parameters, setParameters] = useState({
         spec_cal_method: 'log-mel'
     })
+
+    // Label Canvas
+    const labelCanvasRef = useRef(null)
+    const labelImgData = useRef(null)
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -173,19 +178,21 @@ function ScalableSpec(
         }
 
         // Deal with click inside an existing label
+        /*
         if (checkIfClickedOnLabel (xClicked) ) {
             alert('Labels of the same individual may not stretch across one another.')
             return
-        }
+        }*/
 
         // Add offset to existing label if necessary
         const lastLabel = labels[labels.length-1]
         if (labels.length > 0 && lastLabel.offset === undefined){
             const newOffset = calculateTimestamp(event)
+            /*
             if (!checkIfNewOffsetIsValid(lastLabel.onset, newOffset) ){
                 alert('Labels of the same individual may not stretch across one another.')
                 return
-            }
+            }*/
             const labelsCopy = labels
             if (newOffset < lastLabel.onset){
                 lastLabel.offset = newOffset
@@ -203,7 +210,7 @@ function ScalableSpec(
         // Add onset
         const clickedTimestamp = calculateTimestamp(event)
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(clickedTimestamp, undefined, activeClustername, 80))
+        passActiveLabelToApp( new Label(clickedTimestamp, undefined, undefined, undefined))
     }
 
     const handleMouseUp = (event) => {
@@ -221,7 +228,7 @@ function ScalableSpec(
             if (clickedLabel.onset > clickedLabel.offset){
                 clickedLabel = flipOnsetOffset(clickedLabel)
             }
-            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined, 80))
+            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined, undefined))
         }
 
         clickedLabel = undefined
@@ -241,7 +248,7 @@ function ScalableSpec(
     const handleMouseMove = (event) => {
         // Active label get sets to zero once user has set the offset of a label and moved his mouse
         if (activeLabel && activeLabel.offset){
-            passActiveLabelToApp(null)
+            //passActiveLabelToApp(null)
         }
         hoverLine(event)
         hoverLabel(event)
@@ -265,10 +272,13 @@ function ScalableSpec(
             const specCTX = specCVS.getContext('2d');
             const waveformCVS = waveformCanvasRef.current
             const waveformCTX = waveformCVS.getContext('2d')
+            const labelCVS = labelCanvasRef.current
+            const labelCTX = labelCVS.getContext('2d')
             specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
             specCTX.putImageData(specImgData.current, 0, 0);
             waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
+            labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
@@ -288,6 +298,8 @@ function ScalableSpec(
                 drawActiveLabel()
                 */
                 drawLineBetween(label, LABEL_COLOR_HOVERED)
+                drawLine(label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label.offset, LABEL_COLOR_HOVERED)
                 drawClustername(label)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
@@ -377,15 +389,19 @@ function ScalableSpec(
     const drawEditorCanvases = (spectrogram, newAudioArray) => {
         if (!specCanvasRef.current) return
 
-        const canvas = specCanvasRef.current;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
+        const specCVS = specCanvasRef.current;
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
         const image = new Image();
+
+        const labelCVS = labelCanvasRef.current
+        const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true, alpha: true });
 
         // Draw Spectrogram, Waveform and labels
         image.addEventListener('load', () => {
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            specImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
+            specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
+            labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
             //drawPlayhead(playheadRef.current.timeframe)
@@ -520,6 +536,7 @@ function ScalableSpec(
         const x = calculateXPosition(timestamp, specCanvasRef.current)
         const specCTX = specCanvasRef.current.getContext('2d');
         const waveformCTX = waveformCanvasRef.current.getContext('2d')
+        const labelCTX = labelCanvasRef.current.getContext('2d')
 
         specCTX.beginPath()
         specCTX.setLineDash([1, 1])
@@ -538,13 +555,22 @@ function ScalableSpec(
         waveformCTX.strokeStyle = hexColorCode
         waveformCTX.stroke()
         waveformCTX.setLineDash([])
+
+        labelCTX.beginPath()
+        labelCTX.setLineDash([1, 1])
+        labelCTX.moveTo(x, 0)
+        labelCTX.lineTo(x, labelCanvasRef.current.height)
+        labelCTX.lineWidth = 2
+        labelCTX.strokeStyle = hexColorCode
+        labelCTX.stroke()
+        labelCTX.setLineDash([])
     }
 
     const drawLineBetween = (label, colorHex) => {
         const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
         const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-        let cvs = waveformCanvasRef.current
-        let ctx = cvs.getContext('2d');
+        const cvs = labelCanvasRef.current
+        const ctx = cvs.getContext('2d');
 
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
@@ -566,28 +592,10 @@ function ScalableSpec(
         ctx.moveTo(xOffset, label.y - 3 )
         ctx.lineTo(xOffset, label.y + 3)
         ctx.stroke()
-
-        cvs = specCanvasRef.current
-        ctx = cvs.getContext('2d');
-
-        ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
-
-        // Draw short Onset line
-        ctx.beginPath()
-        ctx.moveTo(xOnset, 0 )
-        ctx.lineTo(xOnset, 3)
-        ctx.stroke()
-
-        // Draw short Offset line
-        ctx.beginPath()
-        ctx.moveTo(xOffset, 0 )
-        ctx.lineTo(xOffset, 3)
-        ctx.stroke()
     }
 
     const drawClustername = (label) => {
-        const cvs = waveformCanvasRef.current;
+        const cvs = labelCanvasRef.current;
         const ctx = cvs.getContext('2d');
         const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
 
@@ -599,10 +607,17 @@ function ScalableSpec(
 
     const drawAllLabels = () => {
         for (let label of labels) {
-            drawLineBetween(label,LABEL_COLOR)
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
             if (!label.offset){
                 drawLine(label.onset, LABEL_COLOR_HOVERED)
+            }
+            if (label === clickedLabel){
+                drawLine(label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label.offset, LABEL_COLOR_HOVERED)
+                drawLineBetween(label,LABEL_COLOR_HOVERED)
+                drawClustername(label)
+            } else {
+                drawLineBetween(label,LABEL_COLOR)
             }
         }
     }
@@ -620,7 +635,7 @@ function ScalableSpec(
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label(onset, undefined, activeClustername, 80) ])
+        setLabels(current => [...current, new Label(onset, undefined, activeClustername, labelCanvasRef.current.height) ])
     }
 
     const deleteLabel = (xClicked) => {
@@ -662,7 +677,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
-        drawPlayhead(playheadRef.current.timeframe)
+        //drawPlayhead(playheadRef.current.timeframe)
     }
 
     const dragOffset = (event) => {
@@ -680,7 +695,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
-        drawPlayhead(playheadRef.current.timeframe)
+        //drawPlayhead(playheadRef.current.timeframe)
     }
 
 
@@ -1027,7 +1042,6 @@ function ScalableSpec(
         removeTrackInApp(id)
     }
 
-
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
@@ -1146,9 +1160,6 @@ function ScalableSpec(
                     >
                         Console log labels
                     </button>
-                    <button onClick={checkIfNewOffsetIsValid}>
-                        Test
-                    </button>
                     <div className='audio-controls'>
                         <button
                             onClick={getAudio}
@@ -1187,6 +1198,16 @@ function ScalableSpec(
                         ref={specCanvasRef}
                         width={parent.innerWidth - 200}
                         height={150}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    <canvas
+                        className='label-canvas'
+                        ref={labelCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={20}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

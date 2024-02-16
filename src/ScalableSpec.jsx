@@ -97,7 +97,10 @@ function ScalableSpec(
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
-    const labelImgData = useRef(null)
+
+    // Edit Mode
+    const [editMode, setEditMode] = useState(false)
+
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -159,12 +162,13 @@ function ScalableSpec(
         const xClicked = getXClicked(event)
 
         // Deal with click on Onset or Offset to trigger drag methods
-        if ( checkIfPositionIsOccupied(xClicked) ){
+        if ( checkIfPositionIsOccupied(xClicked) && editMode){
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(xClicked)
             if ( clickedLabel ){
                 specCanvasRef.current.addEventListener('mousemove', dragOnset)
                 waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
+                labelCanvasRef.current.addEventListener('mousemove', dragOnset)
                 return
             }
 
@@ -173,6 +177,7 @@ function ScalableSpec(
             if (clickedLabel){
                 specCanvasRef.current.addEventListener('mousemove', dragOffset)
                 waveformCanvasRef.current.addEventListener('mousemove', dragOffset)
+                labelCanvasRef.current.addEventListener('mousemove', dragOffset)
                 return
             }
         }
@@ -187,7 +192,8 @@ function ScalableSpec(
         // Add offset to existing label if necessary
         const lastLabel = labels[labels.length-1]
         if (labels.length > 0 && lastLabel.offset === undefined){
-            const newOffset = calculateTimestamp(event)
+            let newOffset = calculateTimestamp(event)
+            newOffset = magnet(newOffset)
             /*
             if (!checkIfNewOffsetIsValid(lastLabel.onset, newOffset) ){
                 alert('Labels of the same individual may not stretch across one another.')
@@ -208,7 +214,8 @@ function ScalableSpec(
         }
 
         // Add onset
-        const clickedTimestamp = calculateTimestamp(event)
+        let clickedTimestamp = calculateTimestamp(event)
+        clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
         passActiveLabelToApp( new Label(clickedTimestamp, undefined, undefined, undefined))
     }
@@ -220,6 +227,9 @@ function ScalableSpec(
         specCanvasRef.current.removeEventListener('mousemove', dragOffset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
+
 
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
@@ -241,7 +251,8 @@ function ScalableSpec(
         if (audioSnippet && !audioSnippet.paused) return
 
         const xClicked = getXClicked(event)
-        deleteLabel(xClicked)
+        const labelToBeDeleted = checkIfClickedOnLabel(xClicked)
+        deleteLabel(labelToBeDeleted)
         passActiveLabelToApp(null)
     }
 
@@ -256,12 +267,14 @@ function ScalableSpec(
 
     const hoverLine = (event) => {
         const xHovered = getXClicked(event)
-        if ( checkIfPositionIsOccupied(xHovered) /*|| checkIfClickedOnPlayhead(xHovered)*/){
+        if ( checkIfPositionIsOccupied(xHovered) && editMode /*|| checkIfClickedOnPlayhead(xHovered)*/){
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
+            labelCanvasRef.current.style.cursor = 'col-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'
             waveformCanvasRef.current.style.cursor = 'default'
+            labelCanvasRef.current.style.cursor = 'default'
         }
     }
 
@@ -298,9 +311,11 @@ function ScalableSpec(
                 drawActiveLabel()
                 */
                 drawLineBetween(label, LABEL_COLOR_HOVERED)
-                drawLine(label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label.offset, LABEL_COLOR_HOVERED)
                 drawClustername(label)
+                if (editMode){
+                    drawLine(label.onset, LABEL_COLOR_HOVERED)
+                    drawLine(label.offset, LABEL_COLOR_HOVERED)
+                }
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
                 //console.log('drawing yellow')
@@ -611,11 +626,13 @@ function ScalableSpec(
             if (!label.offset){
                 drawLine(label.onset, LABEL_COLOR_HOVERED)
             }
+            // Draw label that is being dragged with extended lines and in a different color
             if (label === clickedLabel){
                 drawLine(label.onset, LABEL_COLOR_HOVERED)
                 drawLine(label.offset, LABEL_COLOR_HOVERED)
                 drawLineBetween(label,LABEL_COLOR_HOVERED)
                 drawClustername(label)
+            // Draw all other labels like this
             } else {
                 drawLineBetween(label,LABEL_COLOR)
             }
@@ -638,8 +655,7 @@ function ScalableSpec(
         setLabels(current => [...current, new Label(onset, undefined, activeClustername, labelCanvasRef.current.height) ])
     }
 
-    const deleteLabel = (xClicked) => {
-        const labelToBeDeleted = checkIfClickedOnLabel(xClicked)
+    const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
     }
@@ -696,6 +712,20 @@ function ScalableSpec(
 
         drawAllLabels()
         //drawPlayhead(playheadRef.current.timeframe)
+    }
+
+    const magnet = (timestamp) => {
+        for (let label of labels){
+            if (timestamp < label.onset + 0.005 && timestamp > label.onset - 0.005){
+                console.log('glue them')
+                return label.onset
+            }
+            if (timestamp < label.offset + 0.005 && timestamp > label.offset - 0.005){
+                console.log('glue them')
+                return label.offset
+            }
+        }
+        return timestamp
     }
 
 
@@ -818,8 +848,8 @@ function ScalableSpec(
     const updateViewportScrollButtons = (startFrame, endFrame) => {
         const leftScrollBtn = document.getElementById('left-scroll-overview-btn')
         const rightScrollBtn = document.getElementById('right-scroll-overview-btn')
-        const xLeftBtn = calculateViewportFrameX(startFrame) + 205
-        const xRightBtn = calculateViewportFrameX(endFrame) + 185
+        const xLeftBtn = calculateViewportFrameX(startFrame) + 185
+        const xRightBtn = calculateViewportFrameX(endFrame) + 205
         leftScrollBtn.style.left = `${xLeftBtn}px`
         rightScrollBtn.style.left = `${xRightBtn}px`
     }
@@ -1042,6 +1072,22 @@ function ScalableSpec(
         removeTrackInApp(id)
     }
 
+    /* ++++++++++++++++++ Edit Mode ++++++++++++++++++ */
+
+    const handleClickEditLabel = () => {
+        setEditMode(!editMode)
+    }
+
+    /* ++++++++++++++++++ Canvas Container ++++++++++++++++++ */
+    const handleMouseLeave = () => {
+        const lastLabel = labels[labels.length -1]
+        if (lastLabel && !lastLabel.offset){
+            deleteLabel(lastLabel)
+            passActiveLabelToApp(null)
+        }
+    }
+
+
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When a new spectrogram is returned from the backend
@@ -1160,6 +1206,11 @@ function ScalableSpec(
                     >
                         Console log labels
                     </button>
+                    <button
+                        onClick={handleClickEditLabel}
+                    >
+                        Edit mode on: {editMode.toString()}
+                    </button>
                     <div className='audio-controls'>
                         <button
                             onClick={getAudio}
@@ -1182,7 +1233,10 @@ function ScalableSpec(
                     />
                 </div>
 
-                <div>
+                <div
+                    className='canvas-container'
+                    onMouseLeave={handleMouseLeave}
+                >
                     <canvas
                         className='waveform-canvas'
                         ref={waveformCanvasRef}

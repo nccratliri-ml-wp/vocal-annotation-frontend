@@ -27,6 +27,7 @@ class Playhead{
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 const LABEL_HEIGHT = 0
+const ZERO_GAP_CORRECTION_MARGIN = 0.005
 
 function ScalableSpec(
                         {
@@ -63,6 +64,10 @@ function ScalableSpec(
     const specImgData = useRef(null)
     const [spectrogram, setSpectrogram] = useState(null);
 
+    // Frequency
+    const [frequencies, setFrequencies] = useState(null)
+    const frequenciesCanvasRef = useRef(null)
+
     // Time Axis
     const timeAxisRef = useRef(null);
 
@@ -86,6 +91,7 @@ function ScalableSpec(
     const waveformCanvasRef = useRef(null)
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
+    const [waveformScale, setWaveformScale] = useState(35)
 
     // File Upload
     const [response, setResponse] = useState(null)
@@ -116,7 +122,7 @@ function ScalableSpec(
         setParameters( newParameters )
     }
 
-    /* ++++++++++++++++++ Spectrogram fetching methods ++++++++++++++++++ */
+    /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
@@ -129,20 +135,21 @@ function ScalableSpec(
 
         const response = await axios.post(path, requestParameters)
 
-        return response.data.spec
+        return response.data
     }
 
     const getSpecAndAudioArray = async () => {
         try {
-            const [newSpec, newAudioArray] = await Promise.all(
+            const [data, newAudioArray] = await Promise.all(
                 [
                     getAudioClipSpec(),
                     getAudioArray()
                 ]
             )
-            drawEditorCanvases(newSpec, newAudioArray)
+            drawEditorCanvases(data.spec, data.freqs, newAudioArray)
             setSpectrogramIsLoading(false)
-            setSpectrogram(newSpec)
+            setSpectrogram(data.spec)
+            setFrequencies(data.freqs)
             setAudioArray(newAudioArray)
         } catch (error) {
             console.error('Error fetching data:', error)
@@ -238,6 +245,9 @@ function ScalableSpec(
             if (clickedLabel.onset > clickedLabel.offset){
                 clickedLabel = flipOnsetOffset(clickedLabel)
             }
+            // Create zero gap labels if necessary
+            clickedLabel.onset = magnet(clickedLabel.onset)
+            clickedLabel.offset = magnet(clickedLabel.offset)
             passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined, undefined))
         }
 
@@ -293,6 +303,7 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
+            drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
@@ -401,7 +412,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
-    const drawEditorCanvases = (spectrogram, newAudioArray) => {
+    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
         if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
@@ -416,6 +427,7 @@ function ScalableSpec(
             specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
+            drawFrequenciesAxis(frequenciesArray)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
@@ -716,12 +728,11 @@ function ScalableSpec(
 
     const magnet = (timestamp) => {
         for (let label of labels){
-            if (timestamp < label.onset + 0.005 && timestamp > label.onset - 0.005){
-                console.log('glue them')
+            if (timestamp < label.onset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.onset - ZERO_GAP_CORRECTION_MARGIN){
+                console.log('glue them ' + label.onset)
                 return label.onset
             }
-            if (timestamp < label.offset + 0.005 && timestamp > label.offset - 0.005){
-                console.log('glue them')
+            if (timestamp < label.offset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.offset - ZERO_GAP_CORRECTION_MARGIN){
                 return label.offset
             }
         }
@@ -1038,18 +1049,17 @@ function ScalableSpec(
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
         canvas.width = parent.innerWidth - 200
 
-        const scale = 35
         const centerY = canvas.height / 2
         const ratio = Math.min((response.data.audio_duration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
         for (let i=0; i < newAudioArray.length; i++) {
             const datapoint = newAudioArray[i]
-            const y = centerY + scale * datapoint
+            const y = centerY + waveformScale * datapoint
 
             ctx.beginPath()
             ctx.moveTo(i * canvas.width * ratio / newAudioArray.length, y)
-            ctx.lineTo((i + 1) * canvas.width * ratio / newAudioArray.length, centerY + scale * newAudioArray[i + 1])
+            ctx.lineTo((i + 1) * canvas.width * ratio / newAudioArray.length, centerY + waveformScale * newAudioArray[i + 1])
             ctx.stroke()
         }
 
@@ -1061,6 +1071,14 @@ function ScalableSpec(
 
         waveformImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height)
     }
+
+     const waveformZoomIn = () => {
+        setWaveformScale(prevState => prevState + 10)
+     }
+
+     const waveformZoomOut = () => {
+         setWaveformScale(prevState => Math.max(prevState - 10, 1))
+     }
 
 
     /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
@@ -1078,7 +1096,7 @@ function ScalableSpec(
         setEditMode(!editMode)
     }
 
-    /* ++++++++++++++++++ Canvas Container ++++++++++++++++++ */
+    /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
     const handleMouseLeave = () => {
         const lastLabel = labels[labels.length -1]
         if (lastLabel && !lastLabel.offset){
@@ -1087,14 +1105,35 @@ function ScalableSpec(
         }
     }
 
+    /* ++++++++++++++++++ Frequencies Axis ++++++++++++++++++ */
+
+    const drawFrequenciesAxis = (frequenciesArray) => {
+        if (!frequenciesCanvasRef.current) return
+
+        const cvs = frequenciesCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+
+        const highestFreq = Math.round(frequenciesArray[frequenciesArray.length - 1] / 1000) * 1000
+        console.log(frequenciesArray[frequenciesArray.length - 1])
+        console.log(highestFreq)
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.lineWidth = 1
+
+        ctx.beginPath()
+        ctx.moveTo(5  ,0)
+        ctx.lineTo(5, cvs.height)
+        ctx.stroke()
+    }
+
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
-    // When a new spectrogram is returned from the backend
+    // When labels or the Waveform Scale value are manipulated
     useEffect(() => {
         if (!spectrogram) return
-        drawEditorCanvases(spectrogram, audioArray)
-    }, [labels, activeLabel])
+        drawEditorCanvases(spectrogram, frequencies,audioArray)
+    }, [labels, activeLabel, waveformScale])
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
@@ -1150,6 +1189,7 @@ function ScalableSpec(
     return (
         <div
             className='editor-container'
+            onMouseLeave={handleMouseLeave}
         >
 
             {showOverviewInitialValue && response &&
@@ -1182,61 +1222,76 @@ function ScalableSpec(
                 </div>
             }
             <div className='track-container'>
-                <div className='track-controls' >
-                    <FileUpload
-                        passResponseToScalableSpec={passResponseToScalableSpec}
-                        passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-                        previousAudioDuration={response? response.data.audio_duration : undefined}
-                    />
-                    <Export
-                        audioFileName={'Example Audio File Name'}
-                        labels={labels}
-                    />
-                    {id !== 'track_1' &&
+                <div className='side-window' >
+                    <div className='track-controls'>
+                        <FileUpload
+                            passResponseToScalableSpec={passResponseToScalableSpec}
+                            passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                            passTrackDurationToApp={passTrackDurationToApp}
+                            deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
+                            previousAudioDuration={response? response.data.audio_duration : undefined}
+                        />
+                        <Export
+                            audioFileName={'Example Audio File Name'}
+                            labels={labels}
+                        />
+                        {id !== 'track_1' &&
+                            <button
+                                onClick={handleRemoveTrack}
+                            >
+                                Remove Track
+                            </button>
+                        }
                         <button
-                            onClick={handleRemoveTrack}
+                            onClick={() => console.log(labels)}
                         >
-                            Remove Track
-                        </button>
-                    }
-                    <button
-                        onClick={() => console.log(labels)}
-                    >
-                        Console log labels
-                    </button>
-                    <button
-                        onClick={handleClickEditLabel}
-                    >
-                        Edit mode on: {editMode.toString()}
-                    </button>
-                    <div className='audio-controls'>
-                        <button
-                            onClick={getAudio}
-                        >
-                            ▶
+                            Console log labels
                         </button>
                         <button
-                            onClick={pauseAudio}
+                            onClick={handleClickEditLabel}
                         >
-                            ⏸
+                            Edit mode on: {editMode.toString()}
                         </button>
                         <button
-                            onClick={stopAudio}
+                            onClick={waveformZoomIn}
                         >
-                            ⏹
+                            Enhance Waveform
                         </button>
+                        <button
+                            onClick={waveformZoomOut}
+                        >
+                            Decrease Waveform
+                        </button>
+                        <div className='audio-controls'>
+                            <button
+                                onClick={getAudio}
+                            >
+                                ▶
+                            </button>
+                            <button
+                                onClick={pauseAudio}
+                            >
+                                ⏸
+                            </button>
+                            <button
+                                onClick={stopAudio}
+                            >
+                                ⏹
+                            </button>
+                        </div>
+                        <Parameters
+                            passParametersToScalableSpec={passParametersToScalableSpec}
+                        />
                     </div>
-                    <Parameters
-                        passParametersToScalableSpec={passParametersToScalableSpec}
+                    <canvas
+                        className='frequencies-canvas'
+                        ref={frequenciesCanvasRef}
+                        width={40}
+                        height={150}
                     />
                 </div>
 
-                <div
-                    className='canvas-container'
-                    onMouseLeave={handleMouseLeave}
-                >
+                <div>
                     <canvas
                         className='waveform-canvas'
                         ref={waveformCanvasRef}

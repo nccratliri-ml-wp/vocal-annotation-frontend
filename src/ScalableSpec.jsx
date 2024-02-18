@@ -1108,6 +1108,7 @@ function ScalableSpec(
     /* ++++++++++++++++++ Frequencies Axis ++++++++++++++++++ */
 
     const drawFrequenciesAxis = (maxFreq, minFreq) => {
+        console.log(frequencies)
         if (!frequenciesCanvasRef.current) return
 
         const cvs = frequenciesCanvasRef.current

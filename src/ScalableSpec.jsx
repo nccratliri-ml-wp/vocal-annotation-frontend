@@ -427,7 +427,7 @@ function ScalableSpec(
             specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
-            drawFrequenciesAxis(frequenciesArray)
+            drawFrequenciesAxis(frequenciesArray[frequenciesArray.length-1], frequenciesArray[0])
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
@@ -1107,23 +1107,32 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Frequencies Axis ++++++++++++++++++ */
 
-    const drawFrequenciesAxis = (frequenciesArray) => {
+    const drawFrequenciesAxis = (maxFreq, minFreq) => {
         if (!frequenciesCanvasRef.current) return
 
         const cvs = frequenciesCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
 
-        const highestFreq = Math.round(frequenciesArray[frequenciesArray.length - 1] / 1000) * 1000
-        console.log(frequenciesArray[frequenciesArray.length - 1])
-        console.log(highestFreq)
+        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
+        const step = maxFreqRoundNumber / 5
 
         ctx.strokeStyle = '#ffffff'
-        ctx.lineWidth = 1
+        ctx.fillStyle = '#ffffff'
+        ctx.lineWidth = 1.5
 
-        ctx.beginPath()
-        ctx.moveTo(5  ,0)
-        ctx.lineTo(5, cvs.height)
-        ctx.stroke()
+        for (let i = minFreq; i <= maxFreqRoundNumber+minFreq; i+=step){
+            const ratio = i / maxFreq
+            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
+
+            ctx.beginPath()
+            ctx.moveTo(33,y)
+            ctx.lineTo(40, y)
+            ctx.stroke()
+            ctx.fillText(`${i}`, 0, y);
+        }
+
+        ctx.fillText('Hz', 0, 10);
     }
 
 
@@ -1287,7 +1296,7 @@ function ScalableSpec(
                         className='frequencies-canvas'
                         ref={frequenciesCanvasRef}
                         width={40}
-                        height={150}
+                        height={175}
                     />
                 </div>
 

@@ -427,7 +427,7 @@ function ScalableSpec(
             specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
-            drawFrequenciesAxis(frequenciesArray[frequenciesArray.length-1], frequenciesArray[0])
+            drawFrequenciesAxis(frequenciesArray)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
@@ -1107,6 +1107,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Frequencies Axis ++++++++++++++++++ */
 
+                    /*
     const drawFrequenciesAxis = (maxFreq, minFreq) => {
         console.log(frequencies)
         if (!frequenciesCanvasRef.current) return
@@ -1134,6 +1135,166 @@ function ScalableSpec(
         }
 
         ctx.fillText('Hz', 0, 10);
+    }
+
+    const drawFrequenciesAxis = (frequenciesArray) => {
+
+        if (!frequenciesCanvasRef.current) return
+
+        const cvs = frequenciesCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        const minFreq = frequenciesArray[0]
+        const maxFreq = frequenciesArray[frequenciesArray.length-1]
+
+        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
+
+        const indexDistance  = Math.floor((frequenciesArray.length - 2) / 3)
+
+        let chosenFrequencies = []
+
+        chosenFrequencies.push(minFreq)
+
+        for (let i = 1; i <= 4; i++) {
+            let index = i * indexDistance;
+            if (index < frequenciesArray.length - 1) {
+                chosenFrequencies.push(frequenciesArray[index]);
+            }
+        }
+
+        chosenFrequencies.push(maxFreqRoundNumber)
+
+        console.log(chosenFrequencies)
+
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.fillStyle = '#ffffff'
+        ctx.lineWidth = 1.5
+
+        for (let freq of chosenFrequencies){
+            const ratio = freq / maxFreq
+            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
+
+            ctx.beginPath()
+            ctx.moveTo(33,y)
+            ctx.lineTo(40, y)
+            ctx.stroke()
+            ctx.fillText(`${Math.round(freq)}`, 0, y);
+        }
+
+        // IDEA: for all 200 entries the correct y should be calculated. then simply pick 7 of those with the same distance between each entry
+
+    }
+    */
+    /*
+    const drawFrequenciesAxis = (frequenciesArray) => {
+
+        if (!frequenciesCanvasRef.current) return
+
+        const cvs = frequenciesCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        const minFreq = frequenciesArray[0]
+        const maxFreq = frequenciesArray[frequenciesArray.length-1]
+
+        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
+
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.fillStyle = '#ffffff'
+        ctx.lineWidth = 1.5
+
+        let freq_Y_objects = frequenciesArray.map( freq => {
+            const ratio = freq / maxFreq
+            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
+            return {freq: freq,
+                    y: y}
+        })
+
+        console.log(freq_Y_objects)
+
+        const idealYPositions = [175, 150, 125, 100, 75, 50, 25];
+
+        freq_Y_objects = idealYPositions.map(idealY => {
+            // Check if there's an object with exact y value
+            const exactMatch = freq_Y_objects.find(obj => obj.y === idealY)
+
+            if (exactMatch) {
+                return exactMatch
+            } else {
+                // Find the closest y value from freq_Y_objects
+                const closestObject = freq_Y_objects.reduce((prev, curr) => {
+                    return Math.abs(curr.y - idealY) < Math.abs(prev.y - idealY) ? curr : prev;
+                })
+
+                return closestObject
+            }
+        })
+
+        for (let obj of freq_Y_objects){
+            ctx.beginPath()
+            ctx.moveTo(33,obj.y)
+            ctx.lineTo(40, obj.y)
+            ctx.stroke()
+            ctx.fillText(`${Math.round(obj.freq)}`, 0, obj.y);
+        }
+
+        // IDEA: for all 200 entries the correct y should be calculated. then simply pick 7 of those with the same distance between each entry
+    }*/
+
+    const drawFrequenciesAxis = (frequenciesArray) => {
+        if (!frequenciesCanvasRef.current) return
+
+        const cvs = frequenciesCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.fillStyle = '#ffffff'
+        ctx.lineWidth = 1.5
+
+        // Calculate the index distance to select 5 frequencies between the first and last value
+        const indexDistance = Math.floor((frequenciesArray.length - 2) / 6)
+
+        // Initialize the indices array with the indices of the selected frequencies
+        let indices = [0] // Include the first frequency
+        for (let i = 1; i <= 5; i++) {
+            indices.push(i * indexDistance)
+        }
+        indices.push(frequenciesArray.length - 1) // Include the last frequency
+
+        // Get the frequencies at the selected indices
+        const selectedFrequencies = indices.map(index => frequenciesArray[index])
+
+        // Draw the frequencies
+        const lineDistance = cvs.height / selectedFrequencies.length
+        let y = cvs.height
+        for (let freq of selectedFrequencies){
+            ctx.beginPath()
+            ctx.moveTo(33,y)
+            ctx.lineTo(40, y)
+            ctx.stroke()
+            ctx.fillText(`${Math.round(freq / 100) * 100}`, 0, y);
+            y -= lineDistance
+        }
+
+        ctx.fillText('Hz', 0, 10);
+    }
+
+
+    /* ++++++++++++++++++ Whisper ++++++++++++++++++ */
+    const callWhisperSeg = async () => {
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
+        const requestParameters = {
+            audio_id: audioId,
+        }
+
+        const response = await axios.post(path, requestParameters)
+
+        //return response.data
+        console.log(response.data)
     }
 
 
@@ -1271,6 +1432,11 @@ function ScalableSpec(
                             onClick={waveformZoomOut}
                         >
                             Decrease Waveform
+                        </button>
+                        <button
+                            onClick={callWhisperSeg}
+                        >
+                            Call WhisperSeg
                         </button>
                         <div className='audio-controls'>
                             <button

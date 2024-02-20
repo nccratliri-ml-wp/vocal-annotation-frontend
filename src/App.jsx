@@ -8,7 +8,7 @@ function App() {
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
-    const [activeClustername, setActiveClustername] = useState()
+    const [activeClustername, setActiveClustername] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({

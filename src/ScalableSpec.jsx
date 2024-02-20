@@ -107,6 +107,10 @@ function ScalableSpec(
     // Edit Mode
     const [editMode, setEditMode] = useState(false)
 
+    // WhisperSeg
+    const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
+
+
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -1286,6 +1290,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Whisper ++++++++++++++++++ */
     const callWhisperSeg = async () => {
+        setWhisperSegIsLoading(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
         const requestParameters = {
             audio_id: audioId,
@@ -1294,7 +1299,12 @@ function ScalableSpec(
         const response = await axios.post(path, requestParameters)
 
         //return response.data
-        console.log(response.data)
+        const whisperObjects = response.data.labels
+
+        const whisperLabels = whisperObjects.map( obj => new Label(obj.onset, obj.offset, obj.clustername, labelCanvasRef.current.height))
+
+        setLabels(prevState => [...prevState, ...whisperLabels] )
+        setWhisperSegIsLoading(false)
     }
 
 
@@ -1304,6 +1314,7 @@ function ScalableSpec(
     useEffect(() => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
+
     }, [labels, activeLabel, waveformScale])
 
     // When user zoomed, scrolled, or changed a parameter
@@ -1498,7 +1509,7 @@ function ScalableSpec(
                         onContextMenu={handleRightClick}
                         onMouseMove={handleMouseMove}
                     />
-                    {spectrogramIsLoading ? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
+                    {spectrogramIsLoading || whisperSegIsLoading? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
                 </div>
 
             </div>

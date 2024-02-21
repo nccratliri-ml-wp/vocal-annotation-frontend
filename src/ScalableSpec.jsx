@@ -307,7 +307,7 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawActiveLabel()
+            //drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')

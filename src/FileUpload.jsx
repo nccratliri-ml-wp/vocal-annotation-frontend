@@ -34,7 +34,7 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
 
     return (
         <div>
-            <input type="file" accept=".wav" onChange={handleFileChange} />
+            <input className='file-input' type="file" accept=".wav" onChange={handleFileChange} />
         </div>
     )
 }

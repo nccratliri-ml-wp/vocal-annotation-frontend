@@ -36,14 +36,19 @@ html, body {
   margin: 0 0 10px 0;
 }
 
-.track-controls{
+.side-window{
   display: flex;
-  flex-direction: column;
   width: 200px;
 }
 
-.track-controls > button{
-  width: 87px;
+.track-controls{
+  display: flex;
+  flex-direction: column;
+  width: 160px;
+}
+
+.file-input{
+
 }
 
 .audio-controls{
@@ -221,67 +226,6 @@ html, body {
   color: #f6fffe;
 }
 
-/* -------------------------- Drag & Drop Components -------------------------- */
-
-#files-upload-container{
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 30px;
-}
-
-#searchbar {
-}
-
-.form-file-upload {
-  align-self: center;
-  height: 6rem;
-  width: 12rem;
-  margin: 10px;
-  max-width: 100%;
-  text-align: center;
-  position: relative;
-}
-
-.input-file-upload {
-  display: none;
-}
-
-.label-file-upload {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-width: 2px;
-  border-radius: 10px;
-  border-style: dashed;
-  padding: 10px;
-  color: #cbd5e1;
-  border-color: #86a9ce;
-  background-color: #082536;
-}
-
-.label-file-upload[isdragactive='true'] {
-  background-color: #114b6e;
-}
-
-.drag-file-element {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 1rem;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
-.file-icon{
-  font-size: 3rem;
-}
-
-
 /* -------------------------- Parameters -------------------------- */
 
 .parameters{
@@ -298,13 +242,25 @@ html, body {
 }
 
 
-
-/* -------------------------- Waveform -------------------------- */
+/* -------------------------- Canvases -------------------------- */
 
 .waveform-canvas{
   display: block;
 }
 
+.spec-canvas{
+  display: block;
+}
+
+.label-canvas{
+  display: block;
+}
+
+.frequencies-canvas{
+  display: block;
+  height: 175px;
+  margin: 55px 0 0 0;
+}
 
 
 
@@ -319,4 +275,7 @@ html, body {
 #all-tracks{
   padding: 250px 0 0 0;
 }
+
+
+
 

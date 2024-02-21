@@ -8,7 +8,7 @@ function App() {
     const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
-    const [activeClustername, setActiveClustername] = useState()
+    const [activeClustername, setActiveClustername] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -36,14 +36,14 @@ function App() {
 
 
     // General
-    const [globalAudioDuration, setGlobalAudioDuration] = useState(0);
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(0)
     const [globalClipDuration, setGlobalClipDuration] = useState(0)
-    const [currentStartTime, setCurrentStartTime] = useState(0);
-    const [currentEndTime, setCurrentEndTime] = useState(0);
-    const [maxScrollTime, setMaxScrollTime] = useState(0);
-    const [scrollStep, setScrollStep] = useState(0);
-    const [newOverviewSpecNeeded, setNewOverviewSpecNeeded] = useState(true)
+    const [currentStartTime, setCurrentStartTime] = useState(0)
+    const [currentEndTime, setCurrentEndTime] = useState(0)
+    const [maxScrollTime, setMaxScrollTime] = useState(0)
+    const [scrollStep, setScrollStep] = useState(0)
 
+    const [activeLabel, setActiveLabel] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -83,8 +83,8 @@ function App() {
         setScrollStep( newScrollStep )
     }
 
-    function passNewOverviewSpecNeededToApp( boolean ){
-        setNewOverviewSpecNeeded( boolean )
+    function passActiveLabelToApp( newActiveLabel ){
+        setActiveLabel( newActiveLabel )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -123,23 +123,23 @@ function App() {
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
     function onZoomIn(){
-        const newDuration = Math.max(globalClipDuration / 2, 0.1);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        setGlobalClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentEndTime( currentStartTime + newDuration );
+        const newDuration = Math.max(globalClipDuration / 2, 0.1)
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setScrollStep(newDuration * SCROLL_STEP_RATIO)
+        setCurrentEndTime( currentStartTime + newDuration )
     }
 
     function onZoomOut(){
-        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration);
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0);
-        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime);
-        setGlobalClipDuration(newDuration);
-        setMaxScrollTime(newMaxScrollTime);
-        setScrollStep(newDuration * SCROLL_STEP_RATIO);
-        setCurrentStartTime( newStartTime );
-        setCurrentEndTime( newStartTime + newDuration );
+        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration)
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setScrollStep(newDuration * SCROLL_STEP_RATIO)
+        setCurrentStartTime( newStartTime )
+        setCurrentEndTime( newStartTime + newDuration )
     }
 
     function leftScroll() {
@@ -211,8 +211,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -221,6 +219,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_2 &&
@@ -235,8 +235,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -245,6 +243,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_3 &&
@@ -259,8 +259,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -269,6 +267,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_4 &&
@@ -283,8 +283,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -293,6 +291,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_5 &&
@@ -307,8 +307,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -317,6 +315,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_6 &&
@@ -331,8 +331,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -341,6 +339,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_7 &&
@@ -355,8 +355,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -365,6 +363,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_8 &&
@@ -379,8 +379,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -389,6 +387,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_9 &&
@@ -403,8 +403,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -413,6 +411,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_10 &&
@@ -427,8 +427,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -437,6 +435,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_11 &&
@@ -451,8 +451,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -461,6 +459,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_12 &&
@@ -475,8 +475,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -485,6 +483,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_13 &&
@@ -499,8 +499,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -509,6 +507,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_14 &&
@@ -523,8 +523,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -533,6 +531,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_15 &&
@@ -547,8 +547,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -557,6 +555,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_16 &&
@@ -571,8 +571,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -581,6 +579,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_17 &&
@@ -595,8 +595,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -605,6 +603,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_18 &&
@@ -619,8 +619,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -629,6 +627,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_19 &&
@@ -643,8 +643,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -653,6 +651,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             {showTracks.track_20 &&
@@ -667,8 +667,6 @@ function App() {
                     maxScrollTime={maxScrollTime}
                     scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                    newOverviewSpecNeeded={newOverviewSpecNeeded}
-                    passNewOverviewSpecNeededToApp={passNewOverviewSpecNeededToApp}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
                     passCurrentEndTimeToApp={passCurrentEndTimeToApp}
@@ -677,6 +675,8 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    activeLabel={activeLabel}
                 />
             }
             <button

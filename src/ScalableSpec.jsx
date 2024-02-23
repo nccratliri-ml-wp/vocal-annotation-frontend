@@ -27,7 +27,7 @@ class Playhead{
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 const LABEL_HEIGHT = 0
-const ZERO_GAP_CORRECTION_MARGIN = 0.005
+const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 
 function ScalableSpec(
                         {
@@ -104,9 +104,6 @@ function ScalableSpec(
     // Label Canvas
     const labelCanvasRef = useRef(null)
 
-    // Edit Mode
-    const [editMode, setEditMode] = useState(false)
-
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
 
@@ -173,7 +170,8 @@ function ScalableSpec(
         const xClicked = getXClicked(event)
 
         // Deal with click on Onset or Offset to trigger drag methods
-        if ( checkIfPositionIsOccupied(xClicked) && editMode){
+        if ( checkIfPositionIsOccupied(xClicked) && event.target.className === 'label-canvas'){
+            console.log(event.target.className)
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(xClicked)
             if ( clickedLabel ){
@@ -281,7 +279,7 @@ function ScalableSpec(
 
     const hoverLine = (event) => {
         const xHovered = getXClicked(event)
-        if ( checkIfPositionIsOccupied(xHovered) && editMode /*|| checkIfClickedOnPlayhead(xHovered)*/){
+        if ( checkIfPositionIsOccupied(xHovered) && event.target.className === 'label-canvas' /*|| checkIfClickedOnPlayhead(xHovered)*/){
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
@@ -307,7 +305,7 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            //drawActiveLabel()
+            drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
@@ -327,10 +325,8 @@ function ScalableSpec(
                 */
                 drawLineBetween(label, LABEL_COLOR_HOVERED)
                 drawClustername(label)
-                if (editMode){
-                    drawLine(label.onset, LABEL_COLOR_HOVERED)
-                    drawLine(label.offset, LABEL_COLOR_HOVERED)
-                }
+                drawLine(label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label.offset, LABEL_COLOR_HOVERED)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
                 //console.log('drawing yellow')
@@ -369,7 +365,7 @@ function ScalableSpec(
     const checkIfClickedOnOnset = (xClicked) => {
         for (let label of labels){
             const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
-            if ( ( xOnset >= xClicked - 1 && xOnset <= xClicked + 1 ) ){
+            if ( ( xOnset >= xClicked - 10 && xOnset <= xClicked + 10 ) ){
                 return label
             }
         }
@@ -378,7 +374,7 @@ function ScalableSpec(
     const checkIfClickedOnOffset = (xClicked) => {
         for (let label of labels){
             const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-            if ( ( xOffset >= xClicked - 1 && xOffset <= xClicked + 1 ) ){
+            if ( ( xOffset >= xClicked - 10 && xOffset <= xClicked + 10 ) ){
                 return label
             }
         }
@@ -733,10 +729,13 @@ function ScalableSpec(
     const magnet = (timestamp) => {
         for (let label of labels){
             if (timestamp < label.onset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.onset - ZERO_GAP_CORRECTION_MARGIN){
-                console.log('glue them ' + label.onset)
+                console.log('glued to onset')
+                console.log(timestamp)
+                console.log(label.onset)
                 return label.onset
             }
             if (timestamp < label.offset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.offset - ZERO_GAP_CORRECTION_MARGIN){
+                console.log('glued to offset')
                 return label.offset
             }
         }
@@ -1094,12 +1093,6 @@ function ScalableSpec(
         removeTrackInApp(id)
     }
 
-    /* ++++++++++++++++++ Edit Mode ++++++++++++++++++ */
-
-    const handleClickEditLabel = () => {
-        setEditMode(!editMode)
-    }
-
     /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
     const handleMouseLeave = () => {
         const lastLabel = labels[labels.length -1]
@@ -1110,144 +1103,6 @@ function ScalableSpec(
     }
 
     /* ++++++++++++++++++ Frequencies Axis ++++++++++++++++++ */
-
-                    /*
-    const drawFrequenciesAxis = (maxFreq, minFreq) => {
-        console.log(frequencies)
-        if (!frequenciesCanvasRef.current) return
-
-        const cvs = frequenciesCanvasRef.current
-        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
-        const step = maxFreqRoundNumber / 5
-
-        ctx.strokeStyle = '#ffffff'
-        ctx.fillStyle = '#ffffff'
-        ctx.lineWidth = 1.5
-
-        for (let i = minFreq; i <= maxFreqRoundNumber+minFreq; i+=step){
-            const ratio = i / maxFreq
-            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
-
-            ctx.beginPath()
-            ctx.moveTo(33,y)
-            ctx.lineTo(40, y)
-            ctx.stroke()
-            ctx.fillText(`${i}`, 0, y);
-        }
-
-        ctx.fillText('Hz', 0, 10);
-    }
-
-    const drawFrequenciesAxis = (frequenciesArray) => {
-
-        if (!frequenciesCanvasRef.current) return
-
-        const cvs = frequenciesCanvasRef.current
-        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-        const minFreq = frequenciesArray[0]
-        const maxFreq = frequenciesArray[frequenciesArray.length-1]
-
-        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
-
-        const indexDistance  = Math.floor((frequenciesArray.length - 2) / 3)
-
-        let chosenFrequencies = []
-
-        chosenFrequencies.push(minFreq)
-
-        for (let i = 1; i <= 4; i++) {
-            let index = i * indexDistance;
-            if (index < frequenciesArray.length - 1) {
-                chosenFrequencies.push(frequenciesArray[index]);
-            }
-        }
-
-        chosenFrequencies.push(maxFreqRoundNumber)
-
-        console.log(chosenFrequencies)
-
-
-        ctx.strokeStyle = '#ffffff'
-        ctx.fillStyle = '#ffffff'
-        ctx.lineWidth = 1.5
-
-        for (let freq of chosenFrequencies){
-            const ratio = freq / maxFreq
-            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
-
-            ctx.beginPath()
-            ctx.moveTo(33,y)
-            ctx.lineTo(40, y)
-            ctx.stroke()
-            ctx.fillText(`${Math.round(freq)}`, 0, y);
-        }
-
-        // IDEA: for all 200 entries the correct y should be calculated. then simply pick 7 of those with the same distance between each entry
-
-    }
-    */
-    /*
-    const drawFrequenciesAxis = (frequenciesArray) => {
-
-        if (!frequenciesCanvasRef.current) return
-
-        const cvs = frequenciesCanvasRef.current
-        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-        const minFreq = frequenciesArray[0]
-        const maxFreq = frequenciesArray[frequenciesArray.length-1]
-
-        const maxFreqRoundNumber = Math.floor(maxFreq / 1000) * 1000
-
-
-        ctx.strokeStyle = '#ffffff'
-        ctx.fillStyle = '#ffffff'
-        ctx.lineWidth = 1.5
-
-        let freq_Y_objects = frequenciesArray.map( freq => {
-            const ratio = freq / maxFreq
-            const y = Math.round( cvs.height - specCanvasRef.current.height * ratio )
-            return {freq: freq,
-                    y: y}
-        })
-
-        console.log(freq_Y_objects)
-
-        const idealYPositions = [175, 150, 125, 100, 75, 50, 25];
-
-        freq_Y_objects = idealYPositions.map(idealY => {
-            // Check if there's an object with exact y value
-            const exactMatch = freq_Y_objects.find(obj => obj.y === idealY)
-
-            if (exactMatch) {
-                return exactMatch
-            } else {
-                // Find the closest y value from freq_Y_objects
-                const closestObject = freq_Y_objects.reduce((prev, curr) => {
-                    return Math.abs(curr.y - idealY) < Math.abs(prev.y - idealY) ? curr : prev;
-                })
-
-                return closestObject
-            }
-        })
-
-        for (let obj of freq_Y_objects){
-            ctx.beginPath()
-            ctx.moveTo(33,obj.y)
-            ctx.lineTo(40, obj.y)
-            ctx.stroke()
-            ctx.fillText(`${Math.round(obj.freq)}`, 0, obj.y);
-        }
-
-        // IDEA: for all 200 entries the correct y should be calculated. then simply pick 7 of those with the same distance between each entry
-    }*/
-
     const drawFrequenciesAxis = (frequenciesArray) => {
         if (!frequenciesCanvasRef.current) return
 
@@ -1280,7 +1135,7 @@ function ScalableSpec(
             ctx.moveTo(33,y)
             ctx.lineTo(40, y)
             ctx.stroke()
-            ctx.fillText(`${Math.round(freq / 100) * 100}`, 0, y);
+            ctx.fillText(`${Math.round(freq / 10) * 10}`, 0, y);
             y -= lineDistance
         }
 
@@ -1428,11 +1283,6 @@ function ScalableSpec(
                             onClick={() => console.log(labels)}
                         >
                             Console log labels
-                        </button>
-                        <button
-                            onClick={handleClickEditLabel}
-                        >
-                            Edit mode on: {editMode.toString()}
                         </button>
                         <button
                             onClick={waveformZoomIn}

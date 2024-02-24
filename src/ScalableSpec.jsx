@@ -8,12 +8,13 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, clustername, y, individual) {
+    constructor(onset, offset, clustername, y, individual, annotator) {
         this.onset = onset
         this.offset = offset
         this.clustername = clustername
         this.y = y
         this.individual = individual
+        this.annotator = annotator
     }
 }
 
@@ -26,7 +27,7 @@ class Playhead{
 // Global variables
 const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
-const LABEL_HEIGHT = 0
+const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 
 function ScalableSpec(
@@ -51,7 +52,8 @@ function ScalableSpec(
                             deletePreviousTrackDurationInApp,
                             removeTrackInApp,
                             passActiveLabelToApp,
-                            activeLabel
+                            activeLabel,
+                            activeIndividual
                         }
                     )
                 {
@@ -171,7 +173,6 @@ function ScalableSpec(
 
         // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfPositionIsOccupied(xClicked) && event.target.className === 'label-canvas'){
-            console.log(event.target.className)
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(xClicked)
             if ( clickedLabel ){
@@ -226,19 +227,13 @@ function ScalableSpec(
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(clickedTimestamp, undefined, undefined, undefined))
+        passActiveLabelToApp( new Label(clickedTimestamp))
     }
 
     const handleMouseUp = (event) => {
         if (event.button !== 0) return
 
-        specCanvasRef.current.removeEventListener('mousemove', dragOnset)
-        specCanvasRef.current.removeEventListener('mousemove', dragOffset)
-        waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
-        waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
-        labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
-        labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
-
+        removeDragEventListeners()
 
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
@@ -250,10 +245,20 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
-            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset, undefined, undefined))
+            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset))
         }
 
         clickedLabel = undefined
+    }
+
+    const removeDragEventListeners = () => {
+        console.log('remove drag event listeners')
+        specCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        specCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
     }
 
     const handleRightClick = (event) => {
@@ -270,8 +275,10 @@ function ScalableSpec(
 
     const handleMouseMove = (event) => {
         // Active label get sets to zero once user has set the offset of a label and moved his mouse
-        if (activeLabel && activeLabel.offset){
-            //passActiveLabelToApp(null)
+        const xHovered = getXClicked(event)
+        if (activeLabel && activeLabel.offset && !checkIfClickedOnLabel(xHovered)){
+            console.log('setting active label to null')
+            passActiveLabelToApp(null)
         }
         hoverLine(event)
         hoverLabel(event)
@@ -305,7 +312,7 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawActiveLabel()
+            //drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
@@ -325,8 +332,8 @@ function ScalableSpec(
                 */
                 drawLineBetween(label, LABEL_COLOR_HOVERED)
                 drawClustername(label)
-                drawLine(label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label.offset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.offset, LABEL_COLOR_HOVERED)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
                 //console.log('drawing yellow')
@@ -350,6 +357,10 @@ function ScalableSpec(
 
     const calculateXPosition = (timestamp, canvas) => {
         return ( timestamp * canvas.width / globalClipDuration ) - ( currentStartTime * canvas.width / globalClipDuration )
+    }
+
+    const calculateYPosition = (label) => {
+        return label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
     const calculateTimestamp = (event) => {
@@ -559,20 +570,13 @@ function ScalableSpec(
     }
 
 
-    const drawLine = (timestamp, hexColorCode) => {
-        const x = calculateXPosition(timestamp, specCanvasRef.current)
-        const specCTX = specCanvasRef.current.getContext('2d');
+    const drawLine = (label, timestamp, hexColorCode) => {
         const waveformCTX = waveformCanvasRef.current.getContext('2d')
+        const specCTX = specCanvasRef.current.getContext('2d');
         const labelCTX = labelCanvasRef.current.getContext('2d')
 
-        specCTX.beginPath()
-        specCTX.setLineDash([1, 1])
-        specCTX.moveTo(x, 0)
-        specCTX.lineTo(x, specCanvasRef.current.height)
-        specCTX.lineWidth = 2
-        specCTX.strokeStyle = hexColorCode
-        specCTX.stroke()
-        specCTX.setLineDash([])
+        const x = calculateXPosition(timestamp, specCanvasRef.current)
+        const y = calculateYPosition(label)
 
         waveformCTX.beginPath()
         waveformCTX.setLineDash([1, 1])
@@ -583,10 +587,19 @@ function ScalableSpec(
         waveformCTX.stroke()
         waveformCTX.setLineDash([])
 
+        specCTX.beginPath()
+        specCTX.setLineDash([1, 1])
+        specCTX.moveTo(x, 0)
+        specCTX.lineTo(x, specCanvasRef.current.height)
+        specCTX.lineWidth = 2
+        specCTX.strokeStyle = hexColorCode
+        specCTX.stroke()
+        specCTX.setLineDash([])
+
         labelCTX.beginPath()
         labelCTX.setLineDash([1, 1])
         labelCTX.moveTo(x, 0)
-        labelCTX.lineTo(x, labelCanvasRef.current.height)
+        labelCTX.lineTo(x, y)
         labelCTX.lineWidth = 2
         labelCTX.strokeStyle = hexColorCode
         labelCTX.stroke()
@@ -599,25 +612,27 @@ function ScalableSpec(
         const cvs = labelCanvasRef.current
         const ctx = cvs.getContext('2d');
 
+        const y = calculateYPosition(label)
+
         ctx.lineWidth = 2
         ctx.strokeStyle = colorHex
 
         // Draw horizontal line
         ctx.beginPath()
-        ctx.moveTo(xOnset, label.y)
-        ctx.lineTo(xOffset, label.y)
+        ctx.moveTo(xOnset, y)
+        ctx.lineTo(xOffset, y)
         ctx.stroke()
 
         // Draw short Onset line
         ctx.beginPath()
-        ctx.moveTo(xOnset, label.y - 3 )
-        ctx.lineTo(xOnset, label.y + 3)
+        ctx.moveTo(xOnset, y - 3 )
+        ctx.lineTo(xOnset, y + 1)
         ctx.stroke()
 
         // Draw short Offset line
         ctx.beginPath()
-        ctx.moveTo(xOffset, label.y - 3 )
-        ctx.lineTo(xOffset, label.y + 3)
+        ctx.moveTo(xOffset, y - 3 )
+        ctx.lineTo(xOffset, y + 1)
         ctx.stroke()
     }
 
@@ -625,23 +640,24 @@ function ScalableSpec(
         const cvs = labelCanvasRef.current;
         const ctx = cvs.getContext('2d');
         const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
+        const y = calculateYPosition(label)
 
-        ctx.font = "16px Arial";
+        ctx.font = "12px Arial";
         ctx.textAlign = "center";
         ctx.fillStyle = '#f3e655'
-        ctx.fillText(label.clustername, xClustername, cvs.height - 6);
+        ctx.fillText(label.individual + ' ' + label.clustername, xClustername, y - 4);
     }
 
     const drawAllLabels = () => {
         for (let label of labels) {
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
             if (!label.offset){
-                drawLine(label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
             }
             // Draw label that is being dragged with extended lines and in a different color
             if (label === clickedLabel){
-                drawLine(label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label.offset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.offset, LABEL_COLOR_HOVERED)
                 drawLineBetween(label,LABEL_COLOR_HOVERED)
                 drawClustername(label)
             // Draw all other labels like this
@@ -656,15 +672,15 @@ function ScalableSpec(
 
         const hexColorCode = !activeLabel.offset? LABEL_COLOR_HOVERED : LABEL_COLOR
 
-        drawLine(activeLabel.onset, hexColorCode)
-        drawLine(activeLabel.offset, hexColorCode)
+        drawLine(activeLabel, activeLabel.onset, hexColorCode)
+        drawLine(activeLabel, activeLabel.offset, hexColorCode)
     }
 
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label(onset, undefined, activeClustername, labelCanvasRef.current.height) ])
+        setLabels(current => [...current, new Label(onset, undefined, activeClustername, labelCanvasRef.current.height, activeIndividual) ])
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -729,13 +745,9 @@ function ScalableSpec(
     const magnet = (timestamp) => {
         for (let label of labels){
             if (timestamp < label.onset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.onset - ZERO_GAP_CORRECTION_MARGIN){
-                console.log('glued to onset')
-                console.log(timestamp)
-                console.log(label.onset)
                 return label.onset
             }
             if (timestamp < label.offset + ZERO_GAP_CORRECTION_MARGIN && timestamp > label.offset - ZERO_GAP_CORRECTION_MARGIN){
-                console.log('glued to offset')
                 return label.offset
             }
         }
@@ -1156,7 +1168,7 @@ function ScalableSpec(
         //return response.data
         const whisperObjects = response.data.labels
 
-        const whisperLabels = whisperObjects.map( obj => new Label(obj.onset, obj.offset, obj.clustername, labelCanvasRef.current.height))
+        const whisperLabels = whisperObjects.map( obj => new Label(obj.onset, obj.offset, obj.clustername, labelCanvasRef.current.height, activeIndividual))
 
         setLabels(prevState => [...prevState, ...whisperLabels] )
         setWhisperSegIsLoading(false)
@@ -1328,7 +1340,7 @@ function ScalableSpec(
                     />
                 </div>
 
-                <div>
+                <div onMouseLeave={handleMouseUp}>
                     <canvas
                         className='waveform-canvas'
                         ref={waveformCanvasRef}
@@ -1353,7 +1365,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={20}
+                        height={40}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
+import Individuals from "./Indivduals";
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -45,6 +46,8 @@ function App() {
 
     const [activeLabel, setActiveLabel] = useState(null)
 
+    const [activeIndividual, setActiveIndividual] = useState(1);
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passLabelsToApp(newLabels){
@@ -85,6 +88,10 @@ function App() {
 
     function passActiveLabelToApp( newActiveLabel ){
         setActiveLabel( newActiveLabel )
+    }
+
+    function passActiveIndividualToApp( newActiveIndividual ){
+        setActiveIndividual( newActiveIndividual )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -195,9 +202,18 @@ function App() {
                     onClick={rightScroll}
                 />
             </div>
-            <div id='blank-space'>
+            <div
+                id='blank-space'
+            >
             </div>
-            <div id='all-tracks'>
+            <div
+                id='all-tracks'
+                onMouseLeave={ () => setActiveLabel(null)}
+            >
+                <Individuals
+                    activeIndividual={activeIndividual}
+                    passActiveIndividualToApp={passActiveIndividualToApp}
+                />
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
@@ -221,6 +237,7 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
+                    activeIndividual={activeIndividual}
                 />
             }
             {showTracks.track_2 &&

@@ -10,10 +10,11 @@ function Individuals( {activeIndividual, passActiveIndividualToApp} ) {
     };
 
     return (
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+        <FormControl
+            sx={{ m: 1, minWidth: 120 }} size="small"
+            id="individual-dropdown-menu"
+        >
             <InputLabel
-                id="demo-select-small-label"
-                className="custom-input-label"
                 sx={{
                     color: 'white',
                     '&.Mui-focused': {
@@ -24,8 +25,6 @@ function Individuals( {activeIndividual, passActiveIndividualToApp} ) {
                 Individuals
             </InputLabel>
             <Select
-                labelId="demo-select-small-label"
-                id="demo-select-small"
                 value={activeIndividual}
                 label="Individual"
                 onChange={handleChange}

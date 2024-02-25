@@ -186,6 +186,7 @@ html, body {
 #clusternames-container{
   position: fixed;
   top: 20px;
+  left: 150px;
   z-index: 1;
   display: flex;
   background-color: #082536;
@@ -226,6 +227,14 @@ html, body {
 }
 
 /* -------------------------- Individuals -------------------------- */
+
+#individual-dropdown-menu{
+  position: fixed;
+  top: 20px;
+  z-index: 1;
+  display: flex;
+  background-color: #082536;
+}
 
 
 /* -------------------------- Parameters -------------------------- */

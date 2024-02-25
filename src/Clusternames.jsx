@@ -2,10 +2,11 @@ import {useEffect, useState} from "react"
 import { nanoid } from 'nanoid'
 
 class ClusternameButton {
-    constructor(id, clustername, isActive) {
+    constructor(id, clustername, isActive, color) {
         this.id = id
         this.clustername = clustername
         this.isActive = isActive
+        this.color = color
     }
 }
 

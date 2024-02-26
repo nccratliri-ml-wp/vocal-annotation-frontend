@@ -1,13 +1,27 @@
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+import React, {useState} from 'react'
+import { nanoid } from 'nanoid'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
 
-function Individuals( {activeIndividual, passActiveIndividualToApp} ) {
+function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOfIndividuals} ) {
+
+    const [menuItems, setMenuItems] = useState(
+        [
+            <MenuItem key={nanoid()} value={1}>Individual 1</MenuItem>,
+            <MenuItem key={nanoid()} value={2}>Individual 2</MenuItem>,
+        ])
 
     const handleChange = (event) => {
         passActiveIndividualToApp(event.target.value)
-    };
+    }
+
+    const addIndividual = () => {
+        const newIndividualNumber = menuItems.length + 1
+        setMenuItems(prevState => [...prevState, <MenuItem key={nanoid()} value={newIndividualNumber}>Individual {newIndividualNumber}</MenuItem>])
+        passNumberOfIndividuals( newIndividualNumber )
+    }
 
     return (
         <FormControl
@@ -47,12 +61,11 @@ function Individuals( {activeIndividual, passActiveIndividualToApp} ) {
                     },
                 }}
             >
-                <MenuItem value={1}>Individual 1</MenuItem>
-                <MenuItem value={2}>Individual 2</MenuItem>
-                <MenuItem value={3}>Individual 3</MenuItem>
+                {menuItems}
+                <MenuItem onMouseDown={addIndividual}>Add Individual</MenuItem>
             </Select>
         </FormControl>
-    );
+    )
 }
 
 export default Individuals

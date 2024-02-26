@@ -53,7 +53,8 @@ function ScalableSpec(
                             removeTrackInApp,
                             passActiveLabelToApp,
                             activeLabel,
-                            activeIndividual
+                            activeIndividual,
+                            numberOfIndividuals
                         }
                     )
                 {
@@ -1382,7 +1383,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={40}
+                        height={numberOfIndividuals * 20}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

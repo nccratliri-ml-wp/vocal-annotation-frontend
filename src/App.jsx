@@ -2,14 +2,14 @@ import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Individuals from "./Indivduals";
+import Colorwheel from "./Colorwheel.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
 function App() {
-    const [audioFileName, setAudioFileName] = useState(null)
     const [importedLabels, setImportedLabels] = useState([]);
     const [importedClusternameButtons, setImportedClusternameButtons] = useState([])
-    const [activeClustername, setActiveClustername] = useState(null)
+    const [activeClusternameBTN, setActiveClusternameBTNBTN] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -59,8 +59,8 @@ function App() {
         setImportedClusternameButtons( newClusternameButtons )
     }
 
-    function passActiveClusternameToApp(chosenClustername){
-        setActiveClustername( chosenClustername )
+    function passActiveClusternameBTNToApp( chosenClusternameBTN ){
+        setActiveClusternameBTNBTN( chosenClusternameBTN )
     }
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -183,9 +183,8 @@ function App() {
     return (
         <>
             <Clusternames
-                passActiveClusternameToApp={passActiveClusternameToApp}
+                passActiveClusternameBTNToApp={passActiveClusternameBTNToApp}
                 importedClusternameButtons={importedClusternameButtons}
-                audioFileName={audioFileName}
             />
             <div className='controls-container'>
                 <button
@@ -215,16 +214,16 @@ function App() {
                 id='all-tracks'
                 onMouseLeave={ () => setActiveLabel(null)}
             >
-                <Individuals
-                    activeIndividual={activeIndividual}
-                    passActiveIndividualToApp={passActiveIndividualToApp}
-                    passNumberOfIndividuals={passNumberOfIndividuals}
-                />
+            <Individuals
+                activeIndividual={activeIndividual}
+                passActiveIndividualToApp={passActiveIndividualToApp}
+                passNumberOfIndividuals={passNumberOfIndividuals}
+            />
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
                     trackDurations={trackDurations}
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -250,7 +249,7 @@ function App() {
             {showTracks.track_2 &&
                 <ScalableSpec
                     id='track_2'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -270,12 +269,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_3 &&
                 <ScalableSpec
                     id='track_3'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -295,12 +295,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_4 &&
                 <ScalableSpec
                     id='track_4'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -320,12 +321,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_5 &&
                 <ScalableSpec
                     id='track_5'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -345,12 +347,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_6 &&
                 <ScalableSpec
                     id='track_6'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -370,12 +373,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_7 &&
                 <ScalableSpec
                     id='track_7'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -395,12 +399,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_8 &&
                 <ScalableSpec
                     id='track_8'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -420,12 +425,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_9 &&
                 <ScalableSpec
                     id='track_9'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -445,12 +451,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_10 &&
                 <ScalableSpec
                     id='track_10'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -470,12 +477,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_11 &&
                 <ScalableSpec
                     id='track_11'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -495,12 +503,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_12 &&
                 <ScalableSpec
                     id='track_12'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -520,12 +529,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_13 &&
                 <ScalableSpec
                     id='track_13'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -545,12 +555,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_14 &&
                 <ScalableSpec
                     id='track_14'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -570,12 +581,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_15 &&
                 <ScalableSpec
                     id='track_15'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -595,12 +607,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_16 &&
                 <ScalableSpec
                     id='track_16'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -620,12 +633,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_17 &&
                 <ScalableSpec
                     id='track_17'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -645,12 +659,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_18 &&
                 <ScalableSpec
                     id='track_18'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -670,12 +685,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_19 &&
                 <ScalableSpec
                     id='track_19'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -695,12 +711,13 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             {showTracks.track_20 &&
                 <ScalableSpec
                     id='track_20'
-                    activeClustername={activeClustername}
+                    activeClusternameBTN={activeClusternameBTN}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -720,6 +737,7 @@ function App() {
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
+                    numberOfIndividuals={numberOfIndividuals}
                 />
             }
             <button

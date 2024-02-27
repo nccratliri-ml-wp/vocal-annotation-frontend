@@ -25,7 +25,7 @@ class Playhead{
 }
 
 // Global variables
-const LABEL_COLOR = "#00FF00"
+//const LABEL_COLOR = "#00FF00"
 const LABEL_COLOR_HOVERED = "#f3e655"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
@@ -34,7 +34,7 @@ function ScalableSpec(
                         {
                             id,
                             trackDurations,
-                            activeClustername,
+                            activeClusternameBTN,
                             showOverviewInitialValue,
                             globalAudioDuration,
                             globalClipDuration,
@@ -110,7 +110,7 @@ function ScalableSpec(
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
 
-
+    const LABEL_COLOR = activeClusternameBTN? activeClusternameBTN.color : '#fff'
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -681,7 +681,8 @@ function ScalableSpec(
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        setLabels(current => [...current, new Label(onset, undefined, activeClustername, labelCanvasRef.current.height, activeIndividual) ])
+        const currenClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
+        setLabels(current => [...current, new Label(onset, undefined, currenClustername, labelCanvasRef.current.height, activeIndividual) ])
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -1195,7 +1196,7 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale])
+    }, [labels, activeLabel, waveformScale, activeClusternameBTN])
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {

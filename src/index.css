@@ -187,7 +187,7 @@ html, body {
   position: fixed;
   top: 20px;
   left: 150px;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   background-color: #082536;
 }
@@ -195,7 +195,7 @@ html, body {
 #clustername-input-field{
   border: none;
   height: 30px;
-  margin: 15px;
+  margin: 10px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
 }
 
@@ -207,24 +207,41 @@ html, body {
   display: flex;
   align-items: flex-start;
   flex-wrap: wrap;
-  margin: 10px;
+  margin: 3px;
 }
 
-#clustername-buttons-container > div{
-  /*max-width: fit-content;*/
+.clustername-btn{
+  display: flex;
   background-color: #f6fffe;
   margin: 5px;
-  padding: 2px 30px;
   color: #36d5a8;
-  font-size: 16px;
-  font-weight: bold;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
 }
-#clustername-buttons-container > div[isactive='true']{
-  background-color: #36d5a8;
-  color: #f6fffe;
+
+.clustername-text{
+  padding: 0 30px;
+  font-size: 16px;
+  font-weight: bold;
 }
+.clustername-text[isactive='true']{
+  padding: 5px 30px 5px;
+  font-size: 18px;
+}
+
+.open-colorwheel-btn{
+  background-color: transparent;
+  border: none;
+  border-left: 1px solid black;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* -------------------------- Colorwheel -------------------------- */
+.colorwheel{
+  position: fixed;
+}
+
 
 /* -------------------------- Individuals -------------------------- */
 

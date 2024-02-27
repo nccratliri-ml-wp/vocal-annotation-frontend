@@ -1,16 +1,18 @@
 import {useEffect, useState} from "react"
 import { nanoid } from 'nanoid'
+import Colorwheel from "./Colorwheel.jsx"
 
 class ClusternameButton {
-    constructor(id, clustername, isActive, color) {
+    constructor(id, clustername, isActive) {
         this.id = id
         this.clustername = clustername
         this.isActive = isActive
-        this.color = color
+        this.color = 'colorHere'
+        this.showColorwheel = false
     }
 }
 
-function Clusternames( { passActiveClusternameToApp, importedClusternameButtons, audioFileName } ){
+function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButtons } ){
     const [newClustername, setNewClustername] = useState('')
     const [clusternameButtons, setClusternameButtons] = useState([])
 
@@ -23,13 +25,11 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons,
 
         setClusternameButtons( deactivateAll() )
 
-        setClusternameButtons(prevState =>
-            [
-                ...prevState,
-                new ClusternameButton( nanoid(),newClustername, true )
-            ])
+        const newBTN = new ClusternameButton( nanoid(),newClustername, true)
 
-        passActiveClusternameToApp(newClustername)
+        setClusternameButtons(prevState => [...prevState, newBTN] )
+
+        passActiveClusternameBTNToApp(newBTN)
 
         setNewClustername('')
     }
@@ -49,7 +49,7 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons,
 
         return newClusternameButtons.map(item => {
             if (item.id === btn.id){
-                passActiveClusternameToApp(item.clustername)
+                passActiveClusternameBTNToApp(item)
                 return new ClusternameButton (item.id, item.clustername, !item.isActive)
             }
             return new ClusternameButton (item.id, item.clustername, item.isActive)
@@ -65,22 +65,45 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons,
         return clusternameButtons.filter(item => item.id !== btn.id)
     }
 
+    function toggleColorwheel(clusternameBtn) {
+        const updatedClusternameButtons = clusternameButtons.map(btn => {
+            if (btn.id === clusternameBtn.id) {
+                return { ...btn, showColorwheel: !btn.showColorwheel }
+            } else {
+                return btn
+            }
+        })
+
+        setClusternameButtons(updatedClusternameButtons)
+    }
+
+    function passChosenColorToClusternames(clusternameBtn, newColor) {
+        const updatedClusternameButtons = clusternameButtons.map(btn => {
+            if (btn.id === clusternameBtn.id) {
+                const updatedBTN = { ...btn, color: newColor }
+                passActiveClusternameBTNToApp(updatedBTN)
+                return updatedBTN
+            } else {
+                return btn
+            }
+        })
+
+        setClusternameButtons(updatedClusternameButtons)
+
+    }
+
+
     // When a new CSV-File was uploaded, update the Clustername Buttons and re-render the component
     useEffect( () => {
         setClusternameButtons(importedClusternameButtons)
 
     }, [importedClusternameButtons])
 
-    // When a new Audio-File was uploaded, delete previous clusternameButtons and re-render the component
-    useEffect( () => {
-        setClusternameButtons([])
-
-    }, [audioFileName])
 
     // Whenever user deletes the active Clustername Button, the last button in the state array becomes active
     useEffect( () => {
-        for (let item of clusternameButtons){
-            if (item.isActive){
+        for (let btn of clusternameButtons){
+            if (btn.isActive){
                 return
             }
         }
@@ -106,16 +129,29 @@ function Clusternames( { passActiveClusternameToApp, importedClusternameButtons,
             </form>
             <div id='clustername-buttons-container'>
                 {
-                    clusternameButtons.map( data =>
+                    clusternameButtons.map( BTN =>
                         <div
-                            key={data.id}
-                            id={data.id}
-                            isactive={data.isActive.toString()}
-                            onClick={handleLMB}
-                            onContextMenu={handleRightClick}
-                        >
-                            {data.clustername}
-                        </div>)
+                            className='clustername-btn'
+                            key={BTN.id}>
+                            <div
+                                className='clustername-text'
+                                style={{ backgroundColor: BTN.color }}
+                                id={BTN.id}
+                                isactive={BTN.isActive.toString()}
+                                onClick={handleLMB}
+                                onContextMenu={handleRightClick}
+                            >
+                                {BTN.clustername}
+                            </div>
+                            <button
+                                className='open-colorwheel-btn'
+                                onClick={() => toggleColorwheel(BTN)}
+                            >
+                                🎨
+                            </button>
+                            {BTN.showColorwheel && <Colorwheel toggleColorwheel={toggleColorwheel} passChosenColorToClusternames={passChosenColorToClusternames} BTN={BTN} />}
+                        </div>
+                    )
                 }
             </div>
         </div>

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react"
-import { nanoid } from 'nanoid'
+import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx"
 
 class ClusternameButton {
@@ -14,7 +14,7 @@ class ClusternameButton {
 
 const DEFAULT_BTN_COLOR = '#55e6f3'
 
-function Clusternames( { passActiveClusternameBTNToApp, passClusterNameButtonsToApp, clusternameButtons } ){
+function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
     const [newClustername, setNewClustername] = useState('')
 
     function handleChange(event){
@@ -29,8 +29,6 @@ function Clusternames( { passActiveClusternameBTNToApp, passClusterNameButtonsTo
         const newBTN = new ClusternameButton( nanoid(),newClustername, true, DEFAULT_BTN_COLOR)
 
         passClusterNameButtonsToApp(prevState => [...prevState, newBTN] )
-
-        passActiveClusternameBTNToApp(newBTN)
 
         setNewClustername('')
     }
@@ -50,7 +48,6 @@ function Clusternames( { passActiveClusternameBTNToApp, passClusterNameButtonsTo
 
         return newClusternameButtons.map(item => {
             if (item.id === btn.id){
-                passActiveClusternameBTNToApp(item)
                 return new ClusternameButton (item.id, item.clustername, !item.isActive, item.color)
             }
             return new ClusternameButton (item.id, item.clustername, item.isActive, item.color)
@@ -81,9 +78,7 @@ function Clusternames( { passActiveClusternameBTNToApp, passClusterNameButtonsTo
     function passChosenColorToClusternames(clusternameBtn, newColor) {
         const updatedClusternameButtons = clusternameButtons.map(btn => {
             if (btn.id === clusternameBtn.id) {
-                const updatedBTN = { ...btn, color: newColor }
-                passActiveClusternameBTNToApp(updatedBTN)
-                return updatedBTN
+                return {...btn, color: newColor}
             } else {
                 return btn
             }

@@ -33,7 +33,6 @@ function ScalableSpec(
                         {
                             id,
                             trackDurations,
-                            activeClusternameBTN,
                             clusternameButtons,
                             showOverviewInitialValue,
                             globalAudioDuration,
@@ -109,6 +108,9 @@ function ScalableSpec(
 
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
+
+    // Active Clustername
+    const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -687,8 +689,8 @@ function ScalableSpec(
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        const currenClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
-        setLabels(current => [...current, new Label(onset, undefined, currenClustername, labelCanvasRef.current.height, activeIndividual) ])
+        const newClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
+        setLabels(current => [...current, new Label(onset, undefined, newClustername, labelCanvasRef.current.height, activeIndividual) ])
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -1202,7 +1204,7 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale, activeClusternameBTN])
+    }, [labels, activeLabel, waveformScale, activeClusternameBTN, numberOfIndividuals])
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {

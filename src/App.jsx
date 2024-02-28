@@ -8,7 +8,6 @@ const SCROLL_STEP_RATIO = 0.1
 function App() {
     const [importedLabels, setImportedLabels] = useState([]);
     const [clusternameButtons, setClusternameButtons] = useState([])
-    const [activeClusternameBTN, setActiveClusternameBTNBTN] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -56,10 +55,6 @@ function App() {
 
     function passClusterNameButtonsToApp( newClusternameButtons ){
         setClusternameButtons( newClusternameButtons )
-    }
-
-    function passActiveClusternameBTNToApp( chosenClusternameBTN ){
-        setActiveClusternameBTNBTN( chosenClusternameBTN )
     }
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -182,7 +177,6 @@ function App() {
     return (
         <>
             <Clusternames
-                passActiveClusternameBTNToApp={passActiveClusternameBTNToApp}
                 passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 clusternameButtons={clusternameButtons}
             />
@@ -223,7 +217,6 @@ function App() {
                 <ScalableSpec
                     id='track_1'
                     trackDurations={trackDurations}
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
@@ -250,7 +243,6 @@ function App() {
             {showTracks.track_2 &&
                 <ScalableSpec
                     id='track_2'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -277,7 +269,6 @@ function App() {
             {showTracks.track_3 &&
                 <ScalableSpec
                     id='track_3'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -304,7 +295,6 @@ function App() {
             {showTracks.track_4 &&
                 <ScalableSpec
                     id='track_4'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -331,7 +321,6 @@ function App() {
             {showTracks.track_5 &&
                 <ScalableSpec
                     id='track_5'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -358,7 +347,6 @@ function App() {
             {showTracks.track_6 &&
                 <ScalableSpec
                     id='track_6'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -385,7 +373,6 @@ function App() {
             {showTracks.track_7 &&
                 <ScalableSpec
                     id='track_7'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -412,7 +399,6 @@ function App() {
             {showTracks.track_8 &&
                 <ScalableSpec
                     id='track_8'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -439,7 +425,6 @@ function App() {
             {showTracks.track_9 &&
                 <ScalableSpec
                     id='track_9'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -466,7 +451,6 @@ function App() {
             {showTracks.track_10 &&
                 <ScalableSpec
                     id='track_10'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -493,7 +477,6 @@ function App() {
             {showTracks.track_11 &&
                 <ScalableSpec
                     id='track_11'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -520,7 +503,6 @@ function App() {
             {showTracks.track_12 &&
                 <ScalableSpec
                     id='track_12'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -547,7 +529,6 @@ function App() {
             {showTracks.track_13 &&
                 <ScalableSpec
                     id='track_13'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -574,7 +555,6 @@ function App() {
             {showTracks.track_14 &&
                 <ScalableSpec
                     id='track_14'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -601,7 +581,6 @@ function App() {
             {showTracks.track_15 &&
                 <ScalableSpec
                     id='track_15'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -628,7 +607,6 @@ function App() {
             {showTracks.track_16 &&
                 <ScalableSpec
                     id='track_16'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -655,7 +633,6 @@ function App() {
             {showTracks.track_17 &&
                 <ScalableSpec
                     id='track_17'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -682,7 +659,6 @@ function App() {
             {showTracks.track_18 &&
                 <ScalableSpec
                     id='track_18'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -709,7 +685,6 @@ function App() {
             {showTracks.track_19 &&
                 <ScalableSpec
                     id='track_19'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
@@ -736,7 +711,6 @@ function App() {
             {showTracks.track_20 &&
                 <ScalableSpec
                     id='track_20'
-                    activeClusternameBTN={activeClusternameBTN}
                     clusternameButtons={clusternameButtons}
                     showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}

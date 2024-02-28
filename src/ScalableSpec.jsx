@@ -1333,11 +1333,6 @@ function ScalableSpec(
                         >
                             Call WhisperSeg
                         </button>
-                        <button
-                            onClick={byURL}
-                        >
-                            URL
-                        </button>
                         <div className='audio-controls'>
                             <button
                                 onClick={getAudio}

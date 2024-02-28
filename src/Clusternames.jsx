@@ -1,20 +1,21 @@
 import {useEffect, useState} from "react"
-import { nanoid } from 'nanoid'
+import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx"
 
 class ClusternameButton {
-    constructor(id, clustername, isActive) {
+    constructor(id, clustername, isActive, color) {
         this.id = id
         this.clustername = clustername
         this.isActive = isActive
-        this.color = 'colorHere'
+        this.color = color
         this.showColorwheel = false
     }
 }
 
-function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButtons } ){
+const DEFAULT_BTN_COLOR = '#55e6f3'
+
+function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
     const [newClustername, setNewClustername] = useState('')
-    const [clusternameButtons, setClusternameButtons] = useState([])
 
     function handleChange(event){
         setNewClustername(event.target.value)
@@ -23,25 +24,23 @@ function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButto
     function updateClusternamesButtons(event){
         event.preventDefault()
 
-        setClusternameButtons( deactivateAll() )
+        passClusterNameButtonsToApp( deactivateAll() )
 
-        const newBTN = new ClusternameButton( nanoid(),newClustername, true)
+        const newBTN = new ClusternameButton( nanoid(),newClustername, true, DEFAULT_BTN_COLOR)
 
-        setClusternameButtons(prevState => [...prevState, newBTN] )
-
-        passActiveClusternameBTNToApp(newBTN)
+        passClusterNameButtonsToApp(prevState => [...prevState, newBTN] )
 
         setNewClustername('')
     }
 
     function deactivateAll(){
-        return clusternameButtons.map(item => {
-            return new ClusternameButton (item.id, item.clustername, false)
+        return clusternameButtons.map(btn => {
+            return new ClusternameButton (btn.id, btn.clustername, false, btn.color)
         })
     }
 
     function handleLMB(event){
-        setClusternameButtons( activateButton(event.target) )
+        passClusterNameButtonsToApp( activateButton(event.target) )
     }
 
     function activateButton(btn){
@@ -49,16 +48,15 @@ function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButto
 
         return newClusternameButtons.map(item => {
             if (item.id === btn.id){
-                passActiveClusternameBTNToApp(item)
-                return new ClusternameButton (item.id, item.clustername, !item.isActive)
+                return new ClusternameButton (item.id, item.clustername, !item.isActive, item.color)
             }
-            return new ClusternameButton (item.id, item.clustername, item.isActive)
+            return new ClusternameButton (item.id, item.clustername, item.isActive, item.color)
         })
     }
 
     function handleRightClick(event){
         event.preventDefault()
-        setClusternameButtons( deleteClusternameButton(event.target) )
+        passClusterNameButtonsToApp( deleteClusternameButton(event.target) )
     }
 
     function deleteClusternameButton(btn){
@@ -74,31 +72,30 @@ function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButto
             }
         })
 
-        setClusternameButtons(updatedClusternameButtons)
+        passClusterNameButtonsToApp(updatedClusternameButtons)
     }
 
     function passChosenColorToClusternames(clusternameBtn, newColor) {
         const updatedClusternameButtons = clusternameButtons.map(btn => {
             if (btn.id === clusternameBtn.id) {
-                const updatedBTN = { ...btn, color: newColor }
-                passActiveClusternameBTNToApp(updatedBTN)
-                return updatedBTN
+                return {...btn, color: newColor}
             } else {
                 return btn
             }
         })
 
-        setClusternameButtons(updatedClusternameButtons)
+        passClusterNameButtonsToApp(updatedClusternameButtons)
 
     }
 
 
     // When a new CSV-File was uploaded, update the Clustername Buttons and re-render the component
+    /*
     useEffect( () => {
-        setClusternameButtons(importedClusternameButtons)
+        passClusterNameButtonsToApp(importedClusternameButtons)
 
     }, [importedClusternameButtons])
-
+    */
 
     // Whenever user deletes the active Clustername Button, the last button in the state array becomes active
     useEffect( () => {
@@ -109,7 +106,7 @@ function Clusternames( { passActiveClusternameBTNToApp, importedClusternameButto
         }
 
         const lastClusternameBtn = clusternameButtons[clusternameButtons.length - 1]
-        setClusternameButtons( activateButton(lastClusternameBtn) )
+        passClusterNameButtonsToApp( activateButton(lastClusternameBtn) )
 
     }, [JSON.stringify(clusternameButtons)])
 

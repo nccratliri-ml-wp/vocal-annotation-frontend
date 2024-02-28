@@ -25,8 +25,7 @@ class Playhead{
 }
 
 // Global variables
-//const LABEL_COLOR = "#00FF00"
-const LABEL_COLOR_HOVERED = "#f3e655"
+const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 
@@ -34,7 +33,7 @@ function ScalableSpec(
                         {
                             id,
                             trackDurations,
-                            activeClusternameBTN,
+                            clusternameButtons,
                             showOverviewInitialValue,
                             globalAudioDuration,
                             globalClipDuration,
@@ -110,7 +109,8 @@ function ScalableSpec(
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
 
-    const LABEL_COLOR = activeClusternameBTN? activeClusternameBTN.color : '#fff'
+    // Active Clustername
+    const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -218,9 +218,9 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            //drawLine(newOffset,LABEL_COLOR)
+            //drawLine(newOffset)
             passActiveLabelToApp( labelsCopy[labels.length-1] )
-            drawLineBetween(lastLabel,LABEL_COLOR)
+            drawLineBetween(lastLabel)
             return
         }
 
@@ -331,10 +331,10 @@ function ScalableSpec(
                 }
                 drawActiveLabel()
                 */
-                drawLineBetween(label, LABEL_COLOR_HOVERED)
+                drawLineBetween(label)
                 drawClustername(label)
-                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label, label.offset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset)
+                drawLine(label, label.offset)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
                 //console.log('drawing yellow')
@@ -420,6 +420,10 @@ function ScalableSpec(
         return true
     }
 
+    const getCorrectLabelColor = (label) => {
+        const correspondingBTN = clusternameButtons.find(btn => btn.clustername === label.clustername)
+        return correspondingBTN? correspondingBTN.color: DEFAULT_LABEL_COLOR
+    }
 
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
@@ -570,21 +574,22 @@ function ScalableSpec(
         return timeString
     }
 
-
-    const drawLine = (label, timestamp, hexColorCode) => {
+    const drawLine = (label, timestamp) => {
         const waveformCTX = waveformCanvasRef.current.getContext('2d')
-        const specCTX = specCanvasRef.current.getContext('2d');
+        const specCTX = specCanvasRef.current.getContext('2d')
         const labelCTX = labelCanvasRef.current.getContext('2d')
 
         const x = calculateXPosition(timestamp, specCanvasRef.current)
         const y = calculateYPosition(label)
+
+        const lineColor = getCorrectLabelColor(label)
 
         waveformCTX.beginPath()
         waveformCTX.setLineDash([1, 1])
         waveformCTX.moveTo(x, 0)
         waveformCTX.lineTo(x, waveformCanvasRef.current.height)
         waveformCTX.lineWidth = 2
-        waveformCTX.strokeStyle = hexColorCode
+        waveformCTX.strokeStyle = lineColor
         waveformCTX.stroke()
         waveformCTX.setLineDash([])
 
@@ -593,7 +598,7 @@ function ScalableSpec(
         specCTX.moveTo(x, 0)
         specCTX.lineTo(x, specCanvasRef.current.height)
         specCTX.lineWidth = 2
-        specCTX.strokeStyle = hexColorCode
+        specCTX.strokeStyle = lineColor
         specCTX.stroke()
         specCTX.setLineDash([])
 
@@ -602,21 +607,23 @@ function ScalableSpec(
         labelCTX.moveTo(x, 0)
         labelCTX.lineTo(x, y)
         labelCTX.lineWidth = 2
-        labelCTX.strokeStyle = hexColorCode
+        labelCTX.strokeStyle = lineColor
         labelCTX.stroke()
         labelCTX.setLineDash([])
     }
 
-    const drawLineBetween = (label, colorHex) => {
-        const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
-        const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
+    const drawLineBetween = (label) => {
         const cvs = labelCanvasRef.current
         const ctx = cvs.getContext('2d');
 
+        const xOnset = calculateXPosition(label.onset, cvs)
+        const xOffset = calculateXPosition(label.offset, cvs)
         const y = calculateYPosition(label)
 
+        const lineColor = getCorrectLabelColor(label)
+
         ctx.lineWidth = 2
-        ctx.strokeStyle = colorHex
+        ctx.strokeStyle = lineColor
 
         // Draw horizontal line
         ctx.beginPath()
@@ -640,12 +647,15 @@ function ScalableSpec(
     const drawClustername = (label) => {
         const cvs = labelCanvasRef.current;
         const ctx = cvs.getContext('2d');
+
         const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
         const y = calculateYPosition(label)
 
+        const lineColor = getCorrectLabelColor(label)
+
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
-        ctx.fillStyle = '#f3e655'
+        ctx.fillStyle = lineColor
         ctx.fillText(label.individual + ' ' + label.clustername, xClustername, y - 4);
     }
 
@@ -653,17 +663,17 @@ function ScalableSpec(
         for (let label of labels) {
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
             if (!label.offset){
-                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset)
             }
             // Draw label that is being dragged with extended lines and in a different color
             if (label === clickedLabel){
-                drawLine(label, label.onset, LABEL_COLOR_HOVERED)
-                drawLine(label, label.offset, LABEL_COLOR_HOVERED)
-                drawLineBetween(label,LABEL_COLOR_HOVERED)
+                drawLine(label, label.onset)
+                drawLine(label, label.offset)
+                drawLineBetween(label)
                 drawClustername(label)
             // Draw all other labels like this
             } else {
-                drawLineBetween(label,LABEL_COLOR)
+                drawLineBetween(label)
             }
         }
     }
@@ -671,18 +681,16 @@ function ScalableSpec(
     const drawActiveLabel = () => {
         if (!activeLabel) return
 
-        const hexColorCode = !activeLabel.offset? LABEL_COLOR_HOVERED : LABEL_COLOR
-
-        drawLine(activeLabel, activeLabel.onset, hexColorCode)
-        drawLine(activeLabel, activeLabel.offset, hexColorCode)
+        drawLine(activeLabel, activeLabel.onset)
+        drawLine(activeLabel, activeLabel.offset)
     }
 
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        const currenClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
-        setLabels(current => [...current, new Label(onset, undefined, currenClustername, labelCanvasRef.current.height, activeIndividual) ])
+        const newClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
+        setLabels(current => [...current, new Label(onset, undefined, newClustername, labelCanvasRef.current.height, activeIndividual) ])
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -1196,7 +1204,7 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale, activeClusternameBTN])
+    }, [labels, activeLabel, waveformScale, activeClusternameBTN, numberOfIndividuals])
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
@@ -1324,11 +1332,6 @@ function ScalableSpec(
                             onClick={callWhisperSeg}
                         >
                             Call WhisperSeg
-                        </button>
-                        <button
-                            onClick={byURL}
-                        >
-                            URL
                         </button>
                         <div className='audio-controls'>
                             <button

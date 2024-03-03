@@ -24,6 +24,13 @@ class Playhead{
     }
 }
 
+class AnnotatedArea {
+    constructor(onset, offset){
+        this.onset = onset
+        this.offset = offset
+    }
+}
+
 // Global variables
 const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
@@ -112,6 +119,8 @@ function ScalableSpec(
     // Active Clustername
     const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
 
+    // Annotated Area
+    const annotatedArea = useRef(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
     const passResponseToScalableSpec = ( newResponse ) => {
@@ -313,6 +322,7 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
+            drawAnnotatedArea()
             //drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
@@ -425,6 +435,24 @@ function ScalableSpec(
         return correspondingBTN? correspondingBTN.color: DEFAULT_LABEL_COLOR
     }
 
+    const getAnnotatedArea = () => {
+        if (!labels.length ) return [null, null]
+
+        // Get all onsets, exclude incomplete labels
+        let allOnsets = labels.map(label => label.onset)
+        if ( !labels[labels.length-1].offset ) {
+            allOnsets.pop()
+        }
+
+        // Get all Offsets, exclude incomplete labels
+        let allOffsets = labels.map(label => label.offset)
+        allOffsets = allOffsets.filter(offset => !isNaN(offset))
+
+        const startTime = Math.min(...allOnsets)
+        const endTime = Math.max(...allOffsets)
+
+        return [startTime, endTime]
+    }
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
@@ -447,6 +475,7 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
+            drawAnnotatedArea()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -685,6 +714,24 @@ function ScalableSpec(
         drawLine(activeLabel, activeLabel.offset)
     }
 
+    const drawAnnotatedArea = () => {
+        const cvs = labelCanvasRef.current;
+        const ctx = cvs.getContext('2d');
+
+        const [startTime, endTime] = getAnnotatedArea()
+
+        const x1 = calculateXPosition(startTime, cvs)
+        const x2 = calculateXPosition(endTime, cvs)
+
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'green'
+
+        // Draw horizontal line
+        ctx.beginPath()
+        ctx.moveTo(x1, cvs.height)
+        ctx.lineTo(x2, cvs.height)
+        ctx.stroke()
+    }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
@@ -731,6 +778,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
+        drawAnnotatedArea()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -749,6 +797,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
+        drawAnnotatedArea()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -1169,6 +1218,7 @@ function ScalableSpec(
     const callWhisperSeg = async () => {
         setWhisperSegIsLoading(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
+        const [annotatedAreaStartTime, annotatedAreaEndTime] = getAnnotatedArea() // For the future, when Whisper Seg Endpoint takes human annotated area as parameter
         const requestParameters = {
             audio_id: audioId,
         }
@@ -1204,7 +1254,8 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale, activeClusternameBTN, numberOfIndividuals])
+        }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals]
+    )
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {

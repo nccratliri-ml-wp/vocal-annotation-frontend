@@ -18,6 +18,18 @@
   height: 100%;
 }
 
+/* Hide scrollbar for Chrome, Edge, Safari and Opera */
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Hide scrollbar for IE and Firefox */
+.body {
+  -ms-overflow-style: none;  /* IE */
+  scrollbar-width: none;  /* Firefox */
+}
+
 html, body {
   height: 100%;
   padding: 0;
@@ -214,16 +226,16 @@ html, body {
   display: flex;
   background-color: #f6fffe;
   margin: 5px;
-  color: #36d5a8;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
 }
 
 .clustername-text{
   padding: 0 30px;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
 }
+
 .clustername-text[isactive='true']{
   padding: 5px 30px 5px;
   font-size: 18px;

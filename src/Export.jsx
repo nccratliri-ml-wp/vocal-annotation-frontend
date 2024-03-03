@@ -1,6 +1,10 @@
 function Export( { labels, audioFileName } ){
 
     function exportCSV(){
+        // Sort the labels ascending by onset
+        labels = labels.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+
+        // transform to CSV data
         let csvData = labels.map(label => `${label.onset},${label.offset},${label.clustername}`)
         csvData.unshift('onset,offset,cluster')
         csvData = csvData.join('\n')

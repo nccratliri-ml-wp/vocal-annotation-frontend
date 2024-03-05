@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Export from "./Export.jsx";
 import FileUpload from "./FileUpload.jsx";
 import Parameters from "./Parameters.jsx"
+
 
 // Classes
 class Label {
@@ -227,7 +229,6 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            //drawLine(newOffset)
             passActiveLabelToApp( labelsCopy[labels.length-1] )
             drawLineBetween(lastLabel)
             return
@@ -613,23 +614,32 @@ function ScalableSpec(
 
         const lineColor = getCorrectLabelColor(label)
 
-        waveformCTX.beginPath()
-        waveformCTX.setLineDash([1, 1])
-        waveformCTX.moveTo(x, 0)
-        waveformCTX.lineTo(x, waveformCanvasRef.current.height)
-        waveformCTX.lineWidth = 2
-        waveformCTX.strokeStyle = lineColor
-        waveformCTX.stroke()
-        waveformCTX.setLineDash([])
+        if (parameters.spec_cal_method === 'constant-q'){
+            if (timestamp === label.onset){
+                drawCurvedOnset(timestamp, lineColor)
+            }
+            if (timestamp === label.offset){
+                drawCurvedOffset(timestamp, lineColor)
+            }
+        } else {
+            waveformCTX.beginPath()
+            waveformCTX.setLineDash([1, 1])
+            waveformCTX.moveTo(x, 0)
+            waveformCTX.lineTo(x, waveformCanvasRef.current.height)
+            waveformCTX.lineWidth = 2
+            waveformCTX.strokeStyle = lineColor
+            waveformCTX.stroke()
+            waveformCTX.setLineDash([])
 
-        specCTX.beginPath()
-        specCTX.setLineDash([1, 1])
-        specCTX.moveTo(x, 0)
-        specCTX.lineTo(x, specCanvasRef.current.height)
-        specCTX.lineWidth = 2
-        specCTX.strokeStyle = lineColor
-        specCTX.stroke()
-        specCTX.setLineDash([])
+            specCTX.beginPath()
+            specCTX.setLineDash([1, 1])
+            specCTX.moveTo(x, 0)
+            specCTX.lineTo(x, specCanvasRef.current.height)
+            specCTX.lineWidth = 2
+            specCTX.strokeStyle = lineColor
+            specCTX.stroke()
+            specCTX.setLineDash([])
+        }
 
         labelCTX.beginPath()
         labelCTX.setLineDash([1, 1])
@@ -674,18 +684,116 @@ function ScalableSpec(
     }
 
     const drawClustername = (label) => {
-        const cvs = labelCanvasRef.current;
-        const ctx = cvs.getContext('2d');
+        const cvs = labelCanvasRef.current
+        const ctx = cvs.getContext('2d')
 
         const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
         const y = calculateYPosition(label)
 
         const lineColor = getCorrectLabelColor(label)
 
-        ctx.font = "12px Arial";
-        ctx.textAlign = "center";
+        ctx.font = "12px Arial"
+        ctx.textAlign = "center"
         ctx.fillStyle = lineColor
         ctx.fillText(label.individual + ' ' + label.clustername, xClustername, y - 4);
+    }
+
+    const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
+        const cvs = specCanvasRef.current
+        const ctx = cvs.getContext('2d')
+        ctx.fillStyle = color
+
+        const marker_y_values = linspace(0, cvs.height, cvs.height)
+        const curve_intensity = curve_intensity_factor / globalClipDuration
+
+        const start_marker_x_position_pixels = (marker_start_time - currentStartTime) / globalClipDuration * cvs.width
+        const start_marker_x_values = linspace(0, 2, cvs.height).map(x => start_marker_x_position_pixels + curve_intensity * -Math.exp(x ** 2))
+
+        let i = 0
+        for (let x of start_marker_x_values){
+            const y = marker_y_values[i]
+            ctx.fillRect(x,y,1.5,2)
+            i++
+        }
+
+        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
+        const x1 = start_marker_x_values[0]
+        const x2 = start_marker_x_values[start_marker_x_values.length-1]
+        const y = cvs.height - 1
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+
+        // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d')
+        waveformCTX.fillStyle = color
+
+        const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
+        const x = start_marker_x_values[0]
+
+        for (let y of y_values){
+            waveformCTX.fillRect(x,y,1.5,2)
+        }
+    }
+
+    const drawCurvedOffset = (marker_end_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
+        const cvs = specCanvasRef.current
+        const ctx = cvs.getContext('2d')
+        ctx.fillStyle = color
+
+        const marker_y_values = linspace(0, cvs.height, cvs.height)
+        const curve_intensity = curve_intensity_factor / globalClipDuration
+
+        const end_marker_x_position_pixels = (marker_end_time - currentStartTime) / globalClipDuration * cvs.width
+        const end_marker_x_values = linspace(0, 2, cvs.height).map(x => end_marker_x_position_pixels + curve_intensity * Math.exp(x ** 2))
+
+        let i = 0
+        for (let x of end_marker_x_values){
+            const y = marker_y_values[i]
+            ctx.fillRect(x,y,1.5,2)
+            i++
+        }
+
+        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
+        const x1 = end_marker_x_values[0]
+        const x2 = end_marker_x_values[end_marker_x_values.length-1]
+        const y = cvs.height - 1
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d')
+        waveformCTX.fillStyle = color
+
+        const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
+        const x = end_marker_x_values[0]
+
+        for (let y of y_values){
+            waveformCTX.fillRect(x,y,1.5,2)
+        }
+    }
+
+    const linspace = (start, stop, num=50, endpoint=true) => {
+        const step = (stop - start) / (num - (endpoint ? 1 : 0))
+        const arr = Array.from({ length: num }, (_, i) => start + step * i)
+        if (!endpoint) arr.push(stop)
+        return arr
     }
 
     const drawAllLabels = () => {
@@ -694,7 +802,7 @@ function ScalableSpec(
             if (!label.offset){
                 drawLine(label, label.onset)
             }
-            // Draw label that is being dragged with extended lines and in a different color
+            // Draw label that is being dragged with extended lines
             if (label === clickedLabel){
                 drawLine(label, label.onset)
                 drawLine(label, label.offset)
@@ -1234,28 +1342,46 @@ function ScalableSpec(
         setWhisperSegIsLoading(false)
     }
 
-    const byURL = async () => {
+    const uploadFileByURL = async (audioURL) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
         const requestParameters = {
             //audio_url: 'https://storage.googleapis.com/callbase_bucket/XC633481-RFW_.mp3?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=callbase-storage-management%40callbase-395411.iam.gserviceaccount.com%2F20240222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240222T135207Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=171057da4032d1ee38946369ab9b0bd090539b7d258c7fb1f9b057120b5e6ed9bcdb9f585d0648852e78b10baee07882f813e1278d227dad2b17f0410ae91e4c0a472210485a8d085c6ffa0f3ddfe7f038fee2c9d0089b0980d44ea00cf32d58542bbca37f2bf0cfccc1220ee26ce242340f2fbc238f9b8c0d85bc4d4e975d926e93c58313bc60bb0d40620dfaaeea85068d17282a2e94c7dae6d87b4eb88ffd8794c53a41e936e94df8f59bf28d76dc7042671053fb80f95a94ad2e60bf168784941c52dcbeef7b4575d15649a971e968b8b934f2eba5a2f4862a35727b75d76b7d672791cfc1837a32cd421e80b016722e446bc8b981a0fdd548636fdc8843',
-            audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
+            //audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
+            audio_url: audioURL
         }
 
-        const response = await axios.post(path, requestParameters)
+        const newResponse = await axios.post(path, requestParameters)
 
-        console.log(response.data)
+        console.log(newResponse.data)
+        setResponse( newResponse )
+        deletePreviousTrackDurationInApp( response? response.data.audio_duration : undefined ) // Remove outdated track duration of the previous file in the App component
+        passTrackDurationToApp( newResponse.data.audio_duration )
     }
 
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
+    const location = useLocation();
+
+    useEffect( () => {
+        const queryParams = new URLSearchParams(location.search);
+        const audioUrlParam = queryParams.get('audio_url');
+
+        //const encodedURL = encodeURIComponent('https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav')
+        // ?audio_url=https%3A%2F%2Fwww2.cs.uic.edu%2F~i101%2FSoundFiles%2FBabyElephantWalk60.wav
+        //const encodedURL = encodeURIComponent('https://storage.googleapis.com/callbase_bucket/XC633481-RFW_.mp3?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=callbase-storage-management%40callbase-395411.iam.gserviceaccount.com%2F20240222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240222T135207Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=171057da4032d1ee38946369ab9b0bd090539b7d258c7fb1f9b057120b5e6ed9bcdb9f585d0648852e78b10baee07882f813e1278d227dad2b17f0410ae91e4c0a472210485a8d085c6ffa0f3ddfe7f038fee2c9d0089b0980d44ea00cf32d58542bbca37f2bf0cfccc1220ee26ce242340f2fbc238f9b8c0d85bc4d4e975d926e93c58313bc60bb0d40620dfaaeea85068d17282a2e94c7dae6d87b4eb88ffd8794c53a41e936e94df8f59bf28d76dc7042671053fb80f95a94ad2e60bf168784941c52dcbeef7b4575d15649a971e968b8b934f2eba5a2f4862a35727b75d76b7d672791cfc1837a32cd421e80b016722e446bc8b981a0fdd548636fdc8843')
+
+        if (audioUrlParam) {
+            const decodedURL = decodeURIComponent(audioUrlParam)
+            uploadFileByURL(decodedURL)
+        }
+    }, [location])
 
     // When labels or the Waveform Scale value are manipulated
-    useEffect(() => {
+    useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-        }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals]
-    )
+    }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals] )
 
     // When user zoomed, scrolled, or changed a parameter
     useEffect( () => {
@@ -1267,8 +1393,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-        }, [currentStartTime, globalClipDuration, audioId, parameters]
-    )
+    }, [currentStartTime, globalClipDuration, audioId, parameters] )
 
 
     // When a new audio file is uploaded:
@@ -1279,7 +1404,7 @@ function ScalableSpec(
             setLabels([])
             //playheadRef.current.timeframe = 0
 
-        }, [response])
+    }, [response])
 
     // When a new CSV File was uploaded
     /*
@@ -1293,7 +1418,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!audioSnippet) return
         playAudio()
-    }, [audioSnippet])
+    }, [audioSnippet] )
 
     // When globalAudioDuration is updated in the App component
     useEffect( () => {
@@ -1306,7 +1431,7 @@ function ScalableSpec(
         passScrollStepToApp(globalAudioDuration * SCROLL_STEP_RATIO)
         playheadRef.current.timeframe = 0
 
-    }, [response, globalAudioDuration])
+    }, [response, globalAudioDuration] )
 
     return (
         <div
@@ -1384,6 +1509,7 @@ function ScalableSpec(
                         >
                             Call WhisperSeg
                         </button>
+                        <button onClick={drawCurvedOffset}>Draw curved line</button>
                         <div className='audio-controls'>
                             <button
                                 onClick={getAudio}

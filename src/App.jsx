@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Individuals from "./Indivduals";
+import {Router} from "react-router-dom";
 
 const SCROLL_STEP_RATIO = 0.1
 

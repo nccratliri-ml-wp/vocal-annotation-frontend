@@ -1,5 +1,7 @@
 # React Web Annotation Interface
 
+![](src/assets/demo.png)
+
 ## Installation
 
 1. Fork the repository to your local machine.

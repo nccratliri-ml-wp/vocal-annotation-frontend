@@ -18,7 +18,7 @@ This repository offers an interactive user interface to simplify the annotation 
 
 **Audio Playback:** Listen to audio samples directly within the interface for efficient annotation.
 
-**Browser-Based, no installation:** Access the interface seamlessly in your browser without additional dependencies or installation processes.
+**Browser-Based:** As a User, access the interface seamlessly in your browser without additional dependencies or installation processes.
 
 **Import and Export Data as CSV File:** Easily import and export annotation data in CSV format for compatibility with other tools and analysis.
 

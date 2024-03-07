@@ -107,10 +107,10 @@ function ScalableSpec(
     // File Upload
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
-
     const [parameters, setParameters] = useState({
         spec_cal_method: 'log-mel'
     })
+    const location = useLocation();
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -455,6 +455,13 @@ function ScalableSpec(
         return [startTime, endTime]
     }
 
+    const linspace = (start, stop, num=50, endpoint=true) => {
+        const step = (stop - start) / (num - (endpoint ? 1 : 0))
+        const arr = Array.from({ length: num }, (_, i) => start + step * i)
+        if (!endpoint) arr.push(stop)
+        return arr
+    }
+
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
@@ -787,13 +794,6 @@ function ScalableSpec(
         for (let y of y_values){
             waveformCTX.fillRect(x,y,1.5,2)
         }
-    }
-
-    const linspace = (start, stop, num=50, endpoint=true) => {
-        const step = (stop - start) / (num - (endpoint ? 1 : 0))
-        const arr = Array.from({ length: num }, (_, i) => start + step * i)
-        if (!endpoint) arr.push(stop)
-        return arr
     }
 
     const drawAllLabels = () => {
@@ -1360,22 +1360,6 @@ function ScalableSpec(
 
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
-    const location = useLocation();
-
-    useEffect( () => {
-        const queryParams = new URLSearchParams(location.search);
-        const audioUrlParam = queryParams.get('audio_url');
-
-        //const encodedURL = encodeURIComponent('https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav')
-        // ?audio_url=https%3A%2F%2Fwww2.cs.uic.edu%2F~i101%2FSoundFiles%2FBabyElephantWalk60.wav
-        //const encodedURL = encodeURIComponent('https://storage.googleapis.com/callbase_bucket/XC633481-RFW_.mp3?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=callbase-storage-management%40callbase-395411.iam.gserviceaccount.com%2F20240222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240222T135207Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=171057da4032d1ee38946369ab9b0bd090539b7d258c7fb1f9b057120b5e6ed9bcdb9f585d0648852e78b10baee07882f813e1278d227dad2b17f0410ae91e4c0a472210485a8d085c6ffa0f3ddfe7f038fee2c9d0089b0980d44ea00cf32d58542bbca37f2bf0cfccc1220ee26ce242340f2fbc238f9b8c0d85bc4d4e975d926e93c58313bc60bb0d40620dfaaeea85068d17282a2e94c7dae6d87b4eb88ffd8794c53a41e936e94df8f59bf28d76dc7042671053fb80f95a94ad2e60bf168784941c52dcbeef7b4575d15649a971e968b8b934f2eba5a2f4862a35727b75d76b7d672791cfc1837a32cd421e80b016722e446bc8b981a0fdd548636fdc8843')
-
-        if (audioUrlParam) {
-            const decodedURL = decodeURIComponent(audioUrlParam)
-            uploadFileByURL(decodedURL)
-        }
-    }, [location])
-
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
@@ -1432,6 +1416,17 @@ function ScalableSpec(
         playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration] )
+
+    // When url parameter is added into the searchbar
+    useEffect( () => {
+        const queryParams = new URLSearchParams(location.search);
+        const audioUrlParam = queryParams.get('audio_url');
+
+        if (audioUrlParam) {
+            const decodedURL = decodeURIComponent(audioUrlParam)
+            uploadFileByURL(decodedURL)
+        }
+    }, [location])
 
     return (
         <div

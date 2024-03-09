@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -9,26 +9,19 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, clustername, y, individual, annotator) {
+    constructor(onset, offset, clustername, individual, annotator, color) {
         this.onset = onset
         this.offset = offset
         this.clustername = clustername
-        this.y = y
         this.individual = individual
         this.annotator = annotator
+        this.color = color
     }
 }
 
 class Playhead{
     constructor(timeframe) {
         this.timeframe = timeframe
-    }
-}
-
-class AnnotatedArea {
-    constructor(onset, offset){
-        this.onset = onset
-        this.offset = offset
     }
 }
 
@@ -118,9 +111,6 @@ function ScalableSpec(
 
     // Active Clustername
     const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
-
-    // Annotated Area
-    const annotatedArea = useRef(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
     const passResponseToScalableSpec = ( newResponse ) => {
@@ -321,7 +311,6 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawAnnotatedArea()
             //drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
@@ -370,7 +359,7 @@ function ScalableSpec(
     }
 
     const calculateYPosition = (label) => {
-        return label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+        return label.clustername === 'Protected Area'? labelCanvasRef.current.height : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
     const calculateTimestamp = (event) => {
@@ -386,7 +375,7 @@ function ScalableSpec(
     const checkIfClickedOnOnset = (xClicked) => {
         for (let label of labels){
             const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
-            if ( ( xOnset >= xClicked - 10 && xOnset <= xClicked + 10 ) ){
+            if ( ( xOnset >= xClicked - 5 && xOnset <= xClicked + 5 ) ){
                 return label
             }
         }
@@ -395,7 +384,7 @@ function ScalableSpec(
     const checkIfClickedOnOffset = (xClicked) => {
         for (let label of labels){
             const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-            if ( ( xOffset >= xClicked - 10 && xOffset <= xClicked + 10 ) ){
+            if ( ( xOffset >= xClicked - 5 && xOffset <= xClicked + 5 ) ){
                 return label
             }
         }
@@ -431,26 +420,8 @@ function ScalableSpec(
 
     const getCorrectLabelColor = (label) => {
         const correspondingBTN = clusternameButtons.find(btn => btn.clustername === label.clustername)
-        return correspondingBTN? correspondingBTN.color: DEFAULT_LABEL_COLOR
-    }
-
-    const getAnnotatedArea = () => {
-        if (!labels.length ) return [null, null]
-
-        // Get all onsets, exclude incomplete labels
-        let allOnsets = labels.map(label => label.onset)
-        if ( !labels[labels.length-1].offset ) {
-            allOnsets.pop()
-        }
-
-        // Get all Offsets, exclude incomplete labels
-        let allOffsets = labels.map(label => label.offset)
-        allOffsets = allOffsets.filter(offset => !isNaN(offset))
-
-        const startTime = Math.min(...allOnsets)
-        const endTime = Math.max(...allOffsets)
-
-        return [startTime, endTime]
+        const fallbackColor = label.color? label.color : DEFAULT_LABEL_COLOR
+        return correspondingBTN? correspondingBTN.color: fallbackColor
     }
 
     const linspace = (start, stop, num=50, endpoint=true) => {
@@ -481,7 +452,6 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
-            drawAnnotatedArea()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -820,30 +790,16 @@ function ScalableSpec(
         drawLine(activeLabel, activeLabel.offset)
     }
 
-    const drawAnnotatedArea = () => {
-        const cvs = labelCanvasRef.current;
-        const ctx = cvs.getContext('2d');
-
-        const [startTime, endTime] = getAnnotatedArea()
-
-        const x1 = calculateXPosition(startTime, cvs)
-        const x2 = calculateXPosition(endTime, cvs)
-
-        ctx.lineWidth = 2
-        ctx.strokeStyle = 'green'
-
-        // Draw horizontal line
-        ctx.beginPath()
-        ctx.moveTo(x1, cvs.height)
-        ctx.lineTo(x2, cvs.height)
-        ctx.stroke()
-    }
-
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        const newClustername = activeClusternameBTN? activeClusternameBTN.clustername: null
-        setLabels(current => [...current, new Label(onset, undefined, newClustername, labelCanvasRef.current.height, activeIndividual) ])
+        const clustername = activeClusternameBTN? activeClusternameBTN.clustername: null
+        const individual = clustername === 'Protected Area'? null : activeIndividual
+
+        const newLabel = new Label(onset, undefined, clustername, individual, null, null)
+        newLabel.color = getCorrectLabelColor(newLabel)
+
+        setLabels( current => [...current, newLabel] )
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -884,7 +840,6 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
-        drawAnnotatedArea()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -903,7 +858,6 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
-        drawAnnotatedArea()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -1324,17 +1278,21 @@ function ScalableSpec(
     const callWhisperSeg = async () => {
         setWhisperSegIsLoading(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
-        const [annotatedAreaStartTime, annotatedAreaEndTime] = getAnnotatedArea() // For the future, when Whisper Seg Endpoint takes human annotated area as parameter
+        //For the future, when Whisper Seg Endpoint takes human annotated area as parameter
         const requestParameters = {
             audio_id: audioId,
         }
 
         const response = await axios.post(path, requestParameters)
 
-        //return response.data
         const whisperObjects = response.data.labels
 
-        const whisperLabels = whisperObjects.map( obj => new Label(obj.onset, obj.offset, obj.clustername, labelCanvasRef.current.height, activeIndividual))
+        const whisperLabels = whisperObjects.map( obj => {
+            const newLabel = new Label(obj.onset, obj.offset, obj.clustername, activeIndividual, null, null)
+            newLabel.color = getCorrectLabelColor(newLabel)
+
+            return newLabel
+        })
 
         setLabels(prevState => [...prevState, ...whisperLabels] )
         setWhisperSegIsLoading(false)

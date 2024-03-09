@@ -2,13 +2,22 @@ import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Individuals from "./Indivduals";
-import {Router} from "react-router-dom";
 
 const SCROLL_STEP_RATIO = 0.1
 
+class ClusternameButton {
+    constructor(id, clustername, isActive, color) {
+        this.id = id
+        this.clustername = clustername
+        this.isActive = isActive
+        this.color = color
+        this.showColorwheel = false
+    }
+}
+
 function App() {
     const [importedLabels, setImportedLabels] = useState([]);
-    const [clusternameButtons, setClusternameButtons] = useState([])
+    const [clusternameButtons, setClusternameButtons] = useState([new ClusternameButton('PROTECTED_AREA', 'Protected Area', false, 'green')])
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -49,10 +58,6 @@ function App() {
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
-
-    function passLabelsToApp(newLabels){
-        setImportedLabels( newLabels )
-    }
 
     function passClusterNameButtonsToApp( newClusternameButtons ){
         setClusternameButtons( newClusternameButtons )

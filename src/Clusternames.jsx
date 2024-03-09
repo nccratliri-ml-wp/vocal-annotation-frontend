@@ -56,6 +56,7 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
 
     function handleRightClick(event){
         event.preventDefault()
+        if (event.target.id === 'PROTECTED_AREA') return
         passClusterNameButtonsToApp( deleteClusternameButton(event.target) )
     }
 
@@ -85,7 +86,6 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
         })
 
         passClusterNameButtonsToApp(updatedClusternameButtons)
-
     }
 
 

@@ -71,6 +71,9 @@ function ScalableSpec(
     const [frequencies, setFrequencies] = useState(null)
     const frequenciesCanvasRef = useRef(null)
 
+    // Name Canvas
+    const nameCanvasRef = useRef(null)
+
     // Time Axis
     const timeAxisRef = useRef(null);
 
@@ -449,6 +452,7 @@ function ScalableSpec(
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
             drawFrequenciesAxis(frequenciesArray)
+            drawNames()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
@@ -788,6 +792,22 @@ function ScalableSpec(
 
         drawLine(activeLabel, activeLabel.onset)
         drawLine(activeLabel, activeLabel.offset)
+    }
+
+    const drawNames = () => {
+        const cvs = nameCanvasRef.current
+        const ctx = cvs.getContext('2d')
+        ctx.clearRect(0, 0, cvs.width, cvs.height)
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.fillStyle = '#ffffff'
+        ctx.lineWidth = 1.5
+
+        for (let i=1; i <= numberOfIndividuals; i++){
+            ctx.fillText(`Ind. ${i}`, 0, i * HEIGHT_BETWEEN_INDIVIDUAL_LINES);
+        }
+
+        ctx.fillText('Protected', 0, cvs.height)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
@@ -1263,8 +1283,8 @@ function ScalableSpec(
         let y = cvs.height
         for (let freq of selectedFrequencies){
             ctx.beginPath()
-            ctx.moveTo(33,y)
-            ctx.lineTo(40, y)
+            ctx.moveTo(40,y)
+            ctx.lineTo(cvs.width, y)
             ctx.stroke()
             ctx.fillText(`${Math.round(freq / 10) * 10}`, 0, y);
             y -= lineDistance
@@ -1457,12 +1477,21 @@ function ScalableSpec(
                             passParametersToScalableSpec={passParametersToScalableSpec}
                         />
                     </div>
-                    <canvas
-                        className='frequencies-canvas'
-                        ref={frequenciesCanvasRef}
-                        width={40}
-                        height={175}
-                    />
+                    <div className='frequencies-names-container'>
+                        <canvas
+                            className='frequencies-canvas'
+                            ref={frequenciesCanvasRef}
+                            width={50}
+                            height={175}
+                        />
+                        <canvas
+                            className='name-canvas'
+                            ref={nameCanvasRef}
+                            width={50}
+                            height={numberOfIndividuals * 20 + 5}
+                        />
+                    </div>
+
                 </div>
 
                 <div onMouseLeave={handleMouseUp}>
@@ -1490,7 +1519,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={numberOfIndividuals * 20}
+                        height={numberOfIndividuals * 20 + 5}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

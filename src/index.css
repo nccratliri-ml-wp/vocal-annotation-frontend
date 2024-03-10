@@ -55,7 +55,7 @@ html, body {
 .track-controls{
   display: flex;
   flex-direction: column;
-  width: 160px;
+  width: 150px;
 }
 
 .file-input{
@@ -300,6 +300,10 @@ html, body {
   display: block;
   height: 175px;
   margin: 55px 0 0 0;
+}
+
+.name-canvas{
+  display: block;
 }
 
 

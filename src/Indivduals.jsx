@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
 
-function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOfIndividuals} ) {
+function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOfIndividualsToApp} ) {
 
     const [menuItems, setMenuItems] = useState(
         [
@@ -20,7 +20,7 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
     const addIndividual = () => {
         const newIndividualNumber = menuItems.length + 1
         setMenuItems(prevState => [...prevState, <MenuItem key={nanoid()} value={newIndividualNumber}>Individual {newIndividualNumber}</MenuItem>])
-        passNumberOfIndividuals( newIndividualNumber )
+        passNumberOfIndividualsToApp( newIndividualNumber )
     }
 
     return (

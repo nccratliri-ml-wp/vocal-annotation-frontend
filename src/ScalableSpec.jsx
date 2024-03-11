@@ -6,7 +6,6 @@ import Export from "./Export.jsx";
 import FileUpload from "./FileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 
-
 // Classes
 class Label {
     constructor(onset, offset, clustername, individual, annotator, color) {
@@ -54,7 +53,8 @@ function ScalableSpec(
                             passActiveLabelToApp,
                             activeLabel,
                             activeIndividual,
-                            numberOfIndividuals
+                            numberOfIndividuals,
+                            outdatedClustername
                         }
                     )
                 {
@@ -71,8 +71,8 @@ function ScalableSpec(
     const [frequencies, setFrequencies] = useState(null)
     const frequenciesCanvasRef = useRef(null)
 
-    // Name Canvas
-    const nameCanvasRef = useRef(null)
+    // Individuals Canvas
+    const individualsCanvasRef = useRef(null)
 
     // Time Axis
     const timeAxisRef = useRef(null);
@@ -362,7 +362,7 @@ function ScalableSpec(
     }
 
     const calculateYPosition = (label) => {
-        return label.clustername === 'Protected Area'? labelCanvasRef.current.height : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+        return label.clustername === 'Protected Area🔒'? labelCanvasRef.current.height : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
     const calculateTimestamp = (event) => {
@@ -452,7 +452,7 @@ function ScalableSpec(
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
             drawWaveform(newAudioArray)
             drawFrequenciesAxis(frequenciesArray)
-            drawNames()
+            drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawActiveLabel()
@@ -794,8 +794,8 @@ function ScalableSpec(
         drawLine(activeLabel, activeLabel.offset)
     }
 
-    const drawNames = () => {
-        const cvs = nameCanvasRef.current
+    const drawIndividualsCanvas = () => {
+        const cvs = individualsCanvasRef.current
         const ctx = cvs.getContext('2d')
         ctx.clearRect(0, 0, cvs.width, cvs.height)
 
@@ -1379,13 +1379,27 @@ function ScalableSpec(
 
     }, [response, globalAudioDuration] )
 
+    // When the user edits the clustername of one of the clustername buttons
+    useEffect( () => {
+        if (!activeClusternameBTN) return
+
+        let newLabelsArray = labels.map(label => {
+            if (label.clustername === outdatedClustername){
+                return {...label, clustername: activeClusternameBTN.clustername}
+            }
+            return label
+        })
+
+        setLabels(newLabelsArray)
+
+    }, [outdatedClustername])
+
 
     return (
         <div
             className='editor-container'
             onMouseLeave={handleMouseLeave}
         >
-
             {showOverviewInitialValue && response &&
                 <div className='overview-time-axis-container'>
                     <canvas
@@ -1477,7 +1491,7 @@ function ScalableSpec(
                             passParametersToScalableSpec={passParametersToScalableSpec}
                         />
                     </div>
-                    <div className='frequencies-names-container'>
+                    <div className='frequencies-individuals-container'>
                         <canvas
                             className='frequencies-canvas'
                             ref={frequenciesCanvasRef}
@@ -1485,8 +1499,8 @@ function ScalableSpec(
                             height={175}
                         />
                         <canvas
-                            className='name-canvas'
-                            ref={nameCanvasRef}
+                            className='individuals-canvas'
+                            ref={individualsCanvasRef}
                             width={50}
                             height={numberOfIndividuals * 20 + 5}
                         />

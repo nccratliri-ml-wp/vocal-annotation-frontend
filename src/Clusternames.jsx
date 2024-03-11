@@ -14,7 +14,7 @@ class ClusternameButton {
 
 const DEFAULT_BTN_COLOR = '#55e6f3'
 
-function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
+function Clusternames( { passClusterNameButtonsToApp, clusternameButtons, passOutdatedClusterNamesToApp } ){
     const [newClustername, setNewClustername] = useState('')
 
     function handleChange(event){
@@ -23,14 +23,23 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
 
     function updateClusternamesButtons(event){
         event.preventDefault()
+        if ( checkIfClusternameAlreadyExists(newClustername) ) return
 
         passClusterNameButtonsToApp( deactivateAll() )
 
         const newBTN = new ClusternameButton( nanoid(),newClustername, true, DEFAULT_BTN_COLOR)
-
         passClusterNameButtonsToApp(prevState => [...prevState, newBTN] )
 
         setNewClustername('')
+    }
+
+    function checkIfClusternameAlreadyExists( clustername ){
+        for (let btn of clusternameButtons){
+            if (btn.clustername === clustername){
+                alert('This label already exists. Add a different one.')
+                return true
+            }
+        }
     }
 
     function deactivateAll(){
@@ -64,7 +73,27 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
         return clusternameButtons.filter(item => item.id !== btn.id)
     }
 
+    function editClustername(clusternameBtn){
+        if (clusternameBtn.id === 'PROTECTED_AREA') return
+
+        const editedClustername = prompt('Change clustername: ')
+        if (!editedClustername || checkIfClusternameAlreadyExists(editedClustername)) return
+
+        const updatedClusternameButtons = clusternameButtons.map(btn => {
+            if (btn.id === clusternameBtn.id) {
+                passOutdatedClusterNamesToApp(btn.clustername)
+                return {...btn, clustername: editedClustername, isActive: true}
+            } else {
+                return {...btn, isActive: false}
+            }
+        })
+
+        passClusterNameButtonsToApp(updatedClusternameButtons)
+    }
+
     function toggleColorwheel(clusternameBtn) {
+        if (clusternameBtn.id === 'PROTECTED_AREA') return
+
         const updatedClusternameButtons = clusternameButtons.map(btn => {
             if (btn.id === clusternameBtn.id) {
                 return { ...btn, showColorwheel: !btn.showColorwheel }
@@ -145,6 +174,12 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons } ){
                                 onClick={() => toggleColorwheel(BTN)}
                             >
                                 🎨
+                            </button>
+                            <button
+                                className='open-colorwheel-btn'
+                                onClick={() => editClustername(BTN)}
+                            >
+                                ✏️
                             </button>
                             {BTN.showColorwheel && <Colorwheel toggleColorwheel={toggleColorwheel} passChosenColorToClusternames={passChosenColorToClusternames} BTN={BTN} />}
                         </div>

@@ -17,7 +17,12 @@ class ClusternameButton {
 
 function App() {
     const [importedLabels, setImportedLabels] = useState([]);
-    const [clusternameButtons, setClusternameButtons] = useState([new ClusternameButton('PROTECTED_AREA', 'Protected Area', false, 'green')])
+    const [clusternameButtons, setClusternameButtons] = useState(
+        [
+            new ClusternameButton('PROTECTED_AREA', 'Protected Area🔒', false, 'green'),
+            new ClusternameButton('DEFAULT_BUTTON', 'Default tag', true, '#47ff14')
+        ])
+    const [outdatedClustername, setOutdatedClustername] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -42,7 +47,6 @@ function App() {
         track_19: false,
         track_20: false,
     })
-
 
     // General
     const [globalAudioDuration, setGlobalAudioDuration] = useState(0)
@@ -95,8 +99,12 @@ function App() {
         setActiveIndividual( newActiveIndividual )
     }
 
-    function passNumberOfIndividuals( newNumber ){
+    function passNumberOfIndividualsToApp( newNumber ){
         setNumberOfIndividuals( newNumber )
+    }
+    
+    function passOutdatedClusterNamesToApp( clustername ){
+        setOutdatedClustername( clustername )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -185,6 +193,7 @@ function App() {
             <Clusternames
                 passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 clusternameButtons={clusternameButtons}
+                passOutdatedClusterNamesToApp={passOutdatedClusterNamesToApp}
             />
             <div className='controls-container'>
                 <button
@@ -217,7 +226,7 @@ function App() {
             <Individuals
                 activeIndividual={activeIndividual}
                 passActiveIndividualToApp={passActiveIndividualToApp}
-                passNumberOfIndividuals={passNumberOfIndividuals}
+                passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
             />
             {showTracks.track_1 &&
                 <ScalableSpec
@@ -244,6 +253,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_2 &&
@@ -270,6 +280,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_3 &&
@@ -296,6 +307,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_4 &&
@@ -322,6 +334,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_5 &&
@@ -348,6 +361,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_6 &&
@@ -374,6 +388,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_7 &&
@@ -400,6 +415,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_8 &&
@@ -426,6 +442,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_9 &&
@@ -452,6 +469,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_10 &&
@@ -478,6 +496,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_11 &&
@@ -504,6 +523,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_12 &&
@@ -530,6 +550,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_13 &&
@@ -556,6 +577,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_14 &&
@@ -582,6 +604,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_15 &&
@@ -608,6 +631,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_16 &&
@@ -634,6 +658,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_17 &&
@@ -660,6 +685,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_18 &&
@@ -686,6 +712,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_19 &&
@@ -712,6 +739,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             {showTracks.track_20 &&
@@ -738,6 +766,7 @@ function App() {
                     activeLabel={activeLabel}
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
+                    outdatedClustername={outdatedClustername}
                 />
             }
             <button

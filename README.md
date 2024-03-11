@@ -4,7 +4,7 @@
 
 ## About this App
 
-This repository offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. Below are some of the core features:
+This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. Below are some of the core features:
 
 **Multiple Audio Tracks:** Handle and analyze multiple audio tracks simultaneously.
 

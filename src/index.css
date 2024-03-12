@@ -55,7 +55,7 @@ html, body {
 .track-controls{
   display: flex;
   flex-direction: column;
-  width: 150px;
+  width: 160px;
 }
 
 .file-input{

@@ -1309,10 +1309,12 @@ function ScalableSpec(
         // Draw the frequencies
         const lineDistance = cvs.height / selectedFrequencies.length
         let y = cvs.height
+        const x1 = cvs.width - 10
+        const x2 = cvs.width
         for (let freq of selectedFrequencies){
             ctx.beginPath()
-            ctx.moveTo(40,y)
-            ctx.lineTo(cvs.width, y)
+            ctx.moveTo(x1,y)
+            ctx.lineTo(x2, y)
             ctx.stroke()
             ctx.fillText(`${Math.round(freq / 10) * 10}`, 0, y);
             y -= lineDistance
@@ -1521,13 +1523,13 @@ function ScalableSpec(
                         <canvas
                             className='frequencies-canvas'
                             ref={frequenciesCanvasRef}
-                            width={50}
+                            width={40}
                             height={175}
                         />
                         <canvas
                             className='individuals-canvas'
                             ref={individualsCanvasRef}
-                            width={50}
+                            width={40}
                             height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
                         />
                     </div>
@@ -1569,7 +1571,6 @@ function ScalableSpec(
                 </div>
 
             </div>
-            {numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
         </div>
     );
 }

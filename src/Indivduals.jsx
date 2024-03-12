@@ -21,6 +21,7 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
         const newIndividualNumber = menuItems.length + 1
         setMenuItems(prevState => [...prevState, <MenuItem key={nanoid()} value={newIndividualNumber}>Individual {newIndividualNumber}</MenuItem>])
         passNumberOfIndividualsToApp( newIndividualNumber )
+        passActiveIndividualToApp( newIndividualNumber )
     }
 
     return (

@@ -8,7 +8,7 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
-        if (file && file.type === 'audio/wav') {
+        if (file && (file.type === 'audio/wav' || file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
             passSpectrogramIsLoadingToScalableSpec( true )
             upload(file)
         } else {
@@ -79,7 +79,7 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
 
     return (
         <div>
-            <input className='file-input' type="file" accept=".wav" onChange={handleFileChange} />
+            <input className='file-input' type="file" accept=".wav, .mp3" onChange={handleFileChange} />
         </div>
     )
 }

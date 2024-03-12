@@ -674,7 +674,9 @@ function ScalableSpec(
         ctx.font = "12px Arial"
         ctx.textAlign = "center"
         ctx.fillStyle = lineColor
-        ctx.fillText(label.individual + ' ' + label.clustername, xClustername, y - 4);
+        const text = label.clustername === 'Protected Area🔒' ? 'Protected Area' : label.clustername
+
+        ctx.fillText(text, xClustername, y - 4);
     }
 
     const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
@@ -769,6 +771,25 @@ function ScalableSpec(
     }
 
     const drawAllLabels = () => {
+        const cvs = labelCanvasRef.current
+        const ctx = cvs.getContext('2d')
+        ctx.clearRect(0, 0, cvs.width, cvs.height)
+
+        for (let i = 1; i <= numberOfIndividuals; i++){
+            const x1 = 0
+            const x2 = cvs.width
+            const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+
+            ctx.beginPath()
+            ctx.setLineDash([1, 1])
+            ctx.moveTo(x1, y)
+            ctx.lineTo(x2, y)
+            ctx.lineWidth = 1
+            ctx.strokeStyle = ctx.strokeStyle = '#ffffff'
+            ctx.stroke()
+            ctx.setLineDash([])
+        }
+
         for (let label of labels) {
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
             if (!label.offset){
@@ -804,10 +825,17 @@ function ScalableSpec(
         ctx.lineWidth = 1.5
 
         for (let i=1; i <= numberOfIndividuals; i++){
-            ctx.fillText(`Ind. ${i}`, 0, i * HEIGHT_BETWEEN_INDIVIDUAL_LINES);
+            const text = `Ind. ${i}`
+            const textWidth = ctx.measureText(text).width
+            const x = cvs.width - textWidth - 5
+            const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            ctx.fillText(text, x, y);
         }
 
-        ctx.fillText('Protected', 0, cvs.height)
+        const text = '🔒'
+        const textWidth = ctx.measureText(text).width
+        const x = cvs.width - textWidth - 5
+        ctx.fillText(text, x, cvs.height)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
@@ -1319,8 +1347,6 @@ function ScalableSpec(
     }
 
 
-
-
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
@@ -1502,7 +1528,7 @@ function ScalableSpec(
                             className='individuals-canvas'
                             ref={individualsCanvasRef}
                             width={50}
-                            height={numberOfIndividuals * 20 + 5}
+                            height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
                         />
                     </div>
 
@@ -1533,7 +1559,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={numberOfIndividuals * 20 + 5}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -1543,6 +1569,7 @@ function ScalableSpec(
                 </div>
 
             </div>
+            {numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
         </div>
     );
 }

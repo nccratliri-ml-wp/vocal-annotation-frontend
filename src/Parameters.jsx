@@ -6,6 +6,8 @@ function Parameters({ passParametersToScalableSpec }) {
     const [binsPerOctaveValue, setBinsPerOctaveValue] = useState('')
     const [showNFftInput, setShowNFftInput] = useState(true)
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
+    const [minFreqValue, setMinFreqValue] = useState(0)
+    const [maxFreqValue, setMaxFreqValue] = useState(0)
 
     const handleRadioChange = (method) => {
         setSelectedMethod(method)
@@ -46,6 +48,39 @@ function Parameters({ passParametersToScalableSpec }) {
         }
     }
 
+    const handleMinFreqInputChange = (event) => {
+        setMinFreqValue(event.target.value)
+    }
+
+    const handleMinFreqSubmit = () => {
+        const minFreq = parseInt(minFreqValue, 10)
+        if (!isNaN(minFreq)){
+            passParametersToScalableSpec({
+                spec_cal_method: selectedMethod,
+                n_fft: nFftValue,
+                bins_per_octave: binsPerOctaveValue,
+                //min_freq: minFreq                         -> Example Value. actual parameter doesn't exist yet in the backend
+            })
+        }
+    }
+
+    const handleMaxFreqInputChange = (event) => {
+        setMaxFreqValue(event.target.value)
+    }
+
+    const handleMaxFreqSubmit = () => {
+        const maxFreq = parseInt(maxFreqValue, 10)
+        if (!isNaN(maxFreq)){
+            passParametersToScalableSpec({
+                spec_cal_method: selectedMethod,
+                n_fft: nFftValue,
+                bins_per_octave: binsPerOctaveValue,
+                //max_freq: maxFreq                         -> Example Value. actual parameter doesn't exist yet in the backend
+            })
+        }
+        console.log(maxFreq)
+    }
+
     return (
         <div
             className="parameters"
@@ -62,18 +97,15 @@ function Parameters({ passParametersToScalableSpec }) {
                     Log-Mel
                 </label>
                 {showNFftInput && (
-                    <>
-                        <label>
-                            N-FFT:
-                            <input
-                                type="number"
-                                value={nFftValue}
-                                onChange={handleNFftInputChange}
-                            />
-                            <button onClick={handleNFftSubmit}>Submit</button>
-                        </label>
-
-                    </>
+                    <label>
+                        N-FFT:
+                        <input
+                            type="number"
+                            value={nFftValue}
+                            onChange={handleNFftInputChange}
+                        />
+                        <button onClick={handleNFftSubmit}>Submit</button>
+                    </label>
                 )}
             </div>
 
@@ -88,19 +120,37 @@ function Parameters({ passParametersToScalableSpec }) {
                     Constant-Q
                 </label>
                 {showBinsPerOctaveInput && (
-                    <>
-                        <label>
-                            BPO:
-                            <input
-                                type="number"
-                                value={binsPerOctaveValue}
-                                onChange={handleBinsPerOctaveInputChange}
-                            />
-                            <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
-                        </label>
-
-                    </>
+                    <label>
+                        BPO:
+                        <input
+                            type="number"
+                            value={binsPerOctaveValue}
+                            onChange={handleBinsPerOctaveInputChange}
+                        />
+                        <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
+                    </label>
                 )}
+            </div>
+
+            <div>
+                <label>
+                    Min Freq
+                    <input
+                        type="number"
+                        value={minFreqValue}
+                        onChange={handleMinFreqInputChange}
+                    />
+                    <button onClick={handleMinFreqSubmit}>Submit</button>
+                </label>
+                <label>
+                    Max Freq
+                    <input
+                        type="number"
+                        value={maxFreqValue}
+                        onChange={handleMaxFreqInputChange}
+                    />
+                    <button onClick={handleMaxFreqSubmit}>Submit</button>
+                </label>
             </div>
 
         </div>

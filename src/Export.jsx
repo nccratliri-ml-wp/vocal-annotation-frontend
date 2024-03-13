@@ -1,10 +1,13 @@
 function Export( { labels, audioFileName } ){
 
     function exportCSV(){
+        // Remove Protected Area labels
+        labels = labels.filter(label => label.clustername !== 'Protected Area🔒')
+
         // Sort the labels ascending by onset
         labels = labels.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
 
-        // transform to CSV data
+        // Transform to CSV data
         let csvData = labels.map(label => `${label.onset},${label.offset},${label.clustername},${label.individual}`)
         csvData.unshift('onset,offset,cluster,individual')
         csvData = csvData.join('\n')

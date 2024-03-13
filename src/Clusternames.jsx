@@ -92,8 +92,6 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons, passOu
     }
 
     function toggleColorwheel(clusternameBtn) {
-        if (clusternameBtn.id === 'PROTECTED_AREA') return
-
         const updatedClusternameButtons = clusternameButtons.map(btn => {
             if (btn.id === clusternameBtn.id) {
                 return { ...btn, showColorwheel: !btn.showColorwheel }

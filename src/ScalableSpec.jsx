@@ -362,7 +362,7 @@ function ScalableSpec(
     }
 
     const calculateYPosition = (label) => {
-        return label.clustername === 'Protected Area🔒'? labelCanvasRef.current.height : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+        return label.clustername === 'Protected Area🔒'? labelCanvasRef.current.height - 1 : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
     const calculateTimestamp = (event) => {
@@ -781,7 +781,7 @@ function ScalableSpec(
             const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
 
             ctx.beginPath()
-            ctx.setLineDash([1, 1])
+            ctx.setLineDash([1, 3])
             ctx.moveTo(x1, y)
             ctx.lineTo(x2, y)
             ctx.lineWidth = 1

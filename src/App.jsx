@@ -61,6 +61,31 @@ function App() {
     const [activeIndividual, setActiveIndividual] = useState(1);
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
 
+    const [config, setConfig] = useState(null)
+
+    const [globalHopLength, setGlobalHopLength] = useState(0)
+    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
+    const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
+    /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
+       1.1 handle NAN error in Parameters when user deletes a value in the input field
+    *  2. Adjust the code and methods to work as before
+    *  3. Adjust Upload by URL method
+    *  4. Adjust all instances of ScalableSpec
+    *  5. DONE: Perhaps refactor Paramters? To hold n_fft, bin_per_octave etc. in state variables in ScalabeSpec instead of as a single Parameters state
+    * */
+
+    function passGlobalHopLengthToApp( newHopLength ){
+        setGlobalHopLength( newHopLength )
+    }
+
+    function passGlobalNumSpecColumns( newNumSpecColumns ) {
+        setGlobalNumSpecColumns( newNumSpecColumns )
+    }
+
+    function passGlobalSamplingRate( newSamplingRate ) {
+        setGlobalSamplingRate( newSamplingRate )
+    }
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passClusterNameButtonsToApp( newClusternameButtons ){
@@ -107,6 +132,10 @@ function App() {
         setOutdatedClustername( clustername )
     }
 
+    function passConfigToApp( newConfig ){
+        setConfig( newConfig )
+    }
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
@@ -143,12 +172,18 @@ function App() {
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
     function onZoomIn(){
-        const newDuration = Math.max(globalClipDuration / 2, 0.1)
+        //const newDuration = Math.max(globalClipDuration / 2, 0.1)
+        const newDuration = config.configurations.hop_length / 2 / config.configurations.sampling_rate * config.configurations.num_spec_columns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         setGlobalClipDuration(newDuration)
         setMaxScrollTime(newMaxScrollTime)
         setScrollStep(newDuration * SCROLL_STEP_RATIO)
         setCurrentEndTime( currentStartTime + newDuration )
+
+        const updatedConfig = {...config}
+        updatedConfig.configurations.hop_length = Math.round(config.configurations.hop_length / 2)
+        setConfig(updatedConfig)
+        console.log(updatedConfig.configurations.hop_length)
     }
 
     function onZoomOut(){
@@ -228,6 +263,7 @@ function App() {
                 passActiveIndividualToApp={passActiveIndividualToApp}
                 passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
             />
+                <button onClick={() => console.log(config)}>Show</button>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
@@ -254,6 +290,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    config={config}
+                    passConfigToApp={passConfigToApp}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
+                    passGlobalSamplingRate={passGlobalSamplingRate}
                 />
             }
             {showTracks.track_2 &&
@@ -281,6 +325,8 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    config={config}
+                    passConfigToApp={passConfigToApp}
                 />
             }
             {showTracks.track_3 &&

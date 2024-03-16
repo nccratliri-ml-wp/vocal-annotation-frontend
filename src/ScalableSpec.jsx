@@ -54,7 +54,15 @@ function ScalableSpec(
                             activeLabel,
                             activeIndividual,
                             numberOfIndividuals,
-                            outdatedClustername
+                            outdatedClustername,
+                            config,
+                            passConfigToApp,
+                            globalHopLength,
+                            globalNumSpecColumns,
+                            globalSamplingRate,
+                            passGlobalHopLengthToApp,
+                            passGlobalNumSpecColumns,
+                            passGlobalSamplingRate
                         }
                     )
                 {
@@ -103,8 +111,19 @@ function ScalableSpec(
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
     const [parameters, setParameters] = useState({
-        spec_cal_method: 'log-mel'
+        spec_cal_method: 'log-mel',
+        n_fft: null,
+        bins_per_octave: null,
+        min_frequency: null,
+        max_frequency: null
     })
+
+    const [specCallMethod, setSpecCallMethod] = useState('log-mel')
+    const [nfft, setNfft] = useState(512)
+    const [binsPerOctave, setBinsPerOctave] = useState(0)
+    const [minFreq, setMinFreq] = useState(0)
+    const [maxFreq, setMaxFreq] = useState(16000)
+
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -128,16 +147,78 @@ function ScalableSpec(
         setParameters( newParameters )
     }
 
+    const passSpecCallMethodToScalableSpec = ( newSpecCallMethod ) => {
+        setSpecCallMethod( newSpecCallMethod )
+    }
+
+    const passNfftToScalableSpec = ( newNfft ) => {
+        setNfft( newNfft )
+    }
+
+    const passBinsPerOctaveToScalableSpec = ( newBinsPerOctave ) => {
+        setBinsPerOctave( newBinsPerOctave )
+    }
+
+    const passMinFreqToScalableSpec = ( newMinFreq ) => {
+        setMinFreq( newMinFreq )
+    }
+
+    const passMaxFreqToScalableSpec = ( newMaxFreq ) => {
+        setMaxFreq( newMaxFreq )
+    }
+
+                const submitLocalParameters = () => {
+                    if (!globalClipDuration || !response) return
+
+                    if (audioSnippet) {
+                        audioSnippet.pause()
+                        audioSnippet.currentTime = currentStartTime
+                    }
+
+                    getSpecAndAudioArray()
+                }
+
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
+        /*
         const requestParameters = {
-            ...parameters,
+            ...config.configurations,
             audio_id: audioId,
             start_time: currentStartTime,
             clip_duration: globalClipDuration,
         }
+        */
+        console.log(parameters)
+
+        const requestParameters = {
+            audio_id: audioId,
+            start_time: currentStartTime,
+            hop_length: globalHopLength,
+            num_spec_columns: globalNumSpecColumns,
+            sampling_rate: globalSamplingRate,
+            spec_cal_method: specCallMethod,
+            n_fft: nfft,
+            bins_per_octave: binsPerOctave,
+            min_frequency: minFreq,
+            max_frequency: maxFreq
+        }
+        console.log(requestParameters)
+
+        /*
+        const requestParameters = {
+            spec_cal_method: 'log-mel',
+            bins_per_octave: 30,
+            hop_length: 100,
+            num_spec_columns: 1000,
+            sampling_rate: 4000,
+            min_frequency: 0,
+            max_frequency: 10000,
+            n_fft: 80,
+            audio_id: audioId,
+            start_time: currentStartTime,
+        }*/
 
         const response = await axios.post(path, requestParameters)
 
@@ -1232,7 +1313,7 @@ function ScalableSpec(
         canvas.width = parent.innerWidth - 200
 
         const centerY = canvas.height / 2
-        const ratio = Math.min((response.data.audio_duration - currentStartTime) / globalClipDuration, 1)
+        const ratio = Math.min((response.audio_duration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
         for (let i=0; i < newAudioArray.length; i++) {
@@ -1267,7 +1348,7 @@ function ScalableSpec(
 
     const handleRemoveTrack = () => {
         if (response){
-            deletePreviousTrackDurationInApp( response.data.audio_duration )
+            deletePreviousTrackDurationInApp( response.audio_duration )
         }
         removeTrackInApp(id)
     }
@@ -1374,7 +1455,7 @@ function ScalableSpec(
     useEffect( () => {
             if (!response) return
 
-            setAudioId(response.data.audio_id)
+            setAudioId(response.audio_id)
             setLabels([])
             //playheadRef.current.timeframe = 0
 
@@ -1399,6 +1480,7 @@ function ScalableSpec(
         if (!globalAudioDuration || !response) return
 
         passClipDurationToApp(globalAudioDuration)
+        //passClipDurationToApp( config.configurations.hop_length / config.configurations.sampling_rate * config.configurations.num_spec_columns)
         passCurrentStartTimeToApp(0)
         passCurrentEndTimeToApp(globalAudioDuration)
         passMaxScrollTimeToApp(0)
@@ -1465,7 +1547,12 @@ function ScalableSpec(
                             passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                             passTrackDurationToApp={passTrackDurationToApp}
                             deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-                            previousAudioDuration={response? response.data.audio_duration : undefined}
+                            previousAudioDuration={response? response.audio_duration : undefined}
+                            passConfigToApp={passConfigToApp}
+                            passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                            passGlobalNumSpecColumns={passGlobalNumSpecColumns}
+                            passGlobalSamplingRate={passGlobalSamplingRate}
+                            passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                         />
                         <Export
                             audioFileName={'Example Audio File Name'}
@@ -1516,7 +1603,18 @@ function ScalableSpec(
                             </button>
                         </div>
                         <Parameters
+                            specCallMethod={specCallMethod}
+                            nfft={nfft}
+                            binsPerOctave={binsPerOctave}
+                            minFreq={minFreq}
+                            maxFreq={maxFreq}
                             passParametersToScalableSpec={passParametersToScalableSpec}
+                            passSpecCallMethodToScalableSpec={passSpecCallMethodToScalableSpec}
+                            passNfftToScalableSpec={passNfftToScalableSpec}
+                            passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
+                            passMinFreqToScalableSpec={passMinFreqToScalableSpec}
+                            passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
+                            submitLocalParameters={submitLocalParameters}
                         />
                     </div>
                     <div className='frequencies-individuals-container'>

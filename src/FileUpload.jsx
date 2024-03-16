@@ -2,7 +2,21 @@ import React, {useEffect} from "react";
 import axios from "axios";
 import {useLocation} from "react-router-dom";
 
-function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passTrackDurationToApp, deletePreviousTrackDurationInApp, previousAudioDuration} ) {
+function FileUpload(
+                        {
+                            passResponseToScalableSpec,
+                            passSpectrogramIsLoadingToScalableSpec,
+                            passTrackDurationToApp,
+                            deletePreviousTrackDurationInApp,
+                            previousAudioDuration,
+                            passConfigToApp,
+                            passGlobalHopLengthToApp,
+                            passGlobalNumSpecColumns,
+                            passGlobalSamplingRate,
+                            passMaxFreqToScalableSpec
+                        }
+                    )
+                {
 
     const location = useLocation();
 
@@ -27,10 +41,15 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload'
         try {
             const response = await axios.post(path, formData)
-            console.log('prev duration is: ' + previousAudioDuration)
-            passResponseToScalableSpec( response )
+            passResponseToScalableSpec( response.data.channels[0] )
             deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
-            passTrackDurationToApp( response.data.audio_duration )
+            passTrackDurationToApp( response.data.channels[0].audio_duration )
+            passConfigToApp (response.data)
+            passGlobalHopLengthToApp(response.data.configurations.hop_length)
+            passGlobalNumSpecColumns(response.data.configurations.num_spec_columns)
+            passGlobalSamplingRate(response.data.configurations.sampling_rate)
+            passMaxFreqToScalableSpec(response.data.configurations.max_frequency)
+
         } catch (error) {
             console.error("Error uploading file:", error)
         }

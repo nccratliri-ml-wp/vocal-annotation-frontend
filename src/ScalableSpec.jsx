@@ -55,8 +55,6 @@ function ScalableSpec(
                             activeIndividual,
                             numberOfIndividuals,
                             outdatedClustername,
-                            config,
-                            passConfigToApp,
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -110,13 +108,6 @@ function ScalableSpec(
     // File Upload
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
-    const [parameters, setParameters] = useState({
-        spec_cal_method: 'log-mel',
-        n_fft: null,
-        bins_per_octave: null,
-        min_frequency: null,
-        max_frequency: null
-    })
 
     const [specCallMethod, setSpecCallMethod] = useState('log-mel')
     const [nfft, setNfft] = useState(512)
@@ -143,10 +134,6 @@ function ScalableSpec(
         setSpectrogramIsLoading( boolean )
     }
 
-    const passParametersToScalableSpec = ( newParameters ) => {
-        setParameters( newParameters )
-    }
-
     const passSpecCallMethodToScalableSpec = ( newSpecCallMethod ) => {
         setSpecCallMethod( newSpecCallMethod )
     }
@@ -167,30 +154,14 @@ function ScalableSpec(
         setMaxFreq( newMaxFreq )
     }
 
-                const submitLocalParameters = () => {
-                    if (!globalClipDuration || !response) return
-
-                    if (audioSnippet) {
-                        audioSnippet.pause()
-                        audioSnippet.currentTime = currentStartTime
-                    }
-
-                    getSpecAndAudioArray()
-                }
+    const passAudioIdToScalableSpec = ( newId ) => {
+        setAudioId( newId )
+    }
 
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
-        /*
-        const requestParameters = {
-            ...config.configurations,
-            audio_id: audioId,
-            start_time: currentStartTime,
-            clip_duration: globalClipDuration,
-        }
-        */
-        console.log(parameters)
 
         const requestParameters = {
             audio_id: audioId,
@@ -199,29 +170,16 @@ function ScalableSpec(
             num_spec_columns: globalNumSpecColumns,
             sampling_rate: globalSamplingRate,
             spec_cal_method: specCallMethod,
-            n_fft: nfft,
-            bins_per_octave: binsPerOctave,
-            min_frequency: minFreq,
-            max_frequency: maxFreq
+            n_fft: Number(nfft),
+            bins_per_octave: Number(binsPerOctave),
+            min_frequency: Number(minFreq),
+            max_frequency: Number(maxFreq)
         }
         console.log(requestParameters)
 
-        /*
-        const requestParameters = {
-            spec_cal_method: 'log-mel',
-            bins_per_octave: 30,
-            hop_length: 100,
-            num_spec_columns: 1000,
-            sampling_rate: 4000,
-            min_frequency: 0,
-            max_frequency: 10000,
-            n_fft: 80,
-            audio_id: audioId,
-            start_time: currentStartTime,
-        }*/
-
         const response = await axios.post(path, requestParameters)
 
+        console.log(response.data.configurations)
         return response.data
     }
 
@@ -242,6 +200,17 @@ function ScalableSpec(
             console.error('Error fetching data:', error)
             alert(error+' \nPlease try again later.')
         }
+    }
+
+    const submitLocalParameters = () => {
+        if (!globalClipDuration || !response) return
+
+        if (audioSnippet) {
+            audioSnippet.pause()
+            audioSnippet.currentTime = currentStartTime
+        }
+
+        getSpecAndAudioArray()
     }
 
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
@@ -674,7 +643,7 @@ function ScalableSpec(
 
         const lineColor = getCorrectLabelColor(label)
 
-        if (parameters.spec_cal_method === 'constant-q'){
+        if (specCallMethod === 'constant-q'){
             if (timestamp === label.onset){
                 drawCurvedOnset(timestamp, lineColor)
             }
@@ -934,6 +903,10 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
+    }
+
+    const deleteAllLabels = () => {
+        setLabels([])
     }
 
     const flipOnsetOffset = (label) => {
@@ -1303,6 +1276,7 @@ function ScalableSpec(
         }
 
         const response = await axios.post(path, requestParameters);
+
         return response.data.wav_array
     };
 
@@ -1438,7 +1412,7 @@ function ScalableSpec(
 
     }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals] )
 
-    // When user zoomed, scrolled, or changed a parameter
+    // When user zoomed,or scrolled
     useEffect( () => {
             if (!globalClipDuration || !response) return
 
@@ -1448,10 +1422,11 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-    }, [currentStartTime, globalClipDuration, audioId, parameters] )
+    }, [currentStartTime, globalClipDuration] )
 
 
     // When a new audio file is uploaded:
+                    /*
     useEffect( () => {
             if (!response) return
 
@@ -1480,7 +1455,6 @@ function ScalableSpec(
         if (!globalAudioDuration || !response) return
 
         passClipDurationToApp(globalAudioDuration)
-        //passClipDurationToApp( config.configurations.hop_length / config.configurations.sampling_rate * config.configurations.num_spec_columns)
         passCurrentStartTimeToApp(0)
         passCurrentEndTimeToApp(globalAudioDuration)
         passMaxScrollTimeToApp(0)
@@ -1548,11 +1522,12 @@ function ScalableSpec(
                             passTrackDurationToApp={passTrackDurationToApp}
                             deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                             previousAudioDuration={response? response.audio_duration : undefined}
-                            passConfigToApp={passConfigToApp}
                             passGlobalHopLengthToApp={passGlobalHopLengthToApp}
                             passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                             passGlobalSamplingRate={passGlobalSamplingRate}
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
+                            passAudioIdToScalableSpec={passAudioIdToScalableSpec}
+                            deleteAllLabels={deleteAllLabels}
                         />
                         <Export
                             audioFileName={'Example Audio File Name'}
@@ -1608,7 +1583,6 @@ function ScalableSpec(
                             binsPerOctave={binsPerOctave}
                             minFreq={minFreq}
                             maxFreq={maxFreq}
-                            passParametersToScalableSpec={passParametersToScalableSpec}
                             passSpecCallMethodToScalableSpec={passSpecCallMethodToScalableSpec}
                             passNfftToScalableSpec={passNfftToScalableSpec}
                             passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}

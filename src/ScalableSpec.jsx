@@ -60,7 +60,8 @@ function ScalableSpec(
                             globalSamplingRate,
                             passGlobalHopLengthToApp,
                             passGlobalNumSpecColumns,
-                            passGlobalSamplingRate
+                            passGlobalSamplingRate,
+                            passMaxHopLengthToApp
                         }
                     )
                 {
@@ -163,6 +164,8 @@ function ScalableSpec(
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
 
+        console.log('frontend hop length ' + globalHopLength)
+
         const requestParameters = {
             audio_id: audioId,
             start_time: currentStartTime,
@@ -175,11 +178,12 @@ function ScalableSpec(
             min_frequency: Number(minFreq),
             max_frequency: Number(maxFreq)
         }
-        console.log(requestParameters)
 
         const response = await axios.post(path, requestParameters)
 
-        console.log(response.data.configurations)
+        console.log( 'backend hop length ' + response.data.configurations.hop_length)
+        console.log('++++')
+
         return response.data
     }
 
@@ -1528,6 +1532,7 @@ function ScalableSpec(
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                             passAudioIdToScalableSpec={passAudioIdToScalableSpec}
                             deleteAllLabels={deleteAllLabels}
+                            passMaxHopLengthToApp={passMaxHopLengthToApp}
                         />
                         <Export
                             audioFileName={'Example Audio File Name'}

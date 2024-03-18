@@ -49,8 +49,8 @@ function App() {
     })
 
     // General
-    const [globalAudioDuration, setGlobalAudioDuration] = useState(0)
-    const [globalClipDuration, setGlobalClipDuration] = useState(0)
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(null)
+    const [globalClipDuration, setGlobalClipDuration] = useState(null)
     const [currentStartTime, setCurrentStartTime] = useState(0)
     const [currentEndTime, setCurrentEndTime] = useState(0)
     const [maxScrollTime, setMaxScrollTime] = useState(0)
@@ -61,22 +61,29 @@ function App() {
     const [activeIndividual, setActiveIndividual] = useState(1);
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
 
-    const [globalHopLength, setGlobalHopLength] = useState(0)
-    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
-    const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
+    const [maxHopLength, setMaxHopLength] = useState(null)
+    const [globalHopLength, setGlobalHopLength] = useState(null)
+    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(null)
+    const [globalSamplingRate, setGlobalSamplingRate] = useState(null)
     /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
     *  2. Adjust the code and methods to work as before
-        2.1 Fix Zoom Out
+        2.1 DONE: Fix Zoom Out
+        2.3 Fix OverviewBar zoom
+        2.4 Fix Multi track
     *  3. DONE: Adjust Upload by URL method
     *  4. Adjust all instances of ScalableSpec
         4.1 DONE: Remove parameters from the dependency array in scalable spec
         4.2 Move configruations to a new window
-        4.3 Remove config state everywhere
+        4.3 DONE: Remove config state everywhere
         4.4 DONE: Fixed curved Line
         4.5 DONE: Delete labels upon new file upload
     *  5. DONE: Perhaps refactor Paramters? To hold n_fft, bin_per_octave etc. in state variables in ScalabeSpec instead of as a single Parameters state
     * */
+
+    function passMaxHopLengthToApp( newMaxHopLength) {
+        setMaxHopLength( newMaxHopLength )
+    }
 
     function passGlobalHopLengthToApp( newHopLength ){
         setGlobalHopLength( newHopLength )
@@ -172,7 +179,10 @@ function App() {
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
     function onZoomIn(){
-        const newHopLength = globalHopLength / 2
+        const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
+
+        //if (newHopLength < 1) return // Prevent zoom in to go below smallest possible Hop length
+
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         setGlobalHopLength( newHopLength )
@@ -183,8 +193,11 @@ function App() {
     }
 
     function onZoomOut(){
-        const newHopLength = globalHopLength * 2
-        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
+        const newHopLength = Math.min(Math.floor(globalHopLength * 2), maxHopLength)
+        const newDuration = Math.min(newHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
+
+        //if (newDuration >= globalAudioDuration ) return // Prevent zoom out to go beyond length of the audio
+
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
         setGlobalHopLength( newHopLength )
@@ -261,7 +274,6 @@ function App() {
                 passActiveIndividualToApp={passActiveIndividualToApp}
                 passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
             />
-                <button onClick={() => console.log(config)}>Show</button>
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'
@@ -294,6 +306,7 @@ function App() {
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
                     passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                     passGlobalSamplingRate={passGlobalSamplingRate}
+                    passMaxHopLengthToApp={passMaxHopLengthToApp}
                 />
             }
             {showTracks.track_2 &&
@@ -321,6 +334,12 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
+                    passGlobalSamplingRate={passGlobalSamplingRate}
                 />
             }
             {showTracks.track_3 &&

@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Individuals from "./Indivduals";
+import GlobalConfig from "./GlobalConfig.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -62,15 +63,15 @@ function App() {
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
 
     const [maxHopLength, setMaxHopLength] = useState(null)
-    const [globalHopLength, setGlobalHopLength] = useState(null)
-    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(null)
-    const [globalSamplingRate, setGlobalSamplingRate] = useState(null)
+    const [globalHopLength, setGlobalHopLength] = useState(0)
+    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
+    const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
     /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
     *  2. Adjust the code and methods to work as before
         2.1 DONE: Fix Zoom Out
         2.3 Fix OverviewBar zoom
-        2.4 Fix Multi track
+        2.4 Fix Multi track (max hop Length). Possible remove longestAudioDuration?
     *  3. DONE: Adjust Upload by URL method
     *  4. Adjust all instances of ScalableSpec
         4.1 DONE: Remove parameters from the dependency array in scalable spec
@@ -180,9 +181,9 @@ function App() {
 
     function onZoomIn(){
         const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
+        setGlobalHopLength( newHopLength )
 
-        //if (newHopLength < 1) return // Prevent zoom in to go below smallest possible Hop length
-
+        /*
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         setGlobalHopLength( newHopLength )
@@ -190,14 +191,16 @@ function App() {
         setMaxScrollTime( newMaxScrollTime )
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
         setCurrentEndTime( currentStartTime + newDuration )
+
+         */
     }
 
     function onZoomOut(){
         const newHopLength = Math.min(Math.floor(globalHopLength * 2), maxHopLength)
+        setGlobalHopLength( newHopLength )
+
+        /*
         const newDuration = Math.min(newHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
-
-        //if (newDuration >= globalAudioDuration ) return // Prevent zoom out to go beyond length of the audio
-
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
         setGlobalHopLength( newHopLength )
@@ -206,6 +209,7 @@ function App() {
         setScrollStep(newDuration * SCROLL_STEP_RATIO)
         setCurrentStartTime( newStartTime )
         setCurrentEndTime( newStartTime + newDuration )
+         */
     }
 
     function leftScroll() {
@@ -226,6 +230,7 @@ function App() {
         )
     }
 
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {
@@ -233,6 +238,23 @@ function App() {
         setGlobalAudioDuration(newGlobalDuration)
     }, [trackDurations])
 
+    // When user changes Hop Length, Num Spec Columns or sampling rate (in other words, zooming or scrolling by changing those values)
+    useEffect( () => {
+        if (!globalHopLength) return
+
+        const newDuration = Math.min(globalHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setScrollStep( newDuration * SCROLL_STEP_RATIO )
+        setCurrentStartTime( newStartTime )
+        setCurrentEndTime( newStartTime + newDuration )
+
+        console.log('calculate new duration in useEffect: ' + newDuration)
+
+    }, [globalHopLength, globalNumSpecColumns, globalSamplingRate])
 
     return (
         <>
@@ -273,6 +295,14 @@ function App() {
                 activeIndividual={activeIndividual}
                 passActiveIndividualToApp={passActiveIndividualToApp}
                 passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
+            />
+            <GlobalConfig
+                globalHopLength={globalHopLength}
+                globalNumSpecColumns={globalNumSpecColumns}
+                globalSamplingRate={globalSamplingRate}
+                passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                passGlobalNumSpecColumns={passGlobalNumSpecColumns}
+                passGlobalSamplingRate={passGlobalSamplingRate}
             />
             {showTracks.track_1 &&
                 <ScalableSpec
@@ -340,6 +370,7 @@ function App() {
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
                     passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                     passGlobalSamplingRate={passGlobalSamplingRate}
+                    passMaxHopLengthToApp={passMaxHopLengthToApp}
                 />
             }
             {showTracks.track_3 &&

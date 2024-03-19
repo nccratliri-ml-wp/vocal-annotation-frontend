@@ -61,7 +61,7 @@ function ScalableSpec(
                             passGlobalHopLengthToApp,
                             passGlobalNumSpecColumns,
                             passGlobalSamplingRate,
-                            passMaxHopLengthToApp
+                            passMaxHopLengthToApp,
                         }
                     )
                 {
@@ -110,12 +110,12 @@ function ScalableSpec(
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
+    // Local Parameters
     const [specCallMethod, setSpecCallMethod] = useState('log-mel')
     const [nfft, setNfft] = useState(512)
     const [binsPerOctave, setBinsPerOctave] = useState(0)
     const [minFreq, setMinFreq] = useState(0)
     const [maxFreq, setMaxFreq] = useState(16000)
-
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -1426,7 +1426,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
-    }, [currentStartTime, globalClipDuration] )
+    }, [currentStartTime, globalClipDuration])
 
 
     // When a new audio file is uploaded:

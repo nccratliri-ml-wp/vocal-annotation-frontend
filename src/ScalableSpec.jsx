@@ -1387,9 +1387,10 @@ function ScalableSpec(
     const callWhisperSeg = async () => {
         setWhisperSegIsLoading(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
-        //For the future, when Whisper Seg Endpoint takes human annotated area as parameter
+
         const requestParameters = {
             audio_id: audioId,
+            // In the future add labels and protected area when Whisper Seg Endpoint takes human annotated area as a parameter
         }
 
         const response = await axios.post(path, requestParameters)

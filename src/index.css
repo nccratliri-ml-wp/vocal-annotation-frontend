@@ -268,16 +268,19 @@ html, body {
 
 /* -------------------------- Parameters -------------------------- */
 
-.parameters{
+.local-parameters-config-panel{
+  //position: fixed;
   display: flex;
   flex-direction: column;
+  background-color: #082536;
+  border: 1px solid white;
 }
 
-.parameters > div > label{
+.local-parameters-config-panel > div > label{
   display: flex;
 }
 
-.parameters > div > label > input{
+.local-parameters-config-panel > div > label > input{
   width: 40px;
 }
 

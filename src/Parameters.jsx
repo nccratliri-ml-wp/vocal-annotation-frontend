@@ -49,6 +49,13 @@ function Parameters(
         submitLocalParameters()
     }
 
+    const excludeNonDigits = (event) => {
+        // Prevent the default behavior if the pressed key is not a digit
+        if (!/\d/.test(event.key)) {
+            event.preventDefault()
+        }
+    }
+
     return (
         <>
             <button onClick={ () => setShowConfigPanel(!showConfigPanel) }>Show ConfigPanel</button>
@@ -76,6 +83,7 @@ function Parameters(
                                 value={nfft}
                                 min={0}
                                 onChange={handleNFftInputChange}
+                                onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
                             />
                         </label>
@@ -99,6 +107,7 @@ function Parameters(
                                 type="number"
                                 value={binsPerOctave}
                                 onChange={handleBinsPerOctaveInputChange}
+                                onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
                             />
                         </label>
@@ -112,6 +121,7 @@ function Parameters(
                             type="number"
                             value={minFreq}
                             onChange={handleMinFreqInputChange}
+                            onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
                         />
                     </label>
@@ -121,6 +131,7 @@ function Parameters(
                             type="number"
                             value={maxFreq}
                             onChange={handleMaxFreqInputChange}
+                            onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
                         />
                     </label>

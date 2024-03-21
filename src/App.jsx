@@ -66,12 +66,18 @@ function App() {
     const [globalHopLength, setGlobalHopLength] = useState(0)
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
     const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
+
+    const [lastValidConfigCombination, setLastValidConfigCombination] = useState({
+        hopLength: globalHopLength,
+        numSpecColumns: globalNumSpecColumns,
+        samplingRate: globalSamplingRate
+    })
     /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
     *  2. Adjust the code and methods to work as before
         2.1 DONE: Fix Zoom Out
         2.3 Fix OverviewBar zoom
-        2.4 Fix Multi track (max hop Length). Possible remove longestAudioDuration?
+        2.4 Fix Multi track (max hop Length). Possible remove longestAudioDuration or max hop length?
     *  3. DONE: Adjust Upload by URL method
     *  4. Adjust all instances of ScalableSpec
         4.1 DONE: Remove parameters from the dependency array in scalable spec
@@ -182,34 +188,12 @@ function App() {
     function onZoomIn(){
         const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
         setGlobalHopLength( newHopLength )
-
-        /*
-        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        setGlobalHopLength( newHopLength )
-        setGlobalClipDuration( newDuration )
-        setMaxScrollTime( newMaxScrollTime )
-        setScrollStep( newDuration * SCROLL_STEP_RATIO )
-        setCurrentEndTime( currentStartTime + newDuration )
-
-         */
     }
 
     function onZoomOut(){
-        const newHopLength = Math.min(Math.floor(globalHopLength * 2), maxHopLength)
-        setGlobalHopLength( newHopLength )
-
-        /*
-        const newDuration = Math.min(newHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
-        setGlobalHopLength( newHopLength )
-        setGlobalClipDuration(newDuration)
-        setMaxScrollTime(newMaxScrollTime)
-        setScrollStep(newDuration * SCROLL_STEP_RATIO)
-        setCurrentStartTime( newStartTime )
-        setCurrentEndTime( newStartTime + newDuration )
-         */
+        const currentMaxHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
+        const newHopLength = globalHopLength * 2 / globalSamplingRate * globalNumSpecColumns > globalAudioDuration? currentMaxHopLength: globalHopLength * 2
+        setGlobalHopLength(newHopLength)
     }
 
     function leftScroll() {
@@ -240,9 +224,23 @@ function App() {
 
     // When user changes Hop Length, Num Spec Columns or sampling rate (in other words, zooming or scrolling by changing those values)
     useEffect( () => {
-        if (!globalHopLength) return
+        if (!globalHopLength || !globalAudioDuration) return
 
-        const newDuration = Math.min(globalHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
+        const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
+        if (newDuration > globalAudioDuration) {
+            setGlobalHopLength(lastValidConfigCombination.hopLength)
+            setGlobalNumSpecColumns(lastValidConfigCombination.numSpecColumns)
+            setGlobalSamplingRate(lastValidConfigCombination.samplingRate)
+            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\ntotalAudioDuration >= HopLength / SamplingRate * GlobalNumSpecColumns')
+            return
+        }
+        setLastValidConfigCombination({
+            hopLength: globalHopLength,
+            numSpecColumns: globalNumSpecColumns,
+            samplingRate: globalSamplingRate
+        })
+
+        //const newDuration = Math.min(globalHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
 
@@ -251,8 +249,6 @@ function App() {
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
         setCurrentStartTime( newStartTime )
         setCurrentEndTime( newStartTime + newDuration )
-
-        console.log('calculate new duration in useEffect: ' + newDuration)
 
     }, [globalHopLength, globalNumSpecColumns, globalSamplingRate])
 

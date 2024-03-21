@@ -22,6 +22,13 @@ function GlobalConfig (
         passGlobalSamplingRate(Number(samplingRateValue))
     }
 
+    const excludeNonDigits = (event) => {
+        // Prevent the default behavior if the pressed key is not a digit
+        if (!/\d/.test(event.key)) {
+            event.preventDefault()
+        }
+    }
+
     // Update the input field values with the values returned from the backend (maybe not necessary?)
     useEffect( () => {
         setHopLengthValue(globalHopLength)
@@ -37,7 +44,8 @@ function GlobalConfig (
                 <input
                     type="number"
                     value={hopLengthValue}
-                    onChange={(event) => setHopLengthValue(event.target.value)}
+                    onKeyPress={excludeNonDigits}
+                    onChange={() => setHopLengthValue(event.target.value)}
                     onFocus={(event) => event.target.select()}
                 />
             </label>
@@ -48,6 +56,7 @@ function GlobalConfig (
                     type="number"
                     value={numSpecColumnsValue}
                     onChange={(event) => setColumnsValue(event.target.value)}
+                    onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
                 />
             </label>
@@ -58,6 +67,7 @@ function GlobalConfig (
                     type="number"
                     value={samplingRateValue}
                     onChange={(event) => setSamplingRateValue(event.target.value)}
+                    onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
                 />
             </label>

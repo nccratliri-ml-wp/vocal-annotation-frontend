@@ -164,8 +164,6 @@ function ScalableSpec(
     const getAudioClipSpec = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-spec'
 
-        console.log('frontend hop length ' + globalHopLength)
-
         const requestParameters = {
             audio_id: audioId,
             start_time: currentStartTime,
@@ -181,8 +179,7 @@ function ScalableSpec(
 
         const response = await axios.post(path, requestParameters)
 
-        console.log( 'backend hop length ' + response.data.configurations.hop_length)
-        console.log('++++')
+        console.log(response.data.configurations)
 
         return response.data
     }

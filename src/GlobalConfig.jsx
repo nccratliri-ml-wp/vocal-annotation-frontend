@@ -2,6 +2,9 @@ import React, {useState, useEffect} from "react";
 
 function GlobalConfig (
             {
+                globalAudioDuration,
+                currentStartTime,
+                updateClipDurationAndTimes,
                 globalHopLength,
                 globalNumSpecColumns,
                 globalSamplingRate,
@@ -12,14 +15,40 @@ function GlobalConfig (
         )
     {
 
-    const [hopLengthValue, setHopLengthValue] = useState(globalHopLength)
-    const [numSpecColumnsValue, setColumnsValue] = useState(globalNumSpecColumns)
-    const [samplingRateValue, setSamplingRateValue] = useState(globalSamplingRate)
+    const [hopLengthInputValue, setHopLengthInputValue] = useState(globalHopLength)
+    const [numSpecColumnsInputValue, setColumnsInputValue] = useState(globalNumSpecColumns)
+    const [samplingRateInputValue, setSamplingRateInputValue] = useState(globalSamplingRate)
+
+    const [lastValidConfigCombination, setLastValidConfigCombination] = useState({
+        hopLength: globalHopLength,
+        numSpecColumns: globalNumSpecColumns,
+        samplingRate: globalSamplingRate
+    })
 
     function submitGlobalParameters(){
-        passGlobalHopLengthToApp(Number(hopLengthValue))
-        passGlobalNumSpecColumns(Number(numSpecColumnsValue))
-        passGlobalSamplingRate(Number(samplingRateValue))
+        // Input field values are strings, so convert them to numbers
+        const newHopLength = Number(hopLengthInputValue)
+        const newNumSpecColumns = Number(numSpecColumnsInputValue)
+        const newSamplingRate = Number(samplingRateInputValue)
+
+        // Check if value combination is valid according to formula
+        const newDuration = newHopLength / newSamplingRate * newNumSpecColumns
+        if (newDuration > globalAudioDuration) {
+            // Replace invalid values with last valid config
+            setHopLengthInputValue(lastValidConfigCombination.hopLength)
+            setColumnsInputValue(lastValidConfigCombination.numSpecColumns)
+            setSamplingRateInputValue(lastValidConfigCombination.samplingRate)
+            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
+            return
+        }
+
+        // If the values combination is valid, update everything
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newEndTime = newStartTime + newDuration
+        updateClipDurationAndTimes( newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime )
+        passGlobalNumSpecColumns(newNumSpecColumns)
+        passGlobalSamplingRate(newSamplingRate)
     }
 
     const excludeNonDigits = (event) => {
@@ -31,10 +60,19 @@ function GlobalConfig (
 
     // Update the input field values with the values returned from the backend (maybe not necessary?)
     useEffect( () => {
-        setHopLengthValue(globalHopLength)
-        setColumnsValue(globalNumSpecColumns)
-        setSamplingRateValue(globalSamplingRate)
+        setHopLengthInputValue(globalHopLength)
+        setColumnsInputValue(globalNumSpecColumns)
+        setSamplingRateInputValue(globalSamplingRate)
+
+        // Save last valid config
+        setLastValidConfigCombination({
+            hopLength: globalHopLength,
+            numSpecColumns: globalNumSpecColumns,
+            samplingRate: globalSamplingRate
+        })
+
     }, [globalHopLength, globalNumSpecColumns, globalSamplingRate])
+
 
     return (
         <>
@@ -43,9 +81,9 @@ function GlobalConfig (
                 Hop Length
                 <input
                     type="number"
-                    value={hopLengthValue}
+                    value={hopLengthInputValue}
                     onKeyPress={excludeNonDigits}
-                    onChange={() => setHopLengthValue(event.target.value)}
+                    onChange={() => setHopLengthInputValue(event.target.value)}
                     onFocus={(event) => event.target.select()}
                 />
             </label>
@@ -54,8 +92,8 @@ function GlobalConfig (
                 Num Spec Columns
                 <input
                     type="number"
-                    value={numSpecColumnsValue}
-                    onChange={(event) => setColumnsValue(event.target.value)}
+                    value={numSpecColumnsInputValue}
+                    onChange={(event) => setColumnsInputValue(event.target.value)}
                     onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
                 />
@@ -65,8 +103,8 @@ function GlobalConfig (
                 Sampling Rate
                 <input
                     type="number"
-                    value={samplingRateValue}
-                    onChange={(event) => setSamplingRateValue(event.target.value)}
+                    value={samplingRateInputValue}
+                    onChange={(event) => setSamplingRateInputValue(event.target.value)}
                     onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
                 />

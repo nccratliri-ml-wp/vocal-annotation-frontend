@@ -62,6 +62,7 @@ function ScalableSpec(
                             passGlobalNumSpecColumns,
                             passGlobalSamplingRate,
                             passMaxHopLengthToApp,
+                            updateClipDurationAndTimes
                         }
                     )
                 {
@@ -179,7 +180,7 @@ function ScalableSpec(
 
         const response = await axios.post(path, requestParameters)
 
-        console.log(response.data.configurations)
+        //console.log(response.data.configurations)
 
         return response.data
     }
@@ -1020,7 +1021,7 @@ function ScalableSpec(
         overviewRef.current.removeEventListener('mousemove', dragViewport)
         overviewRef.current.removeEventListener('mouseleave', handleMouseUpOverview)
 
-        // Set new Viewport (Start & Endframe)
+        // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar.
         if (widthBetween_xStartTime_xClicked){
             const newDuration = newViewportEndFrame - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
@@ -1029,22 +1030,28 @@ function ScalableSpec(
             passClipDurationToApp( newDuration )
             passMaxScrollTimeToApp( newMaxScrollTime )
             passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
-        // Set new Start Frame
+        // Set new Start Frame only
         } else if (newViewportStartFrame){
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-            passCurrentStartTimeToApp(newViewportStartFrame)
-            passClipDurationToApp( newDuration )
-            passMaxScrollTimeToApp( newMaxScrollTime )
-            passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
-        // Set new End frame
+            const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
+            //passGlobalHopLengthToApp(newHopLength)
+            updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newViewportStartFrame, currentEndTime)
+            //passCurrentStartTimeToApp(newViewportStartFrame) //This makes CurrentStartTime change twice briefly and causing uncessary rerender. fix this
+            //passClipDurationToApp( newDuration )
+            //passMaxScrollTimeToApp( newMaxScrollTime )
+            //passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
+        // Set new End frame only
         } else if (newViewportEndFrame){
             const newDuration = newViewportEndFrame - currentStartTime
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-            passCurrentEndTimeToApp( newViewportEndFrame )
-            passClipDurationToApp( newDuration )
-            passMaxScrollTimeToApp( newMaxScrollTime )
-            passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
+            const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
+            //passGlobalHopLengthToApp(newHopLength)
+            updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, currentStartTime, newViewportEndFrame)
+            //passCurrentEndTimeToApp( newViewportEndFrame )
+            //passClipDurationToApp( newDuration )
+            //passMaxScrollTimeToApp( newMaxScrollTime )
+            //passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
         }
 
         newViewportStartFrame = null
@@ -1415,6 +1422,7 @@ function ScalableSpec(
     }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals] )
 
     // When user zoomed,or scrolled
+
     useEffect( () => {
             if (!globalClipDuration || !response) return
 
@@ -1424,6 +1432,7 @@ function ScalableSpec(
             }
 
             getSpecAndAudioArray()
+
     }, [currentStartTime, globalClipDuration])
 
 

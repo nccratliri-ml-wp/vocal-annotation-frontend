@@ -67,11 +67,7 @@ function App() {
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
     const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
 
-    const [lastValidConfigCombination, setLastValidConfigCombination] = useState({
-        hopLength: globalHopLength,
-        numSpecColumns: globalNumSpecColumns,
-        samplingRate: globalSamplingRate
-    })
+
     /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
     *  2. Adjust the code and methods to work as before
@@ -187,13 +183,23 @@ function App() {
 
     function onZoomIn(){
         const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
-        setGlobalHopLength( newHopLength )
+        //setGlobalHopLength( newHopLength )
+        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newEndTime = newStartTime + newDuration
+        updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
     }
 
     function onZoomOut(){
         const currentMaxHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
-        const newHopLength = globalHopLength * 2 / globalSamplingRate * globalNumSpecColumns > globalAudioDuration? currentMaxHopLength: globalHopLength * 2
-        setGlobalHopLength(newHopLength)
+        const newHopLength = globalHopLength * 2 / globalSamplingRate * globalNumSpecColumns > globalAudioDuration? currentMaxHopLength : globalHopLength * 2
+        //setGlobalHopLength(newHopLength)
+        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
+        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newEndTime = newStartTime + newDuration
+        updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime , newEndTime)
     }
 
     function leftScroll() {
@@ -214,6 +220,31 @@ function App() {
         )
     }
 
+    function updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime){
+
+        /*
+        if (newDuration > globalAudioDuration) {
+            setGlobalHopLength(lastValidConfigCombination.hopLength)
+            setGlobalNumSpecColumns(lastValidConfigCombination.numSpecColumns)
+            setGlobalSamplingRate(lastValidConfigCombination.samplingRate)
+            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
+            return
+        }
+        setLastValidConfigCombination({
+            hopLength: newHopLength,
+            numSpecColumns: globalNumSpecColumns,
+            samplingRate: globalSamplingRate
+        })*/
+
+        setGlobalHopLength(newHopLength)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setCurrentStartTime( newStartTime )
+        //setCurrentEndTime( newStartTime + newDuration )
+        setCurrentEndTime(newEndTime)
+        setScrollStep( newDuration * SCROLL_STEP_RATIO )
+    }
+
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
@@ -223,6 +254,7 @@ function App() {
     }, [trackDurations])
 
     // When user changes Hop Length, Num Spec Columns or sampling rate (in other words, zooming or scrolling by changing those values)
+    /*
     useEffect( () => {
         if (!globalHopLength || !globalAudioDuration) return
 
@@ -231,7 +263,7 @@ function App() {
             setGlobalHopLength(lastValidConfigCombination.hopLength)
             setGlobalNumSpecColumns(lastValidConfigCombination.numSpecColumns)
             setGlobalSamplingRate(lastValidConfigCombination.samplingRate)
-            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\ntotalAudioDuration >= HopLength / SamplingRate * GlobalNumSpecColumns')
+            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
             return
         }
         setLastValidConfigCombination({
@@ -240,17 +272,20 @@ function App() {
             samplingRate: globalSamplingRate
         })
 
-        //const newDuration = Math.min(globalHopLength / globalSamplingRate * globalNumSpecColumns, globalAudioDuration)
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        //const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newStartTime = currentEndTime - newDuration
+        console.log('newStartTime ' + newStartTime)
 
         setGlobalClipDuration(newDuration)
+
         setMaxScrollTime(newMaxScrollTime)
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
         setCurrentStartTime( newStartTime )
         setCurrentEndTime( newStartTime + newDuration )
 
     }, [globalHopLength, globalNumSpecColumns, globalSamplingRate])
+     */
 
     return (
         <>
@@ -293,6 +328,9 @@ function App() {
                 passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
             />
             <GlobalConfig
+                globalAudioDuration={globalAudioDuration}
+                currentStartTime={currentStartTime}
+                updateClipDurationAndTimes={updateClipDurationAndTimes}
                 globalHopLength={globalHopLength}
                 globalNumSpecColumns={globalNumSpecColumns}
                 globalSamplingRate={globalSamplingRate}
@@ -333,6 +371,7 @@ function App() {
                     passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                     passGlobalSamplingRate={passGlobalSamplingRate}
                     passMaxHopLengthToApp={passMaxHopLengthToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
                 />
             }
             {showTracks.track_2 &&
@@ -367,6 +406,7 @@ function App() {
                     passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                     passGlobalSamplingRate={passGlobalSamplingRate}
                     passMaxHopLengthToApp={passMaxHopLengthToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
                 />
             }
             {showTracks.track_3 &&

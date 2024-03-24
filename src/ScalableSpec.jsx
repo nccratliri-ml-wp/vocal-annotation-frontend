@@ -1035,23 +1035,13 @@ function ScalableSpec(
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
-            //passGlobalHopLengthToApp(newHopLength)
             updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newViewportStartFrame, currentEndTime)
-            //passCurrentStartTimeToApp(newViewportStartFrame) //This makes CurrentStartTime change twice briefly and causing uncessary rerender. fix this
-            //passClipDurationToApp( newDuration )
-            //passMaxScrollTimeToApp( newMaxScrollTime )
-            //passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
         // Set new End frame only
         } else if (newViewportEndFrame){
             const newDuration = newViewportEndFrame - currentStartTime
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
-            //passGlobalHopLengthToApp(newHopLength)
             updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, currentStartTime, newViewportEndFrame)
-            //passCurrentEndTimeToApp( newViewportEndFrame )
-            //passClipDurationToApp( newDuration )
-            //passMaxScrollTimeToApp( newMaxScrollTime )
-            //passScrollStepToApp(newDuration * SCROLL_STEP_RATIO);
         }
 
         newViewportStartFrame = null
@@ -1433,7 +1423,7 @@ function ScalableSpec(
 
             getSpecAndAudioArray()
 
-    }, [currentStartTime, globalClipDuration])
+    }, [currentStartTime, globalClipDuration, audioId, globalHopLength])
 
 
     // When a new audio file is uploaded:
@@ -1463,7 +1453,12 @@ function ScalableSpec(
 
     // When globalAudioDuration is updated in the App component
     useEffect( () => {
-        if (!globalAudioDuration || !response) return
+        if (!globalAudioDuration || !response ) return
+
+        console.log('triggereing this use effect ' + audioId)
+
+        //const newHopLength = Math.max(Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns ), globalHopLength)
+        //passGlobalHopLengthToApp(newHopLength)
 
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
@@ -1536,6 +1531,10 @@ function ScalableSpec(
                             passGlobalHopLengthToApp={passGlobalHopLengthToApp}
                             passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                             passGlobalSamplingRate={passGlobalSamplingRate}
+                            passSpecCallMethodToScalableSpec={passSpecCallMethodToScalableSpec}
+                            passNfftToScalableSpec={passNfftToScalableSpec}
+                            passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
+                            passMinFreqToScalableSpec={passMinFreqToScalableSpec}
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                             passAudioIdToScalableSpec={passAudioIdToScalableSpec}
                             deleteAllLabels={deleteAllLabels}

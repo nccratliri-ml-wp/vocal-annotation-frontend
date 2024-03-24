@@ -10,7 +10,6 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
     const [menuItems, setMenuItems] = useState(
         [
             <MenuItem key={nanoid()} value={1}>Individual 1</MenuItem>,
-            <MenuItem key={nanoid()} value={2}>Individual 2</MenuItem>,
         ])
 
     const handleChange = (event) => {

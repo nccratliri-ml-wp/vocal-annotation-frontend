@@ -8,7 +8,6 @@ function GlobalConfig (
                 globalHopLength,
                 globalNumSpecColumns,
                 globalSamplingRate,
-                passGlobalHopLengthToApp,
                 passGlobalNumSpecColumns,
                 passGlobalSamplingRate,
             }

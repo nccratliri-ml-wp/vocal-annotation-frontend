@@ -60,7 +60,7 @@ function App() {
     const [activeLabel, setActiveLabel] = useState(null)
 
     const [activeIndividual, setActiveIndividual] = useState(1);
-    const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
+    const [numberOfIndividuals, setNumberOfIndividuals] = useState(1)
 
     const [maxHopLength, setMaxHopLength] = useState(null)
     const [globalHopLength, setGlobalHopLength] = useState(0)
@@ -72,7 +72,7 @@ function App() {
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
     *  2. Adjust the code and methods to work as before
         2.1 DONE: Fix Zoom Out
-        2.3 Fix OverviewBar zoom
+        2.3 DONE: Fix OverviewBar zoom
         2.4 Fix Multi track (max hop Length). Possible remove longestAudioDuration or max hop length?
     *  3. DONE: Adjust Upload by URL method
     *  4. Adjust all instances of ScalableSpec
@@ -146,6 +146,7 @@ function App() {
         setOutdatedClustername( clustername )
     }
 
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
@@ -183,7 +184,6 @@ function App() {
 
     function onZoomIn(){
         const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
-        //setGlobalHopLength( newHopLength )
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
@@ -194,7 +194,6 @@ function App() {
     function onZoomOut(){
         const currentMaxHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
         const newHopLength = globalHopLength * 2 / globalSamplingRate * globalNumSpecColumns > globalAudioDuration? currentMaxHopLength : globalHopLength * 2
-        //setGlobalHopLength(newHopLength)
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
@@ -221,26 +220,10 @@ function App() {
     }
 
     function updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime){
-
-        /*
-        if (newDuration > globalAudioDuration) {
-            setGlobalHopLength(lastValidConfigCombination.hopLength)
-            setGlobalNumSpecColumns(lastValidConfigCombination.numSpecColumns)
-            setGlobalSamplingRate(lastValidConfigCombination.samplingRate)
-            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
-            return
-        }
-        setLastValidConfigCombination({
-            hopLength: newHopLength,
-            numSpecColumns: globalNumSpecColumns,
-            samplingRate: globalSamplingRate
-        })*/
-
         setGlobalHopLength(newHopLength)
         setGlobalClipDuration(newDuration)
         setMaxScrollTime(newMaxScrollTime)
         setCurrentStartTime( newStartTime )
-        //setCurrentEndTime( newStartTime + newDuration )
         setCurrentEndTime(newEndTime)
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
     }
@@ -249,43 +232,13 @@ function App() {
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {
-        const newGlobalDuration = Math.max(...trackDurations) === -Infinity? 0 : Math.max(...trackDurations)
+        if (trackDurations.length === 0) return
+
+        const newGlobalDuration = Math.max(...trackDurations) === -Infinity ? 0 : Math.max(...trackDurations)
+        const newHopLength = Math.max(Math.floor( (newGlobalDuration * globalSamplingRate) / globalNumSpecColumns ), globalHopLength)
         setGlobalAudioDuration(newGlobalDuration)
+        setGlobalHopLength(newHopLength)
     }, [trackDurations])
-
-    // When user changes Hop Length, Num Spec Columns or sampling rate (in other words, zooming or scrolling by changing those values)
-    /*
-    useEffect( () => {
-        if (!globalHopLength || !globalAudioDuration) return
-
-        const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
-        if (newDuration > globalAudioDuration) {
-            setGlobalHopLength(lastValidConfigCombination.hopLength)
-            setGlobalNumSpecColumns(lastValidConfigCombination.numSpecColumns)
-            setGlobalSamplingRate(lastValidConfigCombination.samplingRate)
-            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
-            return
-        }
-        setLastValidConfigCombination({
-            hopLength: globalHopLength,
-            numSpecColumns: globalNumSpecColumns,
-            samplingRate: globalSamplingRate
-        })
-
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        //const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
-        const newStartTime = currentEndTime - newDuration
-        console.log('newStartTime ' + newStartTime)
-
-        setGlobalClipDuration(newDuration)
-
-        setMaxScrollTime(newMaxScrollTime)
-        setScrollStep( newDuration * SCROLL_STEP_RATIO )
-        setCurrentStartTime( newStartTime )
-        setCurrentEndTime( newStartTime + newDuration )
-
-    }, [globalHopLength, globalNumSpecColumns, globalSamplingRate])
-     */
 
     return (
         <>
@@ -294,6 +247,7 @@ function App() {
                 clusternameButtons={clusternameButtons}
                 passOutdatedClusterNamesToApp={passOutdatedClusterNamesToApp}
             />
+            {trackDurations}
             <div className='controls-container'>
                 <button
                     id='left-scroll-btn'
@@ -334,7 +288,6 @@ function App() {
                 globalHopLength={globalHopLength}
                 globalNumSpecColumns={globalNumSpecColumns}
                 globalSamplingRate={globalSamplingRate}
-                passGlobalHopLengthToApp={passGlobalHopLengthToApp}
                 passGlobalNumSpecColumns={passGlobalNumSpecColumns}
                 passGlobalSamplingRate={passGlobalSamplingRate}
             />

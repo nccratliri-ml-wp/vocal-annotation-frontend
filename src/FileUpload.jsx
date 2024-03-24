@@ -12,6 +12,10 @@ function FileUpload(
                             passGlobalHopLengthToApp,
                             passGlobalNumSpecColumns,
                             passGlobalSamplingRate,
+                            passSpecCallMethodToScalableSpec,
+                            passNfftToScalableSpec,
+                            passBinsPerOctaveToScalableSpec,
+                            passMinFreqToScalableSpec,
                             passMaxFreqToScalableSpec,
                             passAudioIdToScalableSpec,
                             deleteAllLabels,
@@ -57,6 +61,10 @@ function FileUpload(
         passGlobalHopLengthToApp(response.data.configurations.hop_length)
         passGlobalNumSpecColumns(response.data.configurations.num_spec_columns)
         passGlobalSamplingRate(response.data.configurations.sampling_rate)
+        passSpecCallMethodToScalableSpec(response.data.configurations.spec_cal_method)
+        passNfftToScalableSpec(response.data.configurations.n_fft)
+        passBinsPerOctaveToScalableSpec(response.data.configurations.bins_per_octave)
+        passMinFreqToScalableSpec(response.data.configurations.min_frequency)
         passMaxFreqToScalableSpec(response.data.configurations.max_frequency)
         passAudioIdToScalableSpec(response.data.channels[0].audio_id)
         deleteAllLabels()

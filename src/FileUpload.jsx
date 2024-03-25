@@ -17,9 +17,6 @@ function FileUpload(
                             passBinsPerOctaveToScalableSpec,
                             passMinFreqToScalableSpec,
                             passMaxFreqToScalableSpec,
-                            passAudioIdToScalableSpec,
-                            deleteAllLabels,
-                            passMaxHopLengthToApp
                         }
                     )
                 {
@@ -57,7 +54,6 @@ function FileUpload(
         passResponseToScalableSpec( response.data.channels[0] )
         deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
         passTrackDurationToApp( response.data.channels[0].audio_duration )
-        passMaxHopLengthToApp(response.data.configurations.hop_length) // this needs to be refactored so when multiple tracks exist it always updates to the larges hop_length value
         passGlobalHopLengthToApp(response.data.configurations.hop_length)
         passGlobalNumSpecColumns(response.data.configurations.num_spec_columns)
         passGlobalSamplingRate(response.data.configurations.sampling_rate)
@@ -66,8 +62,6 @@ function FileUpload(
         passBinsPerOctaveToScalableSpec(response.data.configurations.bins_per_octave)
         passMinFreqToScalableSpec(response.data.configurations.min_frequency)
         passMaxFreqToScalableSpec(response.data.configurations.max_frequency)
-        passAudioIdToScalableSpec(response.data.channels[0].audio_id)
-        deleteAllLabels()
     }
 
     const handleUploadError = (error) => {

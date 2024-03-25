@@ -62,7 +62,6 @@ function App() {
     const [activeIndividual, setActiveIndividual] = useState(1);
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(1)
 
-    const [maxHopLength, setMaxHopLength] = useState(null)
     const [globalHopLength, setGlobalHopLength] = useState(0)
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
     const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
@@ -70,10 +69,10 @@ function App() {
 
     /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
        1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
-    *  2. Adjust the code and methods to work as before
+    *  2. DONE: Adjust the code and methods to work as before
         2.1 DONE: Fix Zoom Out
         2.3 DONE: Fix OverviewBar zoom
-        2.4 Fix Multi track (max hop Length). Possible remove longestAudioDuration or max hop length?
+        2.4 DONE: Fix Multi track (max hop Length). Possible remove longestAudioDuration or max hop length?
     *  3. DONE: Adjust Upload by URL method
     *  4. Adjust all instances of ScalableSpec
         4.1 DONE: Remove parameters from the dependency array in scalable spec
@@ -235,19 +234,24 @@ function App() {
         if (trackDurations.length === 0) return
 
         const newGlobalDuration = Math.max(...trackDurations) === -Infinity ? 0 : Math.max(...trackDurations)
-        const newHopLength = Math.max(Math.floor( (newGlobalDuration * globalSamplingRate) / globalNumSpecColumns ), globalHopLength)
+        const newHopLength = Math.floor( (newGlobalDuration * globalSamplingRate) / globalNumSpecColumns )
         setGlobalAudioDuration(newGlobalDuration)
         setGlobalHopLength(newHopLength)
+
     }, [trackDurations])
 
     return (
         <>
+            <Individuals
+                activeIndividual={activeIndividual}
+                passActiveIndividualToApp={passActiveIndividualToApp}
+                passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
+            />
             <Clusternames
                 passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 clusternameButtons={clusternameButtons}
                 passOutdatedClusterNamesToApp={passOutdatedClusterNamesToApp}
             />
-            {trackDurations}
             <div className='controls-container'>
                 <button
                     id='left-scroll-btn'
@@ -276,11 +280,6 @@ function App() {
                 id='all-tracks'
                 onMouseLeave={ () => setActiveLabel(null)}
             >
-            <Individuals
-                activeIndividual={activeIndividual}
-                passActiveIndividualToApp={passActiveIndividualToApp}
-                passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
-            />
             <GlobalConfig
                 globalAudioDuration={globalAudioDuration}
                 currentStartTime={currentStartTime}
@@ -387,6 +386,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
+                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passMaxHopLengthToApp={passMaxHopLengthToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
                 />
             }
             {showTracks.track_4 &&

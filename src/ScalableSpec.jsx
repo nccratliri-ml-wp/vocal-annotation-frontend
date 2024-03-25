@@ -907,10 +907,6 @@ function ScalableSpec(
         setLabels(filteredLabels)
     }
 
-    const deleteAllLabels = () => {
-        setLabels([])
-    }
-
     const flipOnsetOffset = (label) => {
         const newOnset = label.offset
         const newOffset = label.onset
@@ -1412,7 +1408,6 @@ function ScalableSpec(
     }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals] )
 
     // When user zoomed,or scrolled
-
     useEffect( () => {
             if (!globalClipDuration || !response) return
 
@@ -1423,17 +1418,15 @@ function ScalableSpec(
 
             getSpecAndAudioArray()
 
-    }, [currentStartTime, globalClipDuration, audioId, globalHopLength])
+    }, [currentStartTime, globalClipDuration, audioId])
 
 
     // When a new audio file is uploaded:
-                    /*
     useEffect( () => {
             if (!response) return
 
             setAudioId(response.audio_id)
             setLabels([])
-            //playheadRef.current.timeframe = 0
 
     }, [response])
 
@@ -1454,11 +1447,6 @@ function ScalableSpec(
     // When globalAudioDuration is updated in the App component
     useEffect( () => {
         if (!globalAudioDuration || !response ) return
-
-        console.log('triggereing this use effect ' + audioId)
-
-        //const newHopLength = Math.max(Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns ), globalHopLength)
-        //passGlobalHopLengthToApp(newHopLength)
 
         passClipDurationToApp(globalAudioDuration)
         passCurrentStartTimeToApp(0)
@@ -1537,8 +1525,6 @@ function ScalableSpec(
                             passMinFreqToScalableSpec={passMinFreqToScalableSpec}
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                             passAudioIdToScalableSpec={passAudioIdToScalableSpec}
-                            deleteAllLabels={deleteAllLabels}
-                            passMaxHopLengthToApp={passMaxHopLengthToApp}
                         />
                         <Export
                             audioFileName={'Example Audio File Name'}

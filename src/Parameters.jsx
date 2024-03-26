@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
 function Parameters(
         {
-            specCallMethod,
+            specCalMethod,
             nfft,
             binsPerOctave,
             minFreq,
             maxFreq,
-            passSpecCallMethodToScalableSpec,
+            passSpecCalMethodToScalableSpec,
             passNfftToScalableSpec,
             passBinsPerOctaveToScalableSpec,
             passMinFreqToScalableSpec,
@@ -25,7 +25,7 @@ function Parameters(
         setShowNFftInput(method === 'log-mel')
         setShowBinsPerOctaveInput(method === 'constant-q')
 
-        passSpecCallMethodToScalableSpec( method )
+        passSpecCalMethodToScalableSpec( method )
     }
 
     const handleNFftInputChange = (event) => {
@@ -70,7 +70,7 @@ function Parameters(
                         <input
                             type="radio"
                             value="log-mel"
-                            checked={specCallMethod === 'log-mel'}
+                            checked={specCalMethod === 'log-mel'}
                             onChange={() => handleRadioChange('log-mel')}
                         />
                         Log-Mel
@@ -95,7 +95,7 @@ function Parameters(
                         <input
                             type="radio"
                             value="constant-q"
-                            checked={specCallMethod === 'constant-q'}
+                            checked={specCalMethod === 'constant-q'}
                             onChange={() => handleRadioChange('constant-q')}
                         />
                         Constant-Q

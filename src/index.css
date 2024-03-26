@@ -18,16 +18,21 @@
   height: 100%;
 }
 
-/* Hide scrollbar for Chrome, Edge, Safari and Opera */
+/* Hide vertical scrollbar for Chrome, Edge, Safari and Opera */
 body::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
 
-/* Hide scrollbar for IE and Firefox */
-.body {
-  -ms-overflow-style: none;  /* IE */
-  scrollbar-width: none;  /* Firefox */
+/* Hide vertical scrollbar for IE */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Hide vertical scrollbar for Firefox */
+html, body {
+  overflow-y: scroll;
+  scrollbar-width: none;
 }
 
 html, body {
@@ -197,7 +202,7 @@ html, body {
 
 #clusternames-container{
   position: fixed;
-  top: 20px;
+  top: 10px;
   left: 150px;
   z-index: 2;
   display: flex;
@@ -249,6 +254,13 @@ html, body {
   cursor: pointer;
 }
 
+.clustername-btn:has(div#PROTECTED_AREA){
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+
 /* -------------------------- Colorwheel -------------------------- */
 .colorwheel{
   position: fixed;
@@ -257,12 +269,30 @@ html, body {
 
 /* -------------------------- Individuals -------------------------- */
 
-#individual-dropdown-menu{
+.individuals-container{
   position: fixed;
-  top: 20px;
+  top: 10px;
   z-index: 1;
-  display: flex;
   background-color: #082536;
+  max-height: 200px;
+}
+
+.individuals-menu{
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.individual-menu-item{
+  font-size: 12px !important;
+  padding: 5px 20px 5px 16px !important;
+}
+
+.individual-menu-item[isactive='true']{
+  background-color: #86a9ce !important;
+}
+
+.add-individual-btn{
+  background-color: #082536 !important;;
 }
 
 

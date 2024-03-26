@@ -12,11 +12,12 @@ function FileUpload(
                             passGlobalHopLengthToApp,
                             passGlobalNumSpecColumns,
                             passGlobalSamplingRate,
-                            passSpecCallMethodToScalableSpec,
+                            passSpecCalMethodToScalableSpec,
                             passNfftToScalableSpec,
                             passBinsPerOctaveToScalableSpec,
                             passMinFreqToScalableSpec,
                             passMaxFreqToScalableSpec,
+                            passDefaultConfigToApp
                         }
                     )
                 {
@@ -57,11 +58,16 @@ function FileUpload(
         passGlobalHopLengthToApp(response.data.configurations.hop_length)
         passGlobalNumSpecColumns(response.data.configurations.num_spec_columns)
         passGlobalSamplingRate(response.data.configurations.sampling_rate)
-        passSpecCallMethodToScalableSpec(response.data.configurations.spec_cal_method)
+        passSpecCalMethodToScalableSpec(response.data.configurations.spec_cal_method)
         passNfftToScalableSpec(response.data.configurations.n_fft)
         passBinsPerOctaveToScalableSpec(response.data.configurations.bins_per_octave)
         passMinFreqToScalableSpec(response.data.configurations.min_frequency)
         passMaxFreqToScalableSpec(response.data.configurations.max_frequency)
+        passDefaultConfigToApp({
+            hop_length: response.data.configurations.hop_length,
+            num_spec_columns: response.data.configurations.num_spec_columns,
+            sampling_rate: response.data.configurations.sampling_rate
+        })
     }
 
     const handleUploadError = (error) => {
@@ -74,14 +80,22 @@ function FileUpload(
     useEffect( () => {
         let ignore = false
 
-        const queryParams = new URLSearchParams(location.search);
-        const audioUrlParam = queryParams.get('audio_url');
+        const queryParams = new URLSearchParams(location.search)
+        const audioUrl = queryParams.get('audio_url') ? decodeURIComponent(queryParams.get('audio_url')) : null
+        const hopLength = queryParams.get('hop_length') ? Number(queryParams.get('hop_length')) : null
+        const numSpecColumns = queryParams.get('num_spec_columns') ? Number(queryParams.get('num_spec_columns')) : null
+        const samplingRate = queryParams.get('sampling_rate') ? Number(queryParams.get('sampling_rate')) : null
+        //const specCalMethod = queryParams.get('spec_cal_method')
 
-        const uploadFileByURL = async (audioURL) => {
+        const uploadFileByURL = async () => {
             passSpectrogramIsLoadingToScalableSpec( true )
             const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
             const requestParameters = {
-                audio_url: audioURL
+                audio_url: audioUrl,
+                hop_length: hopLength,
+                num_spec_columns: numSpecColumns,
+                sampling_rate: samplingRate,
+                //spec_cal_method: specCalMethod,
             }
 
             try {
@@ -94,9 +108,8 @@ function FileUpload(
             }
         }
 
-        if (audioUrlParam) {
-            const decodedURL = decodeURIComponent(audioUrlParam)
-            uploadFileByURL(decodedURL)
+        if (audioUrl) {
+            uploadFileByURL()
         }
 
         return () => {

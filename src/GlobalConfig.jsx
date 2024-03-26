@@ -10,6 +10,7 @@ function GlobalConfig (
                 globalSamplingRate,
                 passGlobalNumSpecColumns,
                 passGlobalSamplingRate,
+                defaultConfig
             }
         )
     {
@@ -48,6 +49,16 @@ function GlobalConfig (
         updateClipDurationAndTimes( newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime )
         passGlobalNumSpecColumns(newNumSpecColumns)
         passGlobalSamplingRate(newSamplingRate)
+    }
+
+    const restoreDefaultValues = () => {
+        if (!defaultConfig) return
+
+        const { hop_length: defaultHopLength, num_spec_columns: defaultNumSpecColumns, sampling_rate: defaultSamplingRate } = defaultConfig
+
+        setHopLengthInputValue(defaultHopLength)
+        setColumnsInputValue(defaultNumSpecColumns)
+        setSamplingRateInputValue(defaultSamplingRate)
     }
 
     const excludeNonDigits = (event) => {
@@ -110,6 +121,7 @@ function GlobalConfig (
             </label>
 
             <button onClick={submitGlobalParameters}>Submit All</button>
+            <button onClick={restoreDefaultValues}>Restore Default Values</button>
         </>
     )
 }

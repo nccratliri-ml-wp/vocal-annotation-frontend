@@ -22,9 +22,6 @@ function Parameters(
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
     const handleRadioChange = (method) => {
-        setShowNFftInput(method === 'log-mel')
-        setShowBinsPerOctaveInput(method === 'constant-q')
-
         passSpecCalMethodToScalableSpec( method )
     }
 
@@ -55,6 +52,25 @@ function Parameters(
             event.preventDefault()
         }
     }
+
+
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
+
+    useEffect( () => {
+        // Conditionally render the nfft or binsPerOctave Input field according to the selected specCalMethod
+        if (!specCalMethod) return
+
+        if (specCalMethod === 'log-mel') {
+            setShowNFftInput(true)
+            setShowBinsPerOctaveInput(false)
+        }
+
+        if (specCalMethod === 'constant-q'){
+            setShowNFftInput(false)
+            setShowBinsPerOctaveInput(true)
+        }
+
+    }, [specCalMethod])
 
     return (
         <>

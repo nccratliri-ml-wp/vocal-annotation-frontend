@@ -4,14 +4,19 @@ import {useLocation} from "react-router-dom";
 
 function FileUpload(
                         {
+                            specCalMethod,
+                            nfft,
+                            binsPerOctave,
+                            minFreq,
+                            maxFreq,
                             passResponseToScalableSpec,
                             passSpectrogramIsLoadingToScalableSpec,
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
                             previousAudioDuration,
                             passGlobalHopLengthToApp,
-                            passGlobalNumSpecColumns,
-                            passGlobalSamplingRate,
+                            passGlobalNumSpecColumnsToApp,
+                            passGlobalSamplingRateToApp,
                             passSpecCalMethodToScalableSpec,
                             passNfftToScalableSpec,
                             passBinsPerOctaveToScalableSpec,
@@ -38,6 +43,15 @@ function FileUpload(
         if (!file) return
         const formData = new FormData();
         formData.append('newAudioFile', file)
+        /*
+        formData.append('hop_length', globalHopLength)
+        formData.append('num_spec_columns', globalNumSpecColumns)
+        formData.append('sampling_rate', globalSamplingRate)*/
+        formData.append('spec_cal_method', specCalMethod)
+        formData.append('n_fft', nfft)
+        formData.append('bins_per_octave', binsPerOctave)
+        formData.append('min_frequency', minFreq)
+        formData.append('max_frequency', maxFreq)
         getBase64String( formData )
     }
 
@@ -52,22 +66,37 @@ function FileUpload(
     }
 
     const handleResponseData = (response) => {
-        passResponseToScalableSpec( response.data.channels[0] )
+        const trackDuration = response.data.channels[0].audio_duration
+        const hopLength = response.data.configurations.hop_length
+        const numSpecColumns = response.data.configurations.num_spec_columns
+        const samplingRate = response.data.configurations.sampling_rate
+        const defaultConfig = {
+            hop_length: hopLength,
+            num_spec_columns: numSpecColumns,
+            sampling_rate: samplingRate
+        }
+
+        const newResponseData = response.data.channels[0]
+        const newSpecCalMethod = response.data.configurations.spec_cal_method
+        const newNfft = response.data.configurations.n_fft
+        const newBinsPerOctave = response.data.configurations.bins_per_octave
+        const newMinFreq = response.data.configurations.min_frequency
+        const newMaxFreq = response.data.configurations.max_frequency
+
+        
         deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
-        passTrackDurationToApp( response.data.channels[0].audio_duration )
-        passGlobalHopLengthToApp(response.data.configurations.hop_length)
-        passGlobalNumSpecColumns(response.data.configurations.num_spec_columns)
-        passGlobalSamplingRate(response.data.configurations.sampling_rate)
-        passSpecCalMethodToScalableSpec(response.data.configurations.spec_cal_method)
-        passNfftToScalableSpec(response.data.configurations.n_fft)
-        passBinsPerOctaveToScalableSpec(response.data.configurations.bins_per_octave)
-        passMinFreqToScalableSpec(response.data.configurations.min_frequency)
-        passMaxFreqToScalableSpec(response.data.configurations.max_frequency)
-        passDefaultConfigToApp({
-            hop_length: response.data.configurations.hop_length,
-            num_spec_columns: response.data.configurations.num_spec_columns,
-            sampling_rate: response.data.configurations.sampling_rate
-        })
+        passTrackDurationToApp( trackDuration )
+        passGlobalHopLengthToApp( hopLength )
+        passGlobalNumSpecColumnsToApp( numSpecColumns )
+        passGlobalSamplingRateToApp( samplingRate )
+        passDefaultConfigToApp( defaultConfig )
+
+        passResponseToScalableSpec( newResponseData )
+        passSpecCalMethodToScalableSpec( newSpecCalMethod )
+        passNfftToScalableSpec( newNfft ? newNfft : 512)
+        passBinsPerOctaveToScalableSpec( newBinsPerOctave ? newBinsPerOctave : 0)
+        passMinFreqToScalableSpec( newMinFreq ? newMinFreq : 0)
+        passMaxFreqToScalableSpec( newMaxFreq ? newMaxFreq : 16000)
     }
 
     const handleUploadError = (error) => {
@@ -75,6 +104,9 @@ function FileUpload(
         console.error("Error uploading file:", error)
         alert('Error while uploading. Check the console for more information.')
     }
+
+
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
     // When url parameter is added into the searchbar
     useEffect( () => {
@@ -85,7 +117,11 @@ function FileUpload(
         const hopLength = queryParams.get('hop_length') ? Number(queryParams.get('hop_length')) : null
         const numSpecColumns = queryParams.get('num_spec_columns') ? Number(queryParams.get('num_spec_columns')) : null
         const samplingRate = queryParams.get('sampling_rate') ? Number(queryParams.get('sampling_rate')) : null
-        //const specCalMethod = queryParams.get('spec_cal_method')
+        const specCalMethod = queryParams.get('spec_cal_method')
+        const nfft = queryParams.get('n_fft') ? Number(queryParams.get('n_fft')) : null
+        const binsPerOctave = queryParams.get('bins_per_octave') ? Number(queryParams.get('bins_per_octave')) : null
+        const minFreq = queryParams.get('min_frequency') ? Number(queryParams.get('min_frequency')) : null
+        const maxFreq = queryParams.get('max_frequency') ? Number(queryParams.get('max_frequency')) : null
 
         const uploadFileByURL = async () => {
             passSpectrogramIsLoadingToScalableSpec( true )
@@ -95,7 +131,11 @@ function FileUpload(
                 hop_length: hopLength,
                 num_spec_columns: numSpecColumns,
                 sampling_rate: samplingRate,
-                //spec_cal_method: specCalMethod,
+                spec_cal_method: specCalMethod,
+                n_fft: nfft,
+                bins_per_octave: binsPerOctave,
+                min_frequency: minFreq,
+                max_frequency: maxFreq
             }
 
             try {

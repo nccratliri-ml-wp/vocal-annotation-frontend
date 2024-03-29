@@ -8,8 +8,8 @@ function GlobalConfig (
                 globalHopLength,
                 globalNumSpecColumns,
                 globalSamplingRate,
-                passGlobalNumSpecColumns,
-                passGlobalSamplingRate,
+                passGlobalNumSpecColumnsToApp,
+                passGlobalSamplingRateToApp,
                 defaultConfig
             }
         )
@@ -47,8 +47,8 @@ function GlobalConfig (
         const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
         const newEndTime = newStartTime + newDuration
         updateClipDurationAndTimes( newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime )
-        passGlobalNumSpecColumns(newNumSpecColumns)
-        passGlobalSamplingRate(newSamplingRate)
+        passGlobalNumSpecColumnsToApp(newNumSpecColumns)
+        passGlobalSamplingRateToApp(newSamplingRate)
     }
 
     const restoreDefaultValues = () => {

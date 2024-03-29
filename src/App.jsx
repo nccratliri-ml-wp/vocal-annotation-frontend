@@ -87,11 +87,11 @@ function App() {
         setGlobalHopLength( newHopLength )
     }
 
-    function passGlobalNumSpecColumns( newNumSpecColumns ){
+    function passGlobalNumSpecColumnsToApp( newNumSpecColumns ){
         setGlobalNumSpecColumns( newNumSpecColumns )
     }
 
-    function passGlobalSamplingRate( newSamplingRate ){
+    function passGlobalSamplingRateToApp( newSamplingRate ){
         setGlobalSamplingRate( newSamplingRate )
     }
 
@@ -289,8 +289,8 @@ function App() {
                 globalHopLength={globalHopLength}
                 globalNumSpecColumns={globalNumSpecColumns}
                 globalSamplingRate={globalSamplingRate}
-                passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                passGlobalSamplingRate={passGlobalSamplingRate}
+                passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                 defaultConfig={defaultConfig}
             />
             {showTracks.track_1 &&
@@ -323,8 +323,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -358,8 +358,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -393,8 +393,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -428,8 +428,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -463,8 +463,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -498,8 +498,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -533,8 +533,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -568,8 +568,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -603,8 +603,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -638,8 +638,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -673,8 +673,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -708,8 +708,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -743,8 +743,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -778,8 +778,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -813,8 +813,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -848,8 +848,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -883,8 +883,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -918,8 +918,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -953,8 +953,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />
@@ -988,8 +988,8 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                    passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                    passGlobalSamplingRate={passGlobalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                 />

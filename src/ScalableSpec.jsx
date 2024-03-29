@@ -59,8 +59,8 @@ function ScalableSpec(
                             globalNumSpecColumns,
                             globalSamplingRate,
                             passGlobalHopLengthToApp,
-                            passGlobalNumSpecColumns,
-                            passGlobalSamplingRate,
+                            passGlobalNumSpecColumnsToApp,
+                            passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
                             passDefaultConfigToApp
                         }
@@ -114,7 +114,7 @@ function ScalableSpec(
     // Local Parameters
     const [specCalMethod, setSpecCalMethod] = useState('log-mel')
     const [nfft, setNfft] = useState(512)
-    const [binsPerOctave, setBinsPerOctave] = useState(0)
+    const [binsPerOctave, setBinsPerOctave] = useState(25)
     const [minFreq, setMinFreq] = useState(0)
     const [maxFreq, setMaxFreq] = useState(16000)
 
@@ -179,6 +179,20 @@ function ScalableSpec(
         }
 
         const response = await axios.post(path, requestParameters)
+
+        console.log(response.data.configurations)
+
+        const newSpecCalMethod = response.data.configurations.spec_cal_method
+        const newNfft = response.data.configurations.n_fft
+        const newBinsPerOctave = response.data.configurations.bins_per_octave
+        const newMinFreq = response.data.configurations.min_frequency
+        const newMaxFreq = response.data.configurations.max_frequency
+
+        setSpecCalMethod(newSpecCalMethod)
+        setNfft(newNfft ? newNfft : 512)
+        setBinsPerOctave(newBinsPerOctave ? newBinsPerOctave : 0)
+        setMinFreq(newMinFreq ? newMinFreq : 0)
+        setMaxFreq(newMaxFreq ? newMaxFreq : 16000)
 
         return response.data
     }
@@ -1531,14 +1545,19 @@ function ScalableSpec(
                 <div className='side-window' >
                     <div className='track-controls'>
                         <FileUpload
+                            specCalMethod={specCalMethod}
+                            nfft={nfft}
+                            binsPerOctave={binsPerOctave}
+                            minFreq={minFreq}
+                            maxFreq={maxFreq}
                             passResponseToScalableSpec={passResponseToScalableSpec}
                             passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                             passTrackDurationToApp={passTrackDurationToApp}
                             deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                             previousAudioDuration={response? response.audio_duration : undefined}
                             passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                            passGlobalNumSpecColumns={passGlobalNumSpecColumns}
-                            passGlobalSamplingRate={passGlobalSamplingRate}
+                            passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                            passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                             passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
                             passNfftToScalableSpec={passNfftToScalableSpec}
                             passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}

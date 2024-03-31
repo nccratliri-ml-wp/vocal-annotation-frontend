@@ -156,7 +156,8 @@ function Clusternames( { passClusterNameButtonsToApp, clusternameButtons, passOu
                     clusternameButtons.map( BTN =>
                         <div
                             className='clustername-btn'
-                            key={BTN.id}>
+                            key={BTN.id}
+                        >
                             <div
                                 className='clustername-text'
                                 style={{ backgroundColor: BTN.color }}

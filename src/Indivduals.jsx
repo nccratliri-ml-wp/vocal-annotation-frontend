@@ -1,5 +1,84 @@
 import React, {useState} from 'react'
 import { nanoid } from 'nanoid'
+import MenuItem from '@mui/material/MenuItem'
+
+class Individual {
+    constructor(value, isActive) {
+        this.value = value
+        this.isActive = isActive
+    }
+}
+
+function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOfIndividualsToApp} ) {
+
+    const [individuals, setIndividuals] = useState(
+        [
+            new Individual(1, true)
+        ]
+    )
+
+    function activateIndividual(event) {
+
+        const newActiveIndividualValue = event.target.value
+
+        const updatedIndividuals = individuals.map(individual => {
+            if (individual.value === newActiveIndividualValue) {
+                return { ...individual, isActive: true }
+            }
+            return { ...individual, isActive: false }
+        })
+
+        setIndividuals(updatedIndividuals)
+        passActiveIndividualToApp(newActiveIndividualValue)
+    }
+
+
+    function addIndividual() {
+        const newIndividualNumber = individuals.length + 1;
+
+        const updatedIndividuals = individuals.map((individual) => ({
+            ...individual,
+            isActive: false,
+        }))
+
+        updatedIndividuals.push(new Individual(newIndividualNumber, true))
+
+        setIndividuals(updatedIndividuals)
+
+        passNumberOfIndividualsToApp(newIndividualNumber)
+        passActiveIndividualToApp(newIndividualNumber)
+    }
+
+    return (
+        <div className='individuals-container'>
+            <div
+                className='individuals-menu'
+                >
+                {
+                    individuals.map( individual =>
+                        <MenuItem
+                            key={nanoid()}
+                            value={individual.value}
+                            className={'individual-menu-item'}
+                            isactive={individual.isActive.toString()}
+                            onMouseDown={activateIndividual}
+                        >
+                            Individual {individual.value}
+                        </MenuItem>
+                    )
+                }
+            </div>
+            <MenuItem className='add-individual-btn' onMouseDown={addIndividual}>Add Individual</MenuItem>
+        </div>
+    )
+}
+
+export default Individuals
+
+/*
+
+import React, {useState} from 'react'
+import { nanoid } from 'nanoid'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
@@ -10,7 +89,6 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
     const [menuItems, setMenuItems] = useState(
         [
             <MenuItem key={nanoid()} value={1}>Individual 1</MenuItem>,
-            <MenuItem key={nanoid()} value={2}>Individual 2</MenuItem>,
         ])
 
     const handleChange = (event) => {
@@ -70,3 +148,5 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
 }
 
 export default Individuals
+
+ */

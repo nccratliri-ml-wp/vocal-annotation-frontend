@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
 import Individuals from "./Indivduals";
+import GlobalConfig from "./GlobalConfig.jsx";
 
 const SCROLL_STEP_RATIO = 0.1
 
@@ -49,8 +50,8 @@ function App() {
     })
 
     // General
-    const [globalAudioDuration, setGlobalAudioDuration] = useState(0)
-    const [globalClipDuration, setGlobalClipDuration] = useState(0)
+    const [globalAudioDuration, setGlobalAudioDuration] = useState(null)
+    const [globalClipDuration, setGlobalClipDuration] = useState(null)
     const [currentStartTime, setCurrentStartTime] = useState(0)
     const [currentEndTime, setCurrentEndTime] = useState(0)
     const [maxScrollTime, setMaxScrollTime] = useState(0)
@@ -59,7 +60,44 @@ function App() {
     const [activeLabel, setActiveLabel] = useState(null)
 
     const [activeIndividual, setActiveIndividual] = useState(1);
-    const [numberOfIndividuals, setNumberOfIndividuals] = useState(2)
+    const [numberOfIndividuals, setNumberOfIndividuals] = useState(1)
+
+    const [globalHopLength, setGlobalHopLength] = useState(0)
+    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
+    const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
+    const [defaultConfig, setDefaultConfig] = useState(null)
+
+    /* 1. DONE: destructure config.configurations object into globalStates here and local states in ScalableSpec
+       1.1 DONE: handle NAN error in Parameters when user deletes a value in the input field
+    *  2. DONE: Adjust the code and methods to work as before
+        2.1 DONE: Fix Zoom Out
+        2.3 DONE: Fix OverviewBar zoom
+        2.4 DONE: Fix Multi track (max hop Length). Possible remove longestAudioDuration or max hop length?
+    *  3. DONE: Adjust Upload by URL method
+    *  4. DONE: Adjust all instances of ScalableSpec
+        4.1 DONE: Remove parameters from the dependency array in scalable spec
+        4.2 Move configruations to a new window
+        4.3 DONE: Remove config state everywhere
+        4.4 DONE: Fixed curved Line
+        4.5 DONE: Delete labels upon new file upload
+    *  5. DONE: Perhaps refactor Paramters? To hold n_fft, bin_per_octave etc. in state variables in ScalabeSpec instead of as a single Parameters state
+    * */
+
+    function passGlobalHopLengthToApp( newHopLength ){
+        setGlobalHopLength( newHopLength )
+    }
+
+    function passGlobalNumSpecColumnsToApp( newNumSpecColumns ){
+        setGlobalNumSpecColumns( newNumSpecColumns )
+    }
+
+    function passGlobalSamplingRateToApp( newSamplingRate ){
+        setGlobalSamplingRate( newSamplingRate )
+    }
+
+    function passDefaultConfigToApp( newDefaultConfig ){
+        setDefaultConfig( newDefaultConfig )
+    }
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -107,6 +145,7 @@ function App() {
         setOutdatedClustername( clustername )
     }
 
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
@@ -137,29 +176,29 @@ function App() {
             ...showTracks,
             [trackID]: false
         })
+        setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would replaced by the config of another
     }
 
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
     function onZoomIn(){
-        const newDuration = Math.max(globalClipDuration / 2, 0.1)
+        const newHopLength =  Math.max( Math.floor(globalHopLength / 2), 1)
+        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        setGlobalClipDuration(newDuration)
-        setMaxScrollTime(newMaxScrollTime)
-        setScrollStep(newDuration * SCROLL_STEP_RATIO)
-        setCurrentEndTime( currentStartTime + newDuration )
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newEndTime = newStartTime + newDuration
+        updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
     }
 
     function onZoomOut(){
-        const newDuration = Math.min(globalClipDuration * 2, globalAudioDuration)
+        const currentMaxHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
+        const newHopLength = globalHopLength * 2 / globalSamplingRate * globalNumSpecColumns > globalAudioDuration? currentMaxHopLength : globalHopLength * 2
+        const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        const newStartTime = Math.min( Math.max(  globalAudioDuration - newDuration, 0), currentStartTime)
-        setGlobalClipDuration(newDuration)
-        setMaxScrollTime(newMaxScrollTime)
-        setScrollStep(newDuration * SCROLL_STEP_RATIO)
-        setCurrentStartTime( newStartTime )
-        setCurrentEndTime( newStartTime + newDuration )
+        const newStartTime = Math.min( newMaxScrollTime, currentStartTime)
+        const newEndTime = newStartTime + newDuration
+        updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime , newEndTime)
     }
 
     function leftScroll() {
@@ -180,16 +219,36 @@ function App() {
         )
     }
 
+    function updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime){
+        setGlobalHopLength(newHopLength)
+        setGlobalClipDuration(newDuration)
+        setMaxScrollTime(newMaxScrollTime)
+        setCurrentStartTime( newStartTime )
+        setCurrentEndTime(newEndTime)
+        setScrollStep( newDuration * SCROLL_STEP_RATIO )
+    }
+
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {
-        const newGlobalDuration = Math.max(...trackDurations) === -Infinity? 0 : Math.max(...trackDurations)
-        setGlobalAudioDuration(newGlobalDuration)
-    }, [trackDurations])
+        if (trackDurations.length === 0) return
 
+        const newGlobalDuration = Math.max(...trackDurations) === -Infinity ? 0 : Math.max(...trackDurations)
+        //const newHopLength = Math.floor( (newGlobalDuration * globalSamplingRate) / globalNumSpecColumns )
+
+        setGlobalAudioDuration(newGlobalDuration)
+        //setGlobalHopLength(newHopLength)
+
+    }, [trackDurations])
 
     return (
         <>
+            <Individuals
+                activeIndividual={activeIndividual}
+                passActiveIndividualToApp={passActiveIndividualToApp}
+                passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
+            />
             <Clusternames
                 passClusterNameButtonsToApp={passClusterNameButtonsToApp}
                 clusternameButtons={clusternameButtons}
@@ -223,10 +282,16 @@ function App() {
                 id='all-tracks'
                 onMouseLeave={ () => setActiveLabel(null)}
             >
-            <Individuals
-                activeIndividual={activeIndividual}
-                passActiveIndividualToApp={passActiveIndividualToApp}
-                passNumberOfIndividualsToApp={passNumberOfIndividualsToApp}
+            <GlobalConfig
+                globalAudioDuration={globalAudioDuration}
+                currentStartTime={currentStartTime}
+                updateClipDurationAndTimes={updateClipDurationAndTimes}
+                globalHopLength={globalHopLength}
+                globalNumSpecColumns={globalNumSpecColumns}
+                globalSamplingRate={globalSamplingRate}
+                passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                defaultConfig={defaultConfig}
             />
             {showTracks.track_1 &&
                 <ScalableSpec
@@ -254,6 +319,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_2 &&
@@ -281,6 +354,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_3 &&
@@ -308,6 +389,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_4 &&
@@ -335,6 +424,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_5 &&
@@ -362,6 +459,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_6 &&
@@ -389,6 +494,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_7 &&
@@ -416,6 +529,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_8 &&
@@ -443,6 +564,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_9 &&
@@ -470,6 +599,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_10 &&
@@ -497,6 +634,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_11 &&
@@ -524,6 +669,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_12 &&
@@ -551,6 +704,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_13 &&
@@ -578,6 +739,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_14 &&
@@ -605,6 +774,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_15 &&
@@ -632,6 +809,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_16 &&
@@ -659,6 +844,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_17 &&
@@ -686,6 +879,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_18 &&
@@ -713,6 +914,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_19 &&
@@ -740,6 +949,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             {showTracks.track_20 &&
@@ -767,6 +984,14 @@ function App() {
                     activeIndividual={activeIndividual}
                     numberOfIndividuals={numberOfIndividuals}
                     outdatedClustername={outdatedClustername}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    passDefaultConfigToApp={passDefaultConfigToApp}
                 />
             }
             <button

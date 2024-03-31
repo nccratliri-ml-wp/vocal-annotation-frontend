@@ -1,201 +1,164 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
-function Parameters({ passParametersToScalableSpec }) {
-    const [selectedMethod, setSelectedMethod] = useState('log-mel')
-    const [nFftValue, setNFftValue] = useState('')
-    const [binsPerOctaveValue, setBinsPerOctaveValue] = useState('')
+function Parameters(
+        {
+            specCalMethod,
+            nfft,
+            binsPerOctave,
+            minFreq,
+            maxFreq,
+            passSpecCalMethodToScalableSpec,
+            passNfftToScalableSpec,
+            passBinsPerOctaveToScalableSpec,
+            passMinFreqToScalableSpec,
+            passMaxFreqToScalableSpec,
+            submitLocalParameters
+        }
+    )
+{
+
+    const [showConfigPanel, setShowConfigPanel] = useState(false)
     const [showNFftInput, setShowNFftInput] = useState(true)
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
-    const [minFreqValue, setMinFreqValue] = useState(0)
-    const [maxFreqValue, setMaxFreqValue] = useState(0)
 
     const handleRadioChange = (method) => {
-        setSelectedMethod(method)
-        setShowNFftInput(method === 'log-mel')
-        setShowBinsPerOctaveInput(method === 'constant-q')
-        passParametersToScalableSpec({ spec_cal_method: method, n_fft: nFftValue, bins_per_octave: binsPerOctaveValue }) //to be deleted probably to not trigger uneccessary calls to backend
+        passSpecCalMethodToScalableSpec( method )
     }
 
     const handleNFftInputChange = (event) => {
-        setNFftValue(event.target.value)
-    }
-
-    const handleNFftSubmit = () => {
-        const nFft = parseInt(nFftValue, 10)
-        if (!isNaN(nFft)) {
-            passParametersToScalableSpec(
-                {
-                    spec_cal_method: 'log-mel',
-                    n_fft: nFft,
-                    bins_per_octave: binsPerOctaveValue
-                }
-            )
-        }
+        passNfftToScalableSpec(event.target.value)
     }
 
     const handleBinsPerOctaveInputChange = (event) => {
-        setBinsPerOctaveValue(event.target.value)
-    }
-
-    const handleBinsPerOctaveSubmit = () => {
-        const binsPerOctave = parseInt(binsPerOctaveValue, 10)
-        if (!isNaN(binsPerOctave)){
-            passParametersToScalableSpec({
-                spec_cal_method: 'constant-q',
-                n_fft: nFftValue,
-                bins_per_octave: binsPerOctave
-            })
-        }
+        passBinsPerOctaveToScalableSpec(event.target.value)
     }
 
     const handleMinFreqInputChange = (event) => {
-        setMinFreqValue(event.target.value)
-    }
-
-    const handleMinFreqSubmit = () => {
-        const minFreq = parseInt(minFreqValue, 10)
-        if (!isNaN(minFreq)){
-            passParametersToScalableSpec({
-                spec_cal_method: selectedMethod,
-                n_fft: nFftValue,
-                bins_per_octave: binsPerOctaveValue,
-                //min_freq: minFreq                         -> Example Value. actual parameter doesn't exist yet in the backend
-            })
-        }
+        passMinFreqToScalableSpec(event.target.value)
     }
 
     const handleMaxFreqInputChange = (event) => {
-        setMaxFreqValue(event.target.value)
+        passMaxFreqToScalableSpec(event.target.value)
     }
 
-    const handleMaxFreqSubmit = () => {
-        const maxFreq = parseInt(maxFreqValue, 10)
-        if (!isNaN(maxFreq)){
-            passParametersToScalableSpec({
-                spec_cal_method: selectedMethod,
-                n_fft: nFftValue,
-                bins_per_octave: binsPerOctaveValue,
-                //max_freq: maxFreq                         -> Example Value. actual parameter doesn't exist yet in the backend
-            })
-        }
-        console.log(maxFreq)
+    const handleSubmit = () => {
+        setShowConfigPanel(false)
+        submitLocalParameters()
     }
+
+    const excludeNonDigits = (event) => {
+        // Prevent the default behavior if the pressed key is not a digit
+        if (!/\d/.test(event.key)) {
+            event.preventDefault()
+        }
+    }
+
+
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
+
+    useEffect( () => {
+        // Conditionally render the nfft or binsPerOctave Input field according to the selected specCalMethod
+        if (!specCalMethod) return
+
+        if (specCalMethod === 'log-mel') {
+            setShowNFftInput(true)
+            setShowBinsPerOctaveInput(false)
+        }
+
+        if (specCalMethod === 'constant-q'){
+            setShowNFftInput(false)
+            setShowBinsPerOctaveInput(true)
+        }
+
+    }, [specCalMethod])
 
     return (
-        <div
-            className="parameters"
-        >
+        <>
+            <button onClick={ () => setShowConfigPanel(!showConfigPanel) }>Show ConfigPanel</button>
+        {
+            showConfigPanel &&
+            <div
+                className="local-parameters-config-panel"
+            >
 
-            <div>
-                <label>
-                    <input
-                        type="radio"
-                        value="log-mel"
-                        checked={selectedMethod === 'log-mel'}
-                        onChange={() => handleRadioChange('log-mel')}
-                    />
-                    Log-Mel
-                </label>
-                {showNFftInput && (
+                <div>
                     <label>
-                        N-FFT:
+                        <input
+                            type="radio"
+                            value="log-mel"
+                            checked={specCalMethod === 'log-mel'}
+                            onChange={() => handleRadioChange('log-mel')}
+                        />
+                        Log-Mel
+                    </label>
+                    {showNFftInput && (
+                        <label>
+                            N-FFT:
+                            <input
+                                type="number"
+                                value={nfft}
+                                min={0}
+                                onChange={handleNFftInputChange}
+                                onKeyPress={excludeNonDigits}
+                                onFocus={(event) => event.target.select()}
+                            />
+                        </label>
+                    )}
+                </div>
+
+                <div>
+                    <label>
+                        <input
+                            type="radio"
+                            value="constant-q"
+                            checked={specCalMethod === 'constant-q'}
+                            onChange={() => handleRadioChange('constant-q')}
+                        />
+                        Constant-Q
+                    </label>
+                    {showBinsPerOctaveInput && (
+                        <label>
+                            BPO:
+                            <input
+                                type="number"
+                                value={binsPerOctave}
+                                onChange={handleBinsPerOctaveInputChange}
+                                onKeyPress={excludeNonDigits}
+                                onFocus={(event) => event.target.select()}
+                            />
+                        </label>
+                    )}
+                </div>
+
+                <div>
+                    <label>
+                        Min Freq
                         <input
                             type="number"
-                            value={nFftValue}
-                            onChange={handleNFftInputChange}
+                            value={minFreq}
+                            onChange={handleMinFreqInputChange}
+                            onKeyPress={excludeNonDigits}
+                            onFocus={(event) => event.target.select()}
                         />
-                        <button onClick={handleNFftSubmit}>Submit</button>
                     </label>
-                )}
-            </div>
-
-            <div>
-                <label>
-                    <input
-                        type="radio"
-                        value="constant-q"
-                        checked={selectedMethod === 'constant-q'}
-                        onChange={() => handleRadioChange('constant-q')}
-                    />
-                    Constant-Q
-                </label>
-                {showBinsPerOctaveInput && (
                     <label>
-                        BPO:
+                        Max Freq
                         <input
                             type="number"
-                            value={binsPerOctaveValue}
-                            onChange={handleBinsPerOctaveInputChange}
+                            value={maxFreq}
+                            onChange={handleMaxFreqInputChange}
+                            onKeyPress={excludeNonDigits}
+                            onFocus={(event) => event.target.select()}
                         />
-                        <button onClick={handleBinsPerOctaveSubmit}>Submit</button>
                     </label>
-                )}
-            </div>
+                </div>
 
-            <div>
-                <label>
-                    Min Freq
-                    <input
-                        type="number"
-                        value={minFreqValue}
-                        onChange={handleMinFreqInputChange}
-                    />
-                    <button onClick={handleMinFreqSubmit}>Submit</button>
-                </label>
-                <label>
-                    Max Freq
-                    <input
-                        type="number"
-                        value={maxFreqValue}
-                        onChange={handleMaxFreqInputChange}
-                    />
-                    <button onClick={handleMaxFreqSubmit}>Submit</button>
-                </label>
-            </div>
+                <button onClick={handleSubmit}>Submit All</button>
 
-        </div>
+            </div>
+        }
+        </>
     )
 }
 
 export default Parameters;
-
-
-
-/*
-import React, { useState } from 'react'
-
-function Parameters({ passParametersToScalableSpec }) {
-
-    const [selectedMethod, setSelectedMethod] = useState('log-mel')
-
-    const handleRadioChange = (method) => {
-        setSelectedMethod(method)
-        passParametersToScalableSpec({ spec_cal_method: method })
-    }
-
-    return (
-        <div>
-            <label>
-                <input
-                    type="radio"
-                    value="log-mel"
-                    checked={selectedMethod === 'log-mel'}
-                    onChange={() => handleRadioChange('log-mel')}
-                />
-                Log-Mel
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    value="constant-q"
-                    checked={selectedMethod === 'constant-q'}
-                    onChange={() => handleRadioChange('constant-q')}
-                />
-                Constant-Q
-            </label>
-        </div>
-    )
-}
-
-export default Parameters
-*/

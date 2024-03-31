@@ -2,7 +2,30 @@ import React, {useEffect} from "react";
 import axios from "axios";
 import {useLocation} from "react-router-dom";
 
-function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToScalableSpec, passTrackDurationToApp, deletePreviousTrackDurationInApp, previousAudioDuration} ) {
+function FileUpload(
+                        {
+                            specCalMethod,
+                            nfft,
+                            binsPerOctave,
+                            minFreq,
+                            maxFreq,
+                            passResponseToScalableSpec,
+                            passSpectrogramIsLoadingToScalableSpec,
+                            passTrackDurationToApp,
+                            deletePreviousTrackDurationInApp,
+                            previousAudioDuration,
+                            passGlobalHopLengthToApp,
+                            passGlobalNumSpecColumnsToApp,
+                            passGlobalSamplingRateToApp,
+                            passSpecCalMethodToScalableSpec,
+                            passNfftToScalableSpec,
+                            passBinsPerOctaveToScalableSpec,
+                            passMinFreqToScalableSpec,
+                            passMaxFreqToScalableSpec,
+                            passDefaultConfigToApp
+                        }
+                    )
+                {
 
     const location = useLocation();
 
@@ -20,6 +43,15 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
         if (!file) return
         const formData = new FormData();
         formData.append('newAudioFile', file)
+        /*
+        formData.append('hop_length', globalHopLength)
+        formData.append('num_spec_columns', globalNumSpecColumns)
+        formData.append('sampling_rate', globalSamplingRate)*/
+        formData.append('spec_cal_method', specCalMethod)
+        formData.append('n_fft', nfft)
+        formData.append('bins_per_octave', binsPerOctave)
+        formData.append('min_frequency', minFreq)
+        formData.append('max_frequency', maxFreq)
         getBase64String( formData )
     }
 
@@ -27,48 +59,97 @@ function FileUpload( { passResponseToScalableSpec, passSpectrogramIsLoadingToSca
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload'
         try {
             const response = await axios.post(path, formData)
-            console.log('prev duration is: ' + previousAudioDuration)
-            passResponseToScalableSpec( response )
-            deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
-            passTrackDurationToApp( response.data.audio_duration )
+            handleResponseData(response)
         } catch (error) {
-            console.error("Error uploading file:", error)
+            handleUploadError(error)
         }
     }
+
+    const handleResponseData = (response) => {
+        const trackDuration = response.data.channels[0].audio_duration
+        const hopLength = response.data.configurations.hop_length
+        const numSpecColumns = response.data.configurations.num_spec_columns
+        const samplingRate = response.data.configurations.sampling_rate
+        const defaultConfig = {
+            hop_length: hopLength,
+            num_spec_columns: numSpecColumns,
+            sampling_rate: samplingRate
+        }
+
+        const newResponseData = response.data.channels[0]
+        const newSpecCalMethod = response.data.configurations.spec_cal_method
+        const newNfft = response.data.configurations.n_fft
+        const newBinsPerOctave = response.data.configurations.bins_per_octave
+        const newMinFreq = response.data.configurations.min_frequency
+        const newMaxFreq = response.data.configurations.max_frequency
+
+        
+        deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
+        passTrackDurationToApp( trackDuration )
+        passGlobalHopLengthToApp( hopLength )
+        passGlobalNumSpecColumnsToApp( numSpecColumns )
+        passGlobalSamplingRateToApp( samplingRate )
+        passDefaultConfigToApp( defaultConfig )
+
+        passResponseToScalableSpec( newResponseData )
+        passSpecCalMethodToScalableSpec( newSpecCalMethod )
+        passNfftToScalableSpec( newNfft ? newNfft : 512)
+        passBinsPerOctaveToScalableSpec( newBinsPerOctave ? newBinsPerOctave : 0)
+        passMinFreqToScalableSpec( newMinFreq ? newMinFreq : 0)
+        passMaxFreqToScalableSpec( newMaxFreq ? newMaxFreq : 16000)
+    }
+
+    const handleUploadError = (error) => {
+        passSpectrogramIsLoadingToScalableSpec( false )
+        console.error("Error uploading file:", error)
+        alert('Error while uploading. Check the console for more information.')
+    }
+
+
+    /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
     // When url parameter is added into the searchbar
     useEffect( () => {
         let ignore = false
 
-        const queryParams = new URLSearchParams(location.search);
-        const audioUrlParam = queryParams.get('audio_url');
+        const queryParams = new URLSearchParams(location.search)
+        const audioUrl = queryParams.get('audio_url') ? decodeURIComponent(queryParams.get('audio_url')) : null
+        const hopLength = queryParams.get('hop_length') ? Number(queryParams.get('hop_length')) : null
+        const numSpecColumns = queryParams.get('num_spec_columns') ? Number(queryParams.get('num_spec_columns')) : null
+        const samplingRate = queryParams.get('sampling_rate') ? Number(queryParams.get('sampling_rate')) : null
+        const specCalMethod = queryParams.get('spec_cal_method')
+        const nfft = queryParams.get('n_fft') ? Number(queryParams.get('n_fft')) : null
+        const binsPerOctave = queryParams.get('bins_per_octave') ? Number(queryParams.get('bins_per_octave')) : null
+        const minFreq = queryParams.get('min_frequency') ? Number(queryParams.get('min_frequency')) : null
+        const maxFreq = queryParams.get('max_frequency') ? Number(queryParams.get('max_frequency')) : null
 
-        const uploadFileByURL = async (audioURL) => {
+        const uploadFileByURL = async () => {
             passSpectrogramIsLoadingToScalableSpec( true )
             const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
             const requestParameters = {
-                //audio_url: 'https://storage.googleapis.com/callbase_bucket/XC633481-RFW_.mp3?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=callbase-storage-management%40callbase-395411.iam.gserviceaccount.com%2F20240222%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240222T135207Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=171057da4032d1ee38946369ab9b0bd090539b7d258c7fb1f9b057120b5e6ed9bcdb9f585d0648852e78b10baee07882f813e1278d227dad2b17f0410ae91e4c0a472210485a8d085c6ffa0f3ddfe7f038fee2c9d0089b0980d44ea00cf32d58542bbca37f2bf0cfccc1220ee26ce242340f2fbc238f9b8c0d85bc4d4e975d926e93c58313bc60bb0d40620dfaaeea85068d17282a2e94c7dae6d87b4eb88ffd8794c53a41e936e94df8f59bf28d76dc7042671053fb80f95a94ad2e60bf168784941c52dcbeef7b4575d15649a971e968b8b934f2eba5a2f4862a35727b75d76b7d672791cfc1837a32cd421e80b016722e446bc8b981a0fdd548636fdc8843',
-                //audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
-                audio_url: audioURL
+                audio_url: audioUrl,
+                hop_length: hopLength,
+                num_spec_columns: numSpecColumns,
+                sampling_rate: samplingRate,
+                spec_cal_method: specCalMethod,
+                n_fft: nfft,
+                bins_per_octave: binsPerOctave,
+                min_frequency: minFreq,
+                max_frequency: maxFreq
             }
 
             try {
                 const response = await axios.post(path, requestParameters)
                 if (!ignore){
-                    passResponseToScalableSpec( response )
-                    deletePreviousTrackDurationInApp( previousAudioDuration ) // Remove outdated track duration of the previous file in the App component
-                    passTrackDurationToApp( response.data.audio_duration )
+                    handleResponseData(response)
                 }
             } catch (error){
-                passSpectrogramIsLoadingToScalableSpec( false )
-                console.error("Error uploading file:", error)
-                alert('Error while uploading. Make sure the URL to the file is correct and try again.')
+                handleUploadError(error)
             }
         }
 
-        if (audioUrlParam) {
-            const decodedURL = decodeURIComponent(audioUrlParam)
-            uploadFileByURL(decodedURL)
+        if (audioUrl) {
+            uploadFileByURL()
         }
 
         return () => {

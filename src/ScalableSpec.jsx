@@ -180,14 +180,12 @@ function ScalableSpec(
 
         const response = await axios.post(path, requestParameters)
 
-        console.log(response.data.configurations)
-
+        // Update potentially by the backend corrected values in the input fields (e.g. when the user requests nfft < 5)
         const newSpecCalMethod = response.data.configurations.spec_cal_method
         const newNfft = response.data.configurations.n_fft
         const newBinsPerOctave = response.data.configurations.bins_per_octave
         const newMinFreq = response.data.configurations.min_frequency
         const newMaxFreq = response.data.configurations.max_frequency
-
         setSpecCalMethod(newSpecCalMethod)
         setNfft(newNfft ? newNfft : 512)
         setBinsPerOctave(newBinsPerOctave ? newBinsPerOctave : 0)

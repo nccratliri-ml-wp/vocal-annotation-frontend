@@ -3,8 +3,9 @@ import { nanoid } from 'nanoid'
 import MenuItem from '@mui/material/MenuItem'
 
 class Individual {
-    constructor(value, isActive) {
+    constructor(value, name, isActive) {
         this.value = value
+        this.name = name
         this.isActive = isActive
     }
 }
@@ -13,7 +14,7 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
 
     const [individuals, setIndividuals] = useState(
         [
-            new Individual(1, true)
+            new Individual(0, 'Unknown', true)
         ]
     )
 
@@ -34,14 +35,14 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
 
 
     function addIndividual() {
-        const newIndividualNumber = individuals.length + 1;
+        const newIndividualNumber = individuals.length;
 
         const updatedIndividuals = individuals.map((individual) => ({
             ...individual,
             isActive: false,
         }))
 
-        updatedIndividuals.push(new Individual(newIndividualNumber, true))
+        updatedIndividuals.push(new Individual(newIndividualNumber, `Individual ${newIndividualNumber}`,true))
 
         setIndividuals(updatedIndividuals)
 
@@ -63,7 +64,7 @@ function Individuals( {activeIndividual, passActiveIndividualToApp, passNumberOf
                             isactive={individual.isActive.toString()}
                             onMouseDown={activateIndividual}
                         >
-                            Individual {individual.value}
+                            {individual.name}
                         </MenuItem>
                     )
                 }

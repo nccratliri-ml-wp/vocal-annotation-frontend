@@ -62,17 +62,22 @@ function AnnotationLabels () {
                         className='species'
                     >
                         {species.name}
-                        {
-                            species.individuals.map( individual =>
-                                <div
-                                    key={nanoid()}
-                                    className='individual-btn'
-                                >
-                                    {individual}
-                                </div>
-                            )
-                        }
-                        <button onClick={() => addNewIndividual(species.id)}>Add new Individual</button>
+
+                        <div className='individual-btn-container'>
+                            {
+                                species.individuals.map( individual =>
+                                    <div
+                                        key={nanoid()}
+                                        className='individual-btn'
+                                    >
+                                        {individual}
+                                    </div>
+                                )
+                            }
+                            <button onClick={() => addNewIndividual(species.id)}>Add new Individual</button>
+                        </div>
+
+                        <div className='clustername-btn-container'>
                         {
                             species.clusternames.map( clustername =>
                                 <div
@@ -83,7 +88,9 @@ function AnnotationLabels () {
                                 </div>
                             )
                         }
-                        <button onClick={() => addNewClustername(species.id)}>Add new Clustername</button>
+                            <button onClick={() => addNewClustername(species.id)}>Add new Clustername</button>
+                        </div>
+
                     </div>
                 )
             }

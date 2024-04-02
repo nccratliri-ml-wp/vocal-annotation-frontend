@@ -242,32 +242,104 @@ html, body {
 .species{
   background-color: #082536;
   margin: 0 0 7px 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.delete-species-btn{
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+}
+
+.delete-species-btn:hover{
+  font-size: 16px;
+}
+
+.species-input-field{
+  outline: none;
+}
+
+.add-species-btn{
+  background-color: #f6fffe;
+  border: none;
+  font-size: 12px;
 }
 
 .individual-btn-container, .clustername-btn-container{
   display: flex;
+  flex-wrap: wrap;
 }
 
-.individual-btn, .clustername-btn{
+.individual-btn{
   display: flex;
   margin: 2px;
   padding: 0 30px;
   font-size: 16px;
-  font-weight: bold;
+  max-height: 24px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
 }
 
+.clustername-btn{
+  display: flex;
+  margin: 2px;
+  font-size: 16px;
+  max-height: 24px;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
+}
+
+.clustername-btn-name{
+  padding: 0 30px;
+}
+
+.individual-btn[isactive='true'], .clustername-btn[isactive='true']{
+  font-size: 20px;
+  max-height: 28px;
+}
+
 .individual-btn{
-  background-color: #00d0ff;
+  background-color: #2d8ca1;
+}
+
+.add-individual-btn{
+  margin: 2px;
+  vertical-align: middle;
+  font-size: 14px;
+  max-height: 28px;
+  background-color: #f6fffe;
+  border: none;
 }
 
 .clustername-btn{
   background-color: #58a411;
 }
 
-.clustername-input-field{
+.clustername-form{
+  display: flex;
+  border: none;
+}
 
+.clustername-input-field:focus{
+  outline: none;
+}
+
+.add-clustername-btn{
+  background-color: #f6fffe;
+  border: none;
+  font-size: 14px;
+}
+
+.colorwheel-btn, .edit-name-btn{
+  background-color: #f6fffe;
+  border: none;
+  border-left: 1px solid black;
+  font-size: 14px;
+}
+
+.colorwheel-btn:hover, .edit-name-btn:hover{
+  background-color: whitesmoke;
 }
 
 

@@ -10,6 +10,20 @@ class Species {
     }
 }
 
+class Individual {
+    constructor(name) {
+        this.name = name
+        this.isActive = true
+    }
+}
+
+class Clustername {
+    constructor(name) {
+        this.name = name
+        this.isActive = true
+    }
+}
+
 // Global variables
 const UNKNOWN_SPECIES = 'Unknown Species'
 const UNKNOWN_INDIVIDUAL = 'Unknown Individual'
@@ -21,7 +35,7 @@ function AnnotationLabels () {
     const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
 
     const [speciesArray, setSpeciesArray] = useState([
-        new Species(nanoid(),UNKNOWN_SPECIES, [UNKNOWN_INDIVIDUAL], [UNKNOWN_CLUSTERNAME])
+        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME) ] )
     ])
 
 
@@ -35,7 +49,8 @@ function AnnotationLabels () {
         const allSpeciesNames = speciesArray.map( speciesObject => speciesObject.name )
         if (checkIfItemAlreadyExists(newSpeciesInputFieldText, allSpeciesNames)) return
 
-        setSpeciesArray( prevState => [...prevState, new Species(nanoid(), newSpeciesInputFieldText, [UNKNOWN_INDIVIDUAL], [UNKNOWN_CLUSTERNAME])] )
+        const newSpeciesObject = new Species(nanoid(), newSpeciesInputFieldText,[ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME) ])
+        setSpeciesArray( prevState => [...prevState, newSpeciesObject] )
     }
 
     const deleteSpecies = (selectedID) => {
@@ -50,9 +65,10 @@ function AnnotationLabels () {
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
                 const newIndividualNumber = speciesObject.individuals.length
+                const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
                 return {
                     ...speciesObject,
-                    individuals: [...speciesObject.individuals, `Ind. ${newIndividualNumber}`]
+                    individuals: [...updatedIndividuals, new Individual( `Ind. ${newIndividualNumber}`) ]
                 }
             } else {
                 return speciesObject
@@ -65,7 +81,7 @@ function AnnotationLabels () {
     const deleteIndividual = (event, selectedID, selectedIndividual) => {
         event.preventDefault()
 
-        if (selectedIndividual === UNKNOWN_INDIVIDUAL) return
+        if (selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -82,13 +98,42 @@ function AnnotationLabels () {
         setSpeciesArray(modifiedSpeciesArray)
     }
 
+    const activateIndividual = (selectedID, selectedIndividual) => {
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+                const updatedIndividuals = speciesObject.individuals.map( individual => {
+                    if (individual === selectedIndividual){
+                        return {...individual, isActive: true}
+                    } else {
+                        return {...individual, isActive: false}
+                    }
+                })
+                return {
+                    ...speciesObject,
+                    individuals: updatedIndividuals
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
+    const deactivateExistingIndividuals = (individuals) => {
+        return individuals.map(individual => ({
+            ...individual,
+            isActive: false
+        }))
+    }
+
 
     /* ++++++++++++++++++++ Clusternames ++++++++++++++++++++ */
 
     const addNewClustername = (event, selectedID, index) => {
         event.preventDefault()
 
-        const newClustername = newClusternameInputFieldTexts[index]
+        const newClusternameName = newClusternameInputFieldTexts[index]
 
         // Update the correct input field
         const updatedClusternameInputFieldTexts = [...newClusternameInputFieldTexts]
@@ -99,13 +144,16 @@ function AnnotationLabels () {
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
-                if ( checkIfItemAlreadyExists(newClusternameInputFieldTexts[index], speciesObject.clusternames) ) {
+                const allClusternameNames = speciesObject.clusternames.map( clustername => clustername.name)
+                if ( checkIfItemAlreadyExists(newClusternameInputFieldTexts[index], allClusternameNames) ) {
                     return speciesObject
                 }
 
+                const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
+
                 return {
                     ...speciesObject,
-                    clusternames: [...speciesObject.clusternames, newClustername]
+                    clusternames: [...updatedClusternames, new Clustername(newClusternameName)]
                 }
             } else {
                 return speciesObject
@@ -113,7 +161,6 @@ function AnnotationLabels () {
         })
         setSpeciesArray(modifiedSpeciesArray)
     }
-
 
 
     const handleClusternameInputChange = (event, index) => {
@@ -125,7 +172,7 @@ function AnnotationLabels () {
     const deleteClustername = (event, selectedID, selectedClustername) => {
         event.preventDefault()
 
-        if (selectedClustername === UNKNOWN_CLUSTERNAME) return
+        if (selectedClustername.name === UNKNOWN_CLUSTERNAME) return
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -143,17 +190,19 @@ function AnnotationLabels () {
     }
 
     const editClustername = (selectedID, selectedClustername) => {
-        const editedClustername = prompt('Change clustername: ')
+        let editedClustername = prompt('Change clustername: ')
+        if (!editedClustername) return
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
-                if ( checkIfItemAlreadyExists(editedClustername, speciesObject.clusternames) ) {
+                const allClusternameNames = speciesObject.clusternames.map( clustername => clustername.name)
+                if ( checkIfItemAlreadyExists(editedClustername, allClusternameNames) ) {
                     return speciesObject
                 }
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
-                    return clustername === selectedClustername ? editedClustername : clustername
+                    return clustername.name === selectedClustername.name ? {...clustername, name: editedClustername} : clustername
                 })
 
                 return {
@@ -167,6 +216,35 @@ function AnnotationLabels () {
         })
 
         setSpeciesArray(modifiedSpeciesArray)
+    }
+
+    const activateClustername = (selectedID, selectedClustername) => {
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    if (clustername === selectedClustername){
+                        return {...clustername, isActive: true}
+                    } else {
+                        return {...clustername, isActive: false}
+                    }
+                })
+                return {
+                    ...speciesObject,
+                    clusternames: updatedClusternames
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
+    const deactivateExistingClusternames = (clusternames) => {
+        return clusternames.map(clustername => ({
+            ...clustername,
+            isActive: false
+        }))
     }
 
 
@@ -195,40 +273,48 @@ function AnnotationLabels () {
                             className='species'
                         >
                             {species.name}
-                            {species.name !== UNKNOWN_SPECIES && <button onClick={() => deleteSpecies(species.id)}>🗑️</button>}
+                            {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn' onClick={() => deleteSpecies(species.id)}>🗑️</button>}
 
                             <div className='individual-btn-container'>
                                 {
                                     species.individuals.map( individual =>
                                         <div
-                                            key={`${species.id}-${individual}`}
+                                            key={`${species.id}-${individual.name}`}
                                             className='individual-btn'
+                                            isactive={individual.isActive.toString()}
+                                            onClick={ () => activateIndividual(species.id, individual) }
+                                            onContextMenu={ (event) => deleteIndividual(event, species.id, individual)}
                                         >
-                                            <div
-                                                onContextMenu={ (event) => deleteIndividual(event, species.id, individual)}
-                                            >
-                                                {individual}
-                                            </div>
+                                            {individual.name}
                                         </div>
                                     )
                                 }
-                                <button onClick={() => addNewIndividual(species.id)}>➕</button>
+                                <button className='add-individual-btn' onClick={() => addNewIndividual(species.id)}>➕</button>
                             </div>
 
                             <div className='clustername-btn-container'>
                                 {
                                     species.clusternames.map( clustername =>
                                         <div
-                                            key={`${species.id}-${clustername}`}
+                                            key={`${species.id}-${clustername.name}`}
                                             className='clustername-btn'
+                                            isactive={clustername.isActive.toString()}
                                         >
                                             <div
+                                                className='clustername-btn-name'
+                                                onClick={ () => activateClustername(species.id, clustername) }
                                                 onContextMenu={ (event) => deleteClustername(event, species.id, clustername)}
                                             >
-                                                {clustername}
+                                                {clustername.name}
                                             </div>
+                                            <button
+                                                className='colorwheel-btn'
+                                                onContextMenu={ (event) => event.preventDefault() }
+                                            >
+                                                🎨️
+                                            </button>
                                             {
-                                                clustername !== UNKNOWN_CLUSTERNAME &&
+                                                clustername.name !== UNKNOWN_CLUSTERNAME &&
                                                 <button
                                                     className='edit-name-btn'
                                                     onClick={ () => editClustername(species.id, clustername) }
@@ -240,7 +326,7 @@ function AnnotationLabels () {
                                         </div>
                                     )
                                 }
-                                <form onSubmit={ (event) => addNewClustername(event,species.id, index) }>
+                                <form className='clustername-form' onSubmit={ (event) => addNewClustername(event,species.id, index) }>
                                     <input
                                         className='clustername-input-field'
                                         type='text'
@@ -251,6 +337,7 @@ function AnnotationLabels () {
                                         placeholder='Add a new Clustername'
                                         onChange={ (event) => handleClusternameInputChange(event, index) }
                                     />
+                                    <button className='add-clustername-btn'>➕</button>
                                 </form>
                             </div>
 
@@ -262,6 +349,7 @@ function AnnotationLabels () {
 
             <form onSubmit={addNewSpecies}>
                 <input
+                    className='species-input-field'
                     type='text'
                     required='required'
                     pattern='^[^,]{1,30}$'
@@ -270,6 +358,7 @@ function AnnotationLabels () {
                     placeholder='Add a new Species'
                     onChange={ (event) => setNewSpeciesInputFieldText(event.target.value) }
                 />
+                <button className='add-species-btn'>➕</button>
             </form>
 
         </div>

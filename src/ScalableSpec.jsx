@@ -127,7 +127,9 @@ function ScalableSpec(
     // Active Clustername
     const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
 
+
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
+
     const passResponseToScalableSpec = ( newResponse ) => {
         setResponse( newResponse )
     }

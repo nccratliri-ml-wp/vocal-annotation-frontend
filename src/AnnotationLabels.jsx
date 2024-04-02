@@ -10,48 +10,32 @@ class Species {
     }
 }
 
+// Global variables
+const UNKNOWN_SPECIES = 'Unknown Species'
+const UNKNOWN_INDIVIDUAL = 'Unknown Individual'
+const UNKNOWN_CLUSTERNAME = 'Unknown Clustername'
+
 function AnnotationLabels () {
 
     const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
+    const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
 
     const [speciesArray, setSpeciesArray] = useState([
-        new Species(nanoid(),'Unknown Species', ['Unknown'], ['Unknown'])
+        new Species(nanoid(),UNKNOWN_SPECIES, [UNKNOWN_INDIVIDUAL], [UNKNOWN_CLUSTERNAME])
     ])
+
+
+    /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
     const addNewSpecies = (event) => {
         event.preventDefault()
-        setSpeciesArray( prevState => [...prevState, new Species(nanoid(), newSpeciesInputFieldText, ['Unknown'], ['Unknown'])] )
+
         setNewSpeciesInputFieldText('')
-    }
 
-    const addNewIndividual = (selectedID) => {
-        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
-            if (speciesObject.id === selectedID) {
-                return {
-                    ...speciesObject,
-                    individuals: [...speciesObject.individuals, 'My Individual']
-                }
-            } else {
-                return speciesObject
-            }
-        })
+        const allSpeciesNames = speciesArray.map( speciesObject => speciesObject.name )
+        if (checkIfItemAlreadyExists(newSpeciesInputFieldText, allSpeciesNames)) return
 
-        setSpeciesArray(modifiedSpeciesArray)
-    }
-
-    const addNewClustername = (selectedID) => {
-        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
-            if (speciesObject.id === selectedID) {
-                return {
-                    ...speciesObject,
-                    clusternames: [...speciesObject.clusternames, 'My Clustername']
-                }
-            } else {
-                return speciesObject
-            }
-        })
-
-        setSpeciesArray(modifiedSpeciesArray)
+        setSpeciesArray( prevState => [...prevState, new Species(nanoid(), newSpeciesInputFieldText, [UNKNOWN_INDIVIDUAL], [UNKNOWN_CLUSTERNAME])] )
     }
 
     const deleteSpecies = (selectedID) => {
@@ -59,8 +43,29 @@ function AnnotationLabels () {
         setSpeciesArray(modifiedSpeciesArray)
     }
 
+
+    /* ++++++++++++++++++++ Individuals ++++++++++++++++++++ */
+
+    const addNewIndividual = (selectedID) => {
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+                const newIndividualNumber = speciesObject.individuals.length
+                return {
+                    ...speciesObject,
+                    individuals: [...speciesObject.individuals, `Ind. ${newIndividualNumber}`]
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
     const deleteIndividual = (event, selectedID, selectedIndividual) => {
         event.preventDefault()
+
+        if (selectedIndividual === UNKNOWN_INDIVIDUAL) return
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -77,15 +82,57 @@ function AnnotationLabels () {
         setSpeciesArray(modifiedSpeciesArray)
     }
 
+
+    /* ++++++++++++++++++++ Clusternames ++++++++++++++++++++ */
+
+    const addNewClustername = (event, selectedID, index) => {
+        event.preventDefault()
+
+        const newClustername = newClusternameInputFieldTexts[index]
+
+        // Update the correct input field
+        const updatedClusternameInputFieldTexts = [...newClusternameInputFieldTexts]
+        updatedClusternameInputFieldTexts[index] = ''
+        setNewClusternameInputFieldTexts(updatedClusternameInputFieldTexts)
+
+        // Update species Array
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+
+                if ( checkIfItemAlreadyExists(newClusternameInputFieldTexts[index], speciesObject.clusternames) ) {
+                    return speciesObject
+                }
+
+                return {
+                    ...speciesObject,
+                    clusternames: [...speciesObject.clusternames, newClustername]
+                }
+            } else {
+                return speciesObject
+            }
+        })
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
+
+
+    const handleClusternameInputChange = (event, index) => {
+        const updatedClusternameInputFieldTexts = [...newClusternameInputFieldTexts]
+        updatedClusternameInputFieldTexts[index] = event.target.value
+        setNewClusternameInputFieldTexts(updatedClusternameInputFieldTexts)
+    }
+
     const deleteClustername = (event, selectedID, selectedClustername) => {
         event.preventDefault()
 
+        if (selectedClustername === UNKNOWN_CLUSTERNAME) return
+
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
-                const updatedClustername = speciesObject.clusternames.filter( clustername => clustername !== selectedClustername)
+                const updatedClusternames = speciesObject.clusternames.filter( clustername => clustername !== selectedClustername)
                 return {
                     ...speciesObject,
-                    clusternames: updatedClustername
+                    clusternames: updatedClusternames
                 }
             } else {
                 return speciesObject
@@ -95,6 +142,45 @@ function AnnotationLabels () {
         setSpeciesArray(modifiedSpeciesArray)
     }
 
+    const editClustername = (selectedID, selectedClustername) => {
+        const editedClustername = prompt('Change clustername: ')
+
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+
+                if ( checkIfItemAlreadyExists(editedClustername, speciesObject.clusternames) ) {
+                    return speciesObject
+                }
+
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    return clustername === selectedClustername ? editedClustername : clustername
+                })
+
+                return {
+                    ...speciesObject,
+                    clusternames: updatedClusternames
+                }
+
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
+
+    /* ++++++++++++++++++++ Helper methods ++++++++++++++++++++ */
+
+    const checkIfItemAlreadyExists = ( newItem, array ) => {
+        for (let item of array){
+            if (item === newItem){
+                alert(`${newItem} already exists. Add a different one.`)
+                return true
+            }
+        }
+    }
+
 
     return(
         <div id='annotation-labels-container'>
@@ -102,24 +188,27 @@ function AnnotationLabels () {
             <div id='annotation-labels-menu'>
 
                 {
-                    speciesArray.map( species =>
+                    speciesArray.map( (species, index) =>
                         <div
                             id={species.id}
                             key={species.id}
                             className='species'
                         >
                             {species.name}
-                            {speciesArray.indexOf(species) !== 0 && <button onClick={() => deleteSpecies(species.id)}>🗑️</button>}
+                            {species.name !== UNKNOWN_SPECIES && <button onClick={() => deleteSpecies(species.id)}>🗑️</button>}
 
                             <div className='individual-btn-container'>
                                 {
                                     species.individuals.map( individual =>
                                         <div
-                                            key={nanoid()}
+                                            key={`${species.id}-${individual}`}
                                             className='individual-btn'
-                                            onContextMenu={ (event) => deleteIndividual(event, species.id, individual)}
                                         >
-                                            {individual}
+                                            <div
+                                                onContextMenu={ (event) => deleteIndividual(event, species.id, individual)}
+                                            >
+                                                {individual}
+                                            </div>
                                         </div>
                                     )
                                 }
@@ -127,18 +216,42 @@ function AnnotationLabels () {
                             </div>
 
                             <div className='clustername-btn-container'>
-                            {
-                                species.clusternames.map( clustername =>
-                                    <div
-                                        key={nanoid()}
-                                        className='clustername-btn'
-                                        onContextMenu={ (event) => deleteClustername(event, species.id, clustername)}
-                                    >
-                                        {clustername}
-                                    </div>
-                                )
-                            }
-                                <button onClick={() => addNewClustername(species.id)}>Add new Clustername</button>
+                                {
+                                    species.clusternames.map( clustername =>
+                                        <div
+                                            key={`${species.id}-${clustername}`}
+                                            className='clustername-btn'
+                                        >
+                                            <div
+                                                onContextMenu={ (event) => deleteClustername(event, species.id, clustername)}
+                                            >
+                                                {clustername}
+                                            </div>
+                                            {
+                                                clustername !== UNKNOWN_CLUSTERNAME &&
+                                                <button
+                                                    className='edit-name-btn'
+                                                    onClick={ () => editClustername(species.id, clustername) }
+                                                    onContextMenu={ (event) => event.preventDefault() }
+                                                >
+                                                    ✏️
+                                                </button>
+                                            }
+                                        </div>
+                                    )
+                                }
+                                <form onSubmit={ (event) => addNewClustername(event,species.id, index) }>
+                                    <input
+                                        className='clustername-input-field'
+                                        type='text'
+                                        required='required'
+                                        pattern='^[^,]{1,30}$'
+                                        title='No commas allowed. Max length 30 characters'
+                                        value={newClusternameInputFieldTexts[index] || ''}
+                                        placeholder='Add a new Clustername'
+                                        onChange={ (event) => handleClusternameInputChange(event, index) }
+                                    />
+                                </form>
                             </div>
 
                         </div>

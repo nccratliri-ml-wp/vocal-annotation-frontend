@@ -240,29 +240,34 @@ html, body {
 }
 
 .species{
-  /*border-bottom: 1px solid white;*/
   background-color: #082536;
   margin: 0 0 7px 0;
 }
 
 .individual-btn-container{
+  display: flex;
 }
 
 .individual-btn{
-  display: inline-block;
+  display: flex;
   border: 1px solid white;
   padding: 2px;
   margin: 2px;
 }
 
 .clustername-btn-container{
+  display: flex;
 }
 
 .clustername-btn{
-  display: inline-block;
+  display: flex;
   border: 1px solid white;
   padding: 2px;
   margin: 2px;
+}
+
+.clustername-input-field{
+
 }
 
 

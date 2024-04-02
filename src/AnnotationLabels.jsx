@@ -212,7 +212,7 @@ function AnnotationLabels () {
                                         </div>
                                     )
                                 }
-                                <button onClick={() => addNewIndividual(species.id)}>Add new Individual</button>
+                                <button onClick={() => addNewIndividual(species.id)}>➕</button>
                             </div>
 
                             <div className='clustername-btn-container'>

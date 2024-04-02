@@ -244,26 +244,26 @@ html, body {
   margin: 0 0 7px 0;
 }
 
-.individual-btn-container{
+.individual-btn-container, .clustername-btn-container{
   display: flex;
+}
+
+.individual-btn, .clustername-btn{
+  display: flex;
+  margin: 2px;
+  padding: 0 30px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
 }
 
 .individual-btn{
-  display: flex;
-  border: 1px solid white;
-  padding: 2px;
-  margin: 2px;
-}
-
-.clustername-btn-container{
-  display: flex;
+  background-color: #00d0ff;
 }
 
 .clustername-btn{
-  display: flex;
-  border: 1px solid white;
-  padding: 2px;
-  margin: 2px;
+  background-color: #58a411;
 }
 
 .clustername-input-field{

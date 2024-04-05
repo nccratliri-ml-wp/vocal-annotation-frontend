@@ -246,6 +246,24 @@ html, body {
   font-weight: bold;
 }
 
+.species[isactive='true'] {
+  z-index: 0;
+  position: relative;
+  background-size: 100% 100%;
+  overflow: hidden; /* Ensure the triangle doesn't overflow */
+}
+
+.species[isactive='true']::after {
+  z-index: -1;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  border-right: 50px solid #f3e655;
+  border-bottom: 50px solid transparent;
+}
+
 .delete-species-btn{
   background-color: transparent;
   border: none;
@@ -274,7 +292,6 @@ html, body {
 .individual-btn{
   display: flex;
   margin: 2px;
-  padding: 0 30px;
   font-size: 16px;
   max-height: 24px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
@@ -290,42 +307,34 @@ html, body {
   cursor: pointer;
 }
 
-.clustername-btn-name{
+.clustername-btn-name, .individual-btn-name{
   padding: 0 30px;
 }
 
-.individual-btn[isactive='true'], .clustername-btn[isactive='true']{
-  font-size: 20px;
-  max-height: 28px;
-}
-
-.individual-btn{
+.individual-btn[isactive='true']{
   background-color: #2d8ca1;
 }
 
-.add-individual-btn{
-  margin: 2px;
-  vertical-align: middle;
-  font-size: 14px;
-  max-height: 28px;
-  background-color: #f6fffe;
-  border: none;
-}
-
-.clustername-btn{
+.clustername-btn[isactive='true']{
   background-color: #58a411;
 }
 
-.clustername-form{
+.individual-btn, .clustername-btn{
+  background-color: #626262;
+}
+
+
+
+.clustername-form, .individual-form{
   display: flex;
   border: none;
 }
 
-.clustername-input-field:focus{
+.clustername-input-field:focus, .individual-input-field:focus{
   outline: none;
 }
 
-.add-clustername-btn{
+.add-clustername-btn, .add-individual-btn{
   background-color: #f6fffe;
   border: none;
   font-size: 14px;

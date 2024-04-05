@@ -113,10 +113,10 @@ function ScalableSpec(
 
     // Local Parameters
     const [specCalMethod, setSpecCalMethod] = useState('log-mel')
-    const [nfft, setNfft] = useState(512)
-    const [binsPerOctave, setBinsPerOctave] = useState(25)
-    const [minFreq, setMinFreq] = useState(0)
-    const [maxFreq, setMaxFreq] = useState(16000)
+    const [nfft, setNfft] = useState('')
+    const [binsPerOctave, setBinsPerOctave] = useState('')
+    const [minFreq, setMinFreq] = useState('')
+    const [maxFreq, setMaxFreq] = useState('')
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -1410,6 +1410,31 @@ function ScalableSpec(
         setWhisperSegIsLoading(false)
     }
 
+    const submitAnnotations = async () => {
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
+
+        const requestParameters = {
+            annotations: [
+                {
+                    onset: 0,
+                    offset: 0,
+                    species: 'test_species',
+                    individual: 'test_individual',
+                    filename: 'test_filename',
+                    annotation_instance: 'test_annotation_instance'
+                }
+            ]
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+        };
+
+        const response = await axios.post(path, requestParameters, { headers } )
+    }
+
+
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
     // When labels or the Waveform Scale value are manipulated
@@ -1570,6 +1595,7 @@ function ScalableSpec(
                             audioFileName={'Example Audio File Name'}
                             labels={labels}
                         />
+                        <button onClick={submitAnnotations}>Submit Annotations</button>
                         {id !== 'track_1' &&
                             <button
                                 onClick={handleRemoveTrack}

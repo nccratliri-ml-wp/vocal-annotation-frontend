@@ -92,9 +92,11 @@ function GlobalConfig (
                 <input
                     type="number"
                     value={hopLengthInputValue}
+                    min={0}
                     onKeyPress={excludeNonDigits}
                     onChange={() => setHopLengthInputValue(event.target.value)}
                     onFocus={(event) => event.target.select()}
+                    onPaste={(event) => event.preventDefault()}
                 />
             </label>
 
@@ -103,9 +105,11 @@ function GlobalConfig (
                 <input
                     type="number"
                     value={numSpecColumnsInputValue}
+                    min={0}
                     onChange={(event) => setColumnsInputValue(event.target.value)}
                     onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
+                    onPaste={(event) => event.preventDefault()}
                 />
             </label>
 
@@ -114,9 +118,11 @@ function GlobalConfig (
                 <input
                     type="number"
                     value={samplingRateInputValue}
+                    min={0}
                     onChange={(event) => setSamplingRateInputValue(event.target.value)}
                     onKeyPress={excludeNonDigits}
                     onFocus={(event) => event.target.select()}
+                    onPaste={(event) => event.preventDefault()}
                 />
             </label>
 

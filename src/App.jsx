@@ -63,9 +63,9 @@ function App() {
     const [activeIndividual, setActiveIndividual] = useState(0);
     const [numberOfIndividuals, setNumberOfIndividuals] = useState(1)
 
-    const [globalHopLength, setGlobalHopLength] = useState(0)
-    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState(0)
-    const [globalSamplingRate, setGlobalSamplingRate] = useState(0)
+    const [globalHopLength, setGlobalHopLength] = useState('')
+    const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState('')
+    const [globalSamplingRate, setGlobalSamplingRate] = useState('')
     const [defaultConfig, setDefaultConfig] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */

@@ -101,6 +101,7 @@ function Parameters(
                                 onChange={handleNFftInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
                             />
                         </label>
                     )}
@@ -122,9 +123,11 @@ function Parameters(
                             <input
                                 type="number"
                                 value={binsPerOctave}
+                                min={0}
                                 onChange={handleBinsPerOctaveInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
                             />
                         </label>
                     )}
@@ -136,9 +139,11 @@ function Parameters(
                         <input
                             type="number"
                             value={minFreq}
+                            min={0}
                             onChange={handleMinFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
+                            onPaste={(event) => event.preventDefault()}
                         />
                     </label>
                     <label>
@@ -146,9 +151,11 @@ function Parameters(
                         <input
                             type="number"
                             value={maxFreq}
+                            min={0}
                             onChange={handleMaxFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
+                            onPaste={(event) => event.preventDefault()}
                         />
                     </label>
                 </div>

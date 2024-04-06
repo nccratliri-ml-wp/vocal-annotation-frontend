@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import Sketch from '@uiw/react-color-sketch'
 
-function Colorwheel( { toggleColorwheel, passChosenColorToClusternames, BTN } ) {
-    const [hex, setHex] = useState(BTN.color)
+function Colorwheel( { toggleColorwheel, passChosenColorToAnnotationLabels, selectedID, selectedClustername } ) {
+    const [hex, setHex] = useState(selectedClustername.color)
     const [disableAlpha, setDisableAlpha] = useState(false)
 
     return (
@@ -13,10 +13,10 @@ function Colorwheel( { toggleColorwheel, passChosenColorToClusternames, BTN } ) 
                 disableAlpha={disableAlpha}
                 onChange={(color) => {
                     setHex(color.hex)
-                    passChosenColorToClusternames(BTN, color.hex)
+                    passChosenColorToAnnotationLabels(selectedID, selectedClustername, color.hex)
                 }}
             />
-            <button onClick={() => toggleColorwheel(BTN)}>
+            <button onClick={() => toggleColorwheel(selectedID, selectedClustername)}>
                 Close
             </button>
         </div>

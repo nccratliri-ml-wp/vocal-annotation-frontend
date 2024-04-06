@@ -246,31 +246,15 @@ html, body {
   font-weight: bold;
 }
 
-.species[isactive='true'] {
-  z-index: 0;
-  position: relative;
-  background-size: 100% 100%;
-  overflow: hidden; /* Ensure the triangle doesn't overflow */
-}
-
-.species[isactive='true']::after {
-  z-index: -1;
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  border-right: 50px solid #f3e655;
-  border-bottom: 50px solid transparent;
-}
-
-.delete-species-btn{
+.delete-species-btn, .edit-species-btn{
   background-color: transparent;
   border: none;
+  margin: 0;
+  padding: 0;
   font-size: 14px;
 }
 
-.delete-species-btn:hover{
+.delete-species-btn:hover, .edit-species-btn:hover{
   font-size: 16px;
 }
 
@@ -289,7 +273,8 @@ html, body {
   flex-wrap: wrap;
 }
 
-.individual-btn{
+.individual-btn, .clustername-btn{
+  background-color: #626262;
   display: flex;
   margin: 2px;
   font-size: 16px;
@@ -298,32 +283,23 @@ html, body {
   cursor: pointer;
 }
 
-.clustername-btn{
-  display: flex;
-  margin: 2px;
-  font-size: 16px;
-  max-height: 24px;
-  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
-  cursor: pointer;
+.individual-btn[isactive='true']{
+  /*background-color: #2d8ca1;*/
+  background-image: linear-gradient(to bottom right, #0095ff, yellow);
+}
+
+.clustername-btn[isactive='true']{
+  /*background-color: #58a411;*/
+  background-image: linear-gradient(to bottom right, #ff00f2, yellow);
 }
 
 .clustername-btn-name, .individual-btn-name{
   padding: 0 30px;
 }
 
-.individual-btn[isactive='true']{
-  background-color: #2d8ca1;
+.clustername-btn-name[isactive='true']{
+  border-left: 1px solid black;
 }
-
-.clustername-btn[isactive='true']{
-  background-color: #58a411;
-}
-
-.individual-btn, .clustername-btn{
-  background-color: #626262;
-}
-
-
 
 .clustername-form, .individual-form{
   display: flex;

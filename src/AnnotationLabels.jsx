@@ -1,13 +1,13 @@
 import React, {useState} from "react";
 import { nanoid } from 'nanoid'
+import Colorwheel from "./Colorwheel.jsx";
 
 class Species {
-    constructor(id, name, individuals, clusternames, isActive=false) {
+    constructor(id, name, individuals, clusternames) {
         this.id = id
         this.name = name
         this.individuals = individuals
         this.clusternames = clusternames
-        this.isActive = isActive
     }
 }
 
@@ -19,9 +19,11 @@ class Individual {
 }
 
 class Clustername {
-    constructor(name) {
+    constructor(name, color=DEFAULT_CLUSTERNAME_COLOR) {
         this.name = name
         this.isActive = true
+        this.color = color
+        this.showColorwheel = false
     }
 }
 
@@ -29,6 +31,8 @@ class Clustername {
 const UNKNOWN_SPECIES = 'Unknown Species'
 const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
+const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
+const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 
 function AnnotationLabels () {
 
@@ -37,7 +41,7 @@ function AnnotationLabels () {
     const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
 
     const [speciesArray, setSpeciesArray] = useState([
-        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME)], true )
+        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)], true )
     ])
 
 
@@ -97,8 +101,33 @@ function AnnotationLabels () {
         setSpeciesArray(modifiedSpeciesArray)
     }
 
+    const editSpecies = (selectedID) => {
+        let editedSpeciesName = prompt('Change species name: ')
+        if (!editedSpeciesName) return
+
+        const allSpeciesNames = speciesArray.map(speciesObject => speciesObject.name)
+        if (allSpeciesNames.some(name => name === editedSpeciesName)) {
+            alert(`${editedSpeciesName} already exists. Add a different one.`)
+            return
+        }
+
+        const modifiedSpeciesArray = speciesArray.map( speciesObject => {
+            if (speciesObject.id === selectedID) {
+                return{
+                    ...speciesObject,
+                    name: editedSpeciesName
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
 
     /* ++++++++++++++++++++ Individuals ++++++++++++++++++++ */
+
     const addNewIndividual = (event, selectedID, index) => {
         event.preventDefault()
 
@@ -438,6 +467,61 @@ function AnnotationLabels () {
         }))
     }
 
+    const toggleColorwheel = (selectedID, selectedClustername) => {
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    if (clustername === selectedClustername){
+                        return {
+                            ...clustername,
+                            showColorwheel: !clustername.showColorwheel
+                        }
+                    } else {
+                        return clustername
+                    }
+                })
+
+                return {
+                    ...speciesObject,
+                    clusternames: [...updatedClusternames]
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+
+    }
+
+    const passChosenColorToAnnotationLabels = (selectedID, selectedClustername, newColor) => {
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    if (clustername === selectedClustername){
+                        return {
+                            ...clustername,
+                            color: newColor
+                        }
+                    } else {
+                        return clustername
+                    }
+                })
+
+                return {
+                    ...speciesObject,
+                    clusternames: [...updatedClusternames]
+                }
+            } else {
+                return speciesObject
+            }
+        })
+
+        setSpeciesArray(modifiedSpeciesArray)
+    }
+
 
     /* ++++++++++++++++++++ Helper methods ++++++++++++++++++++ */
 
@@ -454,7 +538,7 @@ function AnnotationLabels () {
     }
 
 
-    return(
+    return (
         <div id='annotation-labels-container'>
 
             <div id='annotation-labels-menu'>
@@ -465,9 +549,9 @@ function AnnotationLabels () {
                             id={species.id}
                             key={species.id}
                             className='species'
-                            isactive={species.isActive.toString()}
                         >
                             {species.name}
+                            {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn' onClick={() => editSpecies(species.id)}>✏️</button>}
                             {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn' onClick={() => deleteSpecies(species.id, index)}>🗑️</button>}
 
                             <div className='individual-btn-container'>
@@ -488,11 +572,11 @@ function AnnotationLabels () {
                                             {
                                                 individual.name !== UNKNOWN_INDIVIDUAL &&
                                                 <button
-                                                className='edit-name-btn'
-                                                onClick={ () => editIndividual(species.id, individual) }
-                                                onContextMenu={ (event) => event.preventDefault() }
+                                                    className='edit-name-btn'
+                                                    onClick={ () => editIndividual(species.id, individual) }
+                                                    onContextMenu={ (event) => event.preventDefault() }
                                                 >
-                                                ✏️
+                                                    ✏️
                                                 </button>
                                             }
                                         </div>
@@ -520,10 +604,12 @@ function AnnotationLabels () {
                                         <div
                                             key={`${species.id}-${clustername.name}`}
                                             className='clustername-btn'
+                                            style={{ borderLeft: `2px solid ${clustername.color}` }}
                                             isactive={clustername.isActive.toString()}
                                         >
                                             <div
                                                 className='clustername-btn-name'
+                                                isactive={clustername.isActive.toString()}
                                                 onClick={ () => handleClickClustername(species.id, clustername) }
                                                 onContextMenu={ (event) => deleteClustername(event, species.id, clustername)}
                                             >
@@ -531,10 +617,18 @@ function AnnotationLabels () {
                                             </div>
                                             <button
                                                 className='colorwheel-btn'
+                                                onClick={ () => toggleColorwheel(species.id, clustername) }
                                                 onContextMenu={ (event) => event.preventDefault() }
                                             >
                                                 🎨️
                                             </button>
+                                            {
+                                                clustername.showColorwheel &&
+                                                <Colorwheel
+                                                    toggleColorwheel={toggleColorwheel}
+                                                    passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
+                                                    selectedID={species.id}
+                                                    selectedClustername={clustername} />}
                                             {
                                                 clustername.name !== UNKNOWN_CLUSTERNAME &&
                                                 <button

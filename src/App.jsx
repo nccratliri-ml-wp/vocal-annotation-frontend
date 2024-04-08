@@ -1,17 +1,37 @@
 import React, {useState, useEffect} from 'react'
-import Clusternames from "./Clusternames.jsx"
 import ScalableSpec from "./ScalableSpec.jsx";
-import Individuals from "./Indivduals";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
+import {nanoid} from "nanoid";
 
+// Global Variables
 const SCROLL_STEP_RATIO = 0.1
+const UNKNOWN_SPECIES = 'Unknown Species'
+const UNKNOWN_INDIVIDUAL = 'Unknown'
+const UNKNOWN_CLUSTERNAME = 'Unknown'
+const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
+const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
 
-class ClusternameButton {
-    constructor(id, clustername, isActive, color) {
+class Species {
+    constructor(id, name, individuals, clusternames) {
         this.id = id
-        this.clustername = clustername
-        this.isActive = isActive
+        this.name = name
+        this.individuals = individuals
+        this.clusternames = clusternames
+    }
+}
+
+class Individual {
+    constructor(name) {
+        this.name = name
+        this.isActive = true
+    }
+}
+
+class Clustername {
+    constructor(name, color=DEFAULT_CLUSTERNAME_COLOR) {
+        this.name = name
+        this.isActive = true
         this.color = color
         this.showColorwheel = false
     }
@@ -19,12 +39,9 @@ class ClusternameButton {
 
 function App() {
     const [importedLabels, setImportedLabels] = useState([]);
-    const [clusternameButtons, setClusternameButtons] = useState(
-        [
-            new ClusternameButton('PROTECTED_AREA', 'Protected Area🔒', false, 'green'),
-            new ClusternameButton('UNKNOWN_BUTTON', 'Unknown tag', true, '#47ff14')
-        ])
-    const [outdatedClustername, setOutdatedClustername] = useState(null)
+    const [speciesArray, setSpeciesArray] = useState([
+        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)], true )
+    ])
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -60,19 +77,12 @@ function App() {
 
     const [activeLabel, setActiveLabel] = useState(null)
 
-    const [activeIndividual, setActiveIndividual] = useState(0);
-    const [numberOfIndividuals, setNumberOfIndividuals] = useState(1)
-
     const [globalHopLength, setGlobalHopLength] = useState('')
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState('')
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
     const [defaultConfig, setDefaultConfig] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
-
-    function passClusterNameButtonsToApp( newClusternameButtons ){
-        setClusternameButtons( newClusternameButtons )
-    }
 
     function passTrackDurationToApp( newTrackDuration ) {
         setTrackDurations(prevState => [...prevState, newTrackDuration])
@@ -98,20 +108,12 @@ function App() {
         setScrollStep( newScrollStep )
     }
 
+    function passSpeciesArrayToApp ( newSpeciesArray ){
+        setSpeciesArray( newSpeciesArray )
+    }
+
     function passActiveLabelToApp( newActiveLabel ){
         setActiveLabel( newActiveLabel )
-    }
-
-    function passActiveIndividualToApp( newActiveIndividual ){
-        setActiveIndividual( newActiveIndividual )
-    }
-
-    function passNumberOfIndividualsToApp( newNumber ){
-        setNumberOfIndividuals( newNumber )
-    }
-    
-    function passOutdatedClusterNamesToApp( clustername ){
-        setOutdatedClustername( clustername )
     }
 
     function passGlobalHopLengthToApp( newHopLength ){
@@ -228,7 +230,15 @@ function App() {
 
     return (
         <>
-            <AnnotationLabels />
+            <AnnotationLabels
+                speciesArray={speciesArray}
+                passSpeciesArrayToApp={passSpeciesArrayToApp}
+                UNKNOWN_SPECIES={UNKNOWN_SPECIES}
+                UNKNOWN_INDIVIDUAL={UNKNOWN_INDIVIDUAL}
+                UNKNOWN_CLUSTERNAME={UNKNOWN_CLUSTERNAME}
+                DEFAULT_CLUSTERNAME_COLOR={DEFAULT_CLUSTERNAME_COLOR}
+                DEFAULT_UNKNOWN_CLUSTERNAME_COLOR={DEFAULT_UNKNOWN_CLUSTERNAME_COLOR}
+            />
             <div className='controls-container'>
                 <button
                     id='left-scroll-btn'
@@ -272,14 +282,13 @@ function App() {
                 <ScalableSpec
                     id='track_1'
                     trackDurations={trackDurations}
-                    clusternameButtons={clusternameButtons}
+                    speciesArray={speciesArray}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -291,9 +300,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -307,14 +313,14 @@ function App() {
             {showTracks.track_2 &&
                 <ScalableSpec
                     id='track_2'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -326,9 +332,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -342,14 +345,14 @@ function App() {
             {showTracks.track_3 &&
                 <ScalableSpec
                     id='track_3'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -361,9 +364,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -377,14 +377,14 @@ function App() {
             {showTracks.track_4 &&
                 <ScalableSpec
                     id='track_4'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -396,9 +396,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -412,14 +409,14 @@ function App() {
             {showTracks.track_5 &&
                 <ScalableSpec
                     id='track_5'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -431,9 +428,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -447,14 +441,14 @@ function App() {
             {showTracks.track_6 &&
                 <ScalableSpec
                     id='track_6'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -466,9 +460,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -482,14 +473,14 @@ function App() {
             {showTracks.track_7 &&
                 <ScalableSpec
                     id='track_7'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -501,9 +492,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -517,14 +505,14 @@ function App() {
             {showTracks.track_8 &&
                 <ScalableSpec
                     id='track_8'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -536,9 +524,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -552,14 +537,14 @@ function App() {
             {showTracks.track_9 &&
                 <ScalableSpec
                     id='track_9'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -571,9 +556,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -587,14 +569,14 @@ function App() {
             {showTracks.track_10 &&
                 <ScalableSpec
                     id='track_10'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -606,9 +588,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -622,14 +601,14 @@ function App() {
             {showTracks.track_11 &&
                 <ScalableSpec
                     id='track_11'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -641,9 +620,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -657,14 +633,14 @@ function App() {
             {showTracks.track_12 &&
                 <ScalableSpec
                     id='track_12'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -676,9 +652,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -692,14 +665,14 @@ function App() {
             {showTracks.track_13 &&
                 <ScalableSpec
                     id='track_13'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -711,9 +684,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -727,14 +697,14 @@ function App() {
             {showTracks.track_14 &&
                 <ScalableSpec
                     id='track_14'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -746,9 +716,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -762,14 +729,14 @@ function App() {
             {showTracks.track_15 &&
                 <ScalableSpec
                     id='track_15'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -781,9 +748,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -797,14 +761,14 @@ function App() {
             {showTracks.track_16 &&
                 <ScalableSpec
                     id='track_16'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -816,9 +780,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -832,14 +793,14 @@ function App() {
             {showTracks.track_17 &&
                 <ScalableSpec
                     id='track_17'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -851,9 +812,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -867,14 +825,14 @@ function App() {
             {showTracks.track_18 &&
                 <ScalableSpec
                     id='track_18'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -886,9 +844,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -902,14 +857,14 @@ function App() {
             {showTracks.track_19 &&
                 <ScalableSpec
                     id='track_19'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -921,9 +876,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -937,14 +889,14 @@ function App() {
             {showTracks.track_20 &&
                 <ScalableSpec
                     id='track_20'
-                    clusternameButtons={clusternameButtons}
-                    showOverviewInitialValue={false}
+                    trackDurations={trackDurations}
+                    speciesArray={speciesArray}
+                    showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
                     currentEndTime={currentEndTime}
                     maxScrollTime={maxScrollTime}
-                    scrollStep={scrollStep}
                     SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
                     passScrollStepToApp={passScrollStepToApp}
                     passMaxScrollTimeToApp={passMaxScrollTimeToApp}
@@ -956,9 +908,6 @@ function App() {
                     removeTrackInApp={removeTrackInApp}
                     passActiveLabelToApp={passActiveLabelToApp}
                     activeLabel={activeLabel}
-                    activeIndividual={activeIndividual}
-                    numberOfIndividuals={numberOfIndividuals}
-                    outdatedClustername={outdatedClustername}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}

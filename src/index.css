@@ -53,14 +53,18 @@ html, body {
 }
 
 .side-window{
-  display: flex;
-  width: 200px;
+  display: grid;
+  grid-template-columns: 160px 40px;
+  grid-template-rows: 230px auto;
+  grid-template-areas:
+    "track-controls  frequencies-canvas"
+    "individuals-canvas individuals-canvas";
 }
 
 .track-controls{
+  grid-area: track-controls;
   display: flex;
   flex-direction: column;
-  width: 160px;
 }
 
 .file-input{
@@ -210,7 +214,7 @@ html, body {
 /* -------------------------- Parameters -------------------------- */
 
 .local-parameters-config-panel{
-  //position: fixed;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   background-color: #082536;
@@ -285,12 +289,12 @@ html, body {
 
 .individual-btn[isactive='true']{
   /*background-color: #2d8ca1;*/
-  background-image: linear-gradient(to bottom right, #0095ff, yellow);
+  background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
 }
 
 .clustername-btn[isactive='true']{
   /*background-color: #58a411;*/
-  background-image: linear-gradient(to bottom right, #ff00f2, yellow);
+  /*background-image: linear-gradient(to bottom right, #0095ff, yellow);*/
 }
 
 .clustername-btn-name, .individual-btn-name{
@@ -343,12 +347,14 @@ html, body {
 }
 
 .frequencies-canvas{
+  grid-area: frequencies-canvas;
   display: block;
   height: 175px;
   margin: 55px 0 0 0;
 }
 
 .individuals-canvas{
+  grid-area: individuals-canvas;
   display: block;
 }
 

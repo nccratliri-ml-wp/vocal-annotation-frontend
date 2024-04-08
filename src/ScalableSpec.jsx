@@ -8,11 +8,12 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, clustername, individual, annotator, color) {
+    constructor(onset, offset, species, individual, clustername, annotator, color) {
         this.onset = onset
         this.offset = offset
-        this.clustername = clustername
+        this.species = species
         this.individual = individual
+        this.clustername = clustername
         this.annotator = annotator
         this.color = color
     }
@@ -33,7 +34,7 @@ function ScalableSpec(
                         {
                             id,
                             trackDurations,
-                            clusternameButtons,
+                            speciesArray,
                             showOverviewInitialValue,
                             globalAudioDuration,
                             globalClipDuration,
@@ -41,7 +42,6 @@ function ScalableSpec(
                             currentStartTime,
                             currentEndTime,
                             maxScrollTime,
-                            scrollStep,
                             SCROLL_STEP_RATIO,
                             passScrollStepToApp,
                             passMaxScrollTimeToApp,
@@ -52,9 +52,12 @@ function ScalableSpec(
                             removeTrackInApp,
                             passActiveLabelToApp,
                             activeLabel,
+                            /*
                             activeIndividual,
-                            numberOfIndividuals,
+                            numberOfIndividuals
                             outdatedClustername,
+
+                             */
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -81,6 +84,7 @@ function ScalableSpec(
 
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
+    const numberOfIndividuals = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
 
     // Time Axis
     const timeAxisRef = useRef(null);
@@ -124,8 +128,10 @@ function ScalableSpec(
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
 
-    // Active Clustername
-    const activeClusternameBTN = clusternameButtons.find(btn => btn.isActive === true)
+    // Active Species
+    const activeSpecies = speciesArray.find(speciesObj =>
+        speciesObj.individuals.some(individual => individual.isActive)
+    )
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -425,11 +431,24 @@ function ScalableSpec(
         return ( timestamp * canvas.width / globalClipDuration ) - ( currentStartTime * canvas.width / globalClipDuration )
     }
 
-    const calculateYPosition = (label) => {
-        return label.clustername === 'Protected Area🔒'? labelCanvasRef.current.height - 1 : label.individual * HEIGHT_BETWEEN_INDIVIDUAL_LINES
-    }
+        const calculateYPosition = (label) => {
+            let individualCount = 0
 
-    const calculateTimestamp = (event) => {
+            outerLoop:
+                for (let speciesObj of speciesArray) {
+                    for (let individual of speciesObj.individuals) {
+                        individualCount++
+                        if (speciesObj.name === label.species && individual.name === label.individual) {
+                            break outerLoop
+                        }
+                    }
+                }
+
+            return label.clustername === 'Protected Area🔒' ? labelCanvasRef.current.height - 1 : individualCount * HEIGHT_BETWEEN_INDIVIDUAL_LINES;
+        }
+
+
+        const calculateTimestamp = (event) => {
         const xClicked = getXClicked(event)
         const ratio = (xClicked / specCanvasRef.current.width)
         return globalClipDuration * ratio + currentStartTime
@@ -486,9 +505,11 @@ function ScalableSpec(
     }
 
     const getCorrectLabelColor = (label) => {
-        const correspondingBTN = clusternameButtons.find(btn => btn.clustername === label.clustername)
+        const correspondingClustername = speciesArray.find(speciesObj => speciesObj.name === label.species)?.clusternames.find(clustername => clustername.name === label.clustername);
+
+
         const fallbackColor = label.color? label.color : DEFAULT_LABEL_COLOR
-        return correspondingBTN? correspondingBTN.color: fallbackColor
+        return correspondingClustername? correspondingClustername.color: fallbackColor
     }
 
     const linspace = (start, stop, num=50, endpoint=true) => {
@@ -519,7 +540,7 @@ function ScalableSpec(
             drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawActiveLabel()
+            //drawActiveLabel()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -839,6 +860,7 @@ function ScalableSpec(
         const ctx = cvs.getContext('2d')
         ctx.clearRect(0, 0, cvs.width, cvs.height)
 
+        // Draw dotted visual support lines
         for (let i = 1; i <= numberOfIndividuals; i++){
             const x1 = 0
             const x2 = cvs.width
@@ -888,12 +910,32 @@ function ScalableSpec(
         ctx.fillStyle = '#ffffff'
         ctx.lineWidth = 1.5
 
-        for (let i=1; i <= numberOfIndividuals; i++){
-            const text = `Ind. ${i}`
-            const textWidth = ctx.measureText(text).width
-            const x = cvs.width - textWidth - 5
-            const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
-            ctx.fillText(text, x, y);
+        let i = 1
+        for (let speciesObj of speciesArray){
+            // Draw Individual names
+            for (let individual of speciesObj.individuals){
+                ctx.font = `${10}px sans-serif`
+                const textWidth = ctx.measureText(individual.name).width
+                const x = cvs.width - textWidth - 5
+                const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+                ctx.fillText(individual.name, x, y)
+                i++
+            }
+            // Draw Species name
+            const xSpeciesName = 0
+            const ySpeciesName = (i - speciesObj.individuals.length) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            ctx.font = `${12}px sans-serif`
+            ctx.fillText(speciesObj.name, xSpeciesName, ySpeciesName)
+
+            // Draw line separating Species
+            const x1 = 0
+            const x2 = cvs.width
+            const y = (i - 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 2
+            ctx.beginPath()
+            ctx.moveTo(x1, y)
+            ctx.lineTo(x2, y)
+            ctx.strokeStyle = ctx.strokeStyle = '#ffffff'
+            ctx.stroke()
         }
 
         const text = '🔒'
@@ -905,10 +947,11 @@ function ScalableSpec(
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
 
     const addNewLabel = (onset) => {
-        const clustername = activeClusternameBTN? activeClusternameBTN.clustername: null
-        const individual = clustername === 'Protected Area'? null : activeIndividual
+        const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
+        const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
+        //const individual = clustername === 'Protected Area'? null : activeIndividual
 
-        const newLabel = new Label(onset, undefined, clustername, individual, null, null)
+        const newLabel = new Label(onset, undefined, activeSpecies.name,individual.name,clustername.name, null, clustername.color)
         newLabel.color = getCorrectLabelColor(newLabel)
 
         setLabels( current => [...current, newLabel] )
@@ -1400,7 +1443,7 @@ function ScalableSpec(
         const whisperObjects = response.data.labels
 
         const whisperLabels = whisperObjects.map( obj => {
-            const newLabel = new Label(obj.onset, obj.offset, obj.clustername, activeIndividual, null, null)
+            const newLabel = new Label(obj.onset, obj.offset, 'test species','test individual', obj.clustername, null, null)
             newLabel.color = getCorrectLabelColor(newLabel)
 
             return newLabel
@@ -1442,7 +1485,7 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale, clusternameButtons, numberOfIndividuals] )
+    }, [labels, activeLabel, waveformScale, speciesArray, numberOfIndividuals] )
 
     // When user zoomed,or scrolled
     useEffect( () => {
@@ -1517,6 +1560,7 @@ function ScalableSpec(
     }, [response, globalAudioDuration] )
 
     // When the user edits the clustername of one of the clustername buttons
+                    /*
     useEffect( () => {
         if (!activeClusternameBTN) return
 
@@ -1530,7 +1574,7 @@ function ScalableSpec(
         setLabels(newLabelsArray)
 
     }, [outdatedClustername])
-
+*/
 
     return (
         <div
@@ -1654,21 +1698,18 @@ function ScalableSpec(
                             submitLocalParameters={submitLocalParameters}
                         />
                     </div>
-                    <div className='frequencies-individuals-container'>
-                        <canvas
-                            className='frequencies-canvas'
-                            ref={frequenciesCanvasRef}
-                            width={40}
-                            height={175}
-                        />
-                        <canvas
-                            className='individuals-canvas'
-                            ref={individualsCanvasRef}
-                            width={40}
-                            height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
-                        />
-                    </div>
-
+                    <canvas
+                        className='frequencies-canvas'
+                        ref={frequenciesCanvasRef}
+                        width={40}
+                        height={175}
+                    />
+                    <canvas
+                        className='individuals-canvas'
+                        ref={individualsCanvasRef}
+                        width={200}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
+                    />
                 </div>
 
                 <div onMouseLeave={handleMouseUp}>

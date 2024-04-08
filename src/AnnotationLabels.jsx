@@ -19,7 +19,7 @@ class Individual {
 }
 
 class Clustername {
-    constructor(name, color=DEFAULT_CLUSTERNAME_COLOR) {
+    constructor(name, color) {
         this.name = name
         this.isActive = true
         this.color = color
@@ -27,22 +27,22 @@ class Clustername {
     }
 }
 
-// Global variables
-const UNKNOWN_SPECIES = 'Unknown Species'
-const UNKNOWN_INDIVIDUAL = 'Unknown'
-const UNKNOWN_CLUSTERNAME = 'Unknown'
-const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
-const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 
-function AnnotationLabels () {
+function AnnotationLabels ({
+                               speciesArray,
+                               passSpeciesArrayToApp,
+                               UNKNOWN_SPECIES,
+                               UNKNOWN_INDIVIDUAL,
+                               UNKNOWN_CLUSTERNAME,
+                               DEFAULT_CLUSTERNAME_COLOR,
+                               DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+                           }) {
 
     const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
     const [newIndividualInputFieldTexts, setNewIndividualInputFieldTexts] = useState([])
     const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
 
-    const [speciesArray, setSpeciesArray] = useState([
-        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)], true )
-    ])
+
 
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
@@ -70,10 +70,10 @@ function AnnotationLabels () {
         })
 
         // Create new Species
-        const newSpeciesObject = new Species(nanoid(), newSpeciesInputFieldText,[ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME) ])
+        const newSpeciesObject = new Species(nanoid(), newSpeciesInputFieldText,[ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR) ])
 
         modifiedSpeciesArray.push(newSpeciesObject)
-        setSpeciesArray( modifiedSpeciesArray )
+        passSpeciesArrayToApp( modifiedSpeciesArray )
     }
 
     const deleteSpecies = (selectedID, index) => {
@@ -98,7 +98,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const editSpecies = (selectedID) => {
@@ -122,7 +122,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
 
@@ -179,7 +179,7 @@ function AnnotationLabels () {
                 }
             }
         })
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const handleIndividualInputChange = (event, index) => {
@@ -213,7 +213,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const editIndividual = (selectedID, selectedIndividual) => {
@@ -244,7 +244,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const activateIndividual = (individuals, selectedIndividualName) => {
@@ -286,7 +286,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const deactivateExistingIndividuals = (individuals) => {
@@ -337,7 +337,7 @@ function AnnotationLabels () {
                 return {
                     ...speciesObject,
                     individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames, new Clustername(newClusternameName)]
+                    clusternames: [...updatedClusternames, new Clustername(newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
                 }
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -350,7 +350,7 @@ function AnnotationLabels () {
                 }
             }
         })
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const handleClusternameInputChange = (event, index) => {
@@ -384,7 +384,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const editClustername = (selectedID, selectedClustername) => {
@@ -415,7 +415,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const activateClustername = (clusternames, selectedClusternameName) => {
@@ -457,7 +457,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
     const deactivateExistingClusternames = (clusternames) => {
@@ -491,7 +491,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
 
     }
 
@@ -519,7 +519,7 @@ function AnnotationLabels () {
             }
         })
 
-        setSpeciesArray(modifiedSpeciesArray)
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
 
@@ -604,7 +604,10 @@ function AnnotationLabels () {
                                         <div
                                             key={`${species.id}-${clustername.name}`}
                                             className='clustername-btn'
-                                            style={{ borderLeft: `2px solid ${clustername.color}` }}
+                                            style={{
+                                                borderLeft: `2px solid ${clustername.color}`,
+                                                backgroundColor: clustername.isActive? clustername.color : '#626262'
+                                            }}
                                             isactive={clustername.isActive.toString()}
                                         >
                                             <div

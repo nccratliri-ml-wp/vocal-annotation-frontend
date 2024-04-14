@@ -288,13 +288,10 @@ html, body {
 }
 
 .individual-btn[isactive='true']{
-  /*background-color: #2d8ca1;*/
   background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
 }
 
 .clustername-btn[isactive='true']{
-  /*background-color: #58a411;*/
-  /*background-image: linear-gradient(to bottom right, #0095ff, yellow);*/
 }
 
 .clustername-btn-name, .individual-btn-name{

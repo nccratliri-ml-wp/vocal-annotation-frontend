@@ -1487,6 +1487,25 @@ function ScalableSpec(
 
     }, [labels, activeLabel, waveformScale, speciesArray, numberOfIndividuals] )
 
+
+    useEffect(() => {
+        if (!speciesArray) return;
+
+        const filteredLabels = labels.map( label => {
+
+        })
+    }, [speciesArray]);
+
+    /*
+    * 1. Add id property to Individual and Clustername classes, that derives from species ID
+    * 1.1 when creating a new label, it will have three new Id's: SpeciesID, clusternameID, individualID
+    * 2. Upon deletion, pass deleted id to deletedItemID state in App component
+    * 3. in the useEffect, listen for changes of deletedItemID
+    * 4. all labels that have a deletedItemID store as a property will be filtered out of labels
+    * 5. update labels array
+    * 6. Additional: check if there's no labels with that id, then dont' display the prompt box
+    * */
+
     // When user zoomed,or scrolled
     useEffect( () => {
             if (!globalClipDuration || !response) return

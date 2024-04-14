@@ -44,7 +44,6 @@ function AnnotationLabels ({
 
 
 
-
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
     const addNewSpecies = (event) => {
@@ -192,6 +191,8 @@ function AnnotationLabels ({
         event.preventDefault()
 
         if (selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
+
+        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {

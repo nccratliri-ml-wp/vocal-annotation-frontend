@@ -214,7 +214,6 @@ function App() {
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
     }
 
-
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {

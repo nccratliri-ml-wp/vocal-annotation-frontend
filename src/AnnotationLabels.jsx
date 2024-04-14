@@ -1,48 +1,22 @@
 import React, {useState} from "react";
 import { nanoid } from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx";
+import {
+    UNKNOWN_SPECIES,
+    UNKNOWN_INDIVIDUAL,
+    UNKNOWN_CLUSTERNAME,
+    DEFAULT_CLUSTERNAME_COLOR,
+    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    Species,
+    Individual,
+    Clustername
+} from './species.js'
 
-class Species {
-    constructor(id, name, individuals, clusternames) {
-        this.id = id
-        this.name = name
-        this.individuals = individuals
-        this.clusternames = clusternames
-    }
-}
-
-class Individual {
-    constructor(name) {
-        this.name = name
-        this.isActive = true
-    }
-}
-
-class Clustername {
-    constructor(name, color) {
-        this.name = name
-        this.isActive = true
-        this.color = color
-        this.showColorwheel = false
-    }
-}
-
-
-function AnnotationLabels ({
-                               speciesArray,
-                               passSpeciesArrayToApp,
-                               UNKNOWN_SPECIES,
-                               UNKNOWN_INDIVIDUAL,
-                               UNKNOWN_CLUSTERNAME,
-                               DEFAULT_CLUSTERNAME_COLOR,
-                               DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
-                           }) {
+function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp}) {
 
     const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
     const [newIndividualInputFieldTexts, setNewIndividualInputFieldTexts] = useState([])
     const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
-
-
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -69,13 +43,18 @@ function AnnotationLabels ({
         })
 
         // Create new Species
-        const newSpeciesObject = new Species(nanoid(), newSpeciesInputFieldText,[ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR) ])
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
+        const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+        const newSpecies = new Species(nanoid(),newSpeciesInputFieldText, [newIndividual], [newClustername] )
 
-        modifiedSpeciesArray.push(newSpeciesObject)
+        modifiedSpeciesArray.push(newSpecies)
         passSpeciesArrayToApp( modifiedSpeciesArray )
     }
 
     const deleteSpecies = (selectedID, index) => {
+        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        passDeletedItemIDToApp(selectedID)
+
         // Check if species is active
         const wasDeletedSpeciesInactive = checkIfEveryObjectIsInactive(speciesArray[index].individuals)
 
@@ -164,7 +143,7 @@ function AnnotationLabels ({
 
                 return {
                     ...speciesObject,
-                    individuals: [...updatedIndividuals, new Individual(newIndividualName)],
+                    individuals: [...updatedIndividuals, new Individual(nanoid(),newIndividualName)],
                     clusternames: [...updatedClusternames]
                 }
             } else {
@@ -193,6 +172,7 @@ function AnnotationLabels ({
         if (selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
 
         if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        passDeletedItemIDToApp(selectedIndividual.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -338,7 +318,7 @@ function AnnotationLabels ({
                 return {
                     ...speciesObject,
                     individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames, new Clustername(newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
+                    clusternames: [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
                 }
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -364,6 +344,9 @@ function AnnotationLabels ({
         event.preventDefault()
 
         if (selectedClustername.name === UNKNOWN_CLUSTERNAME) return
+
+        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        passDeletedItemIDToApp(selectedClustername.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -560,7 +543,7 @@ function AnnotationLabels ({
                                 {
                                     species.individuals.map( individual =>
                                         <div
-                                            key={`${species.id}-${individual.name}`}
+                                            key={individual.id}
                                             className='individual-btn'
                                             isactive={individual.isActive.toString()}>
                                             <div
@@ -603,7 +586,7 @@ function AnnotationLabels ({
                                 {
                                     species.clusternames.map( clustername =>
                                         <div
-                                            key={`${species.id}-${clustername.name}`}
+                                            key={clustername.id}
                                             className='clustername-btn'
                                             style={{
                                                 borderLeft: `2px solid ${clustername.color}`,

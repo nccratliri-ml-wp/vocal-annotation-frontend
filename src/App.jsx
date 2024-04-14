@@ -2,46 +2,33 @@ import React, {useState, useEffect} from 'react'
 import ScalableSpec from "./ScalableSpec.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
+import {
+    UNKNOWN_SPECIES,
+    UNKNOWN_INDIVIDUAL,
+    UNKNOWN_CLUSTERNAME,
+    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    Species,
+    Individual,
+    Clustername
+} from './species.js'
 import {nanoid} from "nanoid";
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
-const UNKNOWN_SPECIES = 'Unknown Species'
-const UNKNOWN_INDIVIDUAL = 'Unknown'
-const UNKNOWN_CLUSTERNAME = 'Unknown'
-const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
-const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
 
-class Species {
-    constructor(id, name, individuals, clusternames) {
-        this.id = id
-        this.name = name
-        this.individuals = individuals
-        this.clusternames = clusternames
-    }
-}
-
-class Individual {
-    constructor(name) {
-        this.name = name
-        this.isActive = true
-    }
-}
-
-class Clustername {
-    constructor(name, color=DEFAULT_CLUSTERNAME_COLOR) {
-        this.name = name
-        this.isActive = true
-        this.color = color
-        this.showColorwheel = false
-    }
-}
 
 function App() {
     const [importedLabels, setImportedLabels] = useState([]);
-    const [speciesArray, setSpeciesArray] = useState([
-        new Species(nanoid(),UNKNOWN_SPECIES, [ new Individual(UNKNOWN_INDIVIDUAL) ], [ new Clustername(UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)], true )
-    ])
+
+    const [speciesArray, setSpeciesArray] = useState(() => {
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
+        const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+        const newSpecies = new Species(nanoid(),UNKNOWN_SPECIES, [newIndividual], [newClustername] )
+
+        return [newSpecies]
+    })
+
+    const [deletedItemID, setDeletedItemID] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
     const [showTracks, setShowTracks] = useState({
@@ -130,6 +117,10 @@ function App() {
 
     function passDefaultConfigToApp( newDefaultConfig ){
         setDefaultConfig( newDefaultConfig )
+    }
+
+    function passDeletedItemIDToApp( newDeletedItemID ){
+        setDeletedItemID( newDeletedItemID )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -232,11 +223,7 @@ function App() {
             <AnnotationLabels
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}
-                UNKNOWN_SPECIES={UNKNOWN_SPECIES}
-                UNKNOWN_INDIVIDUAL={UNKNOWN_INDIVIDUAL}
-                UNKNOWN_CLUSTERNAME={UNKNOWN_CLUSTERNAME}
-                DEFAULT_CLUSTERNAME_COLOR={DEFAULT_CLUSTERNAME_COLOR}
-                DEFAULT_UNKNOWN_CLUSTERNAME_COLOR={DEFAULT_UNKNOWN_CLUSTERNAME_COLOR}
+                passDeletedItemIDToApp={passDeletedItemIDToApp}
             />
             <div className='controls-container'>
                 <button
@@ -282,6 +269,7 @@ function App() {
                     id='track_1'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -314,6 +302,7 @@ function App() {
                     id='track_2'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -346,6 +335,7 @@ function App() {
                     id='track_3'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -378,6 +368,7 @@ function App() {
                     id='track_4'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -410,6 +401,7 @@ function App() {
                     id='track_5'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -442,6 +434,7 @@ function App() {
                     id='track_6'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -474,6 +467,7 @@ function App() {
                     id='track_7'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -506,6 +500,7 @@ function App() {
                     id='track_8'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -538,6 +533,7 @@ function App() {
                     id='track_9'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -570,6 +566,7 @@ function App() {
                     id='track_10'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -602,6 +599,7 @@ function App() {
                     id='track_11'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -634,6 +632,7 @@ function App() {
                     id='track_12'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -666,6 +665,7 @@ function App() {
                     id='track_13'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -698,6 +698,7 @@ function App() {
                     id='track_14'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -730,6 +731,7 @@ function App() {
                     id='track_15'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -762,6 +764,7 @@ function App() {
                     id='track_16'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -794,6 +797,7 @@ function App() {
                     id='track_17'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -826,6 +830,7 @@ function App() {
                     id='track_18'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -858,6 +863,7 @@ function App() {
                     id='track_19'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
@@ -890,6 +896,7 @@ function App() {
                     id='track_20'
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
                     showOverviewInitialValue={true}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}

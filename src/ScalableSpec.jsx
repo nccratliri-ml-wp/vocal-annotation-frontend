@@ -8,12 +8,15 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, species, individual, clustername, annotator, color) {
+    constructor(onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, annotator, color) {
         this.onset = onset
         this.offset = offset
         this.species = species
         this.individual = individual
         this.clustername = clustername
+        this.speciesID = speciesID
+        this.individualID = individualID
+        this.clusternameID = clusternameID
         this.annotator = annotator
         this.color = color
     }
@@ -35,6 +38,7 @@ function ScalableSpec(
                             id,
                             trackDurations,
                             speciesArray,
+                            deletedItemID,
                             showOverviewInitialValue,
                             globalAudioDuration,
                             globalClipDuration,
@@ -951,7 +955,17 @@ function ScalableSpec(
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
         //const individual = clustername === 'Protected Area'? null : activeIndividual
 
-        const newLabel = new Label(onset, undefined, activeSpecies.name,individual.name,clustername.name, null, clustername.color)
+        const newLabel = new Label(
+            onset,
+            undefined,
+            activeSpecies.name,
+            individual.name,
+            clustername.name,
+            activeSpecies.id,
+            individual.id,
+            clustername.id,
+            null,
+            clustername.color)
         newLabel.color = getCorrectLabelColor(newLabel)
 
         setLabels( current => [...current, newLabel] )
@@ -1443,7 +1457,16 @@ function ScalableSpec(
         const whisperObjects = response.data.labels
 
         const whisperLabels = whisperObjects.map( obj => {
-            const newLabel = new Label(obj.onset, obj.offset, 'test species','test individual', obj.clustername, null, null)
+            const newLabel = new Label(obj.onset,
+                obj.offset,
+                'currently not available',
+                'currently not available',
+                obj.clustername,
+                null,
+                null,
+                null,
+                null,
+                null)
             newLabel.color = getCorrectLabelColor(newLabel)
 
             return newLabel
@@ -1491,10 +1514,10 @@ function ScalableSpec(
     useEffect(() => {
         if (!speciesArray) return;
 
-        const filteredLabels = labels.map( label => {
+        const filteredLabels = labels.filter( label => label.speciesID !== deletedItemID && label.individualID !== deletedItemID && label.clusternameID !== deletedItemID)
+        setLabels(filteredLabels)
 
-        })
-    }, [speciesArray]);
+    }, [deletedItemID]);
 
     /*
     * 1. Add id property to Individual and Clustername classes, that derives from species ID

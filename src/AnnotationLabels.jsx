@@ -52,7 +52,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const deleteSpecies = (selectedID, index) => {
-        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        if (!confirm('Deleting this Species will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedID)
 
         // Check if species is active
@@ -171,7 +171,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
         if (selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
 
-        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        if (!confirm('Deleting this Individual will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedIndividual.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
@@ -345,7 +345,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
         if (selectedClustername.name === UNKNOWN_CLUSTERNAME) return
 
-        if (!confirm('Deleting this label will remove any annotations associated with it.')) return
+        if (!confirm('Deleting this Clustername will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedClustername.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {

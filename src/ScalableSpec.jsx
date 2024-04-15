@@ -509,8 +509,7 @@ function ScalableSpec(
     }
 
     const getCorrectLabelColor = (label) => {
-        const correspondingClustername = speciesArray.find(speciesObj => speciesObj.name === label.species)?.clusternames.find(clustername => clustername.name === label.clustername);
-
+        const correspondingClustername = speciesArray.find(speciesObj => speciesObj.name === label.species)?.clusternames.find(clustername => clustername.name === label.clustername)
 
         const fallbackColor = label.color? label.color : DEFAULT_LABEL_COLOR
         return correspondingClustername? correspondingClustername.color: fallbackColor
@@ -1507,29 +1506,70 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
+        console.log(labels)
 
     }, [labels, activeLabel, waveformScale, speciesArray, numberOfIndividuals] )
 
 
+    // When a user deletes a Species, Individual or Clustername in the Annotation Labels Component
     useEffect(() => {
-        if (!speciesArray) return;
+        if (!deletedItemID) return
 
         const filteredLabels = labels.filter( label => label.speciesID !== deletedItemID && label.individualID !== deletedItemID && label.clusternameID !== deletedItemID)
         setLabels(filteredLabels)
 
-    }, [deletedItemID]);
+    }, [deletedItemID])
 
-    /*
-    * 1. Add id property to Individual and Clustername classes, that derives from species ID
-    * 1.1 when creating a new label, it will have three new Id's: SpeciesID, clusternameID, individualID
-    * 2. Upon deletion, pass deleted id to deletedItemID state in App component
-    * 3. in the useEffect, listen for changes of deletedItemID
-    * 4. all labels that have a deletedItemID store as a property will be filtered out of labels
-    * 5. update labels array
-    * 6. Additional: check if there's no labels with that id, then dont' display the prompt box
-    * */
+                    useEffect(() => {
+                        if (!speciesArray) return;
 
-    // When user zoomed,or scrolled
+                        const updatedLabels = labels.map(label => {
+                            const updatedLabel = new Label(
+                                label.onset,
+                                label.offset,
+                                label.species,
+                                label.individual,
+                                label.clustername,
+                                label.speciesID,
+                                label.individualID,
+                                label.clusternameID,
+                                label.annotator,
+                                label.color
+                            );
+
+                            for (const speciesObj of speciesArray) {
+                                if (updatedLabel.speciesID === speciesObj.id) {
+                                    updatedLabel.species = speciesObj.name;
+                                }
+                                for (const individual of speciesObj.individuals) {
+                                    if (updatedLabel.individualID === individual.id) {
+                                        updatedLabel.individual = individual.name;
+                                    }
+                                }
+                                for (const clustername of speciesObj.clusternames) {
+                                    if (updatedLabel.clusternameID === clustername.id) {
+                                        updatedLabel.clustername = clustername.name;
+                                        updatedLabel.color = clustername.color;
+                                    }
+                                }
+                            }
+
+                            return updatedLabel;
+                        });
+
+                        setLabels(updatedLabels);
+                    }, [speciesArray]);
+
+
+
+                    /*
+                    1. Refactor DeletedItemID into the above solution
+                    2. Potentially remove speciesArray from the first use effect dependecny array
+                    3.
+                     */
+
+
+    // When user zoomed or scrolled
     useEffect( () => {
             if (!globalClipDuration || !response) return
 

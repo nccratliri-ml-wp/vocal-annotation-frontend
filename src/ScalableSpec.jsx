@@ -508,13 +508,6 @@ function ScalableSpec(
         return true
     }
 
-    const getCorrectLabelColor = (label) => {
-        const correspondingClustername = speciesArray.find(speciesObj => speciesObj.name === label.species)?.clusternames.find(clustername => clustername.name === label.clustername)
-
-        const fallbackColor = label.color? label.color : DEFAULT_LABEL_COLOR
-        return correspondingClustername? correspondingClustername.color: fallbackColor
-    }
-
     const linspace = (start, stop, num=50, endpoint=true) => {
         const step = (stop - start) / (num - (endpoint ? 1 : 0))
         const arr = Array.from({ length: num }, (_, i) => start + step * i)
@@ -679,7 +672,7 @@ function ScalableSpec(
         const x = calculateXPosition(timestamp, specCanvasRef.current)
         const y = calculateYPosition(label)
 
-        const lineColor = getCorrectLabelColor(label)
+        const lineColor = label.color
 
         if (specCalMethod === 'constant-q'){
             if (timestamp === label.onset){
@@ -726,7 +719,7 @@ function ScalableSpec(
         const xOffset = calculateXPosition(label.offset, cvs)
         const y = calculateYPosition(label)
 
-        const lineColor = getCorrectLabelColor(label)
+        const lineColor = label.color
 
         ctx.lineWidth = 2
         ctx.strokeStyle = lineColor
@@ -757,7 +750,7 @@ function ScalableSpec(
         const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
         const y = calculateYPosition(label)
 
-        const lineColor = getCorrectLabelColor(label)
+        const lineColor = label.color
 
         ctx.font = "12px Arial"
         ctx.textAlign = "center"
@@ -965,7 +958,6 @@ function ScalableSpec(
             clustername.id,
             null,
             clustername.color)
-        newLabel.color = getCorrectLabelColor(newLabel)
 
         setLabels( current => [...current, newLabel] )
     }
@@ -1465,8 +1457,7 @@ function ScalableSpec(
                 null,
                 null,
                 null,
-                null)
-            newLabel.color = getCorrectLabelColor(newLabel)
+                DEFAULT_LABEL_COLOR)
 
             return newLabel
         })
@@ -1508,66 +1499,59 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, frequencies,audioArray)
         console.log(labels)
 
-    }, [labels, activeLabel, waveformScale, speciesArray, numberOfIndividuals] )
+    }, [labels, activeLabel, waveformScale, numberOfIndividuals] )
 
 
-    // When a user deletes a Species, Individual or Clustername in the Annotation Labels Component
+    // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
-        if (!deletedItemID) return
+        if (!speciesArray) return;
 
-        const filteredLabels = labels.filter( label => label.speciesID !== deletedItemID && label.individualID !== deletedItemID && label.clusternameID !== deletedItemID)
-        setLabels(filteredLabels)
+        // Iterate over the labels array
+        const updatedLabels = labels
+            .map(label => {
+                // Create an updated label with old values
+                const updatedLabel = new Label(
+                    label.onset,
+                    label.offset,
+                    label.species,
+                    label.individual,
+                    label.clustername,
+                    label.speciesID,
+                    label.individualID,
+                    label.clusternameID,
+                    label.annotator,
+                    label.color
+                )
 
-    }, [deletedItemID])
+                // Iterate over speciesArray and update the potentially new names and colors to updatedLabel
+                for (const speciesObj of speciesArray) {
+                    if (updatedLabel.speciesID === speciesObj.id) {
+                        updatedLabel.species = speciesObj.name
+                    }
+                    for (const individual of speciesObj.individuals) {
+                        if (updatedLabel.individualID === individual.id) {
+                            updatedLabel.individual = individual.name
+                        }
+                    }
+                    for (const clustername of speciesObj.clusternames) {
+                        if (updatedLabel.clusternameID === clustername.id) {
+                            updatedLabel.clustername = clustername.name
+                            updatedLabel.color = clustername.color
+                        }
+                    }
+                }
 
-                    useEffect(() => {
-                        if (!speciesArray) return;
+                return updatedLabel
+            })
+            // Remove labels that have a species, Individual or clustername that have been deleted in Annotation Label Component
+            .filter(label =>
+                label.speciesID !== deletedItemID &&
+                label.individualID !== deletedItemID &&
+                label.clusternameID !== deletedItemID
+            )
 
-                        const updatedLabels = labels.map(label => {
-                            const updatedLabel = new Label(
-                                label.onset,
-                                label.offset,
-                                label.species,
-                                label.individual,
-                                label.clustername,
-                                label.speciesID,
-                                label.individualID,
-                                label.clusternameID,
-                                label.annotator,
-                                label.color
-                            );
-
-                            for (const speciesObj of speciesArray) {
-                                if (updatedLabel.speciesID === speciesObj.id) {
-                                    updatedLabel.species = speciesObj.name;
-                                }
-                                for (const individual of speciesObj.individuals) {
-                                    if (updatedLabel.individualID === individual.id) {
-                                        updatedLabel.individual = individual.name;
-                                    }
-                                }
-                                for (const clustername of speciesObj.clusternames) {
-                                    if (updatedLabel.clusternameID === clustername.id) {
-                                        updatedLabel.clustername = clustername.name;
-                                        updatedLabel.color = clustername.color;
-                                    }
-                                }
-                            }
-
-                            return updatedLabel;
-                        });
-
-                        setLabels(updatedLabels);
-                    }, [speciesArray]);
-
-
-
-                    /*
-                    1. Refactor DeletedItemID into the above solution
-                    2. Potentially remove speciesArray from the first use effect dependecny array
-                    3.
-                     */
-
+        setLabels(updatedLabels)
+    }, [speciesArray])
 
     // When user zoomed or scrolled
     useEffect( () => {

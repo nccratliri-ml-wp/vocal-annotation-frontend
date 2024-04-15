@@ -1499,7 +1499,7 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, frequencies,audioArray)
         console.log(labels)
 
-    }, [labels, activeLabel, waveformScale, numberOfIndividuals] )
+    }, [labels, activeLabel, waveformScale] )
 
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component

@@ -8,7 +8,7 @@ import Parameters from "./Parameters.jsx"
 
 // Classes
 class Label {
-    constructor(onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, annotator, color) {
+    constructor(onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, individualIndex, annotator, color) {
         this.onset = onset
         this.offset = offset
         this.species = species
@@ -17,6 +17,7 @@ class Label {
         this.speciesID = speciesID
         this.individualID = individualID
         this.clusternameID = clusternameID
+        this.individualIndex = individualIndex
         this.annotator = annotator
         this.color = color
     }
@@ -515,6 +516,13 @@ function ScalableSpec(
         return arr
     }
 
+    const getIndividualIndex = (individual) => {
+        const allIndividualIDs = speciesArray.flatMap(speciesObj => {
+            return speciesObj.individuals.map(individual => individual.id)
+        })
+        return allIndividualIDs.indexOf(individual.id)
+    }
+
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
@@ -941,11 +949,12 @@ function ScalableSpec(
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
-
-    const addNewLabel = (onset) => {
+        const addNewLabel = (onset) => {
         const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
         //const individual = clustername === 'Protected Area'? null : activeIndividual
+
+        const individualIndex = getIndividualIndex(individual)
 
         const newLabel = new Label(
             onset,
@@ -956,6 +965,7 @@ function ScalableSpec(
             activeSpecies.id,
             individual.id,
             clustername.id,
+            individualIndex,
             null,
             clustername.color)
 
@@ -1504,6 +1514,14 @@ function ScalableSpec(
     useEffect(() => {
         if (!speciesArray) return
 
+        const allIndividualIDs = speciesArray.flatMap(speciesObj => {
+            return speciesObj.individuals.map(individual => individual.id)
+        })
+
+        // Assign each label correct index according to this array
+        // Remove old stuff from annotationlabels.jsx and species.js
+        console.log(allIndividualIDs)
+
         // Iterate over the labels array
         const updatedLabels = labels
             .map(label => {
@@ -1517,11 +1535,12 @@ function ScalableSpec(
                     label.speciesID,
                     label.individualID,
                     label.clusternameID,
+                    label.individualIndex,
                     label.annotator,
                     label.color
                 )
 
-                // Iterate over speciesArray and update the potentially new names and colors to updatedLabel
+                // Iterate over speciesArray and update the potentially new names, colors and individualIndexes to updatedLabel
                 for (const speciesObj of speciesArray) {
                     if (updatedLabel.speciesID === speciesObj.id) {
                         updatedLabel.species = speciesObj.name
@@ -1529,6 +1548,7 @@ function ScalableSpec(
                     for (const individual of speciesObj.individuals) {
                         if (updatedLabel.individualID === individual.id) {
                             updatedLabel.individual = individual.name
+                            updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
                         }
                     }
                     for (const clustername of speciesObj.clusternames) {

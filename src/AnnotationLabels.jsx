@@ -1,15 +1,15 @@
 import React, {useState} from "react";
-import { nanoid } from 'nanoid'
+import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx";
 import {
-    UNKNOWN_SPECIES,
-    UNKNOWN_INDIVIDUAL,
-    UNKNOWN_CLUSTERNAME,
+    Clustername,
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
-    Species,
     Individual,
-    Clustername
+    Species,
+    UNKNOWN_CLUSTERNAME,
+    UNKNOWN_INDIVIDUAL,
+    UNKNOWN_SPECIES
 } from './species.js'
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp}) {
@@ -35,15 +35,18 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
             const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
-            return {
-                ...speciesObject,
-                individuals: [...updatedIndividuals],
-                clusternames: [...updatedClusternames]
-            }
+
+            return new Species(
+                speciesObject.id,
+                speciesObject.name,
+                [...updatedIndividuals],
+                [...updatedClusternames]
+            )
         })
 
         // Create new Species
-        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
+        const newIndividualIndex = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, newIndividualIndex)
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
         const newSpecies = new Species(nanoid(),newSpeciesInputFieldText, [newIndividual], [newClustername] )
 
@@ -66,11 +69,12 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
             if (index === modifiedSpeciesArray.length - 1 && !wasDeletedSpeciesInactive) {
                 const updatedIndividuals = activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
                 const updatedClusternames = activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             } else {
                 return speciesObject
             }
@@ -91,10 +95,12 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
         const modifiedSpeciesArray = speciesArray.map( speciesObject => {
             if (speciesObject.id === selectedID) {
-                return{
-                    ...speciesObject,
-                    name: editedSpeciesName
-                }
+                return new Species(
+                    speciesObject.id,
+                    editedSpeciesName,
+                    speciesObject.individuals,
+                    speciesObject.clusternames
+                )
             } else {
                 return speciesObject
             }
@@ -131,30 +137,35 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 if ( alreadyExistingObjectName ) {
                     const updatedIndividuals = activateClustername(speciesObject.individuals, alreadyExistingObjectName)
                     alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
-                    return {
-                        ...speciesObject,
-                        individuals: [...updatedIndividuals],
-                        clusternames: [...updatedClusternames]
-                    }
+                    return new Species(
+                        speciesObject.id,
+                        speciesObject.name,
+                        [...updatedIndividuals],
+                        [...updatedClusternames]
+                    )
                 }
 
                 // Deactivate existing individuals of the current species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
+                const newIndividualIndex = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
 
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals, new Individual(nanoid(),newIndividualName)],
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals, new Individual(nanoid(),newIndividualName, newIndividualIndex)],
+                    [...updatedClusternames]
+                )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames]
-                }
+
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             }
         })
         passSpeciesArrayToApp(modifiedSpeciesArray)
@@ -185,10 +196,12 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     ? activateClustername(updatedIndividuals, UNKNOWN_INDIVIDUAL)
                     : updatedIndividuals
 
-                return {
-                    ...speciesObject,
-                    individuals: updatedIndividuals
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    speciesObject.clusternames
+                )
             } else {
                 return speciesObject
             }
@@ -212,13 +225,16 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 }
 
                 const updatedIndividuals = speciesObject.individuals.map( individual => {
-                    return individual.name === selectedIndividual.name ? {...individual, name: editedIndividual} : individual
+                    const updatedIndividual = new Individual( individual.id, editedIndividual, individual.index)
+                    return individual.name === selectedIndividual.name ? updatedIndividual : individual
                 })
 
-                return {
-                    ...speciesObject,
-                    individuals: updatedIndividuals
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    speciesObject.clusternames
+                )
 
             } else {
                 return speciesObject
@@ -231,9 +247,13 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const activateIndividual = (individuals, selectedIndividualName) => {
         return individuals.map( individual => {
             if (individual.name === selectedIndividualName){
-                return {...individual, isActive: true}
+                const activatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                activatedIndividual.isActive = true
+                return activatedIndividual
             } else {
-                return {...individual, isActive: false}
+                const deactivatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                deactivatedIndividual.isActive = false
+                return deactivatedIndividual
             }
         })
     }
@@ -250,20 +270,22 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     ? activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
                     : speciesObject.clusternames
 
-                return {
-                    ...speciesObject,
-                    individuals: updatedIndividuals,
-                    clusternames: updatedClusternames
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             }
         })
 
@@ -271,10 +293,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const deactivateExistingIndividuals = (individuals) => {
-        return individuals.map(individual => ({
-            ...individual,
-            isActive: false
-        }))
+        return individuals.map(individual => {
+                const deactivatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                deactivatedIndividual.isActive = false
+                return deactivatedIndividual
+        })
     }
 
 
@@ -305,30 +328,34 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 if ( alreadyExistingObjectName ) {
                     const updatedClusternames = activateClustername(speciesObject.clusternames, alreadyExistingObjectName)
                     alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
-                    return {
-                        ...speciesObject,
-                        individuals: [...updatedIndividuals],
-                        clusternames: [...updatedClusternames]
-                    }
+
+                    return new Species(
+                        speciesObject.id,
+                        speciesObject.name,
+                        [...updatedIndividuals],
+                        [...updatedClusternames]
+                    )
                 }
 
                 // Deactivate existing clusternames of the current species
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
 
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
+                )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             }
         })
         passSpeciesArrayToApp(modifiedSpeciesArray)
@@ -359,10 +386,12 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     ? activateClustername(updatedClusternames, UNKNOWN_CLUSTERNAME)
                     : updatedClusternames
 
-                return {
-                    ...speciesObject,
-                    clusternames: updatedClusternames
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames]
+                )
             } else {
                 return speciesObject
             }
@@ -386,13 +415,16 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 }
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
-                    return clustername.name === selectedClustername.name ? {...clustername, name: editedClustername} : clustername
+                    const updatedClustername = new Clustername(clustername.id, editedClustername, clustername.color)
+                    return clustername.name === selectedClustername.name ? updatedClustername : clustername
                 })
 
-                return {
-                    ...speciesObject,
-                    clusternames: updatedClusternames
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames]
+                )
 
             } else {
                 return speciesObject
@@ -405,9 +437,13 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const activateClustername = (clusternames, selectedClusternameName) => {
         return clusternames.map( clustername => {
             if (clustername.name === selectedClusternameName){
-                return {...clustername, isActive: true}
+                const activatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+                activatedClustername.isActive = true
+                return activatedClustername
             } else {
-                return {...clustername, isActive: false}
+                const deActivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+                deActivatedClustername.isActive = false
+                return deActivatedClustername
             }
         })
     }
@@ -424,20 +460,22 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     ? activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
                     : speciesObject.individuals
 
-                return {
-                    ...speciesObject,
-                    individuals: updatedIndividuals,
-                    clusternames: updatedClusternames
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
-                return {
-                    ...speciesObject,
-                    individuals: [...updatedIndividuals],
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
             }
         })
 
@@ -445,10 +483,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const deactivateExistingClusternames = (clusternames) => {
-        return clusternames.map(clustername => ({
-            ...clustername,
-            isActive: false
-        }))
+        return clusternames.map(clustername => {
+            const deactivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+            deactivatedClustername.isActive = false
+            return deactivatedClustername
+        })
     }
 
     const toggleColorwheel = (selectedID, selectedClustername) => {
@@ -457,26 +496,27 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     if (clustername === selectedClustername){
-                        return {
-                            ...clustername,
-                            showColorwheel: !clustername.showColorwheel
-                        }
+                        const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
+                        updatedClustername.showColorwheel = !clustername.showColorwheel
+                        return updatedClustername
                     } else {
                         return clustername
                     }
                 })
 
-                return {
-                    ...speciesObject,
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames]
+                )
+
             } else {
                 return speciesObject
             }
         })
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
-
     }
 
     const passChosenColorToAnnotationLabels = (selectedID, selectedClustername, newColor) => {
@@ -485,19 +525,18 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     if (clustername === selectedClustername){
-                        return {
-                            ...clustername,
-                            color: newColor
-                        }
+                        return new Clustername(clustername.id, clustername.name, newColor)
                     } else {
                         return clustername
                     }
                 })
 
-                return {
-                    ...speciesObject,
-                    clusternames: [...updatedClusternames]
-                }
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames]
+                )
             } else {
                 return speciesObject
             }
@@ -524,7 +563,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     return (
         <div id='annotation-labels-container'>
-
+            <button onClick={() => console.log(speciesArray)}>show</button>
             <div id='annotation-labels-menu'>
 
                 {

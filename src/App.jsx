@@ -21,7 +21,7 @@ function App() {
     const [importedLabels, setImportedLabels] = useState([]);
 
     const [speciesArray, setSpeciesArray] = useState(() => {
-        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
         const newSpecies = new Species(nanoid(),UNKNOWN_SPECIES, [newIndividual], [newClustername] )
 

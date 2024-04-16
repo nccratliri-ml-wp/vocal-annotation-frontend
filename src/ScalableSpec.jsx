@@ -1485,11 +1485,10 @@ function ScalableSpec(
         const headers = {
             'Content-Type': 'application/json',
             'accept': 'application/json'
-        };
+        }
 
         const response = await axios.post(path, requestParameters, { headers } )
     }
-
 
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
@@ -1497,14 +1496,13 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-        console.log(labels)
 
     }, [labels, activeLabel, waveformScale] )
 
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
-        if (!speciesArray) return;
+        if (!speciesArray) return
 
         // Iterate over the labels array
         const updatedLabels = labels
@@ -1624,23 +1622,6 @@ function ScalableSpec(
         playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration] )
-
-    // When the user edits the clustername of one of the clustername buttons
-                    /*
-    useEffect( () => {
-        if (!activeClusternameBTN) return
-
-        let newLabelsArray = labels.map(label => {
-            if (label.clustername === outdatedClustername){
-                return {...label, clustername: activeClusternameBTN.clustername}
-            }
-            return label
-        })
-
-        setLabels(newLabelsArray)
-
-    }, [outdatedClustername])
-*/
 
     return (
         <div

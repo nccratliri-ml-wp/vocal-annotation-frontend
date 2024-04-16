@@ -516,13 +516,6 @@ function ScalableSpec(
         return arr
     }
 
-    const getIndividualIndex = (individual) => {
-        const allIndividualIDs = speciesArray.flatMap(speciesObj => {
-            return speciesObj.individuals.map(individual => individual.id)
-        })
-        return allIndividualIDs.indexOf(individual.id)
-    }
-
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
@@ -954,7 +947,8 @@ function ScalableSpec(
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
         //const individual = clustername === 'Protected Area'? null : activeIndividual
 
-        const individualIndex = getIndividualIndex(individual)
+        const allIndividualIDs = getAllIndividualIDs()
+        const individualIndex = allIndividualIDs.indexOf(individual.id)
 
         const newLabel = new Label(
             onset,
@@ -1509,14 +1503,17 @@ function ScalableSpec(
 
     }, [labels, activeLabel, waveformScale] )
 
+    const getAllIndividualIDs = () => {
+        return speciesArray.flatMap(speciesObj => {
+            return speciesObj.individuals.map(individual => individual.id)
+        })
+    }
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
         if (!speciesArray) return
 
-        const allIndividualIDs = speciesArray.flatMap(speciesObj => {
-            return speciesObj.individuals.map(individual => individual.id)
-        })
+        const allIndividualIDs = getAllIndividualIDs()
 
         // Assign each label correct index according to this array
         // Remove old stuff from annotationlabels.jsx and species.js

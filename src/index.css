@@ -330,8 +330,11 @@ html, body {
 
 /* -------------------------- Label Window -------------------------- */
 .label-window {
-  top: 500px;
-  border: 1px solid yellow;
+  position: fixed;
+  background-color: #082536;
+  border: 2px solid whitesmoke;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 /* -------------------------- Canvases -------------------------- */

@@ -9,42 +9,56 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
     // setExpandedLabel(null)
     // Close the window
 
+    const allIndividualIDs = getAllIndividualIDs()
+
+    const updatedLabel = new Label(
+        expandedLabel.onset,
+        expandedLabel.offset,
+        expandedLabel.species,
+        expandedLabel.individual,
+        expandedLabel.clustername,
+        expandedLabel.speciesID,
+        expandedLabel.individualID,
+        expandedLabel.clusternameID,
+        expandedLabel.individualIndex,
+        expandedLabel.annotator,
+        expandedLabel.color
+    )
+
     const changeIndividual = (clickedIndividual) => {
+        updatedLabel.individual = clickedIndividual.name
+        updatedLabel.individualID = clickedIndividual.id
+        updatedLabel.individualIndex = allIndividualIDs.indexOf(clickedIndividual.id)
+    }
 
-        const allIndividualIDs = getAllIndividualIDs()
+    const changeSpecies = (clickedSpecies) => {
+        updatedLabel.species = clickedSpecies.name
+        updatedLabel.speciesID = clickedSpecies.id
+    }
 
-        const updatedLabels = labels.map( label => {
-            if (label === expandedLabel){
-                return new Label(
-                    label.onset,
-                    label.offset,
-                    label.species,
-                    clickedIndividual.name,
-                    label.clustername,
-                    label.speciesID,
-                    clickedIndividual.id,
-                    label.clusternameID,
-                    allIndividualIDs.indexOf(clickedIndividual.id),
-                    label.annotator,
-                    label.color
-                )
-            } else {
-                return label
-            }
-        })
+    const submit = () => {
+        const updatedLabels = labels.filter( label => label !== expandedLabel)
+        updatedLabels.push(updatedLabel)
 
         passLabelsToScalableSpec(updatedLabels)
+        passExpandedLabelToScalableSpec(null)
     }
 
     return (
-        <div className='label-window'>
+        <div
+            className='label-window'
+            style={{
+                top: 400,
+                left: 400
+            }}
+        >
             <div id='annotation-labels-menu'>
 
                 {
                     speciesArray.map( (species) =>
                         <div
-                            id={species.id}
                             key={species.id}
+                            onClick={ () => changeSpecies(species)}
                         >
                             {species.name}
 
@@ -52,12 +66,12 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                                 Individuals:
                                 {
                                     species.individuals.map( individual =>
-                                        <div
+                                        <button
                                             key={individual.id}
                                             onClick={ () => changeIndividual(individual)}
                                         >
                                             {individual.name}
-                                        </div>
+                                        </button>
                                     )
                                 }
                             </div>
@@ -66,11 +80,11 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                                 Clusternames:
                                 {
                                     species.clusternames.map( clustername =>
-                                        <div
+                                        <button
                                             key={clustername.id}
                                         >
                                             {clustername.name}
-                                        </div>
+                                        </button>
                                     )
                                 }
                             </div>
@@ -79,8 +93,8 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                     )
                 }
             </div>
-            <button >Submit</button>
-            <button onClick={() => passExpandedLabelToScalableSpec(false) }>Close</button>
+            <button onClick={submit}>Submit</button>
+            <button onClick={ () => passExpandedLabelToScalableSpec(false) }>Cancel</button>
         </div>
     )
 }

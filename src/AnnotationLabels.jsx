@@ -562,8 +562,8 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     return (
         <div id='annotation-labels-container'>
             <button onClick={() => console.log(speciesArray)}>show</button>
-            <div id='annotation-labels-menu'>
 
+            <div id='annotation-labels-menu'>
                 {
                     speciesArray.map( (species, index) =>
                         <div
@@ -684,7 +684,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                         </div>
                     )
                 }
-
             </div>
 
             <form onSubmit={addNewSpecies}>

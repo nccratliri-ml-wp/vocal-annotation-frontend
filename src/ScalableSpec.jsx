@@ -2,26 +2,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import {Label} from "./label.js"
 import Export from "./Export.jsx";
 import FileUpload from "./FileUpload.jsx";
 import Parameters from "./Parameters.jsx"
+import AnnotationLabels from "./AnnotationLabels.jsx";
+import LabelWindow from "./LabelWindow.jsx";
 
 // Classes
-class Label {
-    constructor(onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, individualIndex, annotator, color) {
-        this.onset = onset
-        this.offset = offset
-        this.species = species
-        this.individual = individual
-        this.clustername = clustername
-        this.speciesID = speciesID
-        this.individualID = individualID
-        this.clusternameID = clusternameID
-        this.individualIndex = individualIndex
-        this.annotator = annotator
-        this.color = color
-    }
-}
 
 class Playhead{
     constructor(timeframe) {
@@ -59,10 +47,7 @@ function ScalableSpec(
                             activeLabel,
                             /*
                             activeIndividual,
-                            numberOfIndividuals
-                            outdatedClustername,
-
-                             */
+                            */
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -137,6 +122,8 @@ function ScalableSpec(
     const activeSpecies = speciesArray.find(speciesObj =>
         speciesObj.individuals.some(individual => individual.isActive)
     )
+                    
+    const [expandedLabel, setExpandedLabel] = useState(null)
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -171,6 +158,14 @@ function ScalableSpec(
 
     const passAudioIdToScalableSpec = ( newId ) => {
         setAudioId( newId )
+    }
+
+    const passLabelsToScalableSpec = ( newLabelsArray ) => {
+        setLabels( newLabelsArray )
+    }
+
+    const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
+        setExpandedLabel( newExpandedLabel )
     }
 
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
@@ -272,11 +267,11 @@ function ScalableSpec(
         }
 
         // Deal with click inside an existing label
-        /*
-        if (checkIfClickedOnLabel (mouseX) ) {
-            alert('Labels of the same individual may not stretch across one another.')
+        const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
+        if ( labelToBeExpanded ) {
+            setExpandedLabel( labelToBeExpanded )
             return
-        }*/
+        }
 
         // Add offset to existing label if necessary
         const lastLabel = labels[labels.length-1]
@@ -1219,7 +1214,7 @@ function ScalableSpec(
         ctx.font = `10px Arial`;
         ctx.fillStyle = hexColorCode
         const timestampText = (Math.round(startFrame * 100) / 100).toString()
-        ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5);
+        ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5)
 
         // Update Scroll Button positions
         updateViewportScrollButtons(startFrame, endFrame)
@@ -1811,6 +1806,17 @@ function ScalableSpec(
                         onContextMenu={handleRightClick}
                         onMouseMove={handleMouseMove}
                     />
+                    {
+                        expandedLabel &&
+                            <LabelWindow
+                                speciesArray={speciesArray}
+                                labels={labels}
+                                expandedLabel={expandedLabel}
+                                passLabelsToScalableSpec={passLabelsToScalableSpec}
+                                passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
+                                getAllIndividualIDs={getAllIndividualIDs}
+                            />
+                    }
                     {spectrogramIsLoading || whisperSegIsLoading? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
                 </div>
 

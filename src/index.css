@@ -328,6 +328,11 @@ html, body {
   background-color: whitesmoke;
 }
 
+/* -------------------------- Label Window -------------------------- */
+.label-window {
+  top: 500px;
+  border: 1px solid yellow;
+}
 
 /* -------------------------- Canvases -------------------------- */
 

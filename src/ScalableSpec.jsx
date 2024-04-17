@@ -98,8 +98,8 @@ function ScalableSpec(
     const overviewRef = useRef(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null
-    let widthBetween_xStartTime_xClicked = null
-    let widthBetween_xEndTime_xClicked = null
+    let widthBetween_xStartTime_mouseX = null
+    let widthBetween_xEndTime_mouseX = null
 
     // Labels
     const [labels, setLabels] = useState([])
@@ -247,12 +247,13 @@ function ScalableSpec(
         // Don't proceed if audio is currently playing
         if (audioSnippet && !audioSnippet.paused) return
 
-        const xClicked = getXClicked(event)
+        const mouseX = getMouseX(event)
+        const mouseY = getMouseY(event)
 
         // Deal with click on Onset or Offset to trigger drag methods
-        if ( checkIfPositionIsOccupied(xClicked) && event.target.className === 'label-canvas'){
+        if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas'){
             // Deal with click on Onset
-            clickedLabel = checkIfClickedOnOnset(xClicked)
+            clickedLabel = checkIfClickedOnOnset(mouseX, mouseY)
             if ( clickedLabel ){
                 specCanvasRef.current.addEventListener('mousemove', dragOnset)
                 waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
@@ -261,7 +262,7 @@ function ScalableSpec(
             }
 
             // Deal with click on Offset
-            clickedLabel = checkIfClickedOnOffset(xClicked)
+            clickedLabel = checkIfClickedOnOffset(mouseX, mouseY)
             if (clickedLabel){
                 specCanvasRef.current.addEventListener('mousemove', dragOffset)
                 waveformCanvasRef.current.addEventListener('mousemove', dragOffset)
@@ -272,7 +273,7 @@ function ScalableSpec(
 
         // Deal with click inside an existing label
         /*
-        if (checkIfClickedOnLabel (xClicked) ) {
+        if (checkIfClickedOnLabel (mouseX) ) {
             alert('Labels of the same individual may not stretch across one another.')
             return
         }*/
@@ -344,16 +345,18 @@ function ScalableSpec(
         // Don't proceed if audio is currently playing
         if (audioSnippet && !audioSnippet.paused) return
 
-        const xClicked = getXClicked(event)
-        const labelToBeDeleted = checkIfClickedOnLabel(xClicked)
+        const mouseX = getMouseX(event)
+        const mouseY = getMouseY(event)
+        const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
         deleteLabel(labelToBeDeleted)
         passActiveLabelToApp(null)
     }
 
     const handleMouseMove = (event) => {
         // Active label get sets to zero once user has set the offset of a label and moved his mouse
-        const xHovered = getXClicked(event)
-        if (activeLabel && activeLabel.offset && !checkIfClickedOnLabel(xHovered)){
+        const mouseX = getMouseX(event)
+        const mouseY = getMouseY(event)
+        if (activeLabel && activeLabel.offset && !checkIfClickedOnLabel(mouseX, mouseY)){
             console.log('setting active label to null')
             passActiveLabelToApp(null)
         }
@@ -362,8 +365,9 @@ function ScalableSpec(
     }
 
     const hoverLine = (event) => {
-        const xHovered = getXClicked(event)
-        if ( checkIfPositionIsOccupied(xHovered) && event.target.className === 'label-canvas' /*|| checkIfClickedOnPlayhead(xHovered)*/){
+        const mouseX = getMouseX(event)
+        const mouseY = getMouseY(event)
+        if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas' /*|| checkIfClickedOnPlayhead(xHovered)*/){
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
@@ -389,24 +393,20 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            //drawActiveLabel()
             drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
         }
 
-        const mouseX = getXClicked(event)
+        const mouseX = getMouseX(event)
+        const mouseY = getMouseY(event)
 
         for (let label of labels){
             const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
             const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
-            if (mouseX >= onsetX && mouseX <= offsetX && !lastHoveredLabel.isHighlighted){
-                /*
-                if (activeLabel !== label){
-                    passActiveLabelToApp(label)
-                }
-                drawActiveLabel()
-                */
+            const bottomY = calculateYPosition(label)
+            const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted){
                 drawLineBetween(label)
                 drawClustername(label)
                 drawLine(label, label.onset)
@@ -422,12 +422,12 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Helper methods ++++++++++++++++++ */
 
-    const getXClicked = (event) => {
+    const getMouseX = (event) => {
         const rect = event.target.getBoundingClientRect()
         return event.clientX - rect.left
     }
 
-    const getYClicked = (event) => {
+    const getMouseY = (event) => {
         const rect = event.target.getBoundingClientRect()
         return event.clientY - rect.top
     }
@@ -436,56 +436,64 @@ function ScalableSpec(
         return ( timestamp * canvas.width / globalClipDuration ) - ( currentStartTime * canvas.width / globalClipDuration )
     }
 
-        const calculateYPosition = (label) => {
-            let individualCount = 0
+    const calculateYPosition = (label) => {
+        /*
+        let individualCount = 0
 
-            outerLoop:
-                for (let speciesObj of speciesArray) {
-                    for (let individual of speciesObj.individuals) {
-                        individualCount++
-                        if (speciesObj.name === label.species && individual.name === label.individual) {
-                            break outerLoop
-                        }
+        outerLoop:
+            for (let speciesObj of speciesArray) {
+                for (let individual of speciesObj.individuals) {
+                    individualCount++
+                    if (speciesObj.name === label.species && individual.name === label.individual) {
+                        break outerLoop
                     }
                 }
+            }
 
-            return label.clustername === 'Protected Area🔒' ? labelCanvasRef.current.height - 1 : individualCount * HEIGHT_BETWEEN_INDIVIDUAL_LINES;
-        }
+        return label.clustername === 'Protected Area🔒' ? labelCanvasRef.current.height - 1 : individualCount * HEIGHT_BETWEEN_INDIVIDUAL_LINES;
+         */
+        return (label.individualIndex + 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+    }
 
-
-        const calculateTimestamp = (event) => {
-        const xClicked = getXClicked(event)
-        const ratio = (xClicked / specCanvasRef.current.width)
+    const calculateTimestamp = (event) => {
+        const mouseX = getMouseX(event)
+        const ratio = (mouseX / specCanvasRef.current.width)
         return globalClipDuration * ratio + currentStartTime
     }
 
-    const checkIfPositionIsOccupied = (xClicked) => {
-        return ( checkIfClickedOnOnset(xClicked) || checkIfClickedOnOffset(xClicked) )
+    const checkIfOccupiedByOnsetOrOffset = (mouseX, mouseY) => {
+        return ( checkIfClickedOnOnset(mouseX, mouseY) || checkIfClickedOnOffset(mouseX, mouseY) )
     }
 
-    const checkIfClickedOnOnset = (xClicked) => {
+    const checkIfClickedOnOnset = (mouseX, mouseY) => {
         for (let label of labels){
             const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
-            if ( ( xOnset >= xClicked - 5 && xOnset <= xClicked + 5 ) ){
+            const bottomY = calculateYPosition(label)
+            const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            if (  xOnset >= mouseX - 5 && xOnset <= mouseX + 5 && mouseY >= topY && mouseY <= bottomY ){
                 return label
             }
         }
     }
 
-    const checkIfClickedOnOffset = (xClicked) => {
+    const checkIfClickedOnOffset = (mouseX, mouseY) => {
         for (let label of labels){
             const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
-            if ( ( xOffset >= xClicked - 5 && xOffset <= xClicked + 5 ) ){
+            const bottomY = calculateYPosition(label)
+            const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            if ( xOffset >= mouseX - 5 && xOffset <= mouseX + 5 && mouseY >= topY && mouseY <= bottomY ){
                 return label
             }
         }
     }
 
-    const checkIfClickedOnLabel = (xClicked) => {
+    const checkIfClickedOnLabel = (mouseX, mouseY) => {
         for (let label of labels) {
             const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
             const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
-            if (xClicked >= onsetX && xClicked <= offsetX) {
+            const bottomY = calculateYPosition(label)
+            const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY) {
                 return label
             }
         }
@@ -514,6 +522,12 @@ function ScalableSpec(
         const arr = Array.from({ length: num }, (_, i) => start + step * i)
         if (!endpoint) arr.push(stop)
         return arr
+    }
+
+    const getAllIndividualIDs = () => {
+        return speciesArray.flatMap(speciesObj => {
+            return speciesObj.individuals.map(individual => individual.id)
+        })
     }
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
@@ -1041,12 +1055,12 @@ function ScalableSpec(
     /* ++++++++++++++++++ Overview Bar Methods ++++++++++++++++++ */
 
     const handleLMBDownOverview = (event) => {
-        const xClicked = getXClicked(event)
+        const mouseX = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
         // Deal with click on Start Frame
-        if (xClicked >= xStartFrame - 2 && xClicked <= xStartFrame + 2){
+        if (mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
@@ -1054,18 +1068,18 @@ function ScalableSpec(
         }
 
         // Deal with click on End Frame
-        if (xClicked >= xEndFrame - 2 && xClicked <= xEndFrame + 2){
+        if (mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
         }
 
         // Deal with click inside viewport
-        if (xClicked > xStartFrame && xClicked < xEndFrame){
+        if (mouseX > xStartFrame && mouseX < xEndFrame){
             const xStartTime = calculateViewportFrameX(currentStartTime)
             const xCurrentEndTime = calculateViewportFrameX(currentEndTime)
-            widthBetween_xStartTime_xClicked = xClicked - xStartTime
-            widthBetween_xEndTime_xClicked = xCurrentEndTime - xClicked
+            widthBetween_xStartTime_mouseX = mouseX - xStartTime
+            widthBetween_xEndTime_mouseX = xCurrentEndTime - mouseX
             overviewRef.current.addEventListener('mousemove', dragViewport)
             overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
         }
@@ -1082,7 +1096,7 @@ function ScalableSpec(
         overviewRef.current.removeEventListener('mouseleave', handleMouseUpOverview)
 
         // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar.
-        if (widthBetween_xStartTime_xClicked){
+        if (widthBetween_xStartTime_mouseX){
             const newDuration = newViewportEndFrame - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             passCurrentStartTimeToApp( newViewportStartFrame )
@@ -1106,27 +1120,27 @@ function ScalableSpec(
 
         newViewportStartFrame = null
         newViewportEndFrame = null
-        widthBetween_xStartTime_xClicked = null
-        widthBetween_xEndTime_xClicked = null
+        widthBetween_xStartTime_mouseX = null
+        widthBetween_xEndTime_mouseX = null
     }
 
     const dragStartFrame = (event) => {
-        const xClicked = getXClicked(event)
-        newViewportStartFrame = calculateViewportTimestamp(xClicked)
+        const mouseX = getMouseX(event)
+        newViewportStartFrame = calculateViewportTimestamp(mouseX)
         drawViewport(newViewportStartFrame, currentEndTime, 'white', 2)
     }
 
     const dragEndFrame = (event) => {
-        const xClicked = getXClicked(event)
-        newViewportEndFrame = calculateViewportTimestamp(xClicked)
+        const mouseX = getMouseX(event)
+        newViewportEndFrame = calculateViewportTimestamp(mouseX)
         drawViewport(currentStartTime, newViewportEndFrame, 'white', 2)
     }
 
     const dragViewport = (event) => {
-        const xClicked = getXClicked(event)
-        const viewportWidth = widthBetween_xStartTime_xClicked + widthBetween_xEndTime_xClicked
-        newViewportStartFrame = calculateViewportTimestamp(xClicked - widthBetween_xStartTime_xClicked)
-        newViewportEndFrame = calculateViewportTimestamp(xClicked + widthBetween_xEndTime_xClicked)
+        const mouseX = getMouseX(event)
+        const viewportWidth = widthBetween_xStartTime_mouseX + widthBetween_xEndTime_mouseX
+        newViewportStartFrame = calculateViewportTimestamp(mouseX - widthBetween_xStartTime_mouseX)
+        newViewportEndFrame = calculateViewportTimestamp(mouseX + widthBetween_xEndTime_mouseX)
         // Prevent Viewport Start Frame from going below 0
         if (newViewportStartFrame < 0){
             newViewportStartFrame = 0
@@ -1142,8 +1156,8 @@ function ScalableSpec(
         drawViewport(newViewportStartFrame, newViewportEndFrame, 'white', 4)
     }
 
-    const calculateViewportTimestamp = (xClicked) => {
-        return globalAudioDuration * (xClicked / overviewRef.current.width)
+    const calculateViewportTimestamp = (mouseX) => {
+        return globalAudioDuration * (mouseX / overviewRef.current.width)
     }
 
     const calculateViewportFrameX = (timestamp) => {
@@ -1216,7 +1230,7 @@ function ScalableSpec(
     }
 
     const hoverViewportFrame = (event) => {
-        const xHovered = getXClicked(event)
+        const xHovered = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
@@ -1503,21 +1517,11 @@ function ScalableSpec(
 
     }, [labels, activeLabel, waveformScale] )
 
-    const getAllIndividualIDs = () => {
-        return speciesArray.flatMap(speciesObj => {
-            return speciesObj.individuals.map(individual => individual.id)
-        })
-    }
-
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
         if (!speciesArray) return
 
         const allIndividualIDs = getAllIndividualIDs()
-
-        // Assign each label correct index according to this array
-        // Remove old stuff from annotationlabels.jsx and species.js
-        console.log(allIndividualIDs)
 
         // Iterate over the labels array
         const updatedLabels = labels

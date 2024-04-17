@@ -14,10 +14,9 @@ class Species {
 }
 
 class Individual {
-    constructor(id, name, index) {
+    constructor(id, name) {
         this.id = id
         this.name = name
-        this.index = index
         this.isActive = true
     }
 }

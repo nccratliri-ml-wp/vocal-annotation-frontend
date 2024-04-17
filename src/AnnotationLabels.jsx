@@ -45,8 +45,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         })
 
         // Create new Species
-        const newIndividualIndex = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
-        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, newIndividualIndex)
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
         const newSpecies = new Species(nanoid(),newSpeciesInputFieldText, [newIndividual], [newClustername] )
 
@@ -147,12 +146,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 // Deactivate existing individuals of the current species
                 const updatedIndividuals = deactivateExistingIndividuals(speciesObject.individuals)
-                const newIndividualIndex = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
 
                 return new Species(
                     speciesObject.id,
                     speciesObject.name,
-                    [...updatedIndividuals, new Individual(nanoid(),newIndividualName, newIndividualIndex)],
+                    [...updatedIndividuals, new Individual(nanoid(),newIndividualName)],
                     [...updatedClusternames]
                 )
             } else {
@@ -225,7 +223,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 }
 
                 const updatedIndividuals = speciesObject.individuals.map( individual => {
-                    const updatedIndividual = new Individual( individual.id, editedIndividual, individual.index)
+                    const updatedIndividual = new Individual( individual.id, editedIndividual)
                     return individual.name === selectedIndividual.name ? updatedIndividual : individual
                 })
 
@@ -247,11 +245,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const activateIndividual = (individuals, selectedIndividualName) => {
         return individuals.map( individual => {
             if (individual.name === selectedIndividualName){
-                const activatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                const activatedIndividual = new Individual(individual.id, individual.name)
                 activatedIndividual.isActive = true
                 return activatedIndividual
             } else {
-                const deactivatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                const deactivatedIndividual = new Individual(individual.id, individual.name)
                 deactivatedIndividual.isActive = false
                 return deactivatedIndividual
             }
@@ -294,7 +292,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     const deactivateExistingIndividuals = (individuals) => {
         return individuals.map(individual => {
-                const deactivatedIndividual = new Individual(individual.id, individual.name, individual.index)
+                const deactivatedIndividual = new Individual(individual.id, individual.name)
                 deactivatedIndividual.isActive = false
                 return deactivatedIndividual
         })

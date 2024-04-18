@@ -337,6 +337,29 @@ html, body {
   padding: 10px;
 }
 
+.label-window-annotation-labels-menu{
+
+}
+
+.label-window-individual-btn-container, .label-window-clustername-btn-container{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.label-window-individual-btn, .label-window-clustername-btn{
+  background-color: #626262;
+  display: flex;
+  margin: 2px;
+  font-size: 16px;
+  max-height: 24px;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
+}
+
+.label-window-individual-btn[isactive='true']{
+  background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
+}
+
 /* -------------------------- Canvases -------------------------- */
 
 .waveform-canvas{

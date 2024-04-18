@@ -7,6 +7,7 @@ import {
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
     Individual,
     Species,
+    INACTIVE_BUTTON_COLOR,
     UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
     UNKNOWN_SPECIES
@@ -561,7 +562,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     return (
         <div id='annotation-labels-container'>
-            <button onClick={() => console.log(speciesArray)}>show</button>
 
             <div id='annotation-labels-menu'>
                 {
@@ -627,7 +627,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                             className='clustername-btn'
                                             style={{
                                                 borderLeft: `2px solid ${clustername.color}`,
-                                                backgroundColor: clustername.isActive? clustername.color : '#626262'
+                                                backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
                                             }}
                                             isactive={clustername.isActive.toString()}
                                         >

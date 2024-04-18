@@ -3,6 +3,7 @@ const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
 const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
+const INACTIVE_BUTTON_COLOR = '#626262'
 
 class Species {
     constructor(id, name, individuals, clusternames) {
@@ -37,6 +38,7 @@ export {
     UNKNOWN_CLUSTERNAME,
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    INACTIVE_BUTTON_COLOR,
     Species,
     Individual,
     Clustername

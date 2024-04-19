@@ -6,7 +6,6 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
     // To-do:
     // 1. Implement change Species and Clustername method
     // on click activate clicked and deactivate the others
-    // When the user moves an individual to another species, it should remove the former clustername and assign it the Unknown clustername
     // Move helper methods to species.js
     // Allow multiple windows to coexist or close the previous one after a new one has been opened.
     // Window Design
@@ -41,9 +40,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
         updatedLabel.individualIndex = allIndividualIDs.indexOf(clickedIndividual.id)
     }
 
-    const changeClustername = (clickedSpecies, clickedClustername) => {
-        changeSpecies(clickedSpecies)
-
+    const changeClustername = (clickedClustername) => {
         updatedLabel.clustername = clickedClustername.name
         updatedLabel.clusternameID = clickedClustername.id
         updatedLabel.color = clickedClustername.color
@@ -56,9 +53,11 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
         changeSpecies(clickedSpecies)
         changeIndividual(clickedIndividual)
 
-        // Missing bit:
-        // When the user moves an individual to another species, it should remove the former clustername and assign it the Unknown clustername
-
+        /* When the user clicks on the individual of a different species, change the clustername to Unknown. This is to prevent
+        an individual from keeping a clustername from another species */
+        if (clickedSpecies.id !== expandedLabel.speciesID){
+            changeClustername(clickedSpecies.clusternames[0])
+        }
 
         // Apply changes to labels
         const updatedLabels = labels.filter( label => label.id !== expandedLabel.id)

@@ -325,7 +325,7 @@ function ScalableSpec(
     }
 
     const removeDragEventListeners = () => {
-        console.log('remove drag event listeners')
+        //console.log('remove drag event listeners')
         specCanvasRef.current.removeEventListener('mousemove', dragOnset)
         specCanvasRef.current.removeEventListener('mousemove', dragOffset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)

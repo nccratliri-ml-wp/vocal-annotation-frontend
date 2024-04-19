@@ -496,6 +496,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     if (clustername === selectedClustername){
                         const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
+                        updatedClustername.isActive = clustername.isActive
                         updatedClustername.showColorwheel = !clustername.showColorwheel
                         return updatedClustername
                     } else {
@@ -524,7 +525,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     if (clustername === selectedClustername){
-                        return new Clustername(clustername.id, clustername.name, newColor)
+                        const updatedClustername = new Clustername(clustername.id, clustername.name, newColor)
+                        updatedClustername.isActive = clustername.isActive
+                        return updatedClustername
                     } else {
                         return clustername
                     }

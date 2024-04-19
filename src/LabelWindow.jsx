@@ -27,25 +27,35 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
     )
 
     const changeSpecies = (clickedSpecies) => {
-        // I think this method is redundant
         updatedLabel.species = clickedSpecies.name
         updatedLabel.speciesID = clickedSpecies.id
     }
 
     const changeIndividual = (clickedIndividual) => {
-        // change species here, pass species as parameter
         const allIndividualIDs = getAllIndividualIDs()
-
         updatedLabel.individual = clickedIndividual.name
         updatedLabel.individualID = clickedIndividual.id
         updatedLabel.individualIndex = allIndividualIDs.indexOf(clickedIndividual.id)
     }
 
-    const changeClustername = (clickedClustername) => {
-        // change species here, pass species as parameter
+    const changeClustername = (clickedSpecies, clickedClustername) => {
+        changeSpecies(clickedSpecies)
+
         updatedLabel.clustername = clickedClustername.name
         updatedLabel.clusternameID = clickedClustername.id
         updatedLabel.color = clickedClustername.color
+    }
+
+    const handleClickOnIndividual = (clickedSpecies, clickedIndividual) => {
+        const updatedLocalSpeciesArray = localSpeciesArray.map(speciesObj => {
+            if (speciesObj.name === clickedSpecies.name){
+
+            }
+        })
+
+        // Apply the changes to updatedLabel
+        changeSpecies(clickedSpecies)
+        changeIndividual(clickedIndividual)
     }
 
     const submit = () => {
@@ -76,7 +86,6 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                     activatedClustername.isActive = true
                     return activatedClustername
                 } else {
-                    console.log(clustername.color)
                     const deactivatedClustername = new Clustername(clustername.id, clustername.name, clustername.color )
                     deactivatedClustername.isActive = false
                     return deactivatedClustername
@@ -117,7 +126,6 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                     localSpeciesArray.map( (species) =>
                         <div
                             key={species.id}
-                            onClick={ () => changeSpecies(species)}
                         >
                             {species.name}
 
@@ -129,7 +137,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                                             key={individual.id}
                                             isactive={individual.isActive.toString()}
                                             className='label-window-individual-btn'
-                                            onClick={ () => changeIndividual(individual) }
+                                            onClick={ () => handleClickOnIndividual(species, individual) }
                                         >
                                             {individual.name}
                                         </div>
@@ -149,7 +157,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                                                 borderLeft: `2px solid ${clustername.color}`,
                                                 backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
                                             }}
-                                            onClick={ () => changeClustername(clustername) }
+                                            onClick={ () => changeClustername(species, clustername) }
                                         >
                                             {clustername.name}
                                         </div>

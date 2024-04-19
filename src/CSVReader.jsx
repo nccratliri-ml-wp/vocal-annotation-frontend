@@ -1,6 +1,8 @@
 import {useEffect, useState} from "react";
 import { nanoid } from 'nanoid'
 
+// This entire component must be refactored before use
+
 class Label {
     constructor(onset, offset, clustername) {
         this.onset = onset

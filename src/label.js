@@ -1,5 +1,6 @@
 class Label {
-    constructor(onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, individualIndex, annotator, color) {
+    constructor(id, onset, offset, species, individual, clustername, speciesID, individualID, clusternameID, individualIndex, annotator, color) {
+        this.id = id
         this.onset = onset
         this.offset = offset
         this.species = species

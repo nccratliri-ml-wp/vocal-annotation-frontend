@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import Export from "./Export.jsx";
 import FileUpload from "./FileUpload.jsx";
@@ -300,7 +301,7 @@ function ScalableSpec(
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(clickedTimestamp))
+        passActiveLabelToApp( new Label(nanoid(), clickedTimestamp))
     }
 
     const handleMouseUp = (event) => {
@@ -318,7 +319,7 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
-            passActiveLabelToApp(new Label(clickedLabel.onset, clickedLabel.offset))
+            passActiveLabelToApp(new Label(nanoid(), clickedLabel.onset, clickedLabel.offset))
         }
 
         clickedLabel = undefined
@@ -960,6 +961,7 @@ function ScalableSpec(
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
         const newLabel = new Label(
+            nanoid(),
             onset,
             undefined,
             activeSpecies.name,
@@ -1461,7 +1463,9 @@ function ScalableSpec(
         const whisperObjects = response.data.labels
 
         const whisperLabels = whisperObjects.map( obj => {
-            const newLabel = new Label(obj.onset,
+            const newLabel = new Label(
+                nanoid(),
+                obj.onset,
                 obj.offset,
                 'currently not available',
                 'currently not available',
@@ -1470,7 +1474,8 @@ function ScalableSpec(
                 null,
                 null,
                 null,
-                DEFAULT_LABEL_COLOR)
+                DEFAULT_LABEL_COLOR
+            )
 
             return newLabel
         })
@@ -1523,6 +1528,7 @@ function ScalableSpec(
             .map(label => {
                 // Create an updated label with old values
                 const updatedLabel = new Label(
+                    label.id,
                     label.onset,
                     label.offset,
                     label.species,

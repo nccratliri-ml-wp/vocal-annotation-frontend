@@ -1,6 +1,17 @@
 import React, {useEffect, useState} from "react";
 import {Label} from "./label.js"
-import {INACTIVE_BUTTON_COLOR, Species, Individual, Clustername, UNKNOWN_CLUSTERNAME} from "./species.js";
+import {
+    INACTIVE_BUTTON_COLOR,
+    Species,
+    Individual,
+    Clustername,
+    UNKNOWN_CLUSTERNAME,
+    activateIndividual,
+    activateClustername,
+    deactivateExistingIndividuals,
+    deactivateExistingClusternames,
+    checkIfEveryObjectIsInactive
+} from "./species.js";
 
 function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalableSpec, passExpandedLabelToScalableSpec, getAllIndividualIDs } ){
     // To-do:
@@ -9,6 +20,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
     // Move helper methods to species.js
     // Allow multiple windows to coexist or close the previous one after a new one has been opened.
     // Window Design
+    // Test thoroughly
 
     // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from AnnotationLabels.jsx
     const [localSpeciesArray, setLocalSpeciesArray] = useState(updateLocalSpeciesArrayFromOriginal)
@@ -45,7 +57,6 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
         updatedLabel.clusternameID = clickedClustername.id
         updatedLabel.color = clickedClustername.color
     }
-
 
 
     const handleClickOnIndividual = (clickedSpecies, clickedIndividual) => {
@@ -96,63 +107,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
             }
         })
         setLocalSpeciesArray(updatedLocalSpeciesArray)
-
-
     }
-
-    const activateIndividual = (individuals, selectedIndividualName) => {
-        return individuals.map( individual => {
-            if (individual.name === selectedIndividualName){
-                const activatedIndividual = new Individual(individual.id, individual.name)
-                activatedIndividual.isActive = true
-                return activatedIndividual
-            } else {
-                const deactivatedIndividual = new Individual(individual.id, individual.name)
-                deactivatedIndividual.isActive = false
-                return deactivatedIndividual
-            }
-        })
-    }
-
-    const activateClustername = (clusternames, selectedClusternameName) => {
-        return clusternames.map( clustername => {
-            if (clustername.name === selectedClusternameName){
-                const activatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-                activatedClustername.isActive = true
-                return activatedClustername
-            } else {
-                const deActivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-                deActivatedClustername.isActive = false
-                return deActivatedClustername
-            }
-        })
-    }
-
-    const deactivateExistingIndividuals = (individuals) => {
-        return individuals.map(individual => {
-            const deactivatedIndividual = new Individual(individual.id, individual.name)
-            deactivatedIndividual.isActive = false
-            return deactivatedIndividual
-        })
-    }
-
-    const deactivateExistingClusternames = (clusternames) => {
-        return clusternames.map(clustername => {
-            const deactivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-            deactivatedClustername.isActive = false
-            return deactivatedClustername
-        })
-    }
-
-    const checkIfEveryObjectIsInactive = (objects) => {
-        return objects.every(object => !object.isActive)
-    }
-
-
-
-
-
-
 
 
     function updateLocalSpeciesArrayFromOriginal() {

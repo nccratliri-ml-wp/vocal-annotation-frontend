@@ -32,6 +32,54 @@ class Clustername {
     }
 }
 
+const activateIndividual = (individuals, selectedIndividualName) => {
+    return individuals.map( individual => {
+        if (individual.name === selectedIndividualName){
+            const activatedIndividual = new Individual(individual.id, individual.name)
+            activatedIndividual.isActive = true
+            return activatedIndividual
+        } else {
+            const deactivatedIndividual = new Individual(individual.id, individual.name)
+            deactivatedIndividual.isActive = false
+            return deactivatedIndividual
+        }
+    })
+}
+
+const activateClustername = (clusternames, selectedClusternameName) => {
+    return clusternames.map( clustername => {
+        if (clustername.name === selectedClusternameName){
+            const activatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+            activatedClustername.isActive = true
+            return activatedClustername
+        } else {
+            const deActivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+            deActivatedClustername.isActive = false
+            return deActivatedClustername
+        }
+    })
+}
+
+const deactivateExistingIndividuals = (individuals) => {
+    return individuals.map(individual => {
+        const deactivatedIndividual = new Individual(individual.id, individual.name)
+        deactivatedIndividual.isActive = false
+        return deactivatedIndividual
+    })
+}
+
+const deactivateExistingClusternames = (clusternames) => {
+    return clusternames.map(clustername => {
+        const deactivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
+        deactivatedClustername.isActive = false
+        return deactivatedClustername
+    })
+}
+
+const checkIfEveryObjectIsInactive = (objects) => {
+    return objects.every(object => !object.isActive)
+}
+
 export {
     UNKNOWN_SPECIES,
     UNKNOWN_INDIVIDUAL,
@@ -41,5 +89,10 @@ export {
     INACTIVE_BUTTON_COLOR,
     Species,
     Individual,
-    Clustername
+    Clustername,
+    activateIndividual,
+    activateClustername,
+    deactivateExistingIndividuals,
+    deactivateExistingClusternames,
+    checkIfEveryObjectIsInactive
 }

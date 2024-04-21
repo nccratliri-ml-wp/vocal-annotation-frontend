@@ -2,15 +2,20 @@ import React, {useState} from "react";
 import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx";
 import {
-    Clustername,
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
-    Individual,
-    Species,
     INACTIVE_BUTTON_COLOR,
     UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
-    UNKNOWN_SPECIES
+    UNKNOWN_SPECIES,
+    Species,
+    Individual,
+    Clustername,
+    activateIndividual,
+    activateClustername,
+    deactivateExistingIndividuals,
+    deactivateExistingClusternames,
+    checkIfEveryObjectIsInactive
 } from './species.js'
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp}) {
@@ -243,20 +248,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const activateIndividual = (individuals, selectedIndividualName) => {
-        return individuals.map( individual => {
-            if (individual.name === selectedIndividualName){
-                const activatedIndividual = new Individual(individual.id, individual.name)
-                activatedIndividual.isActive = true
-                return activatedIndividual
-            } else {
-                const deactivatedIndividual = new Individual(individual.id, individual.name)
-                deactivatedIndividual.isActive = false
-                return deactivatedIndividual
-            }
-        })
-    }
-
     const handleClickIndividual = (selectedID, selectedIndividual) => {
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -289,14 +280,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         })
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
-    }
-
-    const deactivateExistingIndividuals = (individuals) => {
-        return individuals.map(individual => {
-                const deactivatedIndividual = new Individual(individual.id, individual.name)
-                deactivatedIndividual.isActive = false
-                return deactivatedIndividual
-        })
     }
 
 
@@ -433,20 +416,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const activateClustername = (clusternames, selectedClusternameName) => {
-        return clusternames.map( clustername => {
-            if (clustername.name === selectedClusternameName){
-                const activatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-                activatedClustername.isActive = true
-                return activatedClustername
-            } else {
-                const deActivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-                deActivatedClustername.isActive = false
-                return deActivatedClustername
-            }
-        })
-    }
-
     const handleClickClustername = (selectedID, selectedClustername) => {
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -479,14 +448,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         })
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
-    }
-
-    const deactivateExistingClusternames = (clusternames) => {
-        return clusternames.map(clustername => {
-            const deactivatedClustername = new Clustername (clustername.id, clustername.name, clustername.color)
-            deactivatedClustername.isActive = false
-            return deactivatedClustername
-        })
     }
 
     const toggleColorwheel = (selectedID, selectedClustername) => {
@@ -556,10 +517,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 return objectName
             }
         }
-    }
-
-    const checkIfEveryObjectIsInactive = (objects) => {
-        return objects.every(object => !object.isActive)
     }
 
 

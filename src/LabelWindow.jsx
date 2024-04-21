@@ -10,22 +10,18 @@ import {
     activateClustername,
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive
+    checkIfEveryObjectIsInactive, UNKNOWN_INDIVIDUAL
 } from "./species.js";
 
-function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalableSpec, passExpandedLabelToScalableSpec, getAllIndividualIDs } ){
+function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalableSpec, passExpandedLabelToScalableSpec, getAllIndividualIDs, calculateXPosition, HEIGHT_BETWEEN_INDIVIDUAL_LINES } ){
     // To-do:
-    // 1. Implement change Species and Clustername method
-    // on click activate clicked and deactivate the others
-    // Move helper methods to species.js
-    // Allow multiple windows to coexist or close the previous one after a new one has been opened.
     // Window Design
     // Test thoroughly
 
     // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from AnnotationLabels.jsx
     const [localSpeciesArray, setLocalSpeciesArray] = useState(updateLocalSpeciesArrayFromOriginal)
 
-    const updatedLabel = new Label(
+    let updatedLabel = new Label(
         expandedLabel.id,
         expandedLabel.onset,
         expandedLabel.offset,
@@ -109,8 +105,60 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
         setLocalSpeciesArray(updatedLocalSpeciesArray)
     }
 
+    const handleClickOnClustername = (clickedSpecies, clickedClustername) => {
+        // Apply the changes to updatedLabel
+        changeSpecies(clickedSpecies)
+        changeClustername(clickedClustername)
+
+        /* When the user clicks on the clustername of a different species, change the Individual to Unknown. This is to prevent
+        a clustername from keeping an individual from another species */
+        if (clickedSpecies.id !== expandedLabel.speciesID){
+            changeIndividual(clickedSpecies.individuals[0])
+        }
+
+        // Apply changes to labels
+        const updatedLabels = labels.filter( label => label.id !== expandedLabel.id)
+        updatedLabels.push(updatedLabel)
+        passLabelsToScalableSpec(updatedLabels)
+        passExpandedLabelToScalableSpec(updatedLabel)
+
+
+        const modifiedSpeciesArray = speciesArray.map(speciesObj => {
+            if (speciesObj.id === clickedSpecies.id) {
+
+                // Activate selected clustername, deactivate all others
+                const updatedClusternames = activateClustername(speciesObj.clusternames, clickedClustername.name)
+
+                // Activate Unknown individual, only if all other Individuals are inactive (this happens when the user switches species)
+                const updatedIndividuals = checkIfEveryObjectIsInactive(speciesObj.individuals)
+                    ? activateIndividual(speciesObj.individuals, UNKNOWN_INDIVIDUAL)
+                    : speciesObj.individuals
+
+                return new Species(
+                    speciesObj.id,
+                    speciesObj.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
+            } else {
+                //Deactivate existing clusternames and individuals of all other species
+                const updatedIndividuals = deactivateExistingIndividuals(speciesObj.individuals)
+                const updatedClusternames = deactivateExistingClusternames(speciesObj.clusternames)
+                return new Species(
+                    speciesObj.id,
+                    speciesObj.name,
+                    [...updatedIndividuals],
+                    [...updatedClusternames]
+                )
+            }
+        })
+
+        setLocalSpeciesArray(modifiedSpeciesArray)
+    }
+
 
     function updateLocalSpeciesArrayFromOriginal() {
+        // I chose function declaration for this to use JS function hoisting because I use this function at run-time to set localSpeciesArray on mount
         return speciesArray.map( speciesObj => {
 
             const updatedIndividuals = speciesObj.individuals.map( individual => {
@@ -149,12 +197,12 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
-    // When the user makes changes in AnnotationLabels Component, update the localSpeciesArray
+    // When the user makes changes in AnnotationLabels Component or clicks on a different label in the spectrogram, update the localSpeciesArray
     useEffect( () => {
         if (!speciesArray) return
         const updatedLocalSpeciesArray = updateLocalSpeciesArrayFromOriginal()
         setLocalSpeciesArray(updatedLocalSpeciesArray)
-    }, [speciesArray])
+    }, [speciesArray, expandedLabel])
 
 
     return (
@@ -162,12 +210,12 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
             className='label-window'
             onContextMenu={ (event) => event.preventDefault()}
             style={{
-                top: 400,
-                left: 400
+                bottom: getAllIndividualIDs().length * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 20,
+                left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset)
             }}
         >
             <div className='label-window-annotation-labels-menu'>
-
+                <button onClick={ () => passExpandedLabelToScalableSpec(null) }>Close</button>
                 {
                     localSpeciesArray.map( (species) =>
                         <div
@@ -199,11 +247,11 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                                             key={clustername.id}
                                             className='label-window-clustername-btn'
                                             isactive={clustername.isActive.toString()}
+                                            onClick={ () => handleClickOnClustername(species, clustername) }
                                             style={{
                                                 borderLeft: `2px solid ${clustername.color}`,
                                                 backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
                                             }}
-                                            onClick={ () => changeClustername(species, clustername) }
                                         >
                                             {clustername.name}
                                         </div>
@@ -215,7 +263,6 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                     )
                 }
             </div>
-            <button onClick={ () => passExpandedLabelToScalableSpec(null) }>Close</button>
         </div>
     )
 }

@@ -123,9 +123,9 @@ function ScalableSpec(
     const activeSpecies = speciesArray.find(speciesObj =>
         speciesObj.individuals.some(individual => individual.isActive)
     )
-                    
-    const [expandedLabel, setExpandedLabel] = useState(null)
 
+    // Label Window
+    const [expandedLabel, setExpandedLabel] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -398,8 +398,8 @@ function ScalableSpec(
         const mouseY = getMouseY(event)
 
         for (let label of labels){
-            const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
-            const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
+            const onsetX = calculateXPosition(label.onset)
+            const offsetX = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
             if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted){
@@ -428,8 +428,8 @@ function ScalableSpec(
         return event.clientY - rect.top
     }
 
-    const calculateXPosition = (timestamp, canvas) => {
-        return ( timestamp * canvas.width / globalClipDuration ) - ( currentStartTime * canvas.width / globalClipDuration )
+    const calculateXPosition = (timestamp) => {
+        return ( timestamp * labelCanvasRef.current.width / globalClipDuration ) - ( currentStartTime * labelCanvasRef.current.width / globalClipDuration )
     }
 
     const calculateYPosition = (label) => {
@@ -463,7 +463,7 @@ function ScalableSpec(
 
     const checkIfClickedOnOnset = (mouseX, mouseY) => {
         for (let label of labels){
-            const xOnset = calculateXPosition(label.onset, specCanvasRef.current)
+            const xOnset = calculateXPosition(label.onset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
             if (  xOnset >= mouseX - 5 && xOnset <= mouseX + 5 && mouseY >= topY && mouseY <= bottomY ){
@@ -474,7 +474,7 @@ function ScalableSpec(
 
     const checkIfClickedOnOffset = (mouseX, mouseY) => {
         for (let label of labels){
-            const xOffset = calculateXPosition(label.offset, specCanvasRef.current)
+            const xOffset = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
             if ( xOffset >= mouseX - 5 && xOffset <= mouseX + 5 && mouseY >= topY && mouseY <= bottomY ){
@@ -485,8 +485,8 @@ function ScalableSpec(
 
     const checkIfClickedOnLabel = (mouseX, mouseY) => {
         for (let label of labels) {
-            const onsetX = calculateXPosition(label.onset, specCanvasRef.current)
-            const offsetX = calculateXPosition(label.offset, specCanvasRef.current)
+            const onsetX = calculateXPosition(label.onset)
+            const offsetX = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
             if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY) {
@@ -680,7 +680,7 @@ function ScalableSpec(
         const specCTX = specCanvasRef.current.getContext('2d')
         const labelCTX = labelCanvasRef.current.getContext('2d')
 
-        const x = calculateXPosition(timestamp, specCanvasRef.current)
+        const x = calculateXPosition(timestamp)
         const y = calculateYPosition(label)
 
         const lineColor = label.color
@@ -726,8 +726,8 @@ function ScalableSpec(
         const cvs = labelCanvasRef.current
         const ctx = cvs.getContext('2d');
 
-        const xOnset = calculateXPosition(label.onset, cvs)
-        const xOffset = calculateXPosition(label.offset, cvs)
+        const xOnset = calculateXPosition(label.onset)
+        const xOffset = calculateXPosition(label.offset)
         const y = calculateYPosition(label)
 
         const lineColor = label.color
@@ -758,7 +758,7 @@ function ScalableSpec(
         const cvs = labelCanvasRef.current
         const ctx = cvs.getContext('2d')
 
-        const xClustername = ( calculateXPosition(label.onset, cvs) + calculateXPosition(label.offset, cvs) ) / 2
+        const xClustername = ( calculateXPosition(label.onset) + calculateXPosition(label.offset) ) / 2
         const y = calculateYPosition(label)
 
         const lineColor = label.color
@@ -980,6 +980,10 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
+
+        if (labelToBeDeleted === expandedLabel){
+            setExpandedLabel(null)
+        }
     }
 
     const flipOnsetOffset = (label) => {
@@ -1319,7 +1323,7 @@ function ScalableSpec(
     const drawPlayhead = (timeframe) => {
         const canvas = specCanvasRef.current
         const ctx = canvas.getContext('2d');
-        const x = calculateXPosition(timeframe, canvas)
+        const x = calculateXPosition(timeframe)
 
         ctx.beginPath()
         ctx.moveTo(x, 0)
@@ -1781,7 +1785,7 @@ function ScalableSpec(
                     />
                 </div>
 
-                <div onMouseLeave={handleMouseUp}>
+                <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseUp}>
                     <canvas
                         className='waveform-canvas'
                         ref={waveformCanvasRef}
@@ -1806,7 +1810,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -1821,6 +1825,8 @@ function ScalableSpec(
                                 passLabelsToScalableSpec={passLabelsToScalableSpec}
                                 passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
                                 getAllIndividualIDs={getAllIndividualIDs}
+                                calculateXPosition={calculateXPosition}
+                                HEIGHT_BETWEEN_INDIVIDUAL_LINES={HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                             />
                     }
                     {spectrogramIsLoading || whisperSegIsLoading? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}

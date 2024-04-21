@@ -42,6 +42,8 @@ html, body {
 }
 
 .overview-time-axis-container{
+  position: fixed;
+  z-index: 2;
   margin: 0 0 0 200px;
 }
 
@@ -73,6 +75,18 @@ html, body {
 
 .audio-controls{
   display: flex;
+}
+
+.frequencies-canvas{
+  grid-area: frequencies-canvas;
+  display: block;
+  height: 175px;
+  margin: 55px 0 0 0;
+}
+
+.individuals-canvas{
+  grid-area: individuals-canvas;
+  display: block;
 }
 
 /* -------------------------- Overview Window -------------------------- */
@@ -134,7 +148,7 @@ html, body {
 .controls-container{
   position: fixed;
   top: 235px;
-  z-index: 1;
+  z-index: 2;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -214,7 +228,7 @@ html, body {
 /* -------------------------- Parameters -------------------------- */
 
 .local-parameters-config-panel{
-  z-index: 2;
+  z-index: 0;
   display: flex;
   flex-direction: column;
   background-color: #082536;
@@ -233,7 +247,7 @@ html, body {
 
 #annotation-labels-container{
   position: fixed;
-  z-index: 1;
+  z-index: 3;
   width: 100%;
   background: #051923;
 }
@@ -330,11 +344,13 @@ html, body {
 
 /* -------------------------- Label Window -------------------------- */
 .label-window {
-  position: fixed;
+  position: absolute;
   background-color: #082536;
   border: 2px solid whitesmoke;
   border-radius: 5px;
   padding: 10px;
+  max-height: 210px;
+  overflow-y: scroll;
 }
 
 .label-window-annotation-labels-menu{
@@ -360,7 +376,11 @@ html, body {
   background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
 }
 
-/* -------------------------- Canvases -------------------------- */
+/* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */
+.waveform-spec-labels-canvases-container{
+  position: relative;
+  z-index: 0;
+}
 
 .waveform-canvas{
   display: block;
@@ -374,22 +394,12 @@ html, body {
   display: block;
 }
 
-.frequencies-canvas{
-  grid-area: frequencies-canvas;
-  display: block;
-  height: 175px;
-  margin: 55px 0 0 0;
-}
-
-.individuals-canvas{
-  grid-area: individuals-canvas;
-  display: block;
-}
 
 
 
 #blank-space{
   position: fixed;
+  z-index: 1;
   width: 100%;
   height: 350px;
   background: #051923;

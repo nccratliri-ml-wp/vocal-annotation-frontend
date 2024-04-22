@@ -27,8 +27,6 @@ function FileUpload(
                     )
                 {
 
-    const location = useLocation();
-
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file && (file.type === 'audio/wav' || file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
@@ -43,10 +41,6 @@ function FileUpload(
         if (!file) return
         const formData = new FormData();
         formData.append('newAudioFile', file)
-        /*
-        formData.append('hop_length', globalHopLength)
-        formData.append('num_spec_columns', globalNumSpecColumns)
-        formData.append('sampling_rate', globalSamplingRate)*/
         formData.append('spec_cal_method', specCalMethod)
         formData.append('n_fft', nfft)
         formData.append('bins_per_octave', binsPerOctave)
@@ -109,6 +103,7 @@ function FileUpload(
     /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 
     // When url parameter is added into the searchbar
+                    /*
     useEffect( () => {
         let ignore = false
 
@@ -157,7 +152,7 @@ function FileUpload(
         }
 
     }, [location])
-
+                     */
     return (
         <div>
             <input className='file-input' type="file" accept=".wav, .mp3" onChange={handleFileChange} />

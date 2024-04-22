@@ -46,9 +46,6 @@ function ScalableSpec(
                             removeTrackInApp,
                             passActiveLabelToApp,
                             activeLabel,
-                            /*
-                            activeIndividual,
-                            */
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -56,7 +53,8 @@ function ScalableSpec(
                             passGlobalNumSpecColumnsToApp,
                             passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
-                            passDefaultConfigToApp
+                            passDefaultConfigToApp,
+                            audioFileObjects
                         }
                     )
                 {
@@ -1648,6 +1646,48 @@ function ScalableSpec(
         playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration] )
+
+
+    useEffect( () => {
+        if (!audioFileObjects) return
+        let ignore = false
+
+        const correctIndex = Number(id.at(-1))-1
+        const correctAudioFileObj = audioFileObjects[correctIndex]
+
+        const uploadFileByURL = async () => {
+            //passSpectrogramIsLoadingToScalableSpec( true )
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
+            const requestParameters = {
+                audio_url: correctAudioFileObj.url,
+                hop_length: correctAudioFileObj.hop_length,
+                //num_spec_columns: correctAudioFileObj.num_spec_columns,
+                //sampling_rate: correctAudioFileObj.sampling_rate,
+                //spec_cal_method: correctAudioFileObj.spec_cal_method,
+                n_fft: correctAudioFileObj.nfft,
+                //bins_per_octave: correctAudioFileObj.bins_per_octave,
+                min_frequency: correctAudioFileObj.f_low,
+                max_frequency: correctAudioFileObj.f_high
+            }
+
+            try {
+                const response = await axios.post(path, requestParameters)
+                if (!ignore){
+                    console.log(response.data)
+                }
+            } catch (error){
+                console.error(error)
+            }
+        }
+
+        uploadFileByURL()
+
+        return () => {
+            ignore = true
+        }
+
+    }, [audioFileObjects])
+
 
     return (
         <div

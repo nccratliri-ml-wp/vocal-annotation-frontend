@@ -69,6 +69,8 @@ function App() {
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
     const [defaultConfig, setDefaultConfig] = useState(null)
 
+    const [audioFileObjects, setAudioFileObjects] = useState(null)
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -218,6 +220,21 @@ function App() {
 
     }, [trackDurations])
 
+    // When url parameter is added into the searchbar
+    useEffect( () => {
+        let ignore = false
+
+        const queryParams = new URLSearchParams(location.search)
+        const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
+        console.log(decodedData)
+        setAudioFileObjects(decodedData)
+
+        return () => {
+            ignore = true
+        }
+
+    }, [location])
+
     return (
         <>
             <AnnotationLabels
@@ -295,6 +312,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioFileObjects={audioFileObjects}
                 />
             }
             {showTracks.track_2 &&

@@ -14,9 +14,6 @@ import {
 } from "./species.js";
 
 function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalableSpec, passExpandedLabelToScalableSpec, getAllIndividualIDs, calculateXPosition, HEIGHT_BETWEEN_INDIVIDUAL_LINES } ){
-    // To-do:
-    // Window Design
-    // Test thoroughly
 
     // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from AnnotationLabels.jsx
     const [localSpeciesArray, setLocalSpeciesArray] = useState(updateLocalSpeciesArrayFromOriginal)

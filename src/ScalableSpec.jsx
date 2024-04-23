@@ -1647,7 +1647,24 @@ function ScalableSpec(
             if (!response) return
 
             setAudioId(response.audio_id)
-            setLabels([])
+            // setLabels([])
+            const newLabels = audioPayload.labels.map( labelObj => {
+                return new Label(
+                    nanoid(),
+                    labelObj.onset,
+                    labelObj.offset,
+                    labelObj.species,
+                    labelObj.individual,
+                    labelObj.clustername,
+                    'currently not avaliable',
+                    'currently not avaliable',
+                    'currently not avaliable',
+                    'currently not avaliable',
+                    'currently not avaliable',
+                    DEFAULT_LABEL_COLOR,
+                )
+            })
+            setLabels(newLabels)
 
     }, [response])
 
@@ -1703,10 +1720,7 @@ function ScalableSpec(
     // When on of the audio payloads in the URL data parameter was assigned to this track
     useEffect( () => {
         if (!audioPayload) return
-        //const correctIndex = Number(id.at(-1))-1
-        //const correctAudioFileObj = audioFileObjects[correctIndex]
-
-        uploadFileByURL(audioPayload, )
+        uploadFileByURL(audioPayload)
 
     }, [audioPayload])
 

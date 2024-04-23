@@ -236,6 +236,22 @@ function App() {
         }
         setShowTracks(newShowTracksObj)
 
+        /*
+        let updatedSpeciesArray = []
+        for (let audioPayload of decodedData){
+            for (let label of audioPayload.labels){
+                const newSpecies = new Species(
+                    nanoid(),
+                    label.species,
+                    [new Individual( nanoid(), label.individual)],
+                    [new Clustername(nanoid(), label.clustername)],
+                )
+                updatedSpeciesArray.push(newSpecies)
+            }
+        }
+        setSpeciesArray([...speciesArray, ...updatedSpeciesArray])
+         */
+
         return () => {
             ignore = true
         }

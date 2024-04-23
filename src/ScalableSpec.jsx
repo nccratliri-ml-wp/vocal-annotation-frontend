@@ -5,9 +5,8 @@ import LinearProgress from "@mui/material/LinearProgress";
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import Export from "./Export.jsx";
-import FileUpload from "./FileUpload.jsx";
+import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
-import AnnotationLabels from "./AnnotationLabels.jsx";
 import LabelWindow from "./LabelWindow.jsx";
 
 // Classes
@@ -54,7 +53,7 @@ function ScalableSpec(
                             passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
                             passDefaultConfigToApp,
-                            audioFileObjects
+                            audioPayload
                         }
                     )
                 {
@@ -127,10 +126,6 @@ function ScalableSpec(
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
-    const passResponseToScalableSpec = ( newResponse ) => {
-        setResponse( newResponse )
-    }
-
     const passSpectrogramIsLoadingToScalableSpec = ( boolean ) => {
         setSpectrogramIsLoading( boolean )
     }
@@ -153,10 +148,6 @@ function ScalableSpec(
 
     const passMaxFreqToScalableSpec = ( newMaxFreq ) => {
         setMaxFreq( newMaxFreq )
-    }
-
-    const passAudioIdToScalableSpec = ( newId ) => {
-        setAudioId( newId )
     }
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
@@ -230,6 +221,68 @@ function ScalableSpec(
         }
 
         getSpecAndAudioArray()
+    }
+
+    const uploadFileByURL = async (audioPayload) => {
+        passSpectrogramIsLoadingToScalableSpec( true )
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
+        const requestParameters = {
+            audio_url: audioPayload.url,
+            hop_length: audioPayload.hop_length,
+            num_spec_columns: audioPayload.num_spec_columns,
+            sampling_rate: audioPayload.sampling_rate,
+            spec_cal_method: audioPayload.spec_cal_method,
+            n_fft: audioPayload.nfft,
+            bins_per_octave: audioPayload.bins_per_octave,
+            min_frequency: audioPayload.f_low,
+            max_frequency: audioPayload.f_high
+        }
+
+        try {
+            const response = await axios.post(path, requestParameters)
+            handleUploadResponse(response)
+        } catch (error){
+            handleUploadError(error)
+        }
+    }
+
+    const handleUploadResponse = (response) => {
+        const trackDuration = response.data.channels[0].audio_duration
+        const hopLength = response.data.configurations.hop_length
+        const numSpecColumns = response.data.configurations.num_spec_columns
+        const samplingRate = response.data.configurations.sampling_rate
+        const defaultConfig = {
+            hop_length: hopLength,
+            num_spec_columns: numSpecColumns,
+            sampling_rate: samplingRate
+        }
+
+        const newResponseData = response.data.channels[0]
+        const newSpecCalMethod = response.data.configurations.spec_cal_method
+        const newNfft = response.data.configurations.n_fft
+        const newBinsPerOctave = response.data.configurations.bins_per_octave
+        const newMinFreq = response.data.configurations.min_frequency
+        const newMaxFreq = response.data.configurations.max_frequency
+
+        deletePreviousTrackDurationInApp( response.audio_duration ) // Remove outdated track duration of the previous file in the App component
+        passTrackDurationToApp( trackDuration )
+        passGlobalHopLengthToApp( hopLength )
+        passGlobalNumSpecColumnsToApp( numSpecColumns )
+        passGlobalSamplingRateToApp( samplingRate )
+        passDefaultConfigToApp( defaultConfig )
+
+        setResponse( newResponseData )
+        setSpecCalMethod( newSpecCalMethod )
+        setNfft( newNfft ? newNfft : 512)
+        setBinsPerOctave( newBinsPerOctave ? newBinsPerOctave : 0)
+        setMinFreq( newMinFreq ? newMinFreq : 0)
+        setMaxFreq( newMaxFreq ? newMaxFreq : 16000)
+    }
+
+    const handleUploadError = (error) => {
+        setSpectrogramIsLoading( false )
+        console.error("Error uploading file:", error)
+        alert('Error while uploading. Check the console for more information.')
     }
 
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
@@ -1647,47 +1700,15 @@ function ScalableSpec(
 
     }, [response, globalAudioDuration] )
 
-
+    // When on of the audio payloads in the URL data parameter was assigned to this track
     useEffect( () => {
-        if (!audioFileObjects) return
-        let ignore = false
+        if (!audioPayload) return
+        //const correctIndex = Number(id.at(-1))-1
+        //const correctAudioFileObj = audioFileObjects[correctIndex]
 
-        const correctIndex = Number(id.at(-1))-1
-        const correctAudioFileObj = audioFileObjects[correctIndex]
+        uploadFileByURL(audioPayload, )
 
-        const uploadFileByURL = async () => {
-            //passSpectrogramIsLoadingToScalableSpec( true )
-            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
-            const requestParameters = {
-                audio_url: correctAudioFileObj.url,
-                hop_length: correctAudioFileObj.hop_length,
-                //num_spec_columns: correctAudioFileObj.num_spec_columns,
-                //sampling_rate: correctAudioFileObj.sampling_rate,
-                //spec_cal_method: correctAudioFileObj.spec_cal_method,
-                n_fft: correctAudioFileObj.nfft,
-                //bins_per_octave: correctAudioFileObj.bins_per_octave,
-                min_frequency: correctAudioFileObj.f_low,
-                max_frequency: correctAudioFileObj.f_high
-            }
-
-            try {
-                const response = await axios.post(path, requestParameters)
-                if (!ignore){
-                    console.log(response.data)
-                }
-            } catch (error){
-                console.error(error)
-            }
-        }
-
-        uploadFileByURL()
-
-        return () => {
-            ignore = true
-        }
-
-    }, [audioFileObjects])
-
+    }, [audioPayload])
 
     return (
         <div
@@ -1726,27 +1747,15 @@ function ScalableSpec(
             <div className='track-container'>
                 <div className='side-window' >
                     <div className='track-controls'>
-                        <FileUpload
+                        <LocalFileUpload
                             specCalMethod={specCalMethod}
                             nfft={nfft}
                             binsPerOctave={binsPerOctave}
                             minFreq={minFreq}
                             maxFreq={maxFreq}
-                            passResponseToScalableSpec={passResponseToScalableSpec}
                             passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                            passTrackDurationToApp={passTrackDurationToApp}
-                            deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
-                            previousAudioDuration={response? response.audio_duration : undefined}
-                            passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                            passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                            passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                            passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
-                            passNfftToScalableSpec={passNfftToScalableSpec}
-                            passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
-                            passMinFreqToScalableSpec={passMinFreqToScalableSpec}
-                            passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
-                            passAudioIdToScalableSpec={passAudioIdToScalableSpec}
-                            passDefaultConfigToApp={passDefaultConfigToApp}
+                            handleUploadResponse={handleUploadResponse}
+                            handleUploadError={handleUploadError}
                         />
                         <Export
                             audioFileName={'Example Audio File Name'}

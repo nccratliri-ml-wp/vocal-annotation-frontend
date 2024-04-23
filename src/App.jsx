@@ -69,7 +69,7 @@ function App() {
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
     const [defaultConfig, setDefaultConfig] = useState(null)
 
-    const [audioFileObjects, setAudioFileObjects] = useState(null)
+    const [audioPayloads, setAudioPayloads] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -220,14 +220,21 @@ function App() {
 
     }, [trackDurations])
 
-    // When url parameter is added into the searchbar
+    // When the site was accessed with a URL data parameter
     useEffect( () => {
         let ignore = false
 
         const queryParams = new URLSearchParams(location.search)
         const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
-        console.log(decodedData)
-        setAudioFileObjects(decodedData)
+
+        setAudioPayloads(decodedData)
+
+        // For each audio payload, turn on the track's visibility
+        const newShowTracksObj = {}
+        for (let i = 1; i <= 20; i++) {
+            newShowTracksObj[`track_${i}`] = i <= decodedData.length
+        }
+        setShowTracks(newShowTracksObj)
 
         return () => {
             ignore = true
@@ -312,7 +319,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
-                    audioFileObjects={audioFileObjects}
+                    audioPayload={audioPayloads? audioPayloads[0] : null}
                 />
             }
             {showTracks.track_2 &&
@@ -321,7 +328,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -346,6 +353,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[1] : null}
                 />
             }
             {showTracks.track_3 &&
@@ -354,7 +362,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -379,6 +387,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[2] : null}
                 />
             }
             {showTracks.track_4 &&
@@ -387,7 +396,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -412,6 +421,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[3] : null}
                 />
             }
             {showTracks.track_5 &&
@@ -420,7 +430,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -445,6 +455,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[4] : null}
                 />
             }
             {showTracks.track_6 &&
@@ -453,7 +464,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -478,6 +489,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[5] : null}
                 />
             }
             {showTracks.track_7 &&
@@ -486,7 +498,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -511,6 +523,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[6] : null}
                 />
             }
             {showTracks.track_8 &&
@@ -519,7 +532,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -544,6 +557,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[7] : null}
                 />
             }
             {showTracks.track_9 &&
@@ -552,7 +566,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -577,6 +591,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[8] : null}
                 />
             }
             {showTracks.track_10 &&
@@ -585,7 +600,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -610,6 +625,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[9] : null}
                 />
             }
             {showTracks.track_11 &&
@@ -618,7 +634,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -643,6 +659,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[10] : null}
                 />
             }
             {showTracks.track_12 &&
@@ -651,7 +668,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -676,6 +693,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[11] : null}
                 />
             }
             {showTracks.track_13 &&
@@ -684,7 +702,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -709,6 +727,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[12] : null}
                 />
             }
             {showTracks.track_14 &&
@@ -717,7 +736,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -742,6 +761,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[13] : null}
                 />
             }
             {showTracks.track_15 &&
@@ -750,7 +770,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -775,6 +795,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[14] : null}
                 />
             }
             {showTracks.track_16 &&
@@ -783,7 +804,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -808,6 +829,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[15] : null}
                 />
             }
             {showTracks.track_17 &&
@@ -816,7 +838,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -841,6 +863,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[16] : null}
                 />
             }
             {showTracks.track_18 &&
@@ -849,7 +872,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -874,6 +897,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[17] : null}
                 />
             }
             {showTracks.track_19 &&
@@ -882,7 +906,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -907,6 +931,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[18] : null}
                 />
             }
             {showTracks.track_20 &&
@@ -915,7 +940,7 @@ function App() {
                     trackDurations={trackDurations}
                     speciesArray={speciesArray}
                     deletedItemID={deletedItemID}
-                    showOverviewInitialValue={true}
+                    showOverviewInitialValue={false}
                     globalAudioDuration={globalAudioDuration}
                     globalClipDuration={globalClipDuration}
                     currentStartTime={currentStartTime}
@@ -940,6 +965,7 @@ function App() {
                     passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
+                    audioPayload={audioPayloads? audioPayloads[19] : null}
                 />
             }
             <button

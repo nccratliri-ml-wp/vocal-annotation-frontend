@@ -227,6 +227,8 @@ function App() {
         const queryParams = new URLSearchParams(location.search)
         const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
 
+        if (!decodedData) return
+
         setAudioPayloads(decodedData)
 
         // For each audio payload, turn on the track's visibility

@@ -1647,24 +1647,29 @@ function ScalableSpec(
             if (!response) return
 
             setAudioId(response.audio_id)
-            // setLabels([])
-            const newLabels = audioPayload.labels.map( labelObj => {
-                return new Label(
-                    nanoid(),
-                    labelObj.onset,
-                    labelObj.offset,
-                    labelObj.species,
-                    labelObj.individual,
-                    labelObj.clustername,
-                    'currently not avaliable',
-                    'currently not avaliable',
-                    'currently not avaliable',
-                    'currently not avaliable',
-                    'currently not avaliable',
-                    DEFAULT_LABEL_COLOR,
-                )
-            })
-            setLabels(newLabels)
+            //
+            if (audioPayload && audioPayload.labels){
+                const newLabels = audioPayload.labels.map( labelObj => {
+                    return new Label(
+                        nanoid(),
+                        labelObj.onset,
+                        labelObj.offset,
+                        labelObj.species,
+                        labelObj.individual,
+                        labelObj.clustername,
+                        'currently not avaliable',
+                        'currently not avaliable',
+                        'currently not avaliable',
+                        'currently not avaliable',
+                        'currently not avaliable',
+                        DEFAULT_LABEL_COLOR,
+                    )
+                })
+                setLabels(newLabels)
+            } else {
+                setLabels([])
+            }
+
 
     }, [response])
 

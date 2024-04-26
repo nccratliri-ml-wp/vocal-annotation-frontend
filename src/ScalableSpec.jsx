@@ -1626,6 +1626,7 @@ function ScalableSpec(
             )
 
         setLabels(updatedLabels)
+        console.log(updatedLabels)
     }, [speciesArray])
 
     // When user zoomed or scrolled
@@ -1647,7 +1648,8 @@ function ScalableSpec(
             if (!response) return
 
             setAudioId(response.audio_id)
-            //
+            setLabels([])
+            /*
             if (audioPayload && audioPayload.labels){
                 const newLabels = audioPayload.labels.map( labelObj => {
                     return new Label(
@@ -1666,10 +1668,11 @@ function ScalableSpec(
                     )
                 })
                 setLabels(newLabels)
+                console.log(newLabels)
             } else {
                 setLabels([])
             }
-
+             */
 
     }, [response])
 

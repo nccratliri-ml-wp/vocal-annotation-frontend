@@ -148,7 +148,7 @@ html, body {
 .controls-container{
   position: fixed;
   top: 235px;
-  z-index: 2;
+  z-index: 3;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;

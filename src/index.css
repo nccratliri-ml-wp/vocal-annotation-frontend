@@ -220,6 +220,7 @@ html, body {
 /* -------------------------- Colorwheel -------------------------- */
 .colorwheel{
   position: fixed;
+  margin: 30px 0 0 0;
 }
 
 /* -------------------------- Individuals -------------------------- */
@@ -283,6 +284,7 @@ html, body {
 .add-species-btn{
   background-color: #f6fffe;
   border: none;
+  border-radius: 2px;
   font-size: 12px;
 }
 
@@ -295,6 +297,7 @@ html, body {
   background-color: #626262;
   display: flex;
   margin: 2px;
+  border-radius: 2px;
   font-size: 16px;
   max-height: 24px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
@@ -328,6 +331,7 @@ html, body {
 .add-clustername-btn, .add-individual-btn{
   background-color: #f6fffe;
   border: none;
+  border-radius: 2px;
   font-size: 14px;
 }
 
@@ -335,6 +339,7 @@ html, body {
   background-color: #f6fffe;
   border: none;
   border-left: 1px solid black;
+  border-radius: 2px;
   font-size: 14px;
 }
 
@@ -343,18 +348,44 @@ html, body {
 }
 
 /* -------------------------- Label Window -------------------------- */
-.label-window {
+.label-window{
   position: absolute;
-  background-color: #082536;
+  background: #051923;
   border: 2px solid whitesmoke;
   border-radius: 5px;
-  padding: 10px;
   max-height: 210px;
+  max-width: 400px;
   overflow-y: scroll;
 }
 
-.label-window-annotation-labels-menu{
+.close-btn-container{
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: flex-start;
+  background: #ffffff;
+}
 
+.close-btn{
+  margin: 0;
+  background: #ffffff;
+  padding: 0 5px;
+  border: none;
+}
+
+.close-btn:hover{
+  background: #ea1414;
+  color: white;
+}
+
+.label-window-species{
+  background-color: #082536;
+  padding: 0 7px;
+  margin: 0 0 10px;
+}
+
+.label-window-species:last-child{
+  margin: 0;
 }
 
 .label-window-individual-btn-container, .label-window-clustername-btn-container{
@@ -366,6 +397,8 @@ html, body {
   background-color: #626262;
   display: flex;
   margin: 2px;
+  padding: 0 2px;
+  border-radius: 2px;
   font-size: 16px;
   max-height: 24px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);

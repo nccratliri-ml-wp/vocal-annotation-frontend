@@ -13,7 +13,19 @@ import {
     checkIfEveryObjectIsInactive, UNKNOWN_INDIVIDUAL
 } from "./species.js";
 
-function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalableSpec, passExpandedLabelToScalableSpec, getAllIndividualIDs, calculateXPosition, HEIGHT_BETWEEN_INDIVIDUAL_LINES } ){
+function LabelWindow(
+                        {
+                            speciesArray,
+                            labels,
+                            expandedLabel,
+                            passLabelsToScalableSpec,
+                            passExpandedLabelToScalableSpec,
+                            getAllIndividualIDs,
+                            calculateXPosition,
+                            HEIGHT_BETWEEN_INDIVIDUAL_LINES
+                        }
+                    )
+                {
 
     // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from AnnotationLabels.jsx
     const [localSpeciesArray, setLocalSpeciesArray] = useState(updateLocalSpeciesArrayFromOriginal)
@@ -211,12 +223,15 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                 left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset)
             }}
         >
-            <div className='label-window-annotation-labels-menu'>
-                <button onClick={ () => passExpandedLabelToScalableSpec(null) }>Close</button>
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
+                </div>
+
                 {
                     localSpeciesArray.map( (species) =>
                         <div
                             key={species.id}
+                            className='label-window-species'
                         >
                             {species.name}
 
@@ -259,7 +274,7 @@ function LabelWindow ( { speciesArray, labels, expandedLabel, passLabelsToScalab
                         </div>
                     )
                 }
-            </div>
+
         </div>
     )
 }

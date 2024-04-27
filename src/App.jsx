@@ -238,21 +238,58 @@ function App() {
         }
         setShowTracks(newShowTracksObj)
 
-        /*
-        let updatedSpeciesArray = []
-        for (let audioPayload of decodedData){
-            for (let label of audioPayload.labels){
+
+        // Update Annotation Label buttons
+        let updatedSpeciesArray = [...speciesArray]
+        const allExistingSpeciesNames = speciesArray.map(speciesObj => speciesObj.name)
+        const allImportedLabels = decodedData.flatMap(audioPayload => audioPayload.labels || [])
+
+        for (let label of allImportedLabels){
+
+            for (let speciesObj of updatedSpeciesArray){
+
+                // For Existing species, update Individuals and Clusternames
+                if (speciesObj.name === label.species){
+
+                    const allIndividualNames = speciesObj.individuals.map(individual => individual.name)
+                    if ( !allIndividualNames.includes(label.individual) ){
+                        const newIndividual = new Individual(nanoid(), label.individual)
+                        newIndividual.isActive = false
+                        speciesObj.individuals = [...speciesObj.individuals, newIndividual]
+                    }
+
+                    const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
+                    if ( !allClusternamesNames.includes(label.clustername) ){
+                        const newClustername = new Clustername(nanoid(), label.clustername)
+                        newClustername.isActive = false
+                        speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
+                    }
+                }
+            }
+
+            // If imported species does not exist already, create a new one
+            if (!allExistingSpeciesNames.includes(label.species)){
+                const newUnknownIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
+                const newUnknownClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+                const newIndividual = new Individual(nanoid(), label.individual)
+                const newClustername = new Clustername(nanoid(), label.clustername)
+                newIndividual.isActive = false
+                newClustername.isActive = false
+                newUnknownIndividual.isActive = false
+                newUnknownClustername.isActive = false
+
                 const newSpecies = new Species(
                     nanoid(),
                     label.species,
-                    [new Individual( nanoid(), label.individual)],
-                    [new Clustername(nanoid(), label.clustername)],
+                    [newUnknownIndividual, newIndividual],
+                    [newUnknownClustername, newClustername],
                 )
+                allExistingSpeciesNames.push(label.species)
                 updatedSpeciesArray.push(newSpecies)
             }
         }
-        setSpeciesArray([...speciesArray, ...updatedSpeciesArray])
-         */
+
+        setSpeciesArray(updatedSpeciesArray)
 
         return () => {
             ignore = true

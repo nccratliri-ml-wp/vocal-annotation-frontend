@@ -1626,6 +1626,7 @@ function ScalableSpec(
             )
 
         setLabels(updatedLabels)
+
     }, [speciesArray])
 
     // When user zoomed or scrolled
@@ -1647,29 +1648,56 @@ function ScalableSpec(
             if (!response) return
 
             setAudioId(response.audio_id)
-            //
+
+            // Add imported labels to the labels array
+            const allIndividualIDs = getAllIndividualIDs()
             if (audioPayload && audioPayload.labels){
-                const newLabels = audioPayload.labels.map( labelObj => {
-                    return new Label(
-                        nanoid(),
-                        labelObj.onset,
-                        labelObj.offset,
-                        labelObj.species,
-                        labelObj.individual,
-                        labelObj.clustername,
-                        'currently not avaliable',
-                        'currently not avaliable',
-                        'currently not avaliable',
-                        'currently not avaliable',
-                        'currently not avaliable',
-                        DEFAULT_LABEL_COLOR,
-                    )
-                })
-                setLabels(newLabels)
+
+                // Iterate over the imported labels array
+                const updatedLabels = audioPayload.labels
+                    .map(label => {
+
+                        // Create a new Label object with the imported values
+                        const updatedLabel = new Label(
+                            nanoid(),
+                            label.onset,
+                            label.offset,
+                            label.species,
+                            label.individual,
+                            label.clustername,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+
+                        // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
+                        for (const speciesObj of speciesArray) {
+                            if (updatedLabel.species === speciesObj.name) {
+                                updatedLabel.speciesID = speciesObj.id
+                                for (const individual of speciesObj.individuals) {
+                                    if (updatedLabel.individual === individual.name) {
+                                        updatedLabel.individualID = individual.id
+                                        updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
+                                    }
+                                }
+                                for (const clustername of speciesObj.clusternames) {
+                                    if (updatedLabel.clustername === clustername.name) {
+                                        updatedLabel.clusternameID = clustername.id
+                                        updatedLabel.color = clustername.color
+                                    }
+                                }
+                            }
+                        }
+
+                        return updatedLabel
+                    })
+                setLabels(updatedLabels)
             } else {
                 setLabels([])
             }
-
 
     }, [response])
 

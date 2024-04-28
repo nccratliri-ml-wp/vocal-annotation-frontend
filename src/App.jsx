@@ -68,6 +68,7 @@ function App() {
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState('')
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
     const [defaultConfig, setDefaultConfig] = useState(null)
+    const [showGlobalConfigWindow, setShowGlobalConfigWindow] = useState(false)
 
     const [audioPayloads, setAudioPayloads] = useState(null)
 
@@ -119,6 +120,10 @@ function App() {
 
     function passDefaultConfigToApp( newDefaultConfig ){
         setDefaultConfig( newDefaultConfig )
+    }
+
+    function passShowGlobalConfigWindowToApp ( boolean ){
+        setShowGlobalConfigWindow( boolean )
     }
 
     function passDeletedItemIDToApp( newDeletedItemID ){
@@ -332,17 +337,22 @@ function App() {
                 id='all-tracks'
                 onMouseLeave={ () => setActiveLabel(null)}
             >
-            <GlobalConfig
-                globalAudioDuration={globalAudioDuration}
-                currentStartTime={currentStartTime}
-                updateClipDurationAndTimes={updateClipDurationAndTimes}
-                globalHopLength={globalHopLength}
-                globalNumSpecColumns={globalNumSpecColumns}
-                globalSamplingRate={globalSamplingRate}
-                passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                defaultConfig={defaultConfig}
-            />
+                <button id='open-global-config-btn' onClick={ () => setShowGlobalConfigWindow(true)}>⚙️</button>
+            {showGlobalConfigWindow &&
+
+                <GlobalConfig
+                    globalAudioDuration={globalAudioDuration}
+                    currentStartTime={currentStartTime}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                    passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                    defaultConfig={defaultConfig}
+                    passShowGlobalConfigWindowToApp={passShowGlobalConfigWindowToApp}
+                />
+            }
             {showTracks.track_1 &&
                 <ScalableSpec
                     id='track_1'

@@ -10,7 +10,8 @@ function GlobalConfig (
                 globalSamplingRate,
                 passGlobalNumSpecColumnsToApp,
                 passGlobalSamplingRateToApp,
-                defaultConfig
+                defaultConfig,
+                passShowGlobalConfigWindowToApp
             }
         )
     {
@@ -85,50 +86,63 @@ function GlobalConfig (
 
 
     return (
-        <>
+        <div id='global-config-window'>
 
-            <label>
-                Hop Length
-                <input
-                    type="number"
-                    value={hopLengthInputValue}
-                    min={0}
-                    onKeyPress={excludeNonDigits}
-                    onChange={() => setHopLengthInputValue(event.target.value)}
-                    onFocus={(event) => event.target.select()}
-                    onPaste={(event) => event.preventDefault()}
-                />
-            </label>
+            <div className='close-btn-container'>
+                <button className='close-btn' onClick={ () => passShowGlobalConfigWindowToApp(false) }>✖</button>
+            </div>
 
-            <label>
-                Num Spec Columns
-                <input
-                    type="number"
-                    value={numSpecColumnsInputValue}
-                    min={0}
-                    onChange={(event) => setColumnsInputValue(event.target.value)}
-                    onKeyPress={excludeNonDigits}
-                    onFocus={(event) => event.target.select()}
-                    onPaste={(event) => event.preventDefault()}
-                />
-            </label>
+            <div id='global-config-window-content'>
 
-            <label>
-                Sampling Rate
-                <input
-                    type="number"
-                    value={samplingRateInputValue}
-                    min={0}
-                    onChange={(event) => setSamplingRateInputValue(event.target.value)}
-                    onKeyPress={excludeNonDigits}
-                    onFocus={(event) => event.target.select()}
-                    onPaste={(event) => event.preventDefault()}
-                />
-            </label>
+                <div>
+                    <label className='global-config-window-label'>
+                        Hop Length
+                        <input
+                            type="number"
+                            value={hopLengthInputValue}
+                            min={0}
+                            onKeyPress={excludeNonDigits}
+                            onChange={() => setHopLengthInputValue(event.target.value)}
+                            onFocus={(event) => event.target.select()}
+                            onPaste={(event) => event.preventDefault()}
+                        />
+                    </label>
 
-            <button onClick={submitGlobalParameters}>Submit All</button>
-            <button onClick={restoreDefaultValues}>Restore Default Values</button>
-        </>
+                    <label className='global-config-window-label'>
+                        Num Spec Columns
+                        <input
+                            type="number"
+                            value={numSpecColumnsInputValue}
+                            min={0}
+                            onChange={(event) => setColumnsInputValue(event.target.value)}
+                            onKeyPress={excludeNonDigits}
+                            onFocus={(event) => event.target.select()}
+                            onPaste={(event) => event.preventDefault()}
+                        />
+                    </label>
+
+                    <label className='global-config-window-label'>
+                        Sampling Rate
+                        <input
+                            type="number"
+                            value={samplingRateInputValue}
+                            min={0}
+                            onChange={(event) => setSamplingRateInputValue(event.target.value)}
+                            onKeyPress={excludeNonDigits}
+                            onFocus={(event) => event.target.select()}
+                            onPaste={(event) => event.preventDefault()}
+                        />
+                    </label>
+                </div>
+
+                <div id='global-config-window-buttons-container'>
+                    <button id='global-config-default-values-btn' onClick={restoreDefaultValues}>Restore Default Values</button>
+                    <button id='global-config-submit-btn' onClick={submitGlobalParameters}>Submit</button>
+                </div>
+
+            </div>
+
+        </div>
     )
 }
 

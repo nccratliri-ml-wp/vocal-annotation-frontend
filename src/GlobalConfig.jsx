@@ -90,6 +90,7 @@ function GlobalConfig (
 
             <div className='close-btn-container'>
                 <button className='close-btn' onClick={ () => passShowGlobalConfigWindowToApp(false) }>✖</button>
+                <p className='window-header'>Global Configurations</p>
             </div>
 
             <div id='global-config-window-content'>

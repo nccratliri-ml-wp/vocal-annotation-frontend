@@ -225,6 +225,7 @@ function LabelWindow(
         >
                 <div className='close-btn-container'>
                     <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
+                    <p className='window-header'>Reassign label</p>
                 </div>
 
                 {

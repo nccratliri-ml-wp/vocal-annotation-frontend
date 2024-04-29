@@ -1,4 +1,7 @@
 import React, {useState, useEffect} from 'react'
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import SettingsIcon from '@mui/icons-material/Settings';
 import ScalableSpec from "./ScalableSpec.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
@@ -11,6 +14,7 @@ import {
     Individual,
     Clustername
 } from './species.js'
+import {iconStyle} from "./styles.js"
 import {nanoid} from "nanoid";
 
 // Global Variables
@@ -156,6 +160,8 @@ function App() {
     }
 
     function removeTrackInApp( trackID ){
+        if (!confirm('Removing this track will delete any annotations you have made in it.')) return
+
         setShowTracks({
             ...showTracks,
             [trackID]: false
@@ -333,11 +339,15 @@ function App() {
                 id='blank-space'
             >
             </div>
+            <div id='open-global-config-btn'>
+                    <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
+                        <SettingsIcon style={iconStyle} />
+                    </IconButton>
+            </div>
             <div
                 id='all-tracks'
                 onMouseLeave={ () => setActiveLabel(null)}
             >
-                <button id='open-global-config-btn' onClick={ () => setShowGlobalConfigWindow(true)}>⚙️</button>
             {showGlobalConfigWindow &&
 
                 <GlobalConfig

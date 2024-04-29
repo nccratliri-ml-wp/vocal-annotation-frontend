@@ -2,8 +2,19 @@ import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import BackupIcon from '@mui/icons-material/Backup';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import StopIcon from '@mui/icons-material/Stop';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
+import {iconBtnStyle, iconStyle} from "./styles.js"
 import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
@@ -21,6 +32,7 @@ class Playhead{
 const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
+
 
 function ScalableSpec(
                         {
@@ -1804,54 +1816,39 @@ function ScalableSpec(
                             handleUploadResponse={handleUploadResponse}
                             handleUploadError={handleUploadError}
                         />
-                        <Export
-                            audioFileName={'Example Audio File Name'}
-                            labels={labels}
-                        />
-                        <button onClick={submitAnnotations}>Submit Annotations</button>
-                        {id !== 'track_1' &&
-                            <button
-                                onClick={handleRemoveTrack}
-                            >
-                                Remove Track
-                            </button>
-                        }
-                        <button
-                            onClick={() => console.log(labels)}
-                        >
-                            Console log labels
-                        </button>
-                        <button
-                            onClick={waveformZoomIn}
-                        >
-                            Enhance Waveform
-                        </button>
-                        <button
-                            onClick={waveformZoomOut}
-                        >
-                            Decrease Waveform
-                        </button>
-                        <button
-                            onClick={callWhisperSeg}
-                        >
-                            Call WhisperSeg
-                        </button>
+                        <div>
+                            <Export
+                                audioFileName={'Example Audio File Name'}
+                                labels={labels}
+                            />
+                            <Tooltip title="Submit Annotations">
+                                <IconButton>
+                                    <BackupIcon style={iconStyle} onClick={submitAnnotations}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Call WhisperSeg">
+                                <IconButton>
+                                    <AutoFixHighIcon style={iconStyle} onClick={callWhisperSeg}/>
+                                </IconButton>
+                            </Tooltip>
+                            {id !== 'track_1' &&
+                                <Tooltip title="Delete Track">
+                                    <IconButton>
+                                        <DeleteIcon style={iconStyle} onClick={handleRemoveTrack}/>
+                                    </IconButton>
+                                </Tooltip>
+                            }
+                        </div>
                         <div className='audio-controls'>
-                            <button
-                                onClick={getAudio}
-                            >
-                                ▶
-                            </button>
-                            <button
-                                onClick={pauseAudio}
-                            >
-                                ⏸
-                            </button>
-                            <button
-                                onClick={stopAudio}
-                            >
-                                ⏹
-                            </button>
+                            <IconButton>
+                                <PlayArrowIcon style={iconStyle} onClick={getAudio}/>
+                            </IconButton>
+                            <IconButton>
+                                <PauseIcon style={iconStyle} onClick={pauseAudio}/>
+                            </IconButton>
+                            <IconButton>
+                                <StopIcon style={iconStyle} onClick={stopAudio}/>
+                            </IconButton>
                         </div>
                         <Parameters
                             specCalMethod={specCalMethod}
@@ -1867,12 +1864,22 @@ function ScalableSpec(
                             submitLocalParameters={submitLocalParameters}
                         />
                     </div>
-                    <canvas
-                        className='frequencies-canvas'
-                        ref={frequenciesCanvasRef}
-                        width={40}
-                        height={175}
-                    />
+                    <div className='waveform-buttons-frequencies-canvas-container'>
+                        <div className='waveform-buttons'>
+                            <IconButton style={iconBtnStyle}>
+                                <ZoomInIcon style={iconStyle} onClick={waveformZoomIn}/>
+                            </IconButton>
+                            <IconButton style={iconBtnStyle}>
+                                <ZoomOutIcon style={iconStyle} onClick={waveformZoomOut}/>
+                            </IconButton>
+                        </div>
+                        <canvas
+                            className='frequencies-canvas'
+                            ref={frequenciesCanvasRef}
+                            width={40}
+                            height={175}
+                        />
+                    </div>
                     <canvas
                         className='individuals-canvas'
                         ref={individualsCanvasRef}

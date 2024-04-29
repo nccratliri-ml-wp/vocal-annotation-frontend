@@ -1,3 +1,9 @@
+import IconButton from "@material-ui/core/IconButton";
+import DownloadIcon from '@mui/icons-material/Download';
+import Tooltip from "@material-ui/core/Tooltip";
+import React from "react";
+import {iconStyle} from "./styles.js"
+
 function Export( { labels, audioFileName } ){
 
     function exportCSV(){
@@ -24,11 +30,11 @@ function Export( { labels, audioFileName } ){
     }
 
     return (
-        <button
-            id='export-btn'
-            onClick={exportCSV}>
-            Export
-        </button>
+        <Tooltip title="Download Annotations">
+            <IconButton>
+                <DownloadIcon style={iconStyle} onClick={exportCSV}/>
+            </IconButton>
+        </Tooltip>
     )
 }
 

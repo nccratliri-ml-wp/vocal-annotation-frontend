@@ -59,7 +59,7 @@ html, body {
   grid-template-columns: 160px 40px;
   grid-template-rows: 230px auto;
   grid-template-areas:
-    "track-controls  frequencies-canvas"
+    "track-controls waveform-buttons-frequencies-canvas-container"
     "individuals-canvas individuals-canvas";
 }
 
@@ -75,13 +75,25 @@ html, body {
 
 .audio-controls{
   display: flex;
+  background-color: #082536;
+  border-radius: 30px;
+}
+
+.waveform-buttons-frequencies-canvas-container{
+  grid-area: waveform-buttons-frequencies-canvas-container
+}
+
+.waveform-buttons{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 55px;
 }
 
 .frequencies-canvas{
-  grid-area: frequencies-canvas;
   display: block;
   height: 175px;
-  margin: 55px 0 0 0;
 }
 
 .individuals-canvas{
@@ -226,7 +238,8 @@ html, body {
 #open-global-config-btn{
   position: absolute;
   z-index: 3;
-  top: 320px;
+  top: 205px;
+  right: 0;
 }
 
 #global-config-window{
@@ -424,6 +437,11 @@ html, body {
   background: #ffffff;
   padding: 0 5px;
   border: none;
+}
+
+.window-header{
+  color: #051923;
+  margin: 0;
 }
 
 .close-btn:hover{

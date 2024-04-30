@@ -31,8 +31,8 @@ function Export( { labels, audioFileName } ){
 
     return (
         <Tooltip title="Download Annotations">
-            <IconButton>
-                <DownloadIcon style={iconStyle} onClick={exportCSV}/>
+            <IconButton onClick={exportCSV}>
+                <DownloadIcon style={iconStyle}/>
             </IconButton>
         </Tooltip>
     )

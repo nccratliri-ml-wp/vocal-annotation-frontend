@@ -340,9 +340,9 @@ function App() {
             >
             </div>
             <div id='open-global-config-btn'>
-                    <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
-                        <SettingsIcon style={iconStyle} />
-                    </IconButton>
+                <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
+                    <SettingsIcon style={iconStyle} />
+                </IconButton>
             </div>
             <div
                 id='all-tracks'

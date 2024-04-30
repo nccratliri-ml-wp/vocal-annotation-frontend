@@ -1829,37 +1829,37 @@ function ScalableSpec(
                                 labels={labels}
                             />
                             <Tooltip title="Submit Annotations">
-                                <IconButton>
-                                    <BackupIcon style={iconStyle} onClick={submitAnnotations}/>
+                                <IconButton onClick={submitAnnotations}>
+                                    <BackupIcon style={iconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton>
-                                    <AutoFixHighIcon style={iconStyle} onClick={callWhisperSeg}/>
+                                <IconButton onClick={callWhisperSeg}>
+                                    <AutoFixHighIcon style={iconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Change Track Parameters">
                                 <IconButton onClick={ () => setShowLocalConfigWindow(true)}>
-                                    <TuneIcon style={iconStyle} />
+                                    <TuneIcon style={iconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             {id !== 'track_1' &&
                                 <Tooltip title="Delete Track">
-                                    <IconButton>
-                                        <DeleteIcon style={iconStyle} onClick={handleRemoveTrack}/>
+                                    <IconButton onClick={handleRemoveTrack}>
+                                        <DeleteIcon style={iconStyle}/>
                                     </IconButton>
                                 </Tooltip>
                             }
                         </div>
                         <div className='audio-controls'>
-                            <IconButton>
-                                <PlayArrowIcon style={iconStyle} onClick={getAudio}/>
+                            <IconButton onClick={getAudio}>
+                                <PlayArrowIcon style={iconStyle}/>
                             </IconButton>
-                            <IconButton>
-                                <PauseIcon style={iconStyle} onClick={pauseAudio}/>
+                            <IconButton onClick={pauseAudio}>
+                                <PauseIcon style={iconStyle}/>
                             </IconButton>
-                            <IconButton>
-                                <StopIcon style={iconStyle} onClick={stopAudio}/>
+                            <IconButton onClick={stopAudio}>
+                                <StopIcon style={iconStyle}/>
                             </IconButton>
                         </div>
                         <Parameters
@@ -1880,11 +1880,11 @@ function ScalableSpec(
                     </div>
                     <div className='waveform-buttons-frequencies-canvas-container'>
                         <div className='waveform-buttons'>
-                            <IconButton style={iconBtnStyle}>
-                                <ZoomInIcon style={iconStyle} onClick={waveformZoomIn}/>
+                            <IconButton style={iconBtnStyle} onClick={waveformZoomIn}>
+                                <ZoomInIcon style={iconStyle}/>
                             </IconButton>
-                            <IconButton style={iconBtnStyle}>
-                                <ZoomOutIcon style={iconStyle} onClick={waveformZoomOut}/>
+                            <IconButton style={iconBtnStyle} onClick={waveformZoomOut}>
+                                <ZoomOutIcon style={iconStyle}/>
                             </IconButton>
                         </div>
                         <canvas

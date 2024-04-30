@@ -86,7 +86,7 @@ function Parameters(
                     <p className='window-header'>Track Configurations</p>
                 </div>
 
-                <div>
+                <div className={'local-config-window-label'}>
                     <label>
                         <input
                             type="radio"
@@ -112,7 +112,7 @@ function Parameters(
                     )}
                 </div>
 
-                <div>
+                <div className={'local-config-window-label'}>
                     <label>
                         <input
                             type="radio"
@@ -139,7 +139,7 @@ function Parameters(
                 </div>
 
                 <div className='frequencies-labels-container'>
-                    <label>
+                    <label className={'local-config-window-label'}>
                         Min Freq
                         <input
                             type="number"
@@ -151,7 +151,7 @@ function Parameters(
                             onPaste={(event) => event.preventDefault()}
                         />
                     </label>
-                    <label>
+                    <label className={'local-config-window-label'}>
                         Max Freq
                         <input
                             type="number"
@@ -165,7 +165,10 @@ function Parameters(
                     </label>
                 </div>
 
-                <button onClick={handleSubmit}>Submit All</button>
+                <div className={'local-config-window-label'}>
+                    <div></div>
+                    <button onClick={handleSubmit}>Submit</button>
+                </div>
 
             </div>
         }

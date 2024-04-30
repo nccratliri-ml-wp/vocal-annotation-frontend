@@ -260,7 +260,7 @@ html, body {
   flex-direction: column;
   justify-content: space-between;
   width: 380px;
-  height: 168px;
+  height: 160px;
   padding: 7px 10px;
 }
 
@@ -326,7 +326,9 @@ html, body {
 
 .species{
   background-color: #082536;
-  margin: 0 0 7px 0;
+  margin: 10px 7px 7px;
+  padding: 2px 5px;
+  border-radius: 5px;
   font-size: 18px;
   font-weight: bold;
 }

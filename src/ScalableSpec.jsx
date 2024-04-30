@@ -12,6 +12,7 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
+import TuneIcon from '@mui/icons-material/Tune';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import {iconBtnStyle, iconStyle} from "./styles.js"
@@ -19,6 +20,7 @@ import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
+import SettingsIcon from "@mui/icons-material/Settings.js";
 
 // Classes
 
@@ -116,6 +118,7 @@ function ScalableSpec(
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
     // Local Parameters
+    const [showLocalConfigWindow, setShowLocalConfigWindow] = useState(false)
     const [specCalMethod, setSpecCalMethod] = useState('log-mel')
     const [nfft, setNfft] = useState('')
     const [binsPerOctave, setBinsPerOctave] = useState('')
@@ -140,6 +143,10 @@ function ScalableSpec(
 
     const passSpectrogramIsLoadingToScalableSpec = ( boolean ) => {
         setSpectrogramIsLoading( boolean )
+    }
+
+    const passShowLocalConfigWindowToScalableSpec = ( boolean ) => {
+        setShowLocalConfigWindow( boolean )
     }
 
     const passSpecCalMethodToScalableSpec = ( newspecCalMethod ) => {
@@ -1831,6 +1838,11 @@ function ScalableSpec(
                                     <AutoFixHighIcon style={iconStyle} onClick={callWhisperSeg}/>
                                 </IconButton>
                             </Tooltip>
+                            <Tooltip title="Change Track Parameters">
+                                <IconButton onClick={ () => setShowLocalConfigWindow(true)}>
+                                    <TuneIcon style={iconStyle} />
+                                </IconButton>
+                            </Tooltip>
                             {id !== 'track_1' &&
                                 <Tooltip title="Delete Track">
                                     <IconButton>
@@ -1851,11 +1863,13 @@ function ScalableSpec(
                             </IconButton>
                         </div>
                         <Parameters
+                            showLocalConfigWindow={showLocalConfigWindow}
                             specCalMethod={specCalMethod}
                             nfft={nfft}
                             binsPerOctave={binsPerOctave}
                             minFreq={minFreq}
                             maxFreq={maxFreq}
+                            passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
                             passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
                             passNfftToScalableSpec={passNfftToScalableSpec}
                             passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}

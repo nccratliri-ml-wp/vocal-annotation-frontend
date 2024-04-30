@@ -2,11 +2,13 @@ import React, {useEffect, useState} from 'react';
 
 function Parameters(
         {
+            showLocalConfigWindow,
             specCalMethod,
             nfft,
             binsPerOctave,
             minFreq,
             maxFreq,
+            passShowLocalConfigWindowToScalableSpec,
             passSpecCalMethodToScalableSpec,
             passNfftToScalableSpec,
             passBinsPerOctaveToScalableSpec,
@@ -17,7 +19,7 @@ function Parameters(
     )
 {
 
-    const [showConfigPanel, setShowConfigPanel] = useState(false)
+
     const [showNFftInput, setShowNFftInput] = useState(true)
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
@@ -42,7 +44,7 @@ function Parameters(
     }
 
     const handleSubmit = () => {
-        setShowConfigPanel(false)
+        passShowLocalConfigWindowToScalableSpec(false)
         submitLocalParameters()
     }
 
@@ -74,12 +76,15 @@ function Parameters(
 
     return (
         <>
-            <button onClick={ () => setShowConfigPanel(!showConfigPanel) }>Show ConfigPanel</button>
         {
-            showConfigPanel &&
+            showLocalConfigWindow &&
             <div
                 className="local-parameters-config-panel"
             >
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={ () => passShowLocalConfigWindowToScalableSpec(false) }>✖</button>
+                    <p className='window-header'>Track Configurations</p>
+                </div>
 
                 <div>
                     <label>
@@ -93,7 +98,7 @@ function Parameters(
                     </label>
                     {showNFftInput && (
                         <label>
-                            N-FFT:
+                            N-FFT
                             <input
                                 type="number"
                                 value={nfft}
@@ -119,7 +124,7 @@ function Parameters(
                     </label>
                     {showBinsPerOctaveInput && (
                         <label>
-                            BPO:
+                            BPO
                             <input
                                 type="number"
                                 value={binsPerOctave}
@@ -133,7 +138,7 @@ function Parameters(
                     )}
                 </div>
 
-                <div>
+                <div className='frequencies-labels-container'>
                     <label>
                         Min Freq
                         <input

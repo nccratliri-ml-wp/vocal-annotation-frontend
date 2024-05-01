@@ -334,7 +334,7 @@ html, body {
 }
 
 #annotation-labels-menu{
-  max-height: 150px;
+  max-height: 115px;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
@@ -342,7 +342,7 @@ html, body {
 
 .species{
   background-color: #082536;
-  margin: 7px 7px 7px;
+  margin: 2px 7px;
   padding: 2px 5px;
   border: 1px solid #f6fffe;
   border-radius: 5px;

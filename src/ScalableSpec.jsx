@@ -57,8 +57,6 @@ function ScalableSpec(
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
                             removeTrackInApp,
-                            passActiveLabelToApp,
-                            activeLabel,
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -345,25 +343,25 @@ function ScalableSpec(
         }
 
         // Add offset to existing label if necessary
-        const lastLabel = labels[labels.length-1]
-        if (labels.length > 0 && lastLabel.offset === undefined){
+        const newestLabel = labels[labels.length-1]
+        if (labels.length > 0 && newestLabel.offset === undefined){
             let newOffset = calculateTimestamp(event)
             newOffset = magnet(newOffset)
             /*
-            if (!checkIfNewOffsetIsValid(lastLabel.onset, newOffset) ){
+            if (!checkIfNewOffsetIsValid(newestLabel.onset, newOffset) ){
                 alert('Labels of the same individual may not stretch across one another.')
                 return
             }*/
             const labelsCopy = labels
-            if (newOffset < lastLabel.onset){
-                lastLabel.offset = newOffset
-                labelsCopy[labels.length-1] = flipOnsetOffset(lastLabel)
+            if (newOffset < newestLabel.onset){
+                newestLabel.offset = newOffset
+                labelsCopy[labels.length-1] = flipOnsetOffset(newestLabel)
             } else {
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passActiveLabelToApp( labelsCopy[labels.length-1] )
-            drawLineBetween(lastLabel)
+            drawLineBetween(newestLabel)
+            drawLine(newestLabel, newestLabel.offset)
             return
         }
 
@@ -371,7 +369,6 @@ function ScalableSpec(
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(nanoid(), clickedTimestamp))
     }
 
     const handleMouseUp = (event) => {
@@ -389,7 +386,6 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
-            passActiveLabelToApp(new Label(nanoid(), clickedLabel.onset, clickedLabel.offset))
         }
 
         clickedLabel = undefined
@@ -415,17 +411,9 @@ function ScalableSpec(
         const mouseY = getMouseY(event)
         const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
         deleteLabel(labelToBeDeleted)
-        passActiveLabelToApp(null)
     }
 
     const handleMouseMove = (event) => {
-        // Active label get sets to zero once user has set the offset of a label and moved his mouse
-        const mouseX = getMouseX(event)
-        const mouseY = getMouseY(event)
-        if (activeLabel && activeLabel.offset && !checkIfClickedOnLabel(mouseX, mouseY)){
-            console.log('setting active label to null')
-            passActiveLabelToApp(null)
-        }
         hoverLine(event)
         hoverLabel(event)
     }
@@ -617,7 +605,6 @@ function ScalableSpec(
             drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            //drawActiveLabel()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -969,13 +956,6 @@ function ScalableSpec(
                 drawLineBetween(label)
             }
         }
-    }
-
-    const drawActiveLabel = () => {
-        if (!activeLabel) return
-
-        drawLine(activeLabel, activeLabel.onset)
-        drawLine(activeLabel, activeLabel.offset)
     }
 
     const drawIndividualsCanvas = () => {
@@ -1472,10 +1452,9 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
     const handleMouseLeave = () => {
-        const lastLabel = labels[labels.length -1]
-        if (lastLabel && !lastLabel.offset){
-            deleteLabel(lastLabel)
-            passActiveLabelToApp(null)
+        const newestLabel = labels[labels.length -1]
+        if (newestLabel && !newestLabel.offset){
+            deleteLabel(newestLabel)
         }
     }
 
@@ -1589,7 +1568,7 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
-    }, [labels, activeLabel, waveformScale] )
+    }, [labels, waveformScale] )
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {

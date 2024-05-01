@@ -66,8 +66,6 @@ function App() {
     const [maxScrollTime, setMaxScrollTime] = useState(0)
     const [scrollStep, setScrollStep] = useState(0)
 
-    const [activeLabel, setActiveLabel] = useState(null)
-
     const [globalHopLength, setGlobalHopLength] = useState('')
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState('')
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
@@ -104,10 +102,6 @@ function App() {
 
     function passSpeciesArrayToApp ( newSpeciesArray ){
         setSpeciesArray( newSpeciesArray )
-    }
-
-    function passActiveLabelToApp( newActiveLabel ){
-        setActiveLabel( newActiveLabel )
     }
 
     function passGlobalHopLengthToApp( newHopLength ){
@@ -346,7 +340,6 @@ function App() {
             </div>
             <div
                 id='all-tracks'
-                onMouseLeave={ () => setActiveLabel(null)}
             >
             {showGlobalConfigWindow &&
 
@@ -384,8 +377,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -418,8 +409,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -452,8 +441,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -486,8 +473,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -520,8 +505,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -554,8 +537,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -588,8 +569,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -622,8 +601,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -656,8 +633,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -690,8 +665,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -724,8 +697,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -758,8 +729,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -792,8 +761,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -826,8 +793,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -860,8 +825,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -894,8 +857,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -928,8 +889,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -962,8 +921,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -996,8 +953,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
@@ -1030,8 +985,6 @@ function App() {
                     passTrackDurationToApp={passTrackDurationToApp}
                     deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                     removeTrackInApp={removeTrackInApp}
-                    passActiveLabelToApp={passActiveLabelToApp}
-                    activeLabel={activeLabel}
                     globalHopLength={globalHopLength}
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}

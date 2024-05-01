@@ -52,6 +52,7 @@ html, body {
 .track-container{
   display: flex;
   margin: 0 0 10px 0;
+  border-bottom: 5px double #082536;
 }
 
 .side-window{
@@ -105,14 +106,14 @@ html, body {
 
 .overview-canvas{
   position: fixed;
-  top: 250px;
+  top: 150px;
   width: auto;
   margin: 0 0 10px 0;
 }
 
 #left-scroll-overview-btn{
   position: fixed;
-  top: 260px;
+  top: 160px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -131,7 +132,7 @@ html, body {
 
 #right-scroll-overview-btn{
   position: fixed;
-  top: 260px;
+  top: 160px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -152,14 +153,14 @@ html, body {
 
 .time-axis-canvas{
   position: fixed;
-  top: 300px;
+  top: 200px;
 }
 
 /* -------------------------- Global Controls -------------------------- */
 
 .controls-container{
   position: fixed;
-  top: 235px;
+  top: 130px;
   z-index: 3;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -238,7 +239,7 @@ html, body {
 #open-global-config-btn{
   position: absolute;
   z-index: 3;
-  top: 205px;
+  top: 105px;
   right: 0;
 }
 
@@ -335,14 +336,17 @@ html, body {
 #annotation-labels-menu{
   max-height: 150px;
   overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .species{
   background-color: #082536;
-  margin: 10px 7px 7px;
+  margin: 7px 7px 7px;
   padding: 2px 5px;
+  border: 1px solid #f6fffe;
   border-radius: 5px;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: bold;
 }
 
@@ -351,11 +355,11 @@ html, body {
   border: none;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .delete-species-btn:hover, .edit-species-btn:hover{
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .species-input-field{
@@ -379,8 +383,8 @@ html, body {
   display: flex;
   margin: 2px;
   border-radius: 2px;
-  font-size: 16px;
-  max-height: 24px;
+  font-size: 12px;
+  max-height: 20px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
 }
@@ -405,6 +409,10 @@ html, body {
   border: none;
 }
 
+.clustername-input-field, .individual-input-field{
+  max-width: 150px;
+}
+
 .clustername-input-field:focus, .individual-input-field:focus{
   outline: none;
 }
@@ -413,7 +421,7 @@ html, body {
   background-color: #f6fffe;
   border: none;
   border-radius: 2px;
-  font-size: 14px;
+  font-size: 10px;
 }
 
 .colorwheel-btn, .edit-name-btn{
@@ -421,7 +429,7 @@ html, body {
   border: none;
   border-left: 1px solid black;
   border-radius: 2px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .colorwheel-btn:hover, .edit-name-btn:hover{
@@ -520,15 +528,15 @@ html, body {
   position: fixed;
   z-index: 1;
   width: 100%;
-  height: 150px;
+  height: 250px;
   background: #051923;
-  border: 1px solid indianred;
 }
 
 
 #all-tracks{
-  padding: 350px 0 0 0;
+  padding: 250px 0 0 0;
 }
+
 
 
 

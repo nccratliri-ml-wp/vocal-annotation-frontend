@@ -526,14 +526,16 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
             <div id='annotation-labels-menu'>
                 {
                     speciesArray.map( (species, index) =>
-                        <div
+                        <fieldset
                             id={species.id}
                             key={species.id}
                             className='species'
                         >
-                            {species.name}
-                            {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn' onClick={() => editSpecies(species.id)}>✏️</button>}
-                            {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn' onClick={() => deleteSpecies(species.id, index)}>🗑️</button>}
+                            <legend>
+                                {species.name}
+                                {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn' onClick={() => editSpecies(species.id)}>✏️</button>}
+                                {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn' onClick={() => deleteSpecies(species.id, index)}>🗑️</button>}
+                            </legend>
 
                             <div className='individual-btn-container'>
                                 Individuals:
@@ -641,7 +643,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                 </form>
                             </div>
 
-                        </div>
+                        </fieldset>
                     )
                 }
             </div>

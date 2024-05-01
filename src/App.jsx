@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -74,6 +74,8 @@ function App() {
 
     const [audioPayloads, setAudioPayloads] = useState(null)
 
+    const [activeLabel, setActiveLabel] = useState(null)
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -126,6 +128,10 @@ function App() {
 
     function passDeletedItemIDToApp( newDeletedItemID ){
         setDeletedItemID( newDeletedItemID )
+    }
+
+    function passActiveLabelToApp( newActiveLabel ){
+        setActiveLabel( newActiveLabel )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -386,6 +392,8 @@ function App() {
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                     audioPayload={audioPayloads? audioPayloads[0] : null}
+                    activeLabel={activeLabel}
+                    passActiveLabelToApp={passActiveLabelToApp}
                 />
             }
             {showTracks.track_2 &&
@@ -418,6 +426,8 @@ function App() {
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     passDefaultConfigToApp={passDefaultConfigToApp}
                     audioPayload={audioPayloads? audioPayloads[1] : null}
+                    activeLabel={activeLabel}
+                    passActiveLabelToApp={passActiveLabelToApp}
                 />
             }
             {showTracks.track_3 &&

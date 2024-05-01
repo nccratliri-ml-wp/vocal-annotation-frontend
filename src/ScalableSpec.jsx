@@ -65,7 +65,9 @@ function ScalableSpec(
                             passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
                             passDefaultConfigToApp,
-                            audioPayload
+                            audioPayload,
+                            activeLabel,
+                            passActiveLabelToApp
                         }
                     )
                 {
@@ -360,6 +362,7 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
+            passActiveLabelToApp({onset: labelsCopy[labels.length-1].onset, offset: labelsCopy[labels.length-1].offset, color: '#ffffff'})
             drawLineBetween(newestLabel)
             drawLine(newestLabel, newestLabel.offset)
             return
@@ -368,6 +371,7 @@ function ScalableSpec(
         // Add onset
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
+        passActiveLabelToApp({onset: clickedTimestamp, offset: null, color: '#ffffff'})
         addNewLabel(clickedTimestamp)
     }
 
@@ -586,7 +590,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
-    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
+    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray, activeLabelNeeded) => {
         if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
@@ -1566,6 +1570,7 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
+
         drawEditorCanvases(spectrogram, frequencies,audioArray)
 
     }, [labels, waveformScale] )

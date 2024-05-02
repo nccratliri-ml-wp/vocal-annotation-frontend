@@ -362,8 +362,9 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passActiveLabelToApp({onset: labelsCopy[labels.length-1].onset, offset: labelsCopy[labels.length-1].offset, color: '#ffffff'})
+            passActiveLabelToApp({onset: labelsCopy[labels.length-1].onset, offset: labelsCopy[labels.length-1].offset, color: '#ffffff', trackId: id})
             drawLineBetween(newestLabel)
+            drawLine(newestLabel, newestLabel.onset)
             drawLine(newestLabel, newestLabel.offset)
             return
         }
@@ -371,7 +372,7 @@ function ScalableSpec(
         // Add onset
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
-        passActiveLabelToApp({onset: clickedTimestamp, offset: null, color: '#ffffff'})
+        passActiveLabelToApp({onset: clickedTimestamp, offset: undefined, color: '#ffffff', trackId: id})
         addNewLabel(clickedTimestamp)
     }
 
@@ -415,6 +416,7 @@ function ScalableSpec(
         const mouseY = getMouseY(event)
         const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
         deleteLabel(labelToBeDeleted)
+
     }
 
     const handleMouseMove = (event) => {
@@ -590,7 +592,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
-    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray, activeLabelNeeded) => {
+    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
         if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
@@ -618,6 +620,30 @@ function ScalableSpec(
             drawTimeAxis()
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         }
+    }
+
+    const drawActiveLabel = (newAudioArray) => {
+        if (!specCanvasRef.current) return
+
+        const specCVS = specCanvasRef.current;
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
+        const image = new Image();
+
+        const labelCVS = labelCanvasRef.current
+        const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true, alpha: true });
+
+        // Draw Spectrogram, Waveform and labels
+        image.addEventListener('load', () => {
+            specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
+            specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
+            drawWaveform(newAudioArray)
+            labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
+            drawAllLabels()
+            drawLine(activeLabel, activeLabel.onset)
+            drawLine(activeLabel, activeLabel.offset)
+            //drawPlayhead(playheadRef.current.timeframe)
+        })
+        image.src = `data:image/png;base64,${spectrogram}`;
     }
 
     const drawTimeAxis = () => {
@@ -1570,10 +1596,15 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
-
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-
     }, [labels, waveformScale] )
+
+    // When a user adds a new label, thus creating a new active label in the other tracks
+    useEffect( () => {
+        if (!spectrogram) return
+        if (id === activeLabel.trackId) return
+        drawActiveLabel(audioArray)
+    }, [activeLabel] )
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
@@ -1846,6 +1877,7 @@ function ScalableSpec(
                                 <StopIcon style={iconStyle}/>
                             </IconButton>
                         </div>
+                        <button onClick={() => console.log(labels)}>Console log labels</button>
                         <Parameters
                             showLocalConfigWindow={showLocalConfigWindow}
                             specCalMethod={specCalMethod}

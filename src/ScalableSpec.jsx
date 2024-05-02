@@ -380,7 +380,6 @@ function ScalableSpec(
         if (event.button !== 0) return
 
         removeDragEventListeners()
-
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         if (clickedLabel){
@@ -391,6 +390,8 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
+
+            passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: id})
         }
 
         clickedLabel = undefined
@@ -406,6 +407,10 @@ function ScalableSpec(
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
     }
 
+    const handleMouseLeaveCanvases = (event) => {
+        handleMouseUp(event)
+    }
+
     const handleRightClick = (event) => {
         event.preventDefault()
 
@@ -417,6 +422,9 @@ function ScalableSpec(
         const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
         deleteLabel(labelToBeDeleted)
 
+        if (labelToBeDeleted.onset === activeLabel.onset && labelToBeDeleted.offset === activeLabel.offset){
+            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
+        }
     }
 
     const handleMouseMove = (event) => {
@@ -1485,6 +1493,7 @@ function ScalableSpec(
         const newestLabel = labels[labels.length -1]
         if (newestLabel && !newestLabel.offset){
             deleteLabel(newestLabel)
+            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
         }
     }
 
@@ -1918,7 +1927,7 @@ function ScalableSpec(
                     />
                 </div>
 
-                <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseUp}>
+                <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseLeaveCanvases}>
                     <canvas
                         className='waveform-canvas'
                         ref={waveformCanvasRef}

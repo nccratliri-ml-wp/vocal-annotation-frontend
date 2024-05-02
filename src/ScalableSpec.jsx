@@ -420,6 +420,9 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
         const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
+
+        if (!labelToBeDeleted) return
+
         deleteLabel(labelToBeDeleted)
 
         if (labelToBeDeleted.onset === activeLabel.onset && labelToBeDeleted.offset === activeLabel.offset){

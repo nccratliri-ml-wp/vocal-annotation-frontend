@@ -14,8 +14,10 @@ import {
     Individual,
     Clustername
 } from './species.js'
-import {iconStyle} from "./styles.js"
+import {iconBtnStyle, iconStyle} from "./styles.js"
 import {nanoid} from "nanoid";
+import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -320,16 +322,12 @@ function App() {
                     id='left-scroll-btn'
                     onClick={leftScroll}
                 />
-                <button
-                    onClick={onZoomIn}
-                >
-                    +🔍
-                </button>
-                <button
-                    onClick={onZoomOut}
-                >
-                    -🔍
-                </button>
+                <IconButton style={iconBtnStyle} onClick={onZoomIn}>
+                    <ZoomInIcon style={iconStyle}/>
+                </IconButton>
+                <IconButton style={iconBtnStyle} onClick={onZoomOut}>
+                    <ZoomOutIcon style={iconStyle}/>
+                </IconButton>
                 <button
                     id='right-scroll-btn'
                     onClick={rightScroll}

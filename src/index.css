@@ -169,29 +169,13 @@ html, body {
   justify-content: center;
 }
 
-.controls-container > button{
-  height: 25px;
-  border: none;
-  border-radius: 4px;
-  margin: 2px;
-  background-color: #dddddd;
-}
-
-.controls-container > button:hover{
-  background-color: whitesmoke;
-}
-
-.controls-container > button:active{
-  background-color: #b2c0d5;
-}
-
 #left-scroll-btn{
   margin: 0 10px 0 0;
   width: 0;
   height: 0;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-right: 14px solid #dddddd;
+  border-right: 14px solid #ffffff;
   border-left: transparent;
   background: none;
   border-radius: 0;
@@ -212,7 +196,7 @@ html, body {
   height: 0;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-left: 14px solid #dddddd;
+  border-left: 14px solid #ffffff;
   border-right: transparent;
   background: none;
   border-radius: 0;

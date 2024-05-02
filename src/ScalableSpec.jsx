@@ -1381,11 +1381,7 @@ function ScalableSpec(
     function loop(){
         if (audioSnippet.paused) return
 
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(specImgData.current, 0, 0);
-        drawAllLabels()
+        clearAndRedrawCanvases()
         drawPlayhead(currentStartTime + audioSnippet.currentTime)
 
         window.requestAnimationFrame(() => loop() )
@@ -1404,24 +1400,42 @@ function ScalableSpec(
         audioSnippet.currentTime = currentStartTime
         updatePlayhead(currentStartTime)
 
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(specImgData.current, 0, 0);
+        clearAndRedrawCanvases()
+    }
+
+    const clearAndRedrawCanvases = () => {
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d');
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d');
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
+        specCTX.putImageData(specImgData.current, 0, 0);
+        waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
         drawAllLabels()
     }
 
     const drawPlayhead = (timeframe) => {
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d');
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d');
+
         const x = calculateXPosition(timeframe)
 
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, canvas.height)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = "red"
-        ctx.stroke()
+        specCTX.beginPath()
+        specCTX.moveTo(x, 0)
+        specCTX.lineTo(x, specCVS.height)
+        specCTX.lineWidth = 2
+        specCTX.strokeStyle = "red"
+        specCTX.stroke()
+
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, 0)
+        waveformCTX.lineTo(x, waveformCVS.height)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = "red"
+        waveformCTX.stroke()
     }
 
     const updatePlayhead = (newTimeframe) => {

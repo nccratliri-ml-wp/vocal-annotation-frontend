@@ -71,10 +71,6 @@ html, body {
   flex-direction: column;
 }
 
-.file-input{
-
-}
-
 .audio-controls{
   display: flex;
   background-color: #082536;
@@ -506,6 +502,9 @@ html, body {
   display: block;
 }
 
+.hidden{
+  display: none;
+}
 
 
 

@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import BackupIcon from '@mui/icons-material/Backup';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
@@ -13,6 +13,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import TuneIcon from '@mui/icons-material/Tune';
+import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import {iconBtnStyle, iconStyle} from "./styles.js"
@@ -112,6 +113,7 @@ function ScalableSpec(
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
     const [waveformScale, setWaveformScale] = useState(35)
+    const [showWaveform, setShowWaveform] =  useState(true)
 
     // File Upload
     const [response, setResponse] = useState(null)
@@ -1495,6 +1497,10 @@ function ScalableSpec(
          setWaveformScale(prevState => Math.max(prevState - 10, 1))
      }
 
+    const toggleShowWaveform = () => {
+        setShowWaveform(!showWaveform)
+    }
+
 
     /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
 
@@ -1871,7 +1877,7 @@ function ScalableSpec(
                             />
                             <Tooltip title="Submit Annotations">
                                 <IconButton onClick={submitAnnotations}>
-                                    <BackupIcon style={iconStyle}/>
+                                    <DoneAllIcon style={iconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Call WhisperSeg">
@@ -1882,6 +1888,11 @@ function ScalableSpec(
                             <Tooltip title="Change Track Parameters">
                                 <IconButton onClick={ () => setShowLocalConfigWindow(true)}>
                                     <TuneIcon style={iconStyle}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={showWaveform? 'Hide Waveform' : 'Show Waveform'}>
+                                <IconButton onClick={toggleShowWaveform}>
+                                    <GraphicEqIcon style={iconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             {id !== 'track_1' &&
@@ -1903,7 +1914,6 @@ function ScalableSpec(
                                 <StopIcon style={iconStyle}/>
                             </IconButton>
                         </div>
-                        <button onClick={() => console.log(labels)}>Console log labels</button>
                         <Parameters
                             showLocalConfigWindow={showLocalConfigWindow}
                             specCalMethod={specCalMethod}
@@ -1921,7 +1931,7 @@ function ScalableSpec(
                         />
                     </div>
                     <div className='waveform-buttons-frequencies-canvas-container'>
-                        <div className='waveform-buttons'>
+                        <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
                             <IconButton style={iconBtnStyle} onClick={waveformZoomIn}>
                                 <ZoomInIcon style={iconStyle}/>
                             </IconButton>
@@ -1946,7 +1956,7 @@ function ScalableSpec(
 
                 <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseLeaveCanvases}>
                     <canvas
-                        className='waveform-canvas'
+                        className={showWaveform ? 'waveform-canvas' : 'hidden'}
                         ref={waveformCanvasRef}
                         width={parent.innerWidth - 200}
                         height={80}

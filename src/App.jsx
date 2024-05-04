@@ -460,6 +460,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[2] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_4 &&
@@ -492,6 +494,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[3] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_5 &&
@@ -524,6 +528,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[4] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_6 &&
@@ -556,6 +562,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[5] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_7 &&
@@ -588,6 +596,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[6] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_8 &&
@@ -620,6 +630,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[7] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_9 &&
@@ -652,6 +664,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[8] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_10 &&
@@ -684,6 +698,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[9] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_11 &&
@@ -716,6 +732,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[10] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_12 &&
@@ -748,6 +766,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[11] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_13 &&
@@ -780,6 +800,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[12] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_14 &&
@@ -812,6 +834,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[13] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_15 &&
@@ -844,6 +868,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[14] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_16 &&
@@ -876,6 +902,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[15] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_17 &&
@@ -908,6 +936,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[16] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_18 &&
@@ -940,6 +970,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[17] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_19 &&
@@ -972,6 +1004,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[18] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 {showTracks.track_20 &&
@@ -1004,6 +1038,8 @@ function App() {
                         updateClipDurationAndTimes={updateClipDurationAndTimes}
                         passDefaultConfigToApp={passDefaultConfigToApp}
                         audioPayload={audioPayloads? audioPayloads[19] : null}
+                        activeLabel={activeLabel}
+                        passActiveLabelToApp={passActiveLabelToApp}
                     />
                 }
                 <Tooltip title="Add New Track">

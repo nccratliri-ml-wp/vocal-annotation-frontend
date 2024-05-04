@@ -1356,6 +1356,9 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
     const getAudio = async () => {
+        // Prevent user from clicking the play button twice in a row and playing the audio twice at the same time
+        if (audioSnippet && !audioSnippet.paused) return
+
         setAudioSnippet(null)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {

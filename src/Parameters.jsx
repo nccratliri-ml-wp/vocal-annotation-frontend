@@ -140,7 +140,7 @@ function Parameters(
 
                 <div className='frequencies-labels-container'>
                     <label className={'local-config-window-label'}>
-                        Min Frequency
+                        Min Freq
                         <input
                             type="number"
                             value={minFreq}
@@ -152,7 +152,7 @@ function Parameters(
                         />
                     </label>
                     <label className={'local-config-window-label'}>
-                        Max Frequency
+                        Max Freq
                         <input
                             type="number"
                             value={maxFreq}

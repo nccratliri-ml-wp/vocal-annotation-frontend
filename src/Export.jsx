@@ -2,9 +2,9 @@ import IconButton from "@material-ui/core/IconButton";
 import DownloadIcon from '@mui/icons-material/Download';
 import Tooltip from "@material-ui/core/Tooltip";
 import React from "react";
-import {iconStyle} from "./styles.js"
+import {iconBtnStyle, iconBtnStyleSmall, iconStyle} from "./styles.js"
 
-function Export( { labels, audioFileName } ){
+function Export( { labels, audioFileName, showWaveform } ){
 
     function exportCSV(){
         // Remove Protected Area labels
@@ -31,7 +31,7 @@ function Export( { labels, audioFileName } ){
 
     return (
         <Tooltip title="Download Annotations">
-            <IconButton onClick={exportCSV}>
+            <IconButton style={showWaveform? iconBtnStyle : iconBtnStyleSmall} onClick={exportCSV}>
                 <DownloadIcon style={iconStyle}/>
             </IconButton>
         </Tooltip>

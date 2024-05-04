@@ -16,12 +16,11 @@ import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import {iconBtnStyle, iconStyle} from "./styles.js"
+import {iconBtnStyle, iconBtnStyleSmall, freqBtnStyle, iconStyle, iconStyleSmall} from "./styles.js"
 import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
-import SettingsIcon from "@mui/icons-material/Settings.js";
 
 // Classes
 
@@ -140,6 +139,10 @@ function ScalableSpec(
 
     // Label Window
     const [expandedLabel, setExpandedLabel] = useState(null)
+
+    // Icons
+    const activeIconStyle = showWaveform ? iconStyle : iconStyleSmall
+    const activeIconBtnStyle = showWaveform ? iconBtnStyle : iconBtnStyleSmall
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -1501,6 +1504,7 @@ function ScalableSpec(
      }
 
     const toggleShowWaveform = () => {
+        if (!spectrogram) return
         setShowWaveform(!showWaveform)
     }
 
@@ -1549,20 +1553,39 @@ function ScalableSpec(
         const selectedFrequencies = indices.map(index => frequenciesArray[index])
 
         // Draw the frequencies
-        const lineDistance = cvs.height / selectedFrequencies.length
+        const correctionValue = showWaveform ? 0 : 25
+        const lineDistance = (cvs.height + correctionValue) / selectedFrequencies.length
         let y = cvs.height
         const x1 = cvs.width - 10
         const x2 = cvs.width
+        let i = 0
         for (let freq of selectedFrequencies){
+            let textY = y
+            let freqText = `${Math.round(freq / 10) * 10}`
+            if (!showWaveform){
+                if (i === 0){
+                    freqText += ' Hz'
+                }
+                if (i > 0 && i < 6){
+                    textY += 4
+                }
+                if (i === 6){
+                    textY += 8
+                }
+            }
             ctx.beginPath()
             ctx.moveTo(x1,y)
             ctx.lineTo(x2, y)
             ctx.stroke()
-            ctx.fillText(`${Math.round(freq / 10) * 10}`, 0, y);
+            ctx.fillText(freqText, 0, textY);
             y -= lineDistance
+            i++
         }
 
-        ctx.fillText('Hz', 0, 10);
+        if (showWaveform){
+            ctx.fillText('Hz', 0, 10);
+        }
+
     }
 
 
@@ -1632,7 +1655,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale] )
+    }, [labels, waveformScale, showWaveform] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
@@ -1861,8 +1884,8 @@ function ScalableSpec(
                 </div>
             }
             <div className='track-container'>
-                <div className='side-window' >
-                    <div className='track-controls'>
+                <div className={showWaveform ? 'side-window' : 'side-window-small'} >
+                    <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                         <LocalFileUpload
                             specCalMethod={specCalMethod}
                             nfft={nfft}
@@ -1877,44 +1900,45 @@ function ScalableSpec(
                             <Export
                                 audioFileName={'Example Audio File Name'}
                                 labels={labels}
+                                showWaveform={showWaveform}
                             />
                             <Tooltip title="Submit Annotations">
-                                <IconButton onClick={submitAnnotations}>
-                                    <DoneAllIcon style={iconStyle}/>
+                                <IconButton style={activeIconBtnStyle} onClick={submitAnnotations}>
+                                    <DoneAllIcon style={activeIconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton onClick={callWhisperSeg}>
-                                    <AutoFixHighIcon style={iconStyle}/>
+                                <IconButton style={activeIconBtnStyle} onClick={callWhisperSeg}>
+                                    <AutoFixHighIcon style={activeIconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Change Track Parameters">
-                                <IconButton onClick={ () => setShowLocalConfigWindow(true)}>
-                                    <TuneIcon style={iconStyle}/>
+                                <IconButton style={activeIconBtnStyle} onClick={ () => setShowLocalConfigWindow(true)}>
+                                    <TuneIcon style={activeIconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title={showWaveform? 'Hide Waveform' : 'Show Waveform'}>
-                                <IconButton onClick={toggleShowWaveform}>
-                                    <GraphicEqIcon style={iconStyle}/>
+                                <IconButton style={activeIconBtnStyle} onClick={toggleShowWaveform}>
+                                    <GraphicEqIcon style={activeIconStyle}/>
                                 </IconButton>
                             </Tooltip>
                             {id !== 'track_1' &&
                                 <Tooltip title="Delete Track">
-                                    <IconButton onClick={handleRemoveTrack}>
-                                        <DeleteIcon style={iconStyle}/>
+                                    <IconButton style={activeIconBtnStyle} onClick={handleRemoveTrack}>
+                                        <DeleteIcon style={activeIconStyle}/>
                                     </IconButton>
                                 </Tooltip>
                             }
                         </div>
                         <div className='audio-controls'>
-                            <IconButton onClick={getAudio}>
-                                <PlayArrowIcon style={iconStyle}/>
+                            <IconButton style={iconBtnStyle} onClick={getAudio}>
+                                <PlayArrowIcon style={activeIconStyle}/>
                             </IconButton>
-                            <IconButton onClick={pauseAudio}>
-                                <PauseIcon style={iconStyle}/>
+                            <IconButton style={iconBtnStyle} onClick={pauseAudio}>
+                                <PauseIcon style={activeIconStyle}/>
                             </IconButton>
-                            <IconButton onClick={stopAudio}>
-                                <StopIcon style={iconStyle}/>
+                            <IconButton style={iconBtnStyle} onClick={stopAudio}>
+                                <StopIcon style={activeIconStyle}/>
                             </IconButton>
                         </div>
                         <Parameters
@@ -1935,18 +1959,18 @@ function ScalableSpec(
                     </div>
                     <div className='waveform-buttons-frequencies-canvas-container'>
                         <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
-                            <IconButton style={iconBtnStyle} onClick={waveformZoomIn}>
+                            <IconButton style={freqBtnStyle} onClick={waveformZoomIn}>
                                 <ZoomInIcon style={iconStyle}/>
                             </IconButton>
-                            <IconButton style={iconBtnStyle} onClick={waveformZoomOut}>
+                            <IconButton style={freqBtnStyle} onClick={waveformZoomOut}>
                                 <ZoomOutIcon style={iconStyle}/>
                             </IconButton>
                         </div>
                         <canvas
-                            className='frequencies-canvas'
+                            className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
                             ref={frequenciesCanvasRef}
                             width={40}
-                            height={175}
+                            height={showWaveform ? 175 : 150}
                         />
                     </div>
                     <canvas

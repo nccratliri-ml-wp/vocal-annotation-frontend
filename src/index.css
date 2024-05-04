@@ -78,7 +78,7 @@ html, body {
 }
 
 .waveform-buttons-frequencies-canvas-container{
-  grid-area: waveform-buttons-frequencies-canvas-container
+  grid-area: waveform-buttons-frequencies-canvas-container;
 }
 
 .waveform-buttons{
@@ -98,6 +98,30 @@ html, body {
   grid-area: individuals-canvas;
   display: block;
 }
+
+/* Compact mode when waveform is hidden */
+.side-window-small{
+  display: grid;
+  grid-template-columns: 160px 40px;
+  grid-template-rows: 150px auto;
+  grid-template-areas:
+    "track-controls waveform-buttons-frequencies-canvas-container"
+    "individuals-canvas individuals-canvas";
+}
+
+.track-controls-small{
+  grid-area: track-controls;
+  display: flex;
+  flex-direction: column;
+  max-height: 150px;
+}
+
+.frequencies-canvas-small{
+  display: block;
+  height: 150px;
+}
+/* */
+
 
 /* -------------------------- Overview Window -------------------------- */
 
@@ -158,7 +182,7 @@ html, body {
 .controls-container{
   position: fixed;
   top: 130px;
-  z-index: 3;
+  z-index: 2;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -315,7 +339,7 @@ html, body {
 }
 
 #annotation-labels-menu{
-  max-height: 115px;
+  max-height: 95px;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;

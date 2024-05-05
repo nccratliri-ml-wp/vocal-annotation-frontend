@@ -11,7 +11,8 @@ function GlobalConfig (
                 passGlobalNumSpecColumnsToApp,
                 passGlobalSamplingRateToApp,
                 defaultConfig,
-                passShowGlobalConfigWindowToApp
+                passShowGlobalConfigWindowToApp,
+                strictMode
             }
         )
     {
@@ -102,6 +103,7 @@ function GlobalConfig (
                             type="number"
                             value={hopLengthInputValue}
                             min={0}
+                            disabled={strictMode}
                             onKeyPress={excludeNonDigits}
                             onChange={() => setHopLengthInputValue(event.target.value)}
                             onFocus={(event) => event.target.select()}
@@ -115,6 +117,7 @@ function GlobalConfig (
                             type="number"
                             value={numSpecColumnsInputValue}
                             min={0}
+                            disabled={strictMode}
                             onChange={(event) => setColumnsInputValue(event.target.value)}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
@@ -128,6 +131,7 @@ function GlobalConfig (
                             type="number"
                             value={samplingRateInputValue}
                             min={0}
+                            disabled={strictMode}
                             onChange={(event) => setSamplingRateInputValue(event.target.value)}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
@@ -137,8 +141,8 @@ function GlobalConfig (
                 </div>
 
                 <div id='global-config-window-buttons-container'>
-                    <button id='global-config-default-values-btn' onClick={restoreDefaultValues}>Restore Default Values</button>
-                    <button id='global-config-submit-btn' onClick={submitGlobalParameters}>Submit</button>
+                    <button id='global-config-default-values-btn' disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</button>
+                    <button id='global-config-submit-btn' disabled={strictMode} onClick={submitGlobalParameters}>Submit</button>
                 </div>
 
             </div>

@@ -16,7 +16,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import {iconBtnStyle, iconBtnStyleSmall, freqBtnStyle, iconStyle, iconStyleSmall} from "./styles.js"
+import {iconBtn, iconBtnSmall, freqBtn, icon, iconSmall, iconBtnDisabled, iconBtnSmallDisabled} from "./styles.js"
 import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
@@ -67,7 +67,8 @@ function ScalableSpec(
                             passDefaultConfigToApp,
                             audioPayload,
                             activeLabel,
-                            passActiveLabelToApp
+                            passActiveLabelToApp,
+                            strictMode
                         }
                     )
                 {
@@ -141,8 +142,22 @@ function ScalableSpec(
     const [expandedLabel, setExpandedLabel] = useState(null)
 
     // Icons
-    const activeIconStyle = showWaveform ? iconStyle : iconStyleSmall
-    const activeIconBtnStyle = showWaveform ? iconBtnStyle : iconBtnStyleSmall
+    const activeIcon = showWaveform ? icon : iconSmall
+    const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
+                    /*
+    let activeIconBtnStyle
+    if (showWaveform && !strictMode){
+        activeIconBtnStyle = iconBtn
+    }
+    if (showWaveform && strictMode){
+        activeIconBtnStyle = iconBtnDisabled
+    }
+    if (!showWaveform && !strictMode){
+        activeIconBtnStyle = iconBtnSmall
+    }
+    if (!showWaveform && strictMode){
+        activeIconBtnStyle = iconBtnSmallDisabled
+    }*/
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -154,8 +169,8 @@ function ScalableSpec(
         setShowLocalConfigWindow( boolean )
     }
 
-    const passSpecCalMethodToScalableSpec = ( newspecCalMethod ) => {
-        setSpecCalMethod( newspecCalMethod )
+    const passSpecCalMethodToScalableSpec = ( newSpecCalMethod ) => {
+        setSpecCalMethod( newSpecCalMethod )
     }
 
     const passNfftToScalableSpec = ( newNfft ) => {
@@ -1895,6 +1910,7 @@ function ScalableSpec(
                             passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                             handleUploadResponse={handleUploadResponse}
                             handleUploadError={handleUploadError}
+                            strictMode={strictMode}
                         />
                         <div>
                             <Export
@@ -1904,41 +1920,41 @@ function ScalableSpec(
                             />
                             <Tooltip title="Submit Annotations">
                                 <IconButton style={activeIconBtnStyle} onClick={submitAnnotations}>
-                                    <DoneAllIcon style={activeIconStyle}/>
+                                    <DoneAllIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton style={activeIconBtnStyle} onClick={callWhisperSeg}>
-                                    <AutoFixHighIcon style={activeIconStyle}/>
+                                <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}} disabled={strictMode} onClick={callWhisperSeg}>
+                                    <AutoFixHighIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Change Track Parameters">
                                 <IconButton style={activeIconBtnStyle} onClick={ () => setShowLocalConfigWindow(true)}>
-                                    <TuneIcon style={activeIconStyle}/>
+                                    <TuneIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title={showWaveform? 'Hide Waveform' : 'Show Waveform'}>
                                 <IconButton style={activeIconBtnStyle} onClick={toggleShowWaveform}>
-                                    <GraphicEqIcon style={activeIconStyle}/>
+                                    <GraphicEqIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             {id !== 'track_1' &&
                                 <Tooltip title="Delete Track">
-                                    <IconButton style={activeIconBtnStyle} onClick={handleRemoveTrack}>
-                                        <DeleteIcon style={activeIconStyle}/>
+                                    <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}} disabled={strictMode} onClick={handleRemoveTrack}>
+                                        <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
                             }
                         </div>
                         <div className='audio-controls'>
-                            <IconButton style={iconBtnStyle} onClick={getAudio}>
-                                <PlayArrowIcon style={activeIconStyle}/>
+                            <IconButton style={iconBtn} onClick={getAudio}>
+                                <PlayArrowIcon style={activeIcon}/>
                             </IconButton>
-                            <IconButton style={iconBtnStyle} onClick={pauseAudio}>
-                                <PauseIcon style={activeIconStyle}/>
+                            <IconButton style={iconBtn} onClick={pauseAudio}>
+                                <PauseIcon style={activeIcon}/>
                             </IconButton>
-                            <IconButton style={iconBtnStyle} onClick={stopAudio}>
-                                <StopIcon style={activeIconStyle}/>
+                            <IconButton style={iconBtn} onClick={stopAudio}>
+                                <StopIcon style={activeIcon}/>
                             </IconButton>
                         </div>
                         <Parameters
@@ -1955,15 +1971,16 @@ function ScalableSpec(
                             passMinFreqToScalableSpec={passMinFreqToScalableSpec}
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                             submitLocalParameters={submitLocalParameters}
+                            strictMode={strictMode}
                         />
                     </div>
                     <div className='waveform-buttons-frequencies-canvas-container'>
                         <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
-                            <IconButton style={freqBtnStyle} onClick={waveformZoomIn}>
-                                <ZoomInIcon style={iconStyle}/>
+                            <IconButton style={freqBtn} onClick={waveformZoomIn}>
+                                <ZoomInIcon style={icon}/>
                             </IconButton>
-                            <IconButton style={freqBtnStyle} onClick={waveformZoomOut}>
-                                <ZoomOutIcon style={iconStyle}/>
+                            <IconButton style={freqBtn} onClick={waveformZoomOut}>
+                                <ZoomOutIcon style={icon}/>
                             </IconButton>
                         </div>
                         <canvas

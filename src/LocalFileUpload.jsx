@@ -14,7 +14,8 @@ function LocalFileUpload(
             maxFreq,
             passSpectrogramIsLoadingToScalableSpec,
             handleUploadResponse,
-            handleUploadError
+            handleUploadError,
+            strictMode
         }
     )
 {
@@ -52,6 +53,8 @@ function LocalFileUpload(
         }
     }
 
+    /* ++++++++++++++++++++ Button Styles ++++++++++++++++++++ */
+
     const VisuallyHiddenInput = styled('input')({
         clip: 'rect(0 0 0 0)',
         clipPath: 'inset(50%)',
@@ -62,7 +65,7 @@ function LocalFileUpload(
         left: 0,
         whiteSpace: 'nowrap',
         width: 1,
-    });
+    })
 
     const ButtonText = styled('span')({
         maxWidth: '160px',
@@ -70,6 +73,9 @@ function LocalFileUpload(
         overflow: 'hidden',
         textOverflow: 'ellipsis',
     })
+
+    const enabledStyle = {display: 'flex', justifyContent: 'flex-start', overflow: 'hidden', textTransform: 'none'}
+    const disabledStyle = {display: 'flex', justifyContent: 'flex-start', overflow: 'hidden', textTransform: 'none', backgroundColor: 'grey', opacity: 0.5, pointerEvents: 'none'}
 
     return (
         <Tooltip title={fileName? fileName : ''}>
@@ -79,10 +85,10 @@ function LocalFileUpload(
                 variant='contained'
                 tabIndex={-1}
                 startIcon={fileName? '' : <CloudUploadIcon />}
-                style={{display: 'flex', justifyContent: 'flex-start', overflow: 'hidden', textTransform: 'none'}}
+                style={strictMode ? disabledStyle : enabledStyle}
             >
                 <ButtonText>{fileName ? fileName : "UPLOAD FILE"}</ButtonText>
-                <VisuallyHiddenInput type='file' accept='.wav, .mp3' onChange={handleFileChange} />
+                <VisuallyHiddenInput type='file' accept='.wav, .mp3' disabled={strictMode} onChange={handleFileChange} />
             </Button>
         </Tooltip>
     );

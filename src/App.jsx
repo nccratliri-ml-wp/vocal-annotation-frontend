@@ -15,7 +15,7 @@ import {
     Individual,
     Clustername
 } from './species.js'
-import {globalControlsBtnStyle, iconStyle} from "./styles.js"
+import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBtn, iconBtnDisabled} from "./styles.js"
 import {nanoid} from "nanoid";
 import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
@@ -76,6 +76,7 @@ function App() {
     const [showGlobalConfigWindow, setShowGlobalConfigWindow] = useState(false)
 
     const [audioPayloads, setAudioPayloads] = useState(null)
+    const [strictMode, setStrictMode] = useState(false)
 
     const [activeLabel, setActiveLabel] = useState(null)
 
@@ -240,6 +241,11 @@ function App() {
 
         const queryParams = new URLSearchParams(location.search)
         const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
+        const strictMode = queryParams.get('strict-mode') ? queryParams.get('strict-mode') : null
+
+        if (strictMode && strictMode.toLowerCase() === 'true'){
+            setStrictMode(true)
+        }
 
         if (!decodedData) return
 
@@ -323,11 +329,11 @@ function App() {
                     id='left-scroll-btn'
                     onClick={leftScroll}
                 />
-                <IconButton style={globalControlsBtnStyle} onClick={onZoomIn}>
-                    <ZoomInIcon style={iconStyle}/>
+                <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomIn}>
+                    <ZoomInIcon style={icon}/>
                 </IconButton>
-                <IconButton style={globalControlsBtnStyle} onClick={onZoomOut}>
-                    <ZoomOutIcon style={iconStyle}/>
+                <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomOut}>
+                    <ZoomOutIcon style={icon}/>
                 </IconButton>
                 <button
                     id='right-scroll-btn'
@@ -340,7 +346,7 @@ function App() {
             </div>
             <div id='open-global-config-btn'>
                 <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
-                    <SettingsIcon style={iconStyle} />
+                    <SettingsIcon style={icon} />
                 </IconButton>
             </div>
             <div
@@ -359,6 +365,7 @@ function App() {
                         passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                         defaultConfig={defaultConfig}
                         passShowGlobalConfigWindowToApp={passShowGlobalConfigWindowToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_1 &&
@@ -393,6 +400,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[0] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_2 &&
@@ -427,6 +435,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[1] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_3 &&
@@ -461,6 +470,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[2] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_4 &&
@@ -495,6 +505,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[3] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_5 &&
@@ -529,6 +540,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[4] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_6 &&
@@ -563,6 +575,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[5] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_7 &&
@@ -597,6 +610,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[6] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_8 &&
@@ -631,6 +645,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[7] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_9 &&
@@ -665,6 +680,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[8] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_10 &&
@@ -699,6 +715,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[9] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_11 &&
@@ -733,6 +750,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[10] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_12 &&
@@ -767,6 +785,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[11] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_13 &&
@@ -801,6 +820,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[12] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_14 &&
@@ -835,6 +855,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[13] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_15 &&
@@ -869,6 +890,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[14] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_16 &&
@@ -903,6 +925,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[15] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_17 &&
@@ -937,6 +960,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[16] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_18 &&
@@ -971,6 +995,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[17] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_19 &&
@@ -1005,6 +1030,7 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[18] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 {showTracks.track_20 &&
@@ -1039,11 +1065,12 @@ function App() {
                         audioPayload={audioPayloads? audioPayloads[19] : null}
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
+                        strictMode={strictMode}
                     />
                 }
                 <Tooltip title="Add New Track">
-                    <IconButton onClick={addTrack}>
-                        <AddBoxIcon style={iconStyle}/>
+                    <IconButton style={strictMode ? iconBtnDisabled : iconBtn} disabled={strictMode} onClick={addTrack}>
+                        <AddBoxIcon style={icon}/>
                     </IconButton>
                 </Tooltip>
             </div>

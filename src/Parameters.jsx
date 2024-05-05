@@ -14,7 +14,8 @@ function Parameters(
             passBinsPerOctaveToScalableSpec,
             passMinFreqToScalableSpec,
             passMaxFreqToScalableSpec,
-            submitLocalParameters
+            submitLocalParameters,
+            strictMode
         }
     )
 {
@@ -91,6 +92,7 @@ function Parameters(
                         <input
                             type="radio"
                             value="log-mel"
+                            disabled={strictMode && specCalMethod !== 'log-mel'}
                             checked={specCalMethod === 'log-mel'}
                             onChange={() => handleRadioChange('log-mel')}
                         />
@@ -103,6 +105,7 @@ function Parameters(
                                 type="number"
                                 value={nfft}
                                 min={0}
+                                disabled={strictMode}
                                 onChange={handleNFftInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
@@ -117,6 +120,7 @@ function Parameters(
                         <input
                             type="radio"
                             value="constant-q"
+                            disabled={strictMode && specCalMethod !== 'constant-q'}
                             checked={specCalMethod === 'constant-q'}
                             onChange={() => handleRadioChange('constant-q')}
                         />
@@ -129,6 +133,7 @@ function Parameters(
                                 type="number"
                                 value={binsPerOctave}
                                 min={0}
+                                disabled={strictMode}
                                 onChange={handleBinsPerOctaveInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
@@ -145,6 +150,7 @@ function Parameters(
                             type="number"
                             value={minFreq}
                             min={0}
+                            disabled={strictMode}
                             onChange={handleMinFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
@@ -157,6 +163,7 @@ function Parameters(
                             type="number"
                             value={maxFreq}
                             min={0}
+                            disabled={strictMode}
                             onChange={handleMaxFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
@@ -167,7 +174,7 @@ function Parameters(
 
                 <div className={'local-config-window-label'}>
                     <div></div>
-                    <button onClick={handleSubmit}>Submit</button>
+                    <button disabled={strictMode} onClick={handleSubmit}>Submit</button>
                 </div>
 
             </div>

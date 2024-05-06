@@ -497,7 +497,7 @@ function ScalableSpec(
             const offsetX = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
-            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted){
+            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted && event.target.className === 'label-canvas'){
                 drawLineBetween(label)
                 drawClustername(label)
                 drawLine(label, label.onset)

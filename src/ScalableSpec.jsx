@@ -1173,6 +1173,7 @@ function ScalableSpec(
 
         // Deal with click on Start Frame
         if (mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
+            if (strictMode) return
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
@@ -1181,6 +1182,7 @@ function ScalableSpec(
 
         // Deal with click on End Frame
         if (mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
+            if (strictMode) return
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
@@ -1342,6 +1344,8 @@ function ScalableSpec(
     }
 
     const hoverViewportFrame = (event) => {
+        if (strictMode) return
+
         const xHovered = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
@@ -1357,19 +1361,19 @@ function ScalableSpec(
     const leftScrollOverview = () => {
         passCurrentStartTimeToApp(
             prevStartTime => Math.max(prevStartTime - globalClipDuration, 0)
-        );
+        )
         passCurrentEndTimeToApp(
             prevEndTime => Math.max(prevEndTime - globalClipDuration, globalClipDuration)
-        );
+        )
     }
 
     const rightScrollOverview = () => {
         passCurrentStartTimeToApp(
             prevStartTime => Math.min(prevStartTime + globalClipDuration, maxScrollTime)
-        );
+        )
         passCurrentEndTimeToApp(
             prevEndTime => Math.min(prevEndTime + globalClipDuration, globalAudioDuration)
-        );
+        )
     }
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
@@ -1384,12 +1388,12 @@ function ScalableSpec(
                 audio_id: audioId,
                 start_time: currentStartTime,
                 clip_duration: globalClipDuration
-            });
+            })
             handleNewAudio(response.data.wav);
         } catch (error) {
             console.error("Error fetching audio clip:", error);
         }
-    };
+    }
 
     const handleNewAudio = (newAudioBase64String) => {
         const audio = new Audio(`data:audio/ogg;base64,${newAudioBase64String}`);

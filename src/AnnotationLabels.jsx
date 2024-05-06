@@ -488,6 +488,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     if (clustername === selectedClustername){
                         const updatedClustername = new Clustername(clustername.id, clustername.name, newColor)
                         updatedClustername.isActive = clustername.isActive
+                        updatedClustername.showColorwheel = clustername.showColorwheel
                         return updatedClustername
                     } else {
                         return clustername

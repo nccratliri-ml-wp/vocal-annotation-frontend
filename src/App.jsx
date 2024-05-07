@@ -11,6 +11,10 @@ import {
     UNKNOWN_INDIVIDUAL,
     UNKNOWN_CLUSTERNAME,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    ANNOTATED_AREA,
+    ANNOTATED_AREA_INDIVIDUAL,
+    ANNOTATED_AREA_CLUSTERNAME,
+    ANNOTATED_AREA_COLOR,
     Species,
     Individual,
     Clustername
@@ -28,11 +32,18 @@ function App() {
     const [importedLabels, setImportedLabels] = useState([]);
 
     const [speciesArray, setSpeciesArray] = useState(() => {
-        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
+
+        const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
+        const annotatedAreaClustername = new Clustername(nanoid(), ANNOTATED_AREA_CLUSTERNAME, ANNOTATED_AREA_COLOR)
+        annotatedAreaIndividual.isActive = false
+        annotatedAreaClustername.isActive = false
+        const annotatedAreaLabel = new Species(nanoid(), ANNOTATED_AREA, [annotatedAreaIndividual],  [annotatedAreaClustername])
+
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
         const newSpecies = new Species(nanoid(),UNKNOWN_SPECIES, [newIndividual], [newClustername] )
 
-        return [newSpecies]
+        return [newSpecies, annotatedAreaLabel]
     })
 
     const [deletedItemID, setDeletedItemID] = useState(null)
@@ -323,6 +334,7 @@ function App() {
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}
                 passDeletedItemIDToApp={passDeletedItemIDToApp}
+                strictMode={strictMode}
             />
             <div className='controls-container'>
                 <button
@@ -345,9 +357,11 @@ function App() {
             >
             </div>
             <div id='open-global-config-btn'>
-                <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
-                    <SettingsIcon style={icon} />
-                </IconButton>
+                <Tooltip title='Open Global Configurations'>
+                    <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
+                        <SettingsIcon style={icon} />
+                    </IconButton>
+                </Tooltip>
             </div>
             <div
                 id='all-tracks'

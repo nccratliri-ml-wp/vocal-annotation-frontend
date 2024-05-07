@@ -16,11 +16,12 @@ import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import {iconBtn, iconBtnSmall, freqBtn, icon, iconSmall, iconBtnDisabled, iconBtnSmallDisabled} from "./styles.js"
+import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
 import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
+import {ANNOTATED_AREA} from "./species.js";
 
 // Classes
 
@@ -1045,7 +1046,8 @@ function ScalableSpec(
             ctx.font = `${12}px sans-serif`
             ctx.fillText(speciesObj.name, xSpeciesName, ySpeciesName)
 
-            // Draw line separating Species
+            // Draw line separating Species, except for the last one (Annotated Area)
+            if (speciesObj.name === ANNOTATED_AREA) continue
             const x1 = 0
             const x2 = cvs.width
             const y = (i - 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 2
@@ -1056,10 +1058,6 @@ function ScalableSpec(
             ctx.stroke()
         }
 
-        const text = '🔒'
-        const textWidth = ctx.measureText(text).width
-        const x = cvs.width - textWidth - 5
-        ctx.fillText(text, x, cvs.height)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
@@ -1623,7 +1621,7 @@ function ScalableSpec(
         const whisperObjects = response.data.labels
 
         const whisperLabels = whisperObjects.map( obj => {
-            const newLabel = new Label(
+            return new Label(
                 nanoid(),
                 obj.onset,
                 obj.offset,
@@ -1636,14 +1634,14 @@ function ScalableSpec(
                 null,
                 DEFAULT_LABEL_COLOR
             )
-
-            return newLabel
         })
 
         setLabels(prevState => [...prevState, ...whisperLabels] )
         setWhisperSegIsLoading(false)
     }
 
+
+    /* ++++++++++++++++++ Submit Annotations ++++++++++++++++++ */
     const submitAnnotations = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
 
@@ -1998,7 +1996,7 @@ function ScalableSpec(
                         className='individuals-canvas'
                         ref={individualsCanvasRef}
                         width={200}
-                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                     />
                 </div>
 
@@ -2027,7 +2025,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

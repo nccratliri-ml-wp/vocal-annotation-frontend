@@ -15,10 +15,18 @@ import {
     activateClustername,
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive
+    checkIfEveryObjectIsInactive,
+    ANNOTATED_AREA_INDIVIDUAL,
+    ANNOTATED_AREA_CLUSTERNAME,
+    ANNOTATED_AREA,
+    ANNOTATED_AREA_COLOR
 } from './species.js'
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import LockIcon from '@mui/icons-material/Lock';
+import {icon, iconBtn, iconBtnDisabled} from "./styles.js";
 
-function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp}) {
+function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
     const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
     const [newIndividualInputFieldTexts, setNewIndividualInputFieldTexts] = useState([])
@@ -55,23 +63,21 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
         const newSpecies = new Species(nanoid(),newSpeciesInputFieldText, [newIndividual], [newClustername] )
 
-        modifiedSpeciesArray.push(newSpecies)
+        const insertionIndex = modifiedSpeciesArray.length - 1
+        modifiedSpeciesArray.splice(insertionIndex, 0, newSpecies)
         passSpeciesArrayToApp( modifiedSpeciesArray )
     }
 
-    const deleteSpecies = (selectedID, index) => {
+    const deleteSpecies = (selectedID) => {
         if (!confirm('Deleting this Species will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedID)
-
-        // Check if species is active
-        const wasDeletedSpeciesInactive = checkIfEveryObjectIsInactive(speciesArray[index].individuals)
 
         // Delete Species
         let modifiedSpeciesArray = speciesArray.filter(speciesObject => speciesObject.id !== selectedID)
 
-        // Activate Clusternames and Individual of the last species in modifiedSpeciesArray, but only if the deleted Species was active
-        modifiedSpeciesArray = modifiedSpeciesArray.map((speciesObject, index) => {
-            if (index === modifiedSpeciesArray.length - 1 && !wasDeletedSpeciesInactive) {
+        // Activate Clusternames and Individual of the Unknown Species
+        modifiedSpeciesArray = modifiedSpeciesArray.map((speciesObject) => {
+            if (speciesObject.name === UNKNOWN_SPECIES) {
                 const updatedIndividuals = activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
                 const updatedClusternames = activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
                 return new Species(
@@ -255,9 +261,10 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Activate selected individual, deactivate all others
                 const updatedIndividuals = activateIndividual(speciesObject.individuals, selectedIndividual.name)
 
-                // Activate Unknown clustername, only if all other clusternames are inactive (this happens when the user switches species)
+                // Activate Unknown clustername or Annotated Area clustername, only if all other clusternames are inactive (this happens when the user switches species)
+                const fallbackClustername = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_CLUSTERNAME : UNKNOWN_CLUSTERNAME
                 const updatedClusternames = checkIfEveryObjectIsInactive(speciesObject.individuals)
-                    ? activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
+                    ? activateClustername(speciesObject.clusternames, fallbackClustername)
                     : speciesObject.clusternames
 
                 return new Species(
@@ -423,9 +430,10 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Activate selected clustername, deactivate all others
                 const updatedClusternames = activateClustername(speciesObject.clusternames, selectedClustername.name)
 
-                // Activate Unknown individual, only if all other Individuals are inactive (this happens when the user switches species)
+                // Activate Unknown individual or Annotated Area Individual, only if all other Individuals are inactive (this happens when the user switches species)
+                const fallbackIndividual = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_INDIVIDUAL : UNKNOWN_INDIVIDUAL
                 const updatedIndividuals = checkIfEveryObjectIsInactive(speciesObject.individuals)
-                    ? activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
+                    ? activateIndividual(speciesObject.individuals, fallbackIndividual)
                     : speciesObject.individuals
 
                 return new Species(
@@ -526,125 +534,152 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
             <div id='annotation-labels-menu'>
                 {
-                    speciesArray.map( (species, index) =>
-                        <fieldset
-                            id={species.id}
-                            key={species.id}
-                            className='species'
-                        >
-                            <legend>
-                                {species.name}
-                                {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn' onClick={() => editSpecies(species.id)}>✏️</button>}
-                                {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn' onClick={() => deleteSpecies(species.id, index)}>🗑️</button>}
-                            </legend>
+                    speciesArray.map( (species, index) => {
 
-                            <div className='individual-btn-container'>
-                                Individuals:
-                                {
-                                    species.individuals.map( individual =>
-                                        <div
-                                            key={individual.id}
-                                            className='individual-btn'
-                                            isactive={individual.isActive.toString()}>
-                                            <div
-                                                className='individual-btn-name'
-                                                onClick={ () => handleClickIndividual(species.id, individual) }
-                                                onContextMenu={ (event) => deleteIndividual(event, species.id, individual)}
-                                            >
-                                                {individual.name}
-                                            </div>
-                                            {
-                                                individual.name !== UNKNOWN_INDIVIDUAL &&
-                                                <button
-                                                    className='edit-name-btn'
-                                                    onClick={ () => editIndividual(species.id, individual) }
-                                                    onContextMenu={ (event) => event.preventDefault() }
-                                                >
-                                                    ✏️
-                                                </button>
-                                            }
-                                        </div>
-                                    )
-                                }
-                                <form className='individual-form' onSubmit={ (event) => addNewIndividual(event,species.id, index) }>
-                                    <input
-                                        className='individual-input-field'
-                                        type='text'
-                                        required='required'
-                                        pattern='^[^,]{1,30}$'
-                                        title='No commas allowed. Max length 30 characters'
-                                        value={newIndividualInputFieldTexts[index] || ''}
-                                        placeholder='Add a new Individual'
-                                        onChange={ (event) => handleIndividualInputChange(event, index) }
-                                    />
-                                    <button className='add-individual-btn'>➕</button>
-                                </form>
-                            </div>
-
-                            <div className='clustername-btn-container'>
-                                Clusternames:
-                                {
-                                    species.clusternames.map( clustername =>
-                                        <div
-                                            key={clustername.id}
-                                            className='clustername-btn'
-                                            style={{
-                                                borderLeft: `2px solid ${clustername.color}`,
-                                                backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
-                                            }}
-                                            isactive={clustername.isActive.toString()}
+                        // Render Annotated Area Button in a different format
+                        if (species.name === ANNOTATED_AREA){
+                            return (
+                                <div id='annotated-area-button-container'>
+                                    <Tooltip title='Mark Annotated Area'>
+                                        <IconButton style={strictMode ? iconBtnDisabled : iconBtn}
+                                                    disabled={strictMode}
+                                                    onClick={ () => handleClickIndividual(species.id, species.individuals[0]) }
                                         >
-                                            <div
-                                                className='clustername-btn-name'
-                                                isactive={clustername.isActive.toString()}
-                                                onClick={ () => handleClickClustername(species.id, clustername) }
-                                                onContextMenu={ (event) => deleteClustername(event, species.id, clustername)}
-                                            >
-                                                {clustername.name}
-                                            </div>
-                                            <button
-                                                className='colorwheel-btn'
-                                                onClick={ () => toggleColorwheel(species.id, clustername) }
-                                                onContextMenu={ (event) => event.preventDefault() }
-                                            >
-                                                🎨️
-                                            </button>
-                                            {
-                                                clustername.showColorwheel &&
-                                                <Colorwheel
-                                                    toggleColorwheel={toggleColorwheel}
-                                                    passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
-                                                    selectedID={species.id}
-                                                    selectedClustername={clustername} />}
-                                            {
-                                                clustername.name !== UNKNOWN_CLUSTERNAME &&
-                                                <button
-                                                    className='edit-name-btn'
-                                                    onClick={ () => editClustername(species.id, clustername) }
-                                                    onContextMenu={ (event) => event.preventDefault() }
-                                                >
-                                                    ✏️
-                                                </button>
-                                            }
-                                        </div>
-                                    )
-                                }
-                                <form className='clustername-form' onSubmit={ (event) => addNewClustername(event,species.id, index) }>
-                                    <input
-                                        className='clustername-input-field'
-                                        type='text'
-                                        required='required'
-                                        pattern='^[^,]{1,30}$'
-                                        title='No commas allowed. Max length 30 characters'
-                                        value={newClusternameInputFieldTexts[index] || ''}
-                                        placeholder='Add a new Clustername'
-                                        onChange={ (event) => handleClusternameInputChange(event, index) }
-                                    />
-                                    <button className='add-clustername-btn'>➕</button>
-                                </form>
-                            </div>
+                                            <LockIcon
+                                                style={{...icon, ...(species.individuals[0].isActive && {color: ANNOTATED_AREA_COLOR})}}
+                                            />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            )
+                        }
 
-                        </fieldset>
+                        // Render all other species
+                        return (
+                            <fieldset
+                                id={species.id}
+                                key={species.id}
+                                className='species'
+                            >
+                                <legend>
+                                    {species.name}
+                                    {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn'
+                                                                                 onClick={() => editSpecies(species.id)}>✏️</button>}
+                                    {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn'
+                                                                                 onClick={() => deleteSpecies(species.id)}>🗑️</button>}
+                                </legend>
+
+                                <div className='individual-btn-container'>
+                                    Individuals:
+                                    {
+                                        species.individuals.map(individual =>
+                                            <div
+                                                key={individual.id}
+                                                className='individual-btn'
+                                                isactive={individual.isActive.toString()}>
+                                                <div
+                                                    className='individual-btn-name'
+                                                    onClick={() => handleClickIndividual(species.id, individual)}
+                                                    onContextMenu={(event) => deleteIndividual(event, species.id, individual)}
+                                                >
+                                                    {individual.name}
+                                                </div>
+                                                {
+                                                    individual.name !== UNKNOWN_INDIVIDUAL &&
+                                                    <button
+                                                        className='edit-name-btn'
+                                                        onClick={() => editIndividual(species.id, individual)}
+                                                        onContextMenu={(event) => event.preventDefault()}
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                }
+                                            </div>
+                                        )
+                                    }
+                                    <form className='individual-form'
+                                          onSubmit={(event) => addNewIndividual(event, species.id, index)}>
+                                        <input
+                                            className='individual-input-field'
+                                            type='text'
+                                            required='required'
+                                            pattern='^[^,]{1,30}$'
+                                            title='No commas allowed. Max length 30 characters'
+                                            value={newIndividualInputFieldTexts[index] || ''}
+                                            placeholder='Add a new Individual'
+                                            onChange={(event) => handleIndividualInputChange(event, index)}
+                                        />
+                                        <button className='add-individual-btn'>➕</button>
+                                    </form>
+                                </div>
+
+                                <div className='clustername-btn-container'>
+                                    Clusternames:
+                                    {
+                                        species.clusternames.map(clustername =>
+                                            <div
+                                                key={clustername.id}
+                                                className='clustername-btn'
+                                                style={{
+                                                    borderLeft: `2px solid ${clustername.color}`,
+                                                    backgroundColor: clustername.isActive ? clustername.color : INACTIVE_BUTTON_COLOR
+                                                }}
+                                                isactive={clustername.isActive.toString()}
+                                            >
+                                                <div
+                                                    className='clustername-btn-name'
+                                                    isactive={clustername.isActive.toString()}
+                                                    onClick={() => handleClickClustername(species.id, clustername)}
+                                                    onContextMenu={(event) => deleteClustername(event, species.id, clustername)}
+                                                >
+                                                    {clustername.name}
+                                                </div>
+                                                <button
+                                                    className='colorwheel-btn'
+                                                    onClick={() => toggleColorwheel(species.id, clustername)}
+                                                    onContextMenu={(event) => event.preventDefault()}
+                                                >
+                                                    🎨️
+                                                </button>
+                                                {
+                                                    clustername.showColorwheel &&
+                                                    <Colorwheel
+                                                        toggleColorwheel={toggleColorwheel}
+                                                        passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
+                                                        selectedID={species.id}
+                                                        selectedClustername={clustername}/>}
+                                                {
+                                                    clustername.name !== UNKNOWN_CLUSTERNAME &&
+                                                    <button
+                                                        className='edit-name-btn'
+                                                        onClick={() => editClustername(species.id, clustername)}
+                                                        onContextMenu={(event) => event.preventDefault()}
+                                                    >
+                                                        ✏️
+                                                    </button>
+                                                }
+                                            </div>
+                                        )
+                                    }
+                                    <form className='clustername-form'
+                                          onSubmit={(event) => addNewClustername(event, species.id, index)}>
+                                        <input
+                                            className='clustername-input-field'
+                                            type='text'
+                                            required='required'
+                                            pattern='^[^,]{1,30}$'
+                                            title='No commas allowed. Max length 30 characters'
+                                            value={newClusternameInputFieldTexts[index] || ''}
+                                            placeholder='Add a new Clustername'
+                                            onChange={(event) => handleClusternameInputChange(event, index)}
+                                        />
+                                        <button className='add-clustername-btn'>➕</button>
+                                    </form>
+                                </div>
+
+                            </fieldset>
+                            )
+                        }
                     )
                 }
             </div>

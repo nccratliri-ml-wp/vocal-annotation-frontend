@@ -84,7 +84,7 @@ function Parameters(
             >
                 <div className='close-btn-container'>
                     <button className='close-btn' onClick={ () => passShowLocalConfigWindowToScalableSpec(false) }>✖</button>
-                    <p className='window-header'>Track Configurations</p>
+                    <p className='window-header'>Track Parameters</p>
                 </div>
 
                 <div className={'local-config-window-label'}>
@@ -104,7 +104,7 @@ function Parameters(
                             <input
                                 type="number"
                                 value={nfft}
-                                min={0}
+                                min={5}
                                 disabled={strictMode}
                                 onChange={handleNFftInputChange}
                                 onKeyPress={excludeNonDigits}
@@ -132,7 +132,7 @@ function Parameters(
                             <input
                                 type="number"
                                 value={binsPerOctave}
-                                min={0}
+                                min={25}
                                 disabled={strictMode}
                                 onChange={handleBinsPerOctaveInputChange}
                                 onKeyPress={excludeNonDigits}

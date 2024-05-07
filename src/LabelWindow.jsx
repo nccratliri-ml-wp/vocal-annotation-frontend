@@ -10,7 +10,9 @@ import {
     activateClustername,
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive, UNKNOWN_INDIVIDUAL
+    checkIfEveryObjectIsInactive,
+    UNKNOWN_INDIVIDUAL,
+    ANNOTATED_AREA
 } from "./species.js";
 
 function LabelWindow(
@@ -229,50 +231,58 @@ function LabelWindow(
                 </div>
 
                 {
-                    localSpeciesArray.map( (species) =>
-                        <div
-                            key={species.id}
-                            className='label-window-species'
-                        >
-                            {species.name}
+                    localSpeciesArray.map( (species) => {
 
-                            <div className='label-window-individual-btn-container'>
-                                Individuals:
-                                {
-                                    species.individuals.map( individual =>
-                                        <div
-                                            key={individual.id}
-                                            isactive={individual.isActive.toString()}
-                                            className='label-window-individual-btn'
-                                            onClick={ () => handleClickOnIndividual(species, individual) }
-                                        >
-                                            {individual.name}
-                                        </div>
-                                    )
-                                }
-                            </div>
+                            // Don't render Annotated Area "species" in the label window
+                            if (species.name === ANNOTATED_AREA) return
 
-                            <div className='label-window-clustername-btn-container'>
-                                Clusternames:
-                                {
-                                    species.clusternames.map( clustername =>
-                                        <div
-                                            key={clustername.id}
-                                            className='label-window-clustername-btn'
-                                            isactive={clustername.isActive.toString()}
-                                            onClick={ () => handleClickOnClustername(species, clustername) }
-                                            style={{
-                                                borderLeft: `2px solid ${clustername.color}`,
-                                                backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
-                                            }}
-                                        >
-                                            {clustername.name}
-                                        </div>
-                                    )
-                                }
-                            </div>
+                            // Render all other species
+                            return (
+                                <div
+                                    key={species.id}
+                                    className='label-window-species'
+                                >
+                                    {species.name}
 
-                        </div>
+                                    <div className='label-window-individual-btn-container'>
+                                        Individuals:
+                                        {
+                                            species.individuals.map( individual =>
+                                                <div
+                                                    key={individual.id}
+                                                    isactive={individual.isActive.toString()}
+                                                    className='label-window-individual-btn'
+                                                    onClick={ () => handleClickOnIndividual(species, individual) }
+                                                >
+                                                    {individual.name}
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+
+                                    <div className='label-window-clustername-btn-container'>
+                                        Clusternames:
+                                        {
+                                            species.clusternames.map( clustername =>
+                                                <div
+                                                    key={clustername.id}
+                                                    className='label-window-clustername-btn'
+                                                    isactive={clustername.isActive.toString()}
+                                                    onClick={ () => handleClickOnClustername(species, clustername) }
+                                                    style={{
+                                                        borderLeft: `2px solid ${clustername.color}`,
+                                                        backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
+                                                    }}
+                                                >
+                                                    {clustername.name}
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+
+                                </div>
+                            )
+                        }
                     )
                 }
 

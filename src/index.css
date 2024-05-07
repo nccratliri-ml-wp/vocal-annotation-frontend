@@ -52,6 +52,7 @@ html, body {
 
 .track-container{
   display: flex;
+  padding: 0 0 10px 0;
   margin: 0 0 10px 0;
   border-bottom: 5px double #082536;
 }
@@ -238,6 +239,16 @@ html, body {
   position: fixed;
   margin: 30px 0 0 0;
 }
+
+/* -------------------------- Colorwheel -------------------------- */
+
+#annotated-area-button-container{
+  position: absolute;
+  z-index: 3;
+  top: 105px;
+  right: 40px;
+}
+
 
 /* -------------------------- Global Config Window -------------------------- */
 

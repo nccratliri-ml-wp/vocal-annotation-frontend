@@ -49,5 +49,5 @@ export {
     globalControlsBtnDisabled,
     freqBtn,
     icon,
-    iconSmall
+    iconSmall,
 }

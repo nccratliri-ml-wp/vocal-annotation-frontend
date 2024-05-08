@@ -315,8 +315,10 @@ function App() {
                     [newUnknownIndividual, newIndividual],
                     [newUnknownClustername, newClustername],
                 )
-                allExistingSpeciesNames.push(label.species)
-                updatedSpeciesArray.push(newSpecies)
+
+                const insertionIndex = updatedSpeciesArray.length - 1
+                allExistingSpeciesNames.splice(insertionIndex,0,label.species)
+                updatedSpeciesArray.splice(insertionIndex,0,newSpecies)
             }
         }
 

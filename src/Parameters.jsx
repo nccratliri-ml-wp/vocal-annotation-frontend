@@ -173,7 +173,7 @@ function Parameters(
                 </div>
 
                 <div className={'local-config-window-label'}>
-                    <div></div>
+                    <button onClick={() => passShowLocalConfigWindowToScalableSpec(false)}>Cancel</button>
                     <button disabled={strictMode} onClick={handleSubmit}>Submit</button>
                 </div>
 

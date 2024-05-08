@@ -138,10 +138,16 @@ function GlobalConfig (
                             onPaste={(event) => event.preventDefault()}
                         />
                     </label>
+
+                    <div id='global-config-default-values-btn-container' >
+                        <div></div>
+                        <button id='global-config-default-values-btn' disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</button>
+                    </div>
+
                 </div>
 
                 <div id='global-config-window-buttons-container'>
-                    <button id='global-config-default-values-btn' disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</button>
+                    <button onClick={() => passShowGlobalConfigWindowToApp(false)}>Cancel</button>
                     <button id='global-config-submit-btn' disabled={strictMode} onClick={submitGlobalParameters}>Submit</button>
                 </div>
 

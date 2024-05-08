@@ -266,7 +266,7 @@ html, body {
   transform: translate(-50%, -50%);
   z-index: 3;
   width: 400px;
-  height: 200px;
+  height: 220px;
   border: 2px solid #ffffff;
   border-radius: 5px;
   background: #082536;
@@ -277,7 +277,7 @@ html, body {
   flex-direction: column;
   justify-content: space-between;
   width: 380px;
-  height: 160px;
+  height: 180px;
   padding: 7px 10px;
 }
 
@@ -291,14 +291,20 @@ html, body {
   max-width: 100px;
 }
 
+#global-config-default-values-btn-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+#global-config-default-values-btn{
+  max-width: 108px;
+  font-size: 10px;
+}
+
 #global-config-window-buttons-container{
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-}
-
-#global-config-default-values-btn{
-  max-height: 20px;
 }
 
 #global-config-submit-btn{

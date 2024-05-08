@@ -1513,11 +1513,13 @@ function ScalableSpec(
     }
 
      const waveformZoomIn = () => {
-        setWaveformScale(prevState => prevState + 10)
+        setWaveformScale(prevState => prevState * 1.3)
+         console.log(waveformScale)
      }
 
      const waveformZoomOut = () => {
-         setWaveformScale(prevState => Math.max(prevState - 10, 1))
+         setWaveformScale(prevState => Math.max(prevState * 0.7, 1))
+         console.log(waveformScale)
      }
 
     const toggleShowWaveform = () => {

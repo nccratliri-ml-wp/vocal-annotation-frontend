@@ -1830,34 +1830,25 @@ function ScalableSpec(
     useEffect( () => {
         if (!globalAudioDuration || !response ) return
 
-        /*
-        // This makes the zoom in level to show the largest track fully (better for multiple files locally). Use this for planned free mode.
+        playheadRef.current.timeframe = 0
+
+        // This makes the zoom in level to show the newest track fully (necessary for upload by url)
+        if (strictMode){
+            const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
+            const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+            const newStartTime = 0
+            const newEndTime = newStartTime + newDuration
+            updateClipDurationAndTimes(globalHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
+            return
+        }
+
+        // This makes the zoom in level to show the largest track fully (better for multiple files locally)
         const newHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = 0
         const newEndTime = newStartTime + newDuration
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
-         */
-
-        // This makes the zoom in level to show the newest track fully (necessary for upload by url). Use this for planned strict mode.
-        const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        const newStartTime = 0
-        const newEndTime = newStartTime + newDuration
-        updateClipDurationAndTimes(globalHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
-
-        /*
-        Old way:
-
-        passClipDurationToApp(globalAudioDuration)
-        passCurrentStartTimeToApp(0)
-        passCurrentEndTimeToApp(globalAudioDuration)
-        passMaxScrollTimeToApp(0)
-        passScrollStepToApp(globalAudioDuration * SCROLL_STEP_RATIO)
-        */
-
-        playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration] )
 

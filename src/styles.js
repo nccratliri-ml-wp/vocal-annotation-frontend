@@ -40,6 +40,13 @@ const iconSmall = {
     padding: 0
 }
 
+const iconBig = {
+    height: 30,
+    width: 30,
+    color: 'white',
+
+}
+
 export {
     iconBtn,
     iconBtnDisabled,
@@ -50,4 +57,5 @@ export {
     freqBtn,
     icon,
     iconSmall,
+    iconBig
 }

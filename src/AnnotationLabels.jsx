@@ -24,10 +24,15 @@ import {
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
-import {icon, iconBtn, iconBtnDisabled} from "./styles.js";
+import {icon, iconBig, iconBtn, iconBtnDisabled} from "./styles.js";
+import AddBoxIcon from "@mui/icons-material/AddBox.js";
+import InputWindow from "./InputWindow.jsx";
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
+    const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
+    const [showIndividualInputWindow, setShowIndividualInputWindow] = useState(false)
+    const [showClusternameInputWindow, setShowClusternameInputWindow] = useState(false)
     const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
     const [newIndividualInputFieldTexts, setNewIndividualInputFieldTexts] = useState([])
     const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
@@ -66,6 +71,10 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         const insertionIndex = modifiedSpeciesArray.length - 1
         modifiedSpeciesArray.splice(insertionIndex, 0, newSpecies)
         passSpeciesArrayToApp( modifiedSpeciesArray )
+    }
+
+    const handleSpeciesInputChange = (event) => {
+        setNewSpeciesInputFieldText(event.target.value)
     }
 
     const deleteSpecies = (selectedID) => {
@@ -528,6 +537,13 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         }
     }
 
+    const handleCancel = (event) => {
+        event.preventDefault()
+        setShowSpeciesInputWindow(false)
+        setShowIndividualInputWindow(false)
+        setShowClusternameInputWindow(false)
+    }
+
 
     return (
         <div id='annotation-labels-container'>
@@ -597,20 +613,20 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                             </div>
                                         )
                                     }
-                                    <form className='individual-form'
-                                          onSubmit={(event) => addNewIndividual(event, species.id, index)}>
-                                        <input
-                                            className='individual-input-field'
-                                            type='text'
-                                            required='required'
-                                            pattern='^[^,]{1,30}$'
-                                            title='No commas allowed. Max length 30 characters'
-                                            value={newIndividualInputFieldTexts[index] || ''}
-                                            placeholder='Add a new Individual'
-                                            onChange={(event) => handleIndividualInputChange(event, index)}
-                                        />
-                                        <button className='add-individual-btn'>➕</button>
-                                    </form>
+
+                                    <InputWindow
+                                        showInputWindow={showIndividualInputWindow}
+                                        setShowInputWindow={setShowIndividualInputWindow}
+                                        handleCancel={handleCancel}
+                                        objectType='Individual'
+                                        speciesID={species.id}
+                                        index={index}
+                                        addNewObject={addNewIndividual}
+                                        newObjectInputFieldText={newIndividualInputFieldTexts[index] || ''}
+                                        setNewObjectInputFieldText={handleIndividualInputChange}
+                                        iconStyle={icon}
+                                    />
+
                                 </div>
 
                                 <div className='clustername-btn-container'>
@@ -661,20 +677,20 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                             </div>
                                         )
                                     }
-                                    <form className='clustername-form'
-                                          onSubmit={(event) => addNewClustername(event, species.id, index)}>
-                                        <input
-                                            className='clustername-input-field'
-                                            type='text'
-                                            required='required'
-                                            pattern='^[^,]{1,30}$'
-                                            title='No commas allowed. Max length 30 characters'
-                                            value={newClusternameInputFieldTexts[index] || ''}
-                                            placeholder='Add a new Clustername'
-                                            onChange={(event) => handleClusternameInputChange(event, index)}
-                                        />
-                                        <button className='add-clustername-btn'>➕</button>
-                                    </form>
+
+                                    <InputWindow
+                                        showInputWindow={showClusternameInputWindow}
+                                        setShowInputWindow={setShowClusternameInputWindow}
+                                        handleCancel={handleCancel}
+                                        objectType='Clustername'
+                                        speciesID={species.id}
+                                        index={index}
+                                        addNewObject={addNewClustername}
+                                        newObjectInputFieldText={newClusternameInputFieldTexts[index] || ''}
+                                        setNewObjectInputFieldText={handleClusternameInputChange}
+                                        iconStyle={icon}
+                                    />
+
                                 </div>
 
                             </fieldset>
@@ -682,9 +698,29 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                         }
                     )
                 }
+
+                <InputWindow
+                    showInputWindow={showSpeciesInputWindow}
+                    setShowInputWindow={setShowSpeciesInputWindow}
+                    handleCancel={handleCancel}
+                    objectType='Species'
+                    addNewObject={addNewSpecies}
+                    newObjectInputFieldText={newSpeciesInputFieldText}
+                    setNewObjectInputFieldText={handleSpeciesInputChange}
+                    iconStyle={iconBig}
+                />
+
             </div>
 
-            <form onSubmit={addNewSpecies}>
+        </div>
+    )
+}
+
+export default AnnotationLabels
+
+/*
+
+<form onSubmit={addNewSpecies}>
                 <input
                     className='species-input-field'
                     type='text'
@@ -697,9 +733,4 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 />
                 <button className='add-species-btn'>➕</button>
             </form>
-
-        </div>
-    )
-}
-
-export default AnnotationLabels
+ */

@@ -384,17 +384,6 @@ html, body {
   font-size: 13px;
 }
 
-.species-input-field{
-  outline: none;
-}
-
-.add-species-btn{
-  background-color: #f6fffe;
-  border: none;
-  border-radius: 2px;
-  font-size: 12px;
-}
-
 .individual-btn-container, .clustername-btn-container{
   display: flex;
   flex-wrap: wrap;
@@ -426,26 +415,6 @@ html, body {
   border-left: 1px solid black;
 }
 
-.clustername-form, .individual-form{
-  display: flex;
-  border: none;
-}
-
-.clustername-input-field, .individual-input-field{
-  max-width: 150px;
-}
-
-.clustername-input-field:focus, .individual-input-field:focus{
-  outline: none;
-}
-
-.add-clustername-btn, .add-individual-btn{
-  background-color: #f6fffe;
-  border: none;
-  border-radius: 2px;
-  font-size: 10px;
-}
-
 .colorwheel-btn, .edit-name-btn{
   background-color: #f6fffe;
   border: none;
@@ -456,6 +425,46 @@ html, body {
 
 .colorwheel-btn:hover, .edit-name-btn:hover{
   background-color: whitesmoke;
+}
+
+.input-window{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 300px;
+  height: 160px;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  background: #082536;
+}
+
+.input-window-form{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 280px;
+  height: 90px;
+  padding: 7px 10px;
+}
+
+.input-field{
+  outline: none;
+  height: 25px;
+}
+
+.input-window-submit-btn{
+  width: 60px;
+  height: 20px;
+  align-self: flex-end;
+  margin-top: 5px;
+}
+
+.input-window-cancel-btn{
+  width: 60px;
+  align-self: flex-start;
+  margin-left: 10px;
 }
 
 /* -------------------------- Label Window -------------------------- */
@@ -487,6 +496,8 @@ html, body {
 .window-header{
   color: #051923;
   margin: 0;
+  font-size: 15px;
+  font-weight: bold;
 }
 
 .close-btn:hover{

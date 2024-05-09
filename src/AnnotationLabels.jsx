@@ -539,7 +539,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                         // Render Annotated Area Button in a different format
                         if (species.name === ANNOTATED_AREA){
                             return (
-                                <div id='annotated-area-button-container'>
+                                <div id='annotated-area-button-container' key={species.id}>
                                     <Tooltip title='Mark Annotated Area'>
                                         <IconButton style={strictMode ? iconBtnDisabled : iconBtn}
                                                     disabled={strictMode}

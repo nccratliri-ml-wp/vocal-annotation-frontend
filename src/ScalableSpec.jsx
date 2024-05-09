@@ -383,7 +383,14 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passActiveLabelToApp({onset: labelsCopy[labels.length-1].onset, offset: labelsCopy[labels.length-1].offset, color: '#ffffff', trackId: id})
+            passActiveLabelToApp(
+                {
+                    onset: labelsCopy[labels.length-1].onset,
+                    offset: labelsCopy[labels.length-1].offset,
+                    color: '#ffffff',
+                    trackId: id
+                }
+            )
             drawLineBetween(newestLabel)
             drawLine(newestLabel, newestLabel.onset)
             drawLine(newestLabel, newestLabel.offset)
@@ -1678,8 +1685,10 @@ function ScalableSpec(
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
-        if (!spectrogram) return
-        if (id === activeLabel.trackId) return
+        if (!spectrogram ||
+            id === activeLabel.trackId ||
+            activeSpecies.name === ANNOTATED_AREA) return
+
         drawActiveLabel(audioArray)
     }, [activeLabel] )
 

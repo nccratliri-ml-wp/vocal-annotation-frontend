@@ -15,6 +15,8 @@ class Species {
         this.name = name
         this.individuals = individuals
         this.clusternames = clusternames
+        this.showIndividualInputWindow = false
+        this.showClusternameInputWindow = false
     }
 }
 

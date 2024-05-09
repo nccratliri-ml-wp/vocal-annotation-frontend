@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx";
+import InputWindow from "./InputWindow.jsx";
 import {
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
@@ -26,27 +27,22 @@ import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
 import {icon, iconBig, iconBtn, iconBtnDisabled} from "./styles.js";
 import AddBoxIcon from "@mui/icons-material/AddBox.js";
-import InputWindow from "./InputWindow.jsx";
+
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
-    const [showIndividualInputWindow, setShowIndividualInputWindow] = useState(false)
-    const [showClusternameInputWindow, setShowClusternameInputWindow] = useState(false)
-    const [newSpeciesInputFieldText, setNewSpeciesInputFieldText] = useState('')
-    const [newIndividualInputFieldTexts, setNewIndividualInputFieldTexts] = useState([])
-    const [newClusternameInputFieldTexts, setNewClusternameInputFieldTexts] = useState([])
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
-    const addNewSpecies = (event) => {
+    const addNewSpecies = (event, inputFieldContent) => {
         event.preventDefault()
 
-        setNewSpeciesInputFieldText('')
+        setShowSpeciesInputWindow(false)
 
         const allSpeciesNames = speciesArray.map( speciesObject => speciesObject.name )
-        if (checkIfObjectNameAlreadyExists(newSpeciesInputFieldText, allSpeciesNames)){
-            alert(`${newSpeciesInputFieldText} already exists. Add a different one.`)
+        if (checkIfObjectNameAlreadyExists(inputFieldContent, allSpeciesNames)){
+            alert(`${inputFieldContent} already exists. Add a different one.`)
             return
         }
 
@@ -66,15 +62,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         // Create new Species
         const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
         const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
-        const newSpecies = new Species(nanoid(),newSpeciesInputFieldText, [newIndividual], [newClustername] )
+        const newSpecies = new Species(nanoid(),inputFieldContent, [newIndividual], [newClustername] )
 
         const insertionIndex = modifiedSpeciesArray.length - 1
         modifiedSpeciesArray.splice(insertionIndex, 0, newSpecies)
         passSpeciesArrayToApp( modifiedSpeciesArray )
-    }
-
-    const handleSpeciesInputChange = (event) => {
-        setNewSpeciesInputFieldText(event.target.value)
     }
 
     const deleteSpecies = (selectedID) => {
@@ -132,15 +124,10 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     /* ++++++++++++++++++++ Individuals ++++++++++++++++++++ */
 
-    const addNewIndividual = (event, selectedID, index) => {
+    const addNewIndividual = (event, inputFieldContent, selectedID) => {
         event.preventDefault()
 
-        const newIndividualName = newIndividualInputFieldTexts[index]
-
-        // Update the correct input field
-        const updatedIndividualInputFieldTexts = [...newIndividualInputFieldTexts]
-        updatedIndividualInputFieldTexts[index] = ''
-        setNewIndividualInputFieldTexts(updatedIndividualInputFieldTexts)
+        const newIndividualName = inputFieldContent
 
         // Update species Array
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
@@ -188,12 +175,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
             }
         })
         passSpeciesArrayToApp(modifiedSpeciesArray)
-    }
-
-    const handleIndividualInputChange = (event, index) => {
-        const updatedIndividualInputFieldTexts = [...newIndividualInputFieldTexts]
-        updatedIndividualInputFieldTexts[index] = event.target.value
-        setNewIndividualInputFieldTexts(updatedIndividualInputFieldTexts)
     }
 
     const deleteIndividual = (event, selectedID, selectedIndividual) => {
@@ -301,15 +282,10 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     /* ++++++++++++++++++++ Clusternames ++++++++++++++++++++ */
 
-    const addNewClustername = (event, selectedID, index) => {
+    const addNewClustername = (event, inputFieldContent, selectedID) => {
         event.preventDefault()
 
-        const newClusternameName = newClusternameInputFieldTexts[index]
-
-        // Update the correct input field
-        const updatedClusternameInputFieldTexts = [...newClusternameInputFieldTexts]
-        updatedClusternameInputFieldTexts[index] = ''
-        setNewClusternameInputFieldTexts(updatedClusternameInputFieldTexts)
+        const newClusternameName = inputFieldContent
 
         // Update species Array
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
@@ -357,12 +333,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
             }
         })
         passSpeciesArrayToApp(modifiedSpeciesArray)
-    }
-
-    const handleClusternameInputChange = (event, index) => {
-        const updatedClusternameInputFieldTexts = [...newClusternameInputFieldTexts]
-        updatedClusternameInputFieldTexts[index] = event.target.value
-        setNewClusternameInputFieldTexts(updatedClusternameInputFieldTexts)
     }
 
     const deleteClustername = (event, selectedID, selectedClustername) => {
@@ -539,9 +509,80 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     const handleCancel = (event) => {
         event.preventDefault()
+        //setInputFieldContent('')
         setShowSpeciesInputWindow(false)
-        setShowIndividualInputWindow(false)
-        setShowClusternameInputWindow(false)
+    }
+
+    const toggleClusternameInputWindow = (event, selectedID) => {
+        // Close New Species Input Window if it's open
+        setShowSpeciesInputWindow(false)
+
+        // Open/Close the selected Clustername Window
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+
+            // Open Clustername Input Window of the clicked Species, close it's individual Input Window if it's open
+            if (speciesObject.id === selectedID) {
+                const updatedSpeciesObject = new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    speciesObject.clusternames
+                )
+                updatedSpeciesObject.showIndividualInputWindow = false
+                updatedSpeciesObject.showClusternameInputWindow = !speciesObject.showClusternameInputWindow
+                return updatedSpeciesObject
+
+            // Close all Input windows of all other Species
+            } else {
+                const updatedSpeciesObject = new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    speciesObject.clusternames
+                )
+                updatedSpeciesObject.showIndividualInputWindow = false
+                updatedSpeciesObject.showClusternameInputWindow = false
+                return updatedSpeciesObject
+            }
+        })
+
+        passSpeciesArrayToApp(modifiedSpeciesArray)
+    }
+
+    const toggleIndividualInputWindow = (event, selectedID) => {
+        // Close New Species Input Window if it's open
+        setShowSpeciesInputWindow(false)
+
+        // Open/Close the selected Individual Window
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+
+            // Open Individual Input Window of the clicked Species, close it's Clustername Input Window if it's open
+            if (speciesObject.id === selectedID) {
+                const updatedSpeciesObject = new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    speciesObject.clusternames
+                )
+                updatedSpeciesObject.showIndividualInputWindow = !speciesObject.showIndividualInputWindow
+                updatedSpeciesObject.showClusternameInputWindow = false
+                return updatedSpeciesObject
+
+            // Close all Input windows of all other Species
+            } else {
+                const updatedSpeciesObject = new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    speciesObject.clusternames
+                )
+                updatedSpeciesObject.showIndividualInputWindow = false
+                updatedSpeciesObject.showClusternameInputWindow = false
+                return updatedSpeciesObject
+            }
+        })
+
+        passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
 
@@ -550,7 +591,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
             <div id='annotation-labels-menu'>
                 {
-                    speciesArray.map( (species, index) => {
+                    speciesArray.map( (species) => {
 
                         // Render Annotated Area Button in a different format
                         if (species.name === ANNOTATED_AREA){
@@ -579,10 +620,20 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                             >
                                 <legend>
                                     {species.name}
-                                    {species.name !== UNKNOWN_SPECIES && <button className='edit-species-btn'
-                                                                                 onClick={() => editSpecies(species.id)}>✏️</button>}
-                                    {species.name !== UNKNOWN_SPECIES && <button className='delete-species-btn'
-                                                                                 onClick={() => deleteSpecies(species.id)}>🗑️</button>}
+                                    {species.name !== UNKNOWN_SPECIES &&
+                                        <button className='edit-species-btn'
+                                                onClick={() => editSpecies(species.id)}
+                                        >
+                                            ✏️
+                                        </button>
+                                    }
+                                    {species.name !== UNKNOWN_SPECIES &&
+                                        <button className='delete-species-btn'
+                                                onClick={() => deleteSpecies(species.id)}
+                                        >
+                                            🗑️
+                                        </button>
+                                    }
                                 </legend>
 
                                 <div className='individual-btn-container'>
@@ -614,18 +665,20 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                         )
                                     }
 
-                                    <InputWindow
-                                        showInputWindow={showIndividualInputWindow}
-                                        setShowInputWindow={setShowIndividualInputWindow}
-                                        handleCancel={handleCancel}
-                                        objectType='Individual'
-                                        speciesID={species.id}
-                                        index={index}
-                                        addNewObject={addNewIndividual}
-                                        newObjectInputFieldText={newIndividualInputFieldTexts[index] || ''}
-                                        setNewObjectInputFieldText={handleIndividualInputChange}
-                                        iconStyle={icon}
-                                    />
+                                    <Tooltip title='Add New Individual'>
+                                        <IconButton style={{padding: 0}} onClick={ (event) => toggleIndividualInputWindow(event, species.id) }>
+                                            <AddBoxIcon style={icon} />
+                                        </IconButton>
+                                    </Tooltip>
+                                    {
+                                        species.showIndividualInputWindow &&
+                                            <InputWindow
+                                                handleCancel={toggleIndividualInputWindow}
+                                                objectType='Individual'
+                                                speciesID={species.id}
+                                                addNewObject={addNewIndividual}
+                                            />
+                                    }
 
                                 </div>
 
@@ -659,38 +712,40 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                 </button>
                                                 {
                                                     clustername.showColorwheel &&
-                                                    <Colorwheel
-                                                        toggleColorwheel={toggleColorwheel}
-                                                        passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
-                                                        selectedID={species.id}
-                                                        selectedClustername={clustername}/>}
+                                                        <Colorwheel
+                                                            toggleColorwheel={toggleColorwheel}
+                                                            passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
+                                                            selectedID={species.id}
+                                                            selectedClustername={clustername}/>
+                                                }
                                                 {
                                                     clustername.name !== UNKNOWN_CLUSTERNAME &&
-                                                    <button
-                                                        className='edit-name-btn'
-                                                        onClick={() => editClustername(species.id, clustername)}
-                                                        onContextMenu={(event) => event.preventDefault()}
-                                                    >
-                                                        ✏️
-                                                    </button>
+                                                        <button
+                                                            className='edit-name-btn'
+                                                            onClick={() => editClustername(species.id, clustername)}
+                                                            onContextMenu={(event) => event.preventDefault()}
+                                                        >
+                                                            ✏️
+                                                        </button>
                                                 }
                                             </div>
                                         )
                                     }
 
-                                    <InputWindow
-                                        showInputWindow={showClusternameInputWindow}
-                                        setShowInputWindow={setShowClusternameInputWindow}
-                                        handleCancel={handleCancel}
-                                        objectType='Clustername'
-                                        speciesID={species.id}
-                                        index={index}
-                                        addNewObject={addNewClustername}
-                                        newObjectInputFieldText={newClusternameInputFieldTexts[index] || ''}
-                                        setNewObjectInputFieldText={handleClusternameInputChange}
-                                        iconStyle={icon}
-                                    />
-
+                                    <Tooltip title='Add New Clustername'>
+                                        <IconButton style={{padding: 0}} onClick={ (event) => toggleClusternameInputWindow(event, species.id) }>
+                                            <AddBoxIcon style={icon}/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    {
+                                        species.showClusternameInputWindow &&
+                                            <InputWindow
+                                                handleCancel={toggleClusternameInputWindow}
+                                                objectType='Clustername'
+                                                speciesID={species.id}
+                                                addNewObject={addNewClustername}
+                                            />
+                                    }
                                 </div>
 
                             </fieldset>
@@ -699,16 +754,19 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     )
                 }
 
-                <InputWindow
-                    showInputWindow={showSpeciesInputWindow}
-                    setShowInputWindow={setShowSpeciesInputWindow}
-                    handleCancel={handleCancel}
-                    objectType='Species'
-                    addNewObject={addNewSpecies}
-                    newObjectInputFieldText={newSpeciesInputFieldText}
-                    setNewObjectInputFieldText={handleSpeciesInputChange}
-                    iconStyle={iconBig}
-                />
+                <Tooltip title='Add New Species'>
+                    <IconButton style={{padding: 0}} onClick={() => setShowSpeciesInputWindow(true)}>
+                        <AddBoxIcon style={iconBig}/>
+                    </IconButton>
+                </Tooltip>
+                {
+                    showSpeciesInputWindow &&
+                        <InputWindow
+                            handleCancel={handleCancel}
+                            objectType='Species'
+                            addNewObject={addNewSpecies}
+                        />
+                }
 
             </div>
 
@@ -717,20 +775,3 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 }
 
 export default AnnotationLabels
-
-/*
-
-<form onSubmit={addNewSpecies}>
-                <input
-                    className='species-input-field'
-                    type='text'
-                    required='required'
-                    pattern='^[^,]{1,30}$'
-                    title='No commas allowed. Max length 30 characters'
-                    value={newSpeciesInputFieldText}
-                    placeholder='Add a new Species'
-                    onChange={ (event) => setNewSpeciesInputFieldText(event.target.value) }
-                />
-                <button className='add-species-btn'>➕</button>
-            </form>
- */

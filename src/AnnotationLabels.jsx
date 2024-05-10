@@ -99,6 +99,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         let editedSpeciesName = prompt('Change species name: ')
         if (!editedSpeciesName) return
 
+        if (editedSpeciesName.includes(',') || editedSpeciesName.length > 45) {
+            alert('Invalid input. Please provide a valid species name without commas and no longer than 45 characters.')
+            return
+        }
+
         const allSpeciesNames = speciesArray.map(speciesObject => speciesObject.name)
         if (allSpeciesNames.some(name => name === editedSpeciesName)) {
             alert(`${editedSpeciesName} already exists. Add a different one.`)
@@ -213,6 +218,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const editIndividual = (selectedID, selectedIndividual) => {
         let editedIndividual = prompt('Change individual: ')
         if (!editedIndividual) return
+
+        if (editedIndividual.includes(',') || editedIndividual.length > 45) {
+            alert('Invalid input. Please provide a valid Individual name without commas and no longer than 45 characters.')
+            return
+        }
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
@@ -371,6 +381,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const editClustername = (selectedID, selectedClustername) => {
         let editedClustername = prompt('Change clustername: ')
         if (!editedClustername) return
+
+        if (editedClustername.includes(',') || editedClustername.length > 45) {
+            alert('Invalid input. Please provide a valid clustername without commas and no longer than 45 characters.')
+            return
+        }
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {

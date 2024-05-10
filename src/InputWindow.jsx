@@ -20,8 +20,8 @@ function InputWindow ( {handleCancel, objectType, speciesID, addNewObject} ) {
                     className='input-field'
                     type='text'
                     required='required'
-                    pattern='^[^,]{1,30}$'
-                    title='No commas allowed. Max length 30 characters'
+                    pattern='^[^,]{1,45}$'
+                    title='No commas allowed. Max length 45 characters.'
                     value={inputFieldContent}
                     placeholder={`Add a new ${objectType}`}
                     onChange={ (event) => setInputFieldContent(event.target.value) }

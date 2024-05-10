@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -141,6 +142,7 @@ function ScalableSpec(
 
     // Label Window
     const [expandedLabel, setExpandedLabel] = useState(null)
+    const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
 
     // Icons
     const activeIcon = showWaveform ? icon : iconSmall
@@ -362,6 +364,7 @@ function ScalableSpec(
         const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
+            setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
 
@@ -1099,6 +1102,7 @@ function ScalableSpec(
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
+            setGlobalMouseCoordinates(null)
         }
     }
 
@@ -2035,6 +2039,7 @@ function ScalableSpec(
                     />
                     {
                         expandedLabel &&
+                        createPortal(
                             <LabelWindow
                                 speciesArray={speciesArray}
                                 labels={labels}
@@ -2042,9 +2047,10 @@ function ScalableSpec(
                                 passLabelsToScalableSpec={passLabelsToScalableSpec}
                                 passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
                                 getAllIndividualIDs={getAllIndividualIDs}
-                                calculateXPosition={calculateXPosition}
-                                HEIGHT_BETWEEN_INDIVIDUAL_LINES={HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                            />
+                                globalMouseCoordinates={globalMouseCoordinates}
+                            />,
+                            document.body
+                        )
                     }
                     {spectrogramIsLoading || whisperSegIsLoading? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
                 </div>

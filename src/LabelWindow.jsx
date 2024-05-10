@@ -23,8 +23,7 @@ function LabelWindow(
                             passLabelsToScalableSpec,
                             passExpandedLabelToScalableSpec,
                             getAllIndividualIDs,
-                            calculateXPosition,
-                            HEIGHT_BETWEEN_INDIVIDUAL_LINES
+                            globalMouseCoordinates,
                         }
                     )
                 {
@@ -221,8 +220,10 @@ function LabelWindow(
             className='label-window'
             onContextMenu={ (event) => event.preventDefault()}
             style={{
-                bottom: getAllIndividualIDs().length * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 20,
-                left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset)
+                //bottom: getAllIndividualIDs().length * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 20,
+                //left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset) + 200
+                top: globalMouseCoordinates.y,
+                left: globalMouseCoordinates.x
             }}
         >
                 <div className='close-btn-container'>

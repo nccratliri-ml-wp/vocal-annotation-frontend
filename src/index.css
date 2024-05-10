@@ -472,6 +472,7 @@ html, body {
 /* -------------------------- Label Window -------------------------- */
 .label-window{
   position: absolute;
+  z-index: 4;
   background: #051923;
   border: 2px solid #ffffff;
   border-radius: 5px;

@@ -113,7 +113,7 @@ function ScalableSpec(
     const waveformCanvasRef = useRef(null)
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
-    const [waveformScale, setWaveformScale] = useState(35)
+    const [waveformScale, setWaveformScale] = useState(25)
     const [showWaveform, setShowWaveform] =  useState(true)
 
     // File Upload
@@ -1579,7 +1579,7 @@ function ScalableSpec(
         const selectedFrequencies = indices.map(index => frequenciesArray[index])
 
         // Draw the frequencies
-        const correctionValue = showWaveform ? 0 : 25
+        const correctionValue = showWaveform ? 0 : 20
         const lineDistance = (cvs.height + correctionValue) / selectedFrequencies.length
         let y = cvs.height
         const x1 = cvs.width - 10
@@ -1991,7 +1991,7 @@ function ScalableSpec(
                             className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
                             ref={frequenciesCanvasRef}
                             width={40}
-                            height={showWaveform ? 175 : 150}
+                            height={showWaveform ? 140 : 120}
                         />
                     </div>
                     <canvas
@@ -2007,7 +2007,7 @@ function ScalableSpec(
                         className={showWaveform ? 'waveform-canvas' : 'hidden'}
                         ref={waveformCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={80}
+                        height={60}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -2017,7 +2017,7 @@ function ScalableSpec(
                         className='spec-canvas'
                         ref={specCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={150}
+                        height={120}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}

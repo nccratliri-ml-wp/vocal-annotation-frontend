@@ -7,7 +7,7 @@ const iconBtnDisabled = {
 }
 
 const iconBtnSmall = {
-    padding: 8
+    padding: '4px 8px'
 }
 
 const iconBtnSmallDisabled = {

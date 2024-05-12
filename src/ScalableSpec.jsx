@@ -109,6 +109,8 @@ function ScalableSpec(
     // Audio
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
+    const [playWindowStartTime, setPlayWindowStartTime] = useState(null)
+    const [playWindowEndTime, setPlayWindowEndTime] = useState(null)
 
     // Waveform
     const waveformCanvasRef = useRef(null)
@@ -1394,17 +1396,26 @@ function ScalableSpec(
     }
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
-    const getAudio = async () => {
+    const getAudio = async (newStartTime, newEndTime) => {
         // Prevent user from clicking the play button twice in a row and playing the audio twice at the same time
         if (audioSnippet && !audioSnippet.paused) return
 
+        // If the requested play start time hasn't changed and the current audio time is unequal to the start time, resume playback and return
+        if (newStartTime === playWindowStartTime && audioSnippet && audioSnippet.currentTime !== newStartTime){
+            playAudio()
+            return
+        }
+
+        // Else, start process to get a new audio snippet
         setAudioSnippet(null)
+        setPlayWindowStartTime(newStartTime)
+
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
                 audio_id: audioId,
-                start_time: currentStartTime,
-                clip_duration: globalClipDuration
+                start_time: newStartTime,
+                clip_duration: newEndTime
             })
             handleNewAudio(response.data.wav);
         } catch (error) {
@@ -1426,7 +1437,7 @@ function ScalableSpec(
         if (audioSnippet.paused) return
 
         clearAndRedrawCanvases()
-        drawPlayhead(currentStartTime + audioSnippet.currentTime)
+        drawPlayhead(playWindowStartTime + audioSnippet.currentTime)
 
         window.requestAnimationFrame(() => loop() )
     }
@@ -1434,15 +1445,15 @@ function ScalableSpec(
     const pauseAudio = () => {
         if (!audioSnippet) return
         audioSnippet.pause()
-        updatePlayhead(currentStartTime + audioSnippet.currentTime)
+        updatePlayhead(playWindowStartTime + audioSnippet.currentTime)
     }
 
     const stopAudio = () => {
         if (!audioSnippet) return
 
         audioSnippet.pause()
-        audioSnippet.currentTime = currentStartTime
-        updatePlayhead(currentStartTime)
+        audioSnippet.currentTime = playWindowStartTime
+        updatePlayhead(playWindowStartTime)
 
         clearAndRedrawCanvases()
     }
@@ -1966,7 +1977,7 @@ function ScalableSpec(
                             <button onClick={() => console.log(labels)}>Console</button>
                         </div>
                         <div className='audio-controls'>
-                            <IconButton style={iconBtn} onClick={getAudio}>
+                            <IconButton style={iconBtn} onClick={ () => getAudio(currentStartTime, globalClipDuration) }>
                                 <PlayArrowIcon style={activeIcon}/>
                             </IconButton>
                             <IconButton style={iconBtn} onClick={pauseAudio}>
@@ -2059,6 +2070,7 @@ function ScalableSpec(
                                 passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
                                 getAllIndividualIDs={getAllIndividualIDs}
                                 globalMouseCoordinates={globalMouseCoordinates}
+                                getAudio={getAudio}
                             />,
                             document.body
                         )

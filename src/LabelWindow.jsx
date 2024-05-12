@@ -14,6 +14,9 @@ import {
     UNKNOWN_INDIVIDUAL,
     ANNOTATED_AREA
 } from "./species.js";
+import {iconBtn, iconSmall} from "./styles.js";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
+import IconButton from "@material-ui/core/IconButton";
 
 function LabelWindow(
                         {
@@ -24,6 +27,7 @@ function LabelWindow(
                             passExpandedLabelToScalableSpec,
                             getAllIndividualIDs,
                             globalMouseCoordinates,
+                            getAudio
                         }
                     )
                 {
@@ -220,8 +224,6 @@ function LabelWindow(
             className='label-window'
             onContextMenu={ (event) => event.preventDefault()}
             style={{
-                //bottom: getAllIndividualIDs().length * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 20,
-                //left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset) + 200
                 top: globalMouseCoordinates.y + 20,
                 left: globalMouseCoordinates.x + 20
             }}
@@ -230,6 +232,10 @@ function LabelWindow(
                     <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
                     <p className='window-header'>Reassign label</p>
                 </div>
+
+                <IconButton style={iconBtn} onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                    <PlayArrowIcon style={iconSmall}/>
+                </IconButton>
 
                 {
                     localSpeciesArray.map( (species) => {

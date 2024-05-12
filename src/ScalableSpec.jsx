@@ -1948,12 +1948,18 @@ function ScalableSpec(
                                 showWaveform={showWaveform}
                             />
                             <Tooltip title="Submit Annotations">
-                                <IconButton style={activeIconBtnStyle} onClick={submitAnnotations}>
+                                <IconButton style={{...activeIconBtnStyle, ...(!response && iconBtnDisabled)}}
+                                            disabled={!response}
+                                            onClick={submitAnnotations}
+                                >
                                     <DoneAllIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}} disabled={strictMode} onClick={callWhisperSeg}>
+                                <IconButton style={{...activeIconBtnStyle, ...(strictMode || !response && iconBtnDisabled)}}
+                                            disabled={strictMode || !response}
+                                            onClick={callWhisperSeg}
+                                >
                                     <AutoFixHighIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
@@ -1969,12 +1975,14 @@ function ScalableSpec(
                             </Tooltip>
                             {id !== 'track_1' &&
                                 <Tooltip title="Delete Track">
-                                    <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}} disabled={strictMode} onClick={handleRemoveTrack}>
+                                    <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
+                                                disabled={strictMode}
+                                                onClick={handleRemoveTrack}
+                                    >
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
                             }
-                            <button onClick={() => console.log(labels)}>Console</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn} onClick={ () => getAudio(currentStartTime, globalClipDuration) }>

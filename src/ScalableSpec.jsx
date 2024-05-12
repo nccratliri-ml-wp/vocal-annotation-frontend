@@ -307,6 +307,7 @@ function ScalableSpec(
         const newMaxFreq = response.data.configurations.max_frequency
 
         deletePreviousTrackDurationInApp( response.audio_duration ) // Remove outdated track duration of the previous file in the App component
+        console.log(response.audio_duration)
         passTrackDurationToApp( trackDuration )
         passGlobalHopLengthToApp( hopLength )
         passGlobalNumSpecColumnsToApp( numSpecColumns )
@@ -1542,6 +1543,8 @@ function ScalableSpec(
     /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
 
     const handleRemoveTrack = () => {
+        if (!confirm('Removing this track will delete any annotations you have made in it.')) return
+
         if (response){
             deletePreviousTrackDurationInApp( response.audio_duration )
         }
@@ -1953,6 +1956,7 @@ function ScalableSpec(
                                     </IconButton>
                                 </Tooltip>
                             }
+                            <button onClick={() => console.log(labels)}>Console</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn} onClick={getAudio}>

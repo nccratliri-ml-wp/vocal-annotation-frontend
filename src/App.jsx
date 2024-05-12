@@ -158,6 +158,7 @@ function App() {
 
         const newTrackDurations = [...trackDurations]
         newTrackDurations.splice(indexToRemove, 1)
+        console.log(trackDurations)
         setTrackDurations(newTrackDurations)
     }
 
@@ -175,8 +176,6 @@ function App() {
     }
 
     function removeTrackInApp( trackID ){
-        if (!confirm('Removing this track will delete any annotations you have made in it.')) return
-
         setShowTracks({
             ...showTracks,
             [trackID]: false
@@ -332,6 +331,7 @@ function App() {
 
     return (
         <>
+            {trackDurations}
             <AnnotationLabels
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}

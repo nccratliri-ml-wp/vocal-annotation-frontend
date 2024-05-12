@@ -222,8 +222,8 @@ function LabelWindow(
             style={{
                 //bottom: getAllIndividualIDs().length * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 20,
                 //left: calculateXPosition(labels.find(label => label.id === expandedLabel.id).onset) + 200
-                top: globalMouseCoordinates.y,
-                left: globalMouseCoordinates.x
+                top: globalMouseCoordinates.y + 20,
+                left: globalMouseCoordinates.x + 20
             }}
         >
                 <div className='close-btn-container'>

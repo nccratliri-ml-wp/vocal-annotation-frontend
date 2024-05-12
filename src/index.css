@@ -352,7 +352,7 @@ html, body {
 
 #annotation-labels-container{
   position: fixed;
-  z-index: 3;
+  z-index: 4;
   width: 100%;
   background: #051923;
 }
@@ -472,7 +472,7 @@ html, body {
 /* -------------------------- Label Window -------------------------- */
 .label-window{
   position: absolute;
-  z-index: 4;
+  z-index: 3;
   background: #051923;
   border: 2px solid #ffffff;
   border-radius: 5px;

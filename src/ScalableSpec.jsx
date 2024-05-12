@@ -310,6 +310,9 @@ function ScalableSpec(
         if (response){
             deletePreviousTrackDurationInApp( response.audio_duration )
         }
+        // Close Label Window
+        setExpandedLabel(null)
+
         passTrackDurationToApp( trackDuration )
         passGlobalHopLengthToApp( hopLength )
         passGlobalNumSpecColumnsToApp( numSpecColumns )
@@ -322,6 +325,8 @@ function ScalableSpec(
         setBinsPerOctave( newBinsPerOctave ? newBinsPerOctave : 0)
         setMinFreq( newMinFreq ? newMinFreq : 0)
         setMaxFreq( newMaxFreq ? newMaxFreq : 16000)
+
+
     }
 
     const handleUploadError = (error) => {

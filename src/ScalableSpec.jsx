@@ -288,26 +288,28 @@ function ScalableSpec(
         }
     }
 
-    const handleUploadResponse = (response) => {
-        const trackDuration = response.data.channels[0].audio_duration
-        const hopLength = response.data.configurations.hop_length
-        const numSpecColumns = response.data.configurations.num_spec_columns
-        const samplingRate = response.data.configurations.sampling_rate
+    const handleUploadResponse = (newResponse) => {
+        const trackDuration = newResponse.data.channels[0].audio_duration
+        const hopLength = newResponse.data.configurations.hop_length
+        const numSpecColumns = newResponse.data.configurations.num_spec_columns
+        const samplingRate = newResponse.data.configurations.sampling_rate
         const defaultConfig = {
             hop_length: hopLength,
             num_spec_columns: numSpecColumns,
             sampling_rate: samplingRate
         }
 
-        const newResponseData = response.data.channels[0]
-        const newSpecCalMethod = response.data.configurations.spec_cal_method
-        const newNfft = response.data.configurations.n_fft
-        const newBinsPerOctave = response.data.configurations.bins_per_octave
-        const newMinFreq = response.data.configurations.min_frequency
-        const newMaxFreq = response.data.configurations.max_frequency
+        const newResponseData = newResponse.data.channels[0]
+        const newSpecCalMethod = newResponse.data.configurations.spec_cal_method
+        const newNfft = newResponse.data.configurations.n_fft
+        const newBinsPerOctave = newResponse.data.configurations.bins_per_octave
+        const newMinFreq = newResponse.data.configurations.min_frequency
+        const newMaxFreq = newResponse.data.configurations.max_frequency
 
-        deletePreviousTrackDurationInApp( response.audio_duration ) // Remove outdated track duration of the previous file in the App component
-        console.log(response.audio_duration)
+        // Remove outdated track duration of the previous file in the App component
+        if (response){
+            deletePreviousTrackDurationInApp( response.audio_duration )
+        }
         passTrackDurationToApp( trackDuration )
         passGlobalHopLengthToApp( hopLength )
         passGlobalNumSpecColumnsToApp( numSpecColumns )

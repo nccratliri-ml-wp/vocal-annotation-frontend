@@ -158,7 +158,6 @@ function App() {
 
         const newTrackDurations = [...trackDurations]
         newTrackDurations.splice(indexToRemove, 1)
-        console.log(trackDurations)
         setTrackDurations(newTrackDurations)
     }
 
@@ -331,7 +330,6 @@ function App() {
 
     return (
         <>
-            {trackDurations}
             <AnnotationLabels
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}

@@ -23,6 +23,8 @@ import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBtn, iconBtnDisa
 import {nanoid} from "nanoid";
 import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import axios from "axios";
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -91,6 +93,8 @@ function App() {
 
     const [activeLabel, setActiveLabel] = useState(null)
 
+    const [allLabels, setAllLabels] = useState(null)
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -147,6 +151,15 @@ function App() {
 
     function passActiveLabelToApp( newActiveLabel ){
         setActiveLabel( newActiveLabel )
+    }
+
+    function passLabelsToApp( labels, trackID ){
+        setAllLabels(
+            {
+                ...allLabels,
+                [trackID]: labels
+            }
+        )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -231,6 +244,34 @@ function App() {
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
     }
 
+    async function submitAllAnnotations(){
+        if (!allLabels) return
+
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
+
+        const arr = Object.values(allLabels).flat()
+
+        const requestParameters = {
+            annotations: [
+                {
+                    onset: 0,
+                    offset: 0,
+                    species: 'test_species',
+                    individual: 'test_individual',
+                    filename: 'test_filename',
+                    annotation_instance: 'test_annotation_instance'
+                }
+            ]
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+        }
+
+        const response = await axios.post(path, requestParameters, { headers } )
+    }
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {
@@ -252,7 +293,7 @@ function App() {
         const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
         const strictMode = queryParams.get('strict-mode') ? queryParams.get('strict-mode') : null
 
-        if (strictMode && strictMode.toLowerCase() === 'true'){
+        if (strictMode?.toLowerCase() === 'true'){
             setStrictMode(true)
         }
 
@@ -362,6 +403,14 @@ function App() {
                         <SettingsIcon style={icon} />
                     </IconButton>
                 </Tooltip>
+                <Tooltip title='Submit Annotations'>
+                    <IconButton
+                        onClick={submitAllAnnotations}
+                        style={{...(!strictMode || !allLabels && iconBtnDisabled)}}
+                        disabled={!strictMode}>
+                        <DoneAllIcon style={icon} />
+                    </IconButton>
+                </Tooltip>
             </div>
             <div
                 id='all-tracks'
@@ -415,6 +464,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_2 &&
@@ -450,6 +500,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_3 &&
@@ -485,6 +536,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_4 &&

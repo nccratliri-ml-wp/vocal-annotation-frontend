@@ -70,7 +70,8 @@ function ScalableSpec(
                             audioPayload,
                             activeLabel,
                             passActiveLabelToApp,
-                            strictMode
+                            strictMode,
+                            passLabelsToApp
                         }
                     )
                 {
@@ -149,20 +150,10 @@ function ScalableSpec(
     // Icons
     const activeIcon = showWaveform ? icon : iconSmall
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
-                    /*
-    let activeIconBtnStyle
-    if (showWaveform && !strictMode){
-        activeIconBtnStyle = iconBtn
-    }
-    if (showWaveform && strictMode){
-        activeIconBtnStyle = iconBtnDisabled
-    }
-    if (!showWaveform && !strictMode){
-        activeIconBtnStyle = iconBtnSmall
-    }
-    if (!showWaveform && strictMode){
-        activeIconBtnStyle = iconBtnSmallDisabled
-    }*/
+
+    // Database
+    const [annotationInstance, setAnnotationInstance] = useState(null)
+    const [filename, setFilename] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -1708,6 +1699,24 @@ function ScalableSpec(
         drawEditorCanvases(spectrogram, frequencies,audioArray)
     }, [labels, waveformScale, showWaveform] )
 
+    // When labels are added, removed, or edited
+    useEffect( () => {
+
+        // Convert custom label objects into generic objects with the specific data the backend expects
+        const genericLabelObjects = labels.map(label => {
+            return {
+                onset: label.onset,
+                offset: label.offset,
+                species: label.species,
+                individual: label.individual,
+                filename: filename,
+                annotation_instance: annotationInstance
+            }
+        })
+
+        passLabelsToApp(genericLabelObjects, id)
+    }, [labels] )
+
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
         if (!spectrogram ||
@@ -1890,6 +1899,9 @@ function ScalableSpec(
     useEffect( () => {
         if (!audioPayload) return
         uploadFileByURL(audioPayload)
+
+        setAnnotationInstance(audioPayload.annotation_instance)
+        setFilename(audioPayload.filename)
 
     }, [audioPayload])
 

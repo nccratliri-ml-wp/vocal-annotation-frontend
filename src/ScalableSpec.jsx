@@ -187,6 +187,7 @@ function ScalableSpec(
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
+        passLabelsToApp(createGenericLabelObjects(newLabelsArray), id)
     }
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
@@ -387,6 +388,7 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
+            passLabelsToApp(createGenericLabelObjects(labelsCopy), id)
             passActiveLabelToApp(
                 {
                     onset: labelsCopy[labels.length-1].onset,
@@ -423,6 +425,7 @@ function ScalableSpec(
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
 
+            passLabelsToScalableSpec(labels, id)
             passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: id})
         }
 
@@ -630,6 +633,20 @@ function ScalableSpec(
     const getAllIndividualIDs = () => {
         return speciesArray.flatMap(speciesObj => {
             return speciesObj.individuals.map(individual => individual.id)
+        })
+    }
+
+    const createGenericLabelObjects = (labelsArray) => {
+        // Convert custom label objects into generic objects with the specific data the backend expects
+        return labelsArray.map(label => {
+            return {
+                onset: label.onset,
+                offset: label.offset,
+                species: label.species,
+                individual: label.individual,
+                filename: filename,
+                annotation_instance: annotationInstance
+            }
         })
     }
 
@@ -1075,7 +1092,6 @@ function ScalableSpec(
         const addNewLabel = (onset) => {
         const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
-        //const individual = clustername === 'Protected Area'? null : activeIndividual
 
         const allIndividualIDs = getAllIndividualIDs()
         const individualIndex = allIndividualIDs.indexOf(individual.id)
@@ -1100,6 +1116,7 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
+        passLabelsToApp(createGenericLabelObjects(filteredLabels), id)
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
@@ -1661,34 +1678,11 @@ function ScalableSpec(
             )
         })
 
-        setLabels(prevState => [...prevState, ...whisperLabels] )
+        const combinedLabelsArray = labels.concat(whisperLabels)
+        setLabels(combinedLabelsArray)
+        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), id)
+
         setWhisperSegIsLoading(false)
-    }
-
-
-    /* ++++++++++++++++++ Submit Annotations ++++++++++++++++++ */
-    const submitAnnotations = async () => {
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
-
-        const requestParameters = {
-            annotations: [
-                {
-                    onset: 0,
-                    offset: 0,
-                    species: 'test_species',
-                    individual: 'test_individual',
-                    filename: 'test_filename',
-                    annotation_instance: 'test_annotation_instance'
-                }
-            ]
-        }
-
-        const headers = {
-            'Content-Type': 'application/json',
-            'accept': 'application/json'
-        }
-
-        const response = await axios.post(path, requestParameters, { headers } )
     }
 
 
@@ -1698,24 +1692,6 @@ function ScalableSpec(
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
     }, [labels, waveformScale, showWaveform] )
-
-    // When labels are added, removed, or edited
-    useEffect( () => {
-
-        // Convert custom label objects into generic objects with the specific data the backend expects
-        const genericLabelObjects = labels.map(label => {
-            return {
-                onset: label.onset,
-                offset: label.offset,
-                species: label.species,
-                individual: label.individual,
-                filename: filename,
-                annotation_instance: annotationInstance
-            }
-        })
-
-        passLabelsToApp(genericLabelObjects, id)
-    }, [labels] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
@@ -1780,6 +1756,7 @@ function ScalableSpec(
             )
 
         setLabels(updatedLabels)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), id)
 
     }, [speciesArray])
 
@@ -1849,8 +1826,10 @@ function ScalableSpec(
                         return updatedLabel
                     })
                 setLabels(updatedLabels)
+                passLabelsToApp(createGenericLabelObjects(updatedLabels), id)
             } else {
                 setLabels([])
+                passLabelsToApp([], id)
             }
 
     }, [response])
@@ -1904,6 +1883,7 @@ function ScalableSpec(
         setFilename(audioPayload.filename)
 
     }, [audioPayload])
+
 
     return (
         <div
@@ -1959,16 +1939,8 @@ function ScalableSpec(
                                 labels={labels}
                                 showWaveform={showWaveform}
                             />
-                            <Tooltip title="Submit Annotations">
-                                <IconButton style={{...activeIconBtnStyle, ...(!response && iconBtnDisabled)}}
-                                            disabled={!response}
-                                            onClick={submitAnnotations}
-                                >
-                                    <DoneAllIcon style={activeIcon}/>
-                                </IconButton>
-                            </Tooltip>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton style={{...activeIconBtnStyle, ...(strictMode || !response && iconBtnDisabled)}}
+                                <IconButton style={{...activeIconBtnStyle, ...((strictMode || !response) && iconBtnDisabled)}}
                                             disabled={strictMode || !response}
                                             onClick={callWhisperSeg}
                                 >

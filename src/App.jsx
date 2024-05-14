@@ -249,20 +249,13 @@ function App() {
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
 
-        const arr = Object.values(allLabels).flat()
+        const allLabelsArray = Object.values(allLabels).flat()
 
         const requestParameters = {
-            annotations: [
-                {
-                    onset: 0,
-                    offset: 0,
-                    species: 'test_species',
-                    individual: 'test_individual',
-                    filename: 'test_filename',
-                    annotation_instance: 'test_annotation_instance'
-                }
-            ]
+            annotations: allLabelsArray
         }
+
+        console.log(requestParameters)
 
         const headers = {
             'Content-Type': 'application/json',
@@ -406,7 +399,7 @@ function App() {
                 <Tooltip title='Submit Annotations'>
                     <IconButton
                         onClick={submitAllAnnotations}
-                        style={{...(!strictMode || !allLabels && iconBtnDisabled)}}
+                        style={{...(!strictMode && iconBtnDisabled)}}
                         disabled={!strictMode}>
                         <DoneAllIcon style={icon} />
                     </IconButton>
@@ -572,6 +565,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_5 &&
@@ -607,6 +601,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_6 &&
@@ -642,6 +637,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_7 &&
@@ -677,6 +673,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_8 &&
@@ -712,6 +709,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_9 &&
@@ -747,6 +745,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_10 &&
@@ -782,6 +781,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_11 &&
@@ -817,6 +817,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_12 &&
@@ -852,6 +853,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_13 &&
@@ -887,6 +889,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_14 &&
@@ -922,6 +925,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_15 &&
@@ -957,6 +961,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_16 &&
@@ -992,6 +997,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_17 &&
@@ -1027,6 +1033,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_18 &&
@@ -1062,6 +1069,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_19 &&
@@ -1097,6 +1105,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 {showTracks.track_20 &&
@@ -1132,6 +1141,7 @@ function App() {
                         activeLabel={activeLabel}
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
+                        passLabelsToApp={passLabelsToApp}
                     />
                 }
                 <Tooltip title="Add New Track">

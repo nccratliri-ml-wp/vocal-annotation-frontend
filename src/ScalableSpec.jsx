@@ -194,6 +194,10 @@ function ScalableSpec(
         setExpandedLabel( newExpandedLabel )
     }
 
+    const passFileNameToScalableSpec = ( newFilename ) => {
+        setFilename( newFilename )
+    }
+
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
@@ -644,10 +648,11 @@ function ScalableSpec(
                 offset: label.offset,
                 species: label.species,
                 individual: label.individual,
+                clustername: label.clustername,
                 filename: filename,
                 annotation_instance: annotationInstance
             }
-        })
+        }).filter( label => label.species !== ANNOTATED_AREA )
     }
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
@@ -1923,6 +1928,8 @@ function ScalableSpec(
                 <div className={showWaveform ? 'side-window' : 'side-window-small'} >
                     <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                         <LocalFileUpload
+                            filename={filename}
+                            passFileNameToScalableSpec={passFileNameToScalableSpec}
                             specCalMethod={specCalMethod}
                             nfft={nfft}
                             binsPerOctave={binsPerOctave}
@@ -1934,7 +1941,6 @@ function ScalableSpec(
                             strictMode={strictMode}
                         />
                         <div>
-                            <button onClick={() => console.log(labels)}>console</button>
                             <Tooltip title="Call WhisperSeg">
                                 <IconButton style={{...activeIconBtnStyle, ...((strictMode || !response) && iconBtnDisabled)}}
                                             disabled={strictMode || !response}

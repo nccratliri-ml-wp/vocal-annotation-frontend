@@ -7,6 +7,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 function LocalFileUpload(
         {
+            filename,
+            passFileNameToScalableSpec,
             specCalMethod,
             nfft,
             binsPerOctave,
@@ -20,13 +22,11 @@ function LocalFileUpload(
     )
 {
 
-    const [fileName, setFileName] = useState('')
-
     const handleFileChange = (event) => {
         const file = event.target.files[0]
         if (file && (file.type === 'audio/wav' || file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
             passSpectrogramIsLoadingToScalableSpec(true)
-            setFileName(file.name)
+            passFileNameToScalableSpec(file.name)
             createFormData(file)
         }
     }
@@ -78,16 +78,16 @@ function LocalFileUpload(
     const disabledStyle = {display: 'flex', justifyContent: 'flex-start', overflow: 'hidden', textTransform: 'none', backgroundColor: 'grey', opacity: 0.5, pointerEvents: 'none'}
 
     return (
-        <Tooltip title={fileName? fileName : ''}>
+        <Tooltip title={filename? filename : ''}>
             <Button
                 component='label'
                 role={undefined}
                 variant='contained'
                 tabIndex={-1}
-                startIcon={fileName? '' : <CloudUploadIcon />}
+                startIcon={filename? '' : <CloudUploadIcon />}
                 style={strictMode ? disabledStyle : enabledStyle}
             >
-                <ButtonText>{fileName ? fileName : "UPLOAD FILE"}</ButtonText>
+                <ButtonText>{filename ? filename : "UPLOAD FILE"}</ButtonText>
                 <VisuallyHiddenInput type='file' accept='.wav, .mp3' disabled={strictMode} onChange={handleFileChange} />
             </Button>
         </Tooltip>

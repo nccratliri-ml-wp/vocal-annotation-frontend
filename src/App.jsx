@@ -252,6 +252,8 @@ function App() {
 
         let allLabelsArray = Object.values(allLabels).flat()
 
+        console.log(allLabelsArray)
+
         const requestParameters = {
             annotations: allLabelsArray
         }
@@ -369,45 +371,52 @@ function App() {
                 passDeletedItemIDToApp={passDeletedItemIDToApp}
                 strictMode={strictMode}
             />
-            <div className='controls-container'>
-                <button
-                    id='left-scroll-btn'
-                    onClick={leftScroll}
-                />
-                <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomIn}>
-                    <ZoomInIcon style={icon}/>
-                </IconButton>
-                <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomOut}>
-                    <ZoomOutIcon style={icon}/>
-                </IconButton>
-                <button
-                    id='right-scroll-btn'
-                    onClick={rightScroll}
-                />
+            <div id='controls-container'>
+                <div id='zoom-scroll-buttons-container'>
+                    <button
+                        id='left-scroll-btn'
+                        onClick={leftScroll}
+                    />
+                    <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomIn}>
+                        <ZoomInIcon style={icon}/>
+                    </IconButton>
+                    <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomOut}>
+                        <ZoomOutIcon style={icon}/>
+                    </IconButton>
+                    <button
+                        id='right-scroll-btn'
+                        onClick={rightScroll}
+                    />
+                </div>
+                <div id={'settings-download-submit-container'}>
+                    <Export
+                        audioFileName={'Example Audio File Name'}
+                        allLabels={allLabels}
+                    />
+                    <Tooltip title='Submit Annotations'>
+                        <IconButton
+                            style={{...globalControlsBtn, ...(!strictMode && iconBtnDisabled)}}
+                            disabled={!strictMode}
+                            onClick={submitAllAnnotations}
+                        >
+                            <DoneAllIcon style={icon} />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Open Global Configurations'>
+                        <IconButton
+                            style={globalControlsBtn}
+                            onClick={ () => setShowGlobalConfigWindow(true)}>
+                            <SettingsIcon style={icon} />
+                        </IconButton>
+                    </Tooltip>
+                </div>
             </div>
             <div
                 id='blank-space'
             >
             </div>
-            <div id='open-global-config-btn'>
-                <Tooltip title='Open Global Configurations'>
-                    <IconButton onClick={ () => setShowGlobalConfigWindow(true)}>
-                        <SettingsIcon style={icon} />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title='Submit Annotations'>
-                    <IconButton
-                        onClick={submitAllAnnotations}
-                        style={{...(!strictMode && iconBtnDisabled)}}
-                        disabled={!strictMode}>
-                        <DoneAllIcon style={icon} />
-                    </IconButton>
-                </Tooltip>
-                <Export
-                    audioFileName={'Example Audio File Name'}
-                    allLabels={allLabels}
-                />
-            </div>
+
+
             <div
                 id='all-tracks'
             >

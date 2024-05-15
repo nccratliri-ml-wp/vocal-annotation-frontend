@@ -1,21 +1,28 @@
+
+
+/*
 import IconButton from "@material-ui/core/IconButton";
 import DownloadIcon from '@mui/icons-material/Download';
 import Tooltip from "@material-ui/core/Tooltip";
 import React from "react";
-import {iconBtn, iconBtnSmall, icon} from "./styles.js"
+import {iconBtn, icon} from "./styles.js"
+import {ANNOTATED_AREA} from "./species.js";
 
-function Export( { labels, audioFileName, showWaveform } ){
+function Export( { allLabels, audioFileName } ){
 
     function exportCSV(){
-        // Remove Protected Area labels
-        labels = labels.filter(label => label.clustername !== 'Protected Area🔒')
+        console.log(allLabels)
+        let allLabelsArray = Object.values(allLabels).flat()
+
+        // Remove Annotated Area labels
+        allLabelsArray = allLabelsArray.filter(label => label.species !== ANNOTATED_AREA)
 
         // Sort the labels ascending by onset
-        labels = labels.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+        allLabelsArray = allLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
 
         // Transform to CSV data
-        let csvData = labels.map(label => `${label.onset},${label.offset},${label.clustername},${label.individual}`)
-        csvData.unshift('onset,offset,cluster,individual')
+        let csvData = allLabelsArray.map(label => `${label.onset},${label.offset},${label.clustername},${label.individual},${label.species}`)
+        csvData.unshift('onset,offset,cluster,individual,species')
         csvData = csvData.join('\n')
 
         const newCSVFileName = audioFileName.slice(0, -4) + '.csv'
@@ -31,7 +38,7 @@ function Export( { labels, audioFileName, showWaveform } ){
 
     return (
         <Tooltip title="Download Annotations">
-            <IconButton style={showWaveform? iconBtn : iconBtnSmall} onClick={exportCSV}>
+            <IconButton style={iconBtn} onClick={exportCSV}>
                 <DownloadIcon style={icon}/>
             </IconButton>
         </Tooltip>
@@ -39,3 +46,4 @@ function Export( { labels, audioFileName, showWaveform } ){
 }
 
 export default Export
+ */

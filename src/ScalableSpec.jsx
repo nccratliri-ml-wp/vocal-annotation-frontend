@@ -1934,11 +1934,7 @@ function ScalableSpec(
                             strictMode={strictMode}
                         />
                         <div>
-                            <Export
-                                audioFileName={'Example Audio File Name'}
-                                labels={labels}
-                                showWaveform={showWaveform}
-                            />
+                            <button onClick={() => console.log(labels)}>console</button>
                             <Tooltip title="Call WhisperSeg">
                                 <IconButton style={{...activeIconBtnStyle, ...((strictMode || !response) && iconBtnDisabled)}}
                                             disabled={strictMode || !response}

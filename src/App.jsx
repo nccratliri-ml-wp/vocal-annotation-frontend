@@ -25,6 +25,7 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import axios from "axios";
+import Export from "./Export.jsx";
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -249,13 +250,11 @@ function App() {
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
 
-        const allLabelsArray = Object.values(allLabels).flat()
+        let allLabelsArray = Object.values(allLabels).flat()
 
         const requestParameters = {
             annotations: allLabelsArray
         }
-
-        console.log(requestParameters)
 
         const headers = {
             'Content-Type': 'application/json',
@@ -404,6 +403,10 @@ function App() {
                         <DoneAllIcon style={icon} />
                     </IconButton>
                 </Tooltip>
+                <Export
+                    audioFileName={'Example Audio File Name'}
+                    allLabels={allLabels}
+                />
             </div>
             <div
                 id='all-tracks'

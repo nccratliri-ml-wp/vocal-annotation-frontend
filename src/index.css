@@ -478,10 +478,66 @@ html, body {
   background: #051923;
   border: 2px solid #ffffff;
   border-radius: 5px;
-  max-height: 210px;
-  max-width: 400px;
+  max-height: 400px;
+  max-width: 800px;
   overflow-y: scroll;
 }
+
+.label-window-content{
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.window-label-play-btn{
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  width: fit-content;
+  margin: 7px;
+  padding: 7px 12px 7px 5px;
+  background-color: #082536;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.window-label-play-btn:hover{
+  background-color: #0a2b3f;
+}
+
+.label-window-species{
+  background-color: #082536;
+  padding: 7px;
+  margin: 0 7px 7px;
+  border: 1px solid #f6fffe;
+  border-radius: 5px;
+}
+
+.label-window-individual-btn-container, .label-window-clustername-btn-container{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.label-window-individual-btn, .label-window-clustername-btn{
+  background-color: #626262;
+  display: flex;
+  margin: 2px;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
+  max-height: 24px;
+  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
+  cursor: pointer;
+}
+
+.label-window-individual-btn[isactive='true']{
+  background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
+}
+
+
+/* -------------------------- Close Window Bar -------------------------- */
 
 .close-btn-container{
   position: sticky;
@@ -502,6 +558,7 @@ html, body {
   color: #051923;
   margin: 0;
   font-size: 15px;
+  font-style: italic;
   font-weight: bold;
 }
 
@@ -510,38 +567,8 @@ html, body {
   color: white;
 }
 
-.label-window-species{
-  background-color: #082536;
-  padding: 0 7px;
-  margin: 0 0 10px;
-}
-
-.label-window-species:last-child{
-  margin: 0;
-}
-
-.label-window-individual-btn-container, .label-window-clustername-btn-container{
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.label-window-individual-btn, .label-window-clustername-btn{
-  background-color: #626262;
-  display: flex;
-  margin: 2px;
-  padding: 0 2px;
-  border-radius: 2px;
-  font-size: 16px;
-  max-height: 24px;
-  box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
-  cursor: pointer;
-}
-
-.label-window-individual-btn[isactive='true']{
-  background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
-}
-
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */
+
 .waveform-spec-labels-canvases-container{
   position: relative;
   z-index: 0;

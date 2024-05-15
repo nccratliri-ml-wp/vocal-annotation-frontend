@@ -25,7 +25,7 @@ import {
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
-import {icon, iconBig, iconBtn, iconBtnDisabled} from "./styles.js";
+import {globalControlsBtn, icon, iconBig, iconBtnDisabled} from "./styles.js";
 import AddBoxIcon from "@mui/icons-material/AddBox.js";
 
 
@@ -613,7 +613,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                             return (
                                 <div id='annotated-area-button-container' key={species.id}>
                                     <Tooltip title='Mark Annotated Area'>
-                                        <IconButton style={strictMode ? iconBtnDisabled : iconBtn}
+                                        <IconButton style={strictMode ? iconBtnDisabled : globalControlsBtn}
                                                     disabled={strictMode}
                                                     onClick={ () => handleClickIndividual(species.id, species.individuals[0]) }
                                         >

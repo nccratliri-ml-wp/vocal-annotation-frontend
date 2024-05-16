@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
@@ -17,8 +16,6 @@ import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
-import Export from "./Export.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
@@ -111,7 +108,6 @@ function ScalableSpec(
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
     const [playWindowStartTime, setPlayWindowStartTime] = useState(null)
-    const [playWindowEndTime, setPlayWindowEndTime] = useState(null)
 
     // Waveform
     const waveformCanvasRef = useRef(null)
@@ -642,17 +638,26 @@ function ScalableSpec(
 
     const createGenericLabelObjects = (labelsArray) => {
         // Convert custom label objects into generic objects with the specific data the backend expects
-        return labelsArray.map(label => {
-            return {
-                onset: label.onset,
-                offset: label.offset,
-                species: label.species,
-                individual: label.individual,
-                clustername: label.clustername,
-                filename: filename,
-                annotation_instance: annotationInstance
+        let newLabelsArray = labelsArray.map( label => {
+                return {
+                    onset: label.onset,
+                    offset: label.offset,
+                    species: label.species,
+                    individual: label.individual,
+                    clustername: label.clustername,
+                    filename: filename,
+                    annotation_instance: annotationInstance
+                }
             }
-        }).filter( label => label.species !== ANNOTATED_AREA )
+        )
+
+        // Remove the Annotated Area labels because they are only necessary for WhisperSeg
+        newLabelsArray = newLabelsArray.filter( label => label.species !== ANNOTATED_AREA )
+
+        // Sort the labels ascending by onset
+        newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+
+        return newLabelsArray
     }
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */

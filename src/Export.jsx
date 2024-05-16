@@ -2,52 +2,35 @@ import React from "react"
 import { IconButton } from "@material-ui/core"
 import DownloadIcon from '@mui/icons-material/Download'
 import Tooltip from "@material-ui/core/Tooltip"
-import {iconBtn, icon, globalControlsBtn} from "./styles.js"
-import ExcelJS from 'exceljs'
+import {icon, globalControlsBtn} from "./styles.js"
 
-function Export({ allLabels, audioFileName }) {
-    async function exportExcel() {
-        try {
-            let workbook = new ExcelJS.Workbook()
+function Export( { allLabels } ){
 
-            // Iterate over all tracks
-            for (let [trackName, labels] of Object.entries(allLabels)) {
+    function exportCSV(){
+        // Flatten the allLabels Object into a single array
+        let labels = Object.values(allLabels).flat()
 
-                // Create worksheets and sheet Data template
-                const newWorksheet = workbook.addWorksheet(`${trackName} - ${labels[0]?.filename}`)
-                const sheetData = [['onset', 'offset', 'cluster', 'individual', 'species']]
+        // Transform to CSV data
+        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename}`)
+        csvData.unshift('onset,offset,species,individual,clustername,filename')
+        csvData = csvData.join('\n')
 
-                // Sort the labels ascending by onset
-                labels = labels.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+        const newCSVFileName = labels[0]?.annotation_instance ? `${labels[0]?.annotation_instance}.csv` : 'annotations.csv'
 
-                // Feed the sheet
-                for (let label of labels){
-                    sheetData.push([label.onset, label.offset, label.clustername, label.individual, label.species])
-                }
-                newWorksheet.addRows(sheetData)
-            }
+        const element = document.createElement('a')
+        element.setAttribute('href', `data:text/csv;charset=utf-8,${csvData}`)
+        element.setAttribute('download', newCSVFileName)
 
-            const buffer = await workbook.xlsx.writeBuffer()
-
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-            const url = window.URL.createObjectURL(blob)
-
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', audioFileName.slice(0, -4) + '.xlsx')
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        } catch (error) {
-            console.error('Error exporting Excel:', error)
-        }
+        document.body.appendChild(element)
+        element.click()
+        element.remove()
     }
 
     return (
         <Tooltip title="Download Annotations">
             <IconButton
                 style={globalControlsBtn}
-                onClick={exportExcel}
+                onClick={exportCSV}
             >
                 <DownloadIcon style={icon} />
             </IconButton>

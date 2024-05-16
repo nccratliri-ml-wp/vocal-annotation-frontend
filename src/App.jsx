@@ -390,7 +390,6 @@ function App() {
                 </div>
                 <div id={'settings-download-submit-container'}>
                     <Export
-                        audioFileName={'Example Audio File Name'}
                         allLabels={allLabels}
                     />
                     <Tooltip title='Submit Annotations'>

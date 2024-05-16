@@ -438,7 +438,6 @@ function App() {
                 {showTracks.track_1 &&
                     <ScalableSpec
                         id='track_1'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={true}
@@ -474,7 +473,6 @@ function App() {
                 {showTracks.track_2 &&
                     <ScalableSpec
                         id='track_2'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -510,7 +508,6 @@ function App() {
                 {showTracks.track_3 &&
                     <ScalableSpec
                         id='track_3'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -546,7 +543,6 @@ function App() {
                 {showTracks.track_4 &&
                     <ScalableSpec
                         id='track_4'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -582,7 +578,6 @@ function App() {
                 {showTracks.track_5 &&
                     <ScalableSpec
                         id='track_5'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -618,7 +613,6 @@ function App() {
                 {showTracks.track_6 &&
                     <ScalableSpec
                         id='track_6'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -654,7 +648,6 @@ function App() {
                 {showTracks.track_7 &&
                     <ScalableSpec
                         id='track_7'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -690,7 +683,6 @@ function App() {
                 {showTracks.track_8 &&
                     <ScalableSpec
                         id='track_8'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -726,7 +718,6 @@ function App() {
                 {showTracks.track_9 &&
                     <ScalableSpec
                         id='track_9'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -762,7 +753,6 @@ function App() {
                 {showTracks.track_10 &&
                     <ScalableSpec
                         id='track_10'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -798,7 +788,6 @@ function App() {
                 {showTracks.track_11 &&
                     <ScalableSpec
                         id='track_11'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -834,7 +823,6 @@ function App() {
                 {showTracks.track_12 &&
                     <ScalableSpec
                         id='track_12'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -870,7 +858,6 @@ function App() {
                 {showTracks.track_13 &&
                     <ScalableSpec
                         id='track_13'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -906,7 +893,6 @@ function App() {
                 {showTracks.track_14 &&
                     <ScalableSpec
                         id='track_14'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -942,7 +928,6 @@ function App() {
                 {showTracks.track_15 &&
                     <ScalableSpec
                         id='track_15'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -978,7 +963,6 @@ function App() {
                 {showTracks.track_16 &&
                     <ScalableSpec
                         id='track_16'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1014,7 +998,6 @@ function App() {
                 {showTracks.track_17 &&
                     <ScalableSpec
                         id='track_17'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1050,7 +1033,6 @@ function App() {
                 {showTracks.track_18 &&
                     <ScalableSpec
                         id='track_18'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1086,7 +1068,6 @@ function App() {
                 {showTracks.track_19 &&
                     <ScalableSpec
                         id='track_19'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1122,7 +1103,6 @@ function App() {
                 {showTracks.track_20 &&
                     <ScalableSpec
                         id='track_20'
-                        trackDurations={trackDurations}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}

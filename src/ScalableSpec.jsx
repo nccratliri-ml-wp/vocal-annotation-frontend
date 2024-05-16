@@ -39,7 +39,6 @@ const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 function ScalableSpec(
                         {
                             id,
-                            trackDurations,
                             speciesArray,
                             deletedItemID,
                             showOverviewInitialValue,

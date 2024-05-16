@@ -16,6 +16,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
+import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";

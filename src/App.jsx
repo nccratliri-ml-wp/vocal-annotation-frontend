@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect} from 'react'
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -26,6 +26,7 @@ import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import axios from "axios";
 import Export from "./Export.jsx";
+import ImportCSV from "./ImportCSV.jsx";
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -389,6 +390,7 @@ function App() {
                     />
                 </div>
                 <div id={'settings-download-submit-container'}>
+                    <ImportCSV />
                     <Export
                         allLabels={allLabels}
                     />

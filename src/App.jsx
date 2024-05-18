@@ -31,9 +31,8 @@ import ImportCSV from "./ImportCSV.jsx";
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
 
-
 function App() {
-    const [importedLabels, setImportedLabels] = useState([]);
+    const [csvImportedLabels, setCsvImportedLabels] = useState(null);
 
     const [speciesArray, setSpeciesArray] = useState(() => {
 
@@ -164,6 +163,10 @@ function App() {
         )
     }
 
+    function passCsvImportedLabelsToApp ( newImportedLabels ){
+        setCsvImportedLabels( newImportedLabels )
+    }
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
 
     function deletePreviousTrackDurationInApp( previousTrackDuration ) {
@@ -253,6 +256,19 @@ function App() {
 
         let allLabelsArray = Object.values(allLabels).flat()
 
+        // Remove trackID property for all label objects (it's irrelevant for the database)
+        allLabelsArray = allLabelsArray.map(labelObj => {
+            return {
+                onset: labelObj.onset,
+                offset: labelObj.offset,
+                species: labelObj.species,
+                individual: labelObj.individual,
+                clustername: labelObj.clustername,
+                filename: labelObj.filename,
+                annotation_instance: labelObj.annotation_instance
+            }
+        })
+
         console.log(allLabelsArray)
 
         const requestParameters = {
@@ -265,6 +281,78 @@ function App() {
         }
 
         const response = await axios.post(path, requestParameters, { headers } )
+    }
+
+    function createSpeciesFromImportedLabels (importedLabels){
+        let updatedSpeciesArray = [...speciesArray]
+        const allExistingSpeciesNames = speciesArray.map(speciesObj => speciesObj.name)
+
+        for (let label of importedLabels){
+
+            for (let speciesObj of updatedSpeciesArray){
+
+                // For Existing species, update Individuals and Clusternames
+                if (speciesObj.name === label.species){
+                    const allIndividualNames = speciesObj.individuals.map(individual => individual.name)
+                    if ( !allIndividualNames.includes(label.individual) ){
+                        const newIndividual = new Individual(nanoid(), label.individual)
+                        newIndividual.isActive = false
+                        speciesObj.individuals = [...speciesObj.individuals, newIndividual]
+                    }
+
+                    const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
+                    if ( !allClusternamesNames.includes(label.clustername) ){
+                        const newClustername = new Clustername(nanoid(), label.clustername)
+                        newClustername.isActive = false
+                        speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
+                    }
+                }
+            }
+
+            // If imported species does not exist already, create a new one
+            if (!allExistingSpeciesNames.includes(label.species)){
+
+                const newIndividualsArray = []
+                // Create Unknown Individual
+                const newUnknownIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
+                newUnknownIndividual.isActive = false
+                newIndividualsArray.unshift(newUnknownIndividual)
+
+                // If that label's individual is not Unknown, create that individual for this species
+                if (label.individual !== UNKNOWN_INDIVIDUAL){
+                    const newIndividual = new Individual(nanoid(), label.individual)
+                    newIndividual.isActive = false
+                    newIndividualsArray.push(newIndividual)
+                }
+
+
+                const newClusternamesArray = []
+                // Create Unknown Clustername
+                const newUnknownClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+                newUnknownClustername.isActive = false
+                newClusternamesArray.push(newUnknownClustername)
+
+                // If that label's clustername is not Unknown, create that clustername for this species
+                if (label.clustername !== UNKNOWN_CLUSTERNAME) {
+                    const newClustername = new Clustername(nanoid(), label.clustername)
+                    newClustername.isActive = false
+                    newClusternamesArray.push(newClustername)
+                }
+
+                const newSpecies = new Species(
+                    nanoid(),
+                    label.species,
+                    newIndividualsArray,
+                    newClusternamesArray,
+                )
+
+                const insertionIndex = updatedSpeciesArray.length - 1
+                allExistingSpeciesNames.splice(insertionIndex,0,label.species)
+                updatedSpeciesArray.splice(insertionIndex,0,newSpecies)
+            }
+        }
+
+        setSpeciesArray(updatedSpeciesArray)
     }
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
@@ -303,66 +391,25 @@ function App() {
         }
         setShowTracks(newShowTracksObj)
 
-
-        // Update Annotation Label buttons
-        let updatedSpeciesArray = [...speciesArray]
-        const allExistingSpeciesNames = speciesArray.map(speciesObj => speciesObj.name)
-        const allImportedLabels = decodedData.flatMap(audioPayload => audioPayload.labels || [])
-
-        for (let label of allImportedLabels){
-
-            for (let speciesObj of updatedSpeciesArray){
-
-                // For Existing species, update Individuals and Clusternames
-                if (speciesObj.name === label.species){
-
-                    const allIndividualNames = speciesObj.individuals.map(individual => individual.name)
-                    if ( !allIndividualNames.includes(label.individual) ){
-                        const newIndividual = new Individual(nanoid(), label.individual)
-                        newIndividual.isActive = false
-                        speciesObj.individuals = [...speciesObj.individuals, newIndividual]
-                    }
-
-                    const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
-                    if ( !allClusternamesNames.includes(label.clustername) ){
-                        const newClustername = new Clustername(nanoid(), label.clustername)
-                        newClustername.isActive = false
-                        speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
-                    }
-                }
-            }
-
-            // If imported species does not exist already, create a new one
-            if (!allExistingSpeciesNames.includes(label.species)){
-                const newUnknownIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
-                const newUnknownClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
-                const newIndividual = new Individual(nanoid(), label.individual)
-                const newClustername = new Clustername(nanoid(), label.clustername)
-                newIndividual.isActive = false
-                newClustername.isActive = false
-                newUnknownIndividual.isActive = false
-                newUnknownClustername.isActive = false
-
-                const newSpecies = new Species(
-                    nanoid(),
-                    label.species,
-                    [newUnknownIndividual, newIndividual],
-                    [newUnknownClustername, newClustername],
-                )
-
-                const insertionIndex = updatedSpeciesArray.length - 1
-                allExistingSpeciesNames.splice(insertionIndex,0,label.species)
-                updatedSpeciesArray.splice(insertionIndex,0,newSpecies)
-            }
-        }
-
-        setSpeciesArray(updatedSpeciesArray)
+        // Create Species, Individuals and clustername buttons deriving from the imported labels
+        const urlImportedLabels = decodedData.flatMap(audioPayload => audioPayload.labels || [])
+        createSpeciesFromImportedLabels(urlImportedLabels)
 
         return () => {
             ignore = true
         }
 
     }, [location])
+
+    // When labels are imported from a local CSV file
+    useEffect( () => {
+        if (!csvImportedLabels) return
+
+        const csvImportedLabelsArray = Object.values(csvImportedLabels).flat()
+        createSpeciesFromImportedLabels(csvImportedLabelsArray)
+
+    }, [csvImportedLabels])
+
 
     return (
         <>
@@ -390,7 +437,9 @@ function App() {
                     />
                 </div>
                 <div id={'settings-download-submit-container'}>
-                    <ImportCSV />
+                    <ImportCSV
+                        passCsvImportedLabelsToApp={passCsvImportedLabelsToApp}
+                    />
                     <Export
                         allLabels={allLabels}
                     />
@@ -439,7 +488,7 @@ function App() {
                 }
                 {showTracks.track_1 &&
                     <ScalableSpec
-                        id='track_1'
+                        trackID='track_1'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={true}
@@ -470,11 +519,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_1'] : null}
                     />
                 }
                 {showTracks.track_2 &&
                     <ScalableSpec
-                        id='track_2'
+                        trackID='track_2'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -505,11 +555,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
                     />
                 }
                 {showTracks.track_3 &&
                     <ScalableSpec
-                        id='track_3'
+                        trackID='track_3'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -540,11 +591,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
                     />
                 }
                 {showTracks.track_4 &&
                     <ScalableSpec
-                        id='track_4'
+                        trackID='track_4'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -575,11 +627,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
                     />
                 }
                 {showTracks.track_5 &&
                     <ScalableSpec
-                        id='track_5'
+                        trackID='track_5'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -610,11 +663,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
                     />
                 }
                 {showTracks.track_6 &&
                     <ScalableSpec
-                        id='track_6'
+                        trackID='track_6'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -645,11 +699,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
                     />
                 }
                 {showTracks.track_7 &&
                     <ScalableSpec
-                        id='track_7'
+                        trackID='track_7'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -680,11 +735,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_7'] : null}
                     />
                 }
                 {showTracks.track_8 &&
                     <ScalableSpec
-                        id='track_8'
+                        trackID='track_8'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -715,11 +771,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_8'] : null}
                     />
                 }
                 {showTracks.track_9 &&
                     <ScalableSpec
-                        id='track_9'
+                        trackID='track_9'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -750,11 +807,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_9'] : null}
                     />
                 }
                 {showTracks.track_10 &&
                     <ScalableSpec
-                        id='track_10'
+                        trackID='track_10'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -785,11 +843,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_10'] : null}
                     />
                 }
                 {showTracks.track_11 &&
                     <ScalableSpec
-                        id='track_11'
+                        trackID='track_11'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -820,11 +879,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_11'] : null}
                     />
                 }
                 {showTracks.track_12 &&
                     <ScalableSpec
-                        id='track_12'
+                        trackID='track_12'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -855,11 +915,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_12'] : null}
                     />
                 }
                 {showTracks.track_13 &&
                     <ScalableSpec
-                        id='track_13'
+                        trackID='track_13'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -890,11 +951,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_13'] : null}
                     />
                 }
                 {showTracks.track_14 &&
                     <ScalableSpec
-                        id='track_14'
+                        trackID='track_14'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -925,11 +987,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_14'] : null}
                     />
                 }
                 {showTracks.track_15 &&
                     <ScalableSpec
-                        id='track_15'
+                        trackID='track_15'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -960,11 +1023,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_15'] : null}
                     />
                 }
                 {showTracks.track_16 &&
                     <ScalableSpec
-                        id='track_16'
+                        trackID='track_16'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -995,11 +1059,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_16'] : null}
                     />
                 }
                 {showTracks.track_17 &&
                     <ScalableSpec
-                        id='track_17'
+                        trackID='track_17'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1030,11 +1095,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_17'] : null}
                     />
                 }
                 {showTracks.track_18 &&
                     <ScalableSpec
-                        id='track_18'
+                        trackID='track_18'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1065,11 +1131,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_18'] : null}
                     />
                 }
                 {showTracks.track_19 &&
                     <ScalableSpec
-                        id='track_19'
+                        trackID='track_19'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1100,11 +1167,12 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_19'] : null}
                     />
                 }
                 {showTracks.track_20 &&
                     <ScalableSpec
-                        id='track_20'
+                        trackID='track_20'
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1135,6 +1203,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_20'] : null}
                     />
                 }
                 <Tooltip title="Add New Track">

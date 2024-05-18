@@ -36,6 +36,8 @@ function LabelWindow(
 
     let updatedLabel = new Label(
         expandedLabel.id,
+        expandedLabel.trackID,
+        expandedLabel.filename,
         expandedLabel.onset,
         expandedLabel.offset,
         expandedLabel.species,

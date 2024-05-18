@@ -38,7 +38,7 @@ const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 
 function ScalableSpec(
                         {
-                            id,
+                            trackID,
                             speciesArray,
                             deletedItemID,
                             showOverviewInitialValue,
@@ -68,7 +68,8 @@ function ScalableSpec(
                             activeLabel,
                             passActiveLabelToApp,
                             strictMode,
-                            passLabelsToApp
+                            passLabelsToApp,
+                            csvImportedLabels
                         }
                     )
                 {
@@ -183,7 +184,7 @@ function ScalableSpec(
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
-        passLabelsToApp(createGenericLabelObjects(newLabelsArray), id)
+        passLabelsToApp(createGenericLabelObjects(newLabelsArray), trackID)
     }
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
@@ -388,13 +389,13 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passLabelsToApp(createGenericLabelObjects(labelsCopy), id)
+            passLabelsToApp(createGenericLabelObjects(labelsCopy), trackID)
             passActiveLabelToApp(
                 {
                     onset: labelsCopy[labels.length-1].onset,
                     offset: labelsCopy[labels.length-1].offset,
                     color: '#ffffff',
-                    trackId: id
+                    trackId: trackID
                 }
             )
             drawLineBetween(newestLabel)
@@ -406,7 +407,7 @@ function ScalableSpec(
         // Add onset
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
-        passActiveLabelToApp({onset: clickedTimestamp, offset: undefined, color: '#ffffff', trackId: id})
+        passActiveLabelToApp({onset: clickedTimestamp, offset: undefined, color: '#ffffff', trackId: trackID})
         addNewLabel(clickedTimestamp)
     }
 
@@ -426,7 +427,7 @@ function ScalableSpec(
             clickedLabel.offset = magnet(clickedLabel.offset)
 
             passLabelsToScalableSpec(labels, id)
-            passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: id})
+            passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: trackID})
         }
 
         clickedLabel = undefined
@@ -637,7 +638,7 @@ function ScalableSpec(
     }
 
     const createGenericLabelObjects = (labelsArray) => {
-        // Convert custom label objects into generic objects with the specific data the backend expects
+        // Convert custom label objects into generic objects with the specific data that is needed for later export
         let newLabelsArray = labelsArray.map( label => {
                 return {
                     onset: label.onset,
@@ -645,7 +646,8 @@ function ScalableSpec(
                     species: label.species,
                     individual: label.individual,
                     clustername: label.clustername,
-                    filename: filename,
+                    filename: label.filename,
+                    trackID: label.trackID,
                     annotation_instance: annotationInstance
                 }
             }
@@ -1108,6 +1110,8 @@ function ScalableSpec(
 
         const newLabel = new Label(
             nanoid(),
+            trackID,
+            filename,
             onset,
             undefined,
             activeSpecies.name,
@@ -1126,7 +1130,7 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
-        passLabelsToApp(createGenericLabelObjects(filteredLabels), id)
+        passLabelsToApp(createGenericLabelObjects(filteredLabels), trackID)
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
@@ -1198,6 +1202,53 @@ function ScalableSpec(
             }
         }
         return timestamp
+    }
+
+    const assignSpeciesInformationToImportedLabels = (genericLabelObjectsArray) => {
+        const allIndividualIDs = getAllIndividualIDs()
+
+        // Iterate over the imported labels array
+        return genericLabelObjectsArray.map( label => {
+
+            // Create a new Label object with the imported values
+            const updatedLabel = new Label(
+                nanoid(),
+                trackID,
+                filename,
+                label.onset,
+                label.offset,
+                label.species,
+                label.individual,
+                label.clustername,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+
+            // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
+            for (const speciesObj of speciesArray) {
+                if (updatedLabel.species === speciesObj.name) {
+                    updatedLabel.speciesID = speciesObj.id
+                    for (const individual of speciesObj.individuals) {
+                        if (updatedLabel.individual === individual.name) {
+                            updatedLabel.individualID = individual.id
+                            updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
+                        }
+                    }
+                    for (const clustername of speciesObj.clusternames) {
+                        if (updatedLabel.clustername === clustername.name) {
+                            updatedLabel.clusternameID = clustername.id
+                            updatedLabel.color = clustername.color
+                        }
+                    }
+                }
+            }
+
+            return updatedLabel
+        })
     }
 
 
@@ -1584,7 +1635,7 @@ function ScalableSpec(
         if (response){
             deletePreviousTrackDurationInApp( response.audio_duration )
         }
-        removeTrackInApp(id)
+        removeTrackInApp(trackID)
     }
 
     /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
@@ -1675,6 +1726,8 @@ function ScalableSpec(
         const whisperLabels = whisperObjects.map( obj => {
             return new Label(
                 nanoid(),
+                trackID,
+                filename,
                 obj.onset,
                 obj.offset,
                 'currently not available',
@@ -1690,7 +1743,7 @@ function ScalableSpec(
 
         const combinedLabelsArray = labels.concat(whisperLabels)
         setLabels(combinedLabelsArray)
-        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), id)
+        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackID)
 
         setWhisperSegIsLoading(false)
     }
@@ -1706,7 +1759,7 @@ function ScalableSpec(
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
         if (!spectrogram ||
-            id === activeLabel.trackId ||
+            trackID === activeLabel.trackId ||
             activeSpecies.name === ANNOTATED_AREA) return
 
         drawActiveLabel(audioArray)
@@ -1719,11 +1772,13 @@ function ScalableSpec(
         const allIndividualIDs = getAllIndividualIDs()
 
         // Iterate over the labels array
-        const updatedLabels = labels
+        let updatedLabels = labels
             .map(label => {
                 // Create an updated label with old values
                 const updatedLabel = new Label(
                     label.id,
+                    trackID,
+                    filename,
                     label.onset,
                     label.offset,
                     label.species,
@@ -1765,8 +1820,14 @@ function ScalableSpec(
                 label.clusternameID !== deletedItemID
             )
 
+        // If imported CSV labels exist, add them now
+        if (csvImportedLabels){
+            const newCsvImportedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
+            updatedLabels = updatedLabels.concat(newCsvImportedLabels)
+        }
+
         setLabels(updatedLabels)
-        passLabelsToApp(createGenericLabelObjects(updatedLabels), id)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
 
     }, [speciesArray])
 
@@ -1790,67 +1851,33 @@ function ScalableSpec(
 
             setAudioId(response.audio_id)
 
+            const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
+
             // Add imported labels to the labels array
-            const allIndividualIDs = getAllIndividualIDs()
-            if (audioPayload && audioPayload.labels){
-
-                // Iterate over the imported labels array
-                const updatedLabels = audioPayload.labels
-                    .map(label => {
-
-                        // Create a new Label object with the imported values
-                        const updatedLabel = new Label(
-                            nanoid(),
-                            label.onset,
-                            label.offset,
-                            label.species,
-                            label.individual,
-                            label.clustername,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-
-                        // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
-                        for (const speciesObj of speciesArray) {
-                            if (updatedLabel.species === speciesObj.name) {
-                                updatedLabel.speciesID = speciesObj.id
-                                for (const individual of speciesObj.individuals) {
-                                    if (updatedLabel.individual === individual.name) {
-                                        updatedLabel.individualID = individual.id
-                                        updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
-                                    }
-                                }
-                                for (const clustername of speciesObj.clusternames) {
-                                    if (updatedLabel.clustername === clustername.name) {
-                                        updatedLabel.clusternameID = clustername.id
-                                        updatedLabel.color = clustername.color
-                                    }
-                                }
-                            }
-                        }
-
-                        return updatedLabel
-                    })
+            if (importedLabelsSource){
+                const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabelsSource)
                 setLabels(updatedLabels)
-                passLabelsToApp(createGenericLabelObjects(updatedLabels), id)
+                passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+
+            // If there's no audio payload labels nor CSV imported labels delete all existing labels on this track
             } else {
                 setLabels([])
-                passLabelsToApp([], id)
+                passLabelsToApp([], trackID)
             }
 
     }, [response])
 
+                    /*
     // When a new CSV File was uploaded
-    /*
     useEffect( () => {
-        if (!importedLabels) return
-        setLabels(importedLabels)
-    }, [importedLabels])
-    */
+        if (!csvImportedLabels) return
+
+        const updatedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
+        setLabels(updatedLabels)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+
+    }, [csvImportedLabels])
+*/
 
     // When a new audio snippet is returned from the backend
     useEffect( () => {
@@ -1964,7 +1991,7 @@ function ScalableSpec(
                                     <GraphicEqIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
-                            {id !== 'track_1' &&
+                            {trackID !== 'track_1' &&
                                 <Tooltip title="Delete Track">
                                     <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
                                                 disabled={strictMode}

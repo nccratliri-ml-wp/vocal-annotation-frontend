@@ -11,8 +11,8 @@ function Export( { allLabels } ){
         let labels = Object.values(allLabels).flat()
 
         // Transform to CSV data
-        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename}`)
-        csvData.unshift('onset,offset,species,individual,clustername,filename')
+        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.trackID}`)
+        csvData.unshift('onset,offset,species,individual,clustername,filename,track')
         csvData = csvData.join('\n')
 
         const newCSVFileName = labels[0]?.annotation_instance ? `${labels[0]?.annotation_instance}.csv` : 'annotations.csv'

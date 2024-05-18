@@ -2,11 +2,10 @@ import React from "react"
 import IconButton from "@material-ui/core/IconButton"
 import Tooltip from "@material-ui/core/Tooltip"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
-import {nanoid} from "nanoid";
 import { icon } from "./styles.js"
-import { Label } from "./label.js"
 
-function ImportCSV() {
+function ImportCSV( {passCsvImportedLabelsToApp} ) {
+
     const handleFileChange = (event) => {
         const file = event.target.files[0]
         if (file) {
@@ -14,36 +13,58 @@ function ImportCSV() {
             reader.onload = (e) => {
                 const contents = e.target.result
                 const lines = contents.split('\n')
-                const annotations = []
+                const importedLabelsArray = []
 
                 // Starting from the second line to skip the CSV header
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i]
-                    const [onset, offset, species, individual, clustername, filename] = line.trim().split(',')
-                    annotations.push({
+                    const [onset, offset, species, individual, clustername, filename, trackID] = line.trim().split(',')
+
+                    importedLabelsArray.push({
                         onset: parseFloat(onset),
                         offset: parseFloat(offset),
                         species: species.trim(),
                         individual: individual.trim(),
                         clustername: clustername.trim(),
-                        filename: filename.trim()
+                        filename: filename.trim(),
+                        trackID: trackID.trim()
                     })
-                    annotations.push(
-                        new Label(
-                            nanoid(),
-                            onset,
-                            offset,
-                            species,
-                            individual,
-                            clustername,
 
-                        )
-                    )
-                    // 1. Refactor label class to contain new filename and trackID property
-                    // 2. Change Submit and Export process accordingly, also createGenericLableObject
-                    // 3. Return importedLabels array into the App component, feed different tracks with the correct labels
+                    // . investigae right click error
                 }
 
+                let allImportedLabelsObject = {
+                    'track_1': [],
+                    'track_2': [],
+                    'track_3': [],
+                    'track_4': [],
+                    'track_5': [],
+                    'track_6': [],
+                    'track_7': [],
+                    'track_8': [],
+                    'track_9': [],
+                    'track_10': [],
+                    'track_11': [],
+                    'track_12': [],
+                    'track_13': [],
+                    'track_14': [],
+                    'track_15': [],
+                    'track_16': [],
+                    'track_17': [],
+                    'track_18': [],
+                    'track_19': [],
+                    'track_20': [],
+                }
+
+                for (const label of importedLabelsArray) {
+                    const trackID = label.trackID
+                    allImportedLabelsObject[trackID] = [
+                        ...(allImportedLabelsObject[trackID] || []), // Ensure the track array exists
+                        label
+                    ]
+                }
+
+                passCsvImportedLabelsToApp(allImportedLabelsObject)
             }
             reader.readAsText(file)
         }

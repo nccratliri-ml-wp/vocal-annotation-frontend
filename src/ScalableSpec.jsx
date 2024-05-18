@@ -461,7 +461,7 @@ function ScalableSpec(
 
         deleteLabel(labelToBeDeleted)
 
-        if (labelToBeDeleted.onset === activeLabel.onset && labelToBeDeleted.offset === activeLabel.offset){
+        if (labelToBeDeleted.onset === activeLabel?.onset && labelToBeDeleted.offset === activeLabel?.offset){
             passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
         }
     }

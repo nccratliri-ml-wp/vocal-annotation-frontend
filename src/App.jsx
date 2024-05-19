@@ -27,6 +27,8 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import axios from "axios";
 import Export from "./Export.jsx";
 import ImportCSV from "./ImportCSV.jsx";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -94,7 +96,7 @@ function App() {
 
     const [activeLabel, setActiveLabel] = useState(null)
 
-    const [allLabels, setAllLabels] = useState(null)
+    const [allLabels, setAllLabels] = useState({})
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -256,6 +258,11 @@ function App() {
 
         let allLabelsArray = Object.values(allLabels).flat()
 
+        if (!allLabelsArray.length) {
+            alert('There are currently no annotations. Add some and try again.')
+            return
+        }
+
         // Remove trackID property for all label objects (it's irrelevant for the database)
         allLabelsArray = allLabelsArray.map(labelObj => {
             return {
@@ -269,8 +276,6 @@ function App() {
             }
         })
 
-        console.log(allLabelsArray)
-
         const requestParameters = {
             annotations: allLabelsArray
         }
@@ -280,7 +285,14 @@ function App() {
             'accept': 'application/json'
         }
 
-        const response = await axios.post(path, requestParameters, { headers } )
+        try {
+            await axios.post(path, requestParameters, { headers } )
+            toast.success('Annotations submitted successfully!')
+        } catch (error) {
+            alert('Something went wrong trying to submit the annotations. Check the console for more information.')
+            console.log(error)
+        }
+
     }
 
     function createSpeciesFromImportedLabels (importedLabels){
@@ -413,6 +425,7 @@ function App() {
 
     return (
         <>
+            <ToastContainer />
             <AnnotationLabels
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}

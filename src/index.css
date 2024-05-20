@@ -39,10 +39,12 @@ html, body {
   height: 100%;
   padding: 0;
   margin: 0;
+  user-select: none;
 }
 
 .overview-time-axis-container{
   position: fixed;
+  top: 100px;
   z-index: 2;
   margin: 0 0 0 200px;
 }
@@ -51,15 +53,17 @@ html, body {
 
 .track-container{
   display: flex;
+  padding: 0 0 10px 0;
   margin: 0 0 10px 0;
+  border-bottom: 5px double #082536;
 }
 
 .side-window{
   display: grid;
   grid-template-columns: 160px 40px;
-  grid-template-rows: 230px auto;
+  grid-template-rows: 180px auto;
   grid-template-areas:
-    "track-controls  frequencies-canvas"
+    "track-controls waveform-buttons-frequencies-canvas-container"
     "individuals-canvas individuals-canvas";
 }
 
@@ -69,19 +73,27 @@ html, body {
   flex-direction: column;
 }
 
-.file-input{
-
-}
-
 .audio-controls{
   display: flex;
+  background-color: #082536;
+  border-radius: 30px;
+}
+
+.waveform-buttons-frequencies-canvas-container{
+  grid-area: waveform-buttons-frequencies-canvas-container;
+}
+
+.waveform-buttons{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 40px;
 }
 
 .frequencies-canvas{
-  grid-area: frequencies-canvas;
   display: block;
-  height: 175px;
-  margin: 55px 0 0 0;
+  /*height: 145px;*/
 }
 
 .individuals-canvas{
@@ -89,18 +101,33 @@ html, body {
   display: block;
 }
 
-/* -------------------------- Overview Window -------------------------- */
-
-.overview-canvas{
-  position: fixed;
-  top: 250px;
-  width: auto;
-  margin: 0 0 10px 0;
+/* Compact mode when waveform is hidden */
+.side-window-small{
+  display: grid;
+  grid-template-columns: 160px 40px;
+  grid-template-rows: 120px auto;
+  grid-template-areas:
+    "track-controls waveform-buttons-frequencies-canvas-container"
+    "individuals-canvas individuals-canvas";
 }
+
+.track-controls-small{
+  grid-area: track-controls;
+  display: flex;
+  flex-direction: column;
+  max-height: 150px;
+}
+
+.frequencies-canvas-small{
+  display: block;
+  height: 120px;
+}
+
+/* -------------------------- Overview Window -------------------------- */
 
 #left-scroll-overview-btn{
   position: fixed;
-  top: 260px;
+  top: 110px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -119,7 +146,7 @@ html, body {
 
 #right-scroll-overview-btn{
   position: fixed;
-  top: 260px;
+  top: 110px;
   width: 0;
   height: 0;
   border-top: 10px solid transparent;
@@ -138,37 +165,30 @@ html, body {
 
 /* -------------------------- Time Axis -------------------------- */
 
-.time-axis-canvas{
-  position: fixed;
-  top: 300px;
-}
+
 
 /* -------------------------- Global Controls -------------------------- */
 
-.controls-container{
+#controls-container{
   position: fixed;
-  top: 235px;
-  z-index: 3;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 105px;
+  left: 22px;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
-.controls-container > button{
-  height: 25px;
-  border: none;
-  border-radius: 4px;
-  margin: 2px;
-  background-color: #dddddd;
+#zoom-scroll-buttons-container{
+  display: flex;
+  align-items: center;
+  background: #082536;
+  padding: 10px 5px;
+  border-radius: 30px;
 }
 
-.controls-container > button:hover{
-  background-color: whitesmoke;
-}
-
-.controls-container > button:active{
-  background-color: #b2c0d5;
+#settings-download-submit-container{
+  margin: 8px 7px;
 }
 
 #left-scroll-btn{
@@ -177,7 +197,7 @@ html, body {
   height: 0;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-right: 14px solid #dddddd;
+  border-right: 14px solid #ffffff;
   border-left: transparent;
   background: none;
   border-radius: 0;
@@ -198,7 +218,7 @@ html, body {
   height: 0;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-left: 14px solid #dddddd;
+  border-left: 14px solid #ffffff;
   border-right: transparent;
   background: none;
   border-radius: 0;
@@ -213,54 +233,134 @@ html, body {
   border-left: 14px solid #ddd8ff;
 }
 
-
-/* -------------------------- Clusternames -------------------------- */
-
-
 /* -------------------------- Colorwheel -------------------------- */
+
 .colorwheel{
   position: fixed;
+  margin: 30px 0 0 0;
 }
 
-/* -------------------------- Individuals -------------------------- */
+/* -------------------------- Colorwheel -------------------------- */
+
+#annotated-area-button-container{
+  position: absolute;
+  z-index: 3;
+  top: 159px;
+  left: 0;
+}
+
+/* -------------------------- Global Config Window -------------------------- */
+
+#global-config-window{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 400px;
+  height: 220px;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  background: #082536;
+}
+
+#global-config-window-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 380px;
+  height: 180px;
+  padding: 7px 10px;
+}
+
+.global-config-window-label{
+  display: flex;
+  justify-content: space-between;
+  margin: 3px 0;
+}
+
+.global-config-window-label > input{
+  max-width: 100px;
+}
+
+#global-config-default-values-btn-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+#global-config-default-values-btn{
+  max-width: 108px;
+  font-size: 10px;
+}
+
+#global-config-window-buttons-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+#global-config-submit-btn{
+  min-height: 40px;
+  min-width: 108px;
+  font-size: 16px;
+}
 
 
 /* -------------------------- Parameters -------------------------- */
 
 .local-parameters-config-panel{
-  z-index: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: #082536;
-  border: 1px solid white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 300px;
+  height: 220px;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  background: #082536;
 }
 
-.local-parameters-config-panel > div > label{
+.local-config-window-label{
   display: flex;
+  justify-content: space-between;
+  margin: 7px 7px 0;
+}
+
+.frequencies-labels-container{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 20px 0 20px 0;
 }
 
 .local-parameters-config-panel > div > label > input{
-  width: 40px;
+  max-width: 60px;
 }
 
 /* -------------------------- Annotation Labels -------------------------- */
 
 #annotation-labels-container{
   position: fixed;
-  z-index: 3;
+  z-index: 4;
   width: 100%;
   background: #051923;
 }
 
 #annotation-labels-menu{
-  max-height: 220px;
+  max-height: 95px;
   overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .species{
   background-color: #082536;
-  margin: 0 0 7px 0;
-  font-size: 18px;
+  margin: 1px 7px 0;
+  padding: 2px 5px;
+  border: 1px solid #f6fffe;
+  border-radius: 5px;
+  font-size: 12px;
   font-weight: bold;
 }
 
@@ -269,21 +369,11 @@ html, body {
   border: none;
   margin: 0;
   padding: 0;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .delete-species-btn:hover, .edit-species-btn:hover{
-  font-size: 16px;
-}
-
-.species-input-field{
-  outline: none;
-}
-
-.add-species-btn{
-  background-color: #f6fffe;
-  border: none;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .individual-btn-container, .clustername-btn-container{
@@ -295,8 +385,9 @@ html, body {
   background-color: #626262;
   display: flex;
   margin: 2px;
-  font-size: 16px;
-  max-height: 24px;
+  border-radius: 2px;
+  font-size: 12px;
+  max-height: 20px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
 }
@@ -316,45 +407,99 @@ html, body {
   border-left: 1px solid black;
 }
 
-.clustername-form, .individual-form{
-  display: flex;
-  border: none;
-}
-
-.clustername-input-field:focus, .individual-input-field:focus{
-  outline: none;
-}
-
-.add-clustername-btn, .add-individual-btn{
-  background-color: #f6fffe;
-  border: none;
-  font-size: 14px;
-}
-
 .colorwheel-btn, .edit-name-btn{
   background-color: #f6fffe;
   border: none;
   border-left: 1px solid black;
-  font-size: 14px;
+  border-radius: 2px;
+  font-size: 12px;
 }
 
 .colorwheel-btn:hover, .edit-name-btn:hover{
   background-color: whitesmoke;
 }
 
-/* -------------------------- Label Window -------------------------- */
-.label-window {
-  position: absolute;
-  background-color: #082536;
-  border: 2px solid whitesmoke;
+.input-window{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 300px;
+  height: 160px;
+  border: 2px solid #ffffff;
   border-radius: 5px;
-  padding: 10px;
-  max-height: 210px;
+  background: #082536;
+}
+
+.input-window-form{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 280px;
+  height: 90px;
+  padding: 7px 10px;
+}
+
+.input-field{
+  outline: none;
+  height: 25px;
+}
+
+.input-window-submit-btn{
+  width: 60px;
+  height: 20px;
+  align-self: flex-end;
+  margin-top: 5px;
+}
+
+.input-window-cancel-btn{
+  width: 60px;
+  align-self: flex-start;
+  margin-left: 10px;
+}
+
+/* -------------------------- Label Window -------------------------- */
+.label-window{
+  position: absolute;
+  z-index: 3;
+  background: #051923;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  max-height: 400px;
+  max-width: 800px;
   overflow-y: scroll;
 }
 
-.label-window-annotation-labels-menu{
+.label-window-content{
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: bold;
+}
 
+.window-label-play-btn{
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  width: fit-content;
+  margin: 7px;
+  padding: 7px 12px 7px 5px;
+  background-color: #082536;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.window-label-play-btn:hover{
+  background-color: #0a2b3f;
+}
+
+.label-window-species{
+  background-color: #082536;
+  padding: 7px;
+  margin: 0 7px 7px;
+  border: 1px solid #f6fffe;
+  border-radius: 5px;
 }
 
 .label-window-individual-btn-container, .label-window-clustername-btn-container{
@@ -366,7 +511,10 @@ html, body {
   background-color: #626262;
   display: flex;
   margin: 2px;
-  font-size: 16px;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
   max-height: 24px;
   box-shadow: 3px 2px 4px 0 rgba(0,0,0,0.75);
   cursor: pointer;
@@ -376,7 +524,39 @@ html, body {
   background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
 }
 
+
+/* -------------------------- Close Window Bar -------------------------- */
+
+.close-btn-container{
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: flex-start;
+  background: #ffffff;
+}
+
+.close-btn{
+  margin: 0;
+  background: #ffffff;
+  padding: 0 5px;
+  border: none;
+}
+
+.window-header{
+  color: #051923;
+  margin: 0;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.close-btn:hover{
+  background: #ea1414;
+  color: white;
+}
+
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */
+
 .waveform-spec-labels-canvases-container{
   position: relative;
   z-index: 0;
@@ -394,6 +574,9 @@ html, body {
   display: block;
 }
 
+.hidden{
+  display: none;
+}
 
 
 
@@ -401,14 +584,15 @@ html, body {
   position: fixed;
   z-index: 1;
   width: 100%;
-  height: 350px;
+  height: 200px;
   background: #051923;
 }
 
 
 #all-tracks{
-  padding: 350px 0 0 0;
+  padding: 200px 0 0 0;
 }
+
 
 
 

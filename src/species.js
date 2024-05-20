@@ -4,6 +4,10 @@ const UNKNOWN_CLUSTERNAME = 'Unknown'
 const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
 const INACTIVE_BUTTON_COLOR = '#626262'
+const ANNOTATED_AREA = 'Annotated Area'
+const ANNOTATED_AREA_INDIVIDUAL = '🔒'
+const ANNOTATED_AREA_CLUSTERNAME = 'Annotated Area'
+const ANNOTATED_AREA_COLOR = '#296c16'
 
 class Species {
     constructor(id, name, individuals, clusternames) {
@@ -11,6 +15,8 @@ class Species {
         this.name = name
         this.individuals = individuals
         this.clusternames = clusternames
+        this.showIndividualInputWindow = false
+        this.showClusternameInputWindow = false
     }
 }
 
@@ -87,6 +93,10 @@ export {
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
     INACTIVE_BUTTON_COLOR,
+    ANNOTATED_AREA,
+    ANNOTATED_AREA_INDIVIDUAL,
+    ANNOTATED_AREA_CLUSTERNAME,
+    ANNOTATED_AREA_COLOR,
     Species,
     Individual,
     Clustername,

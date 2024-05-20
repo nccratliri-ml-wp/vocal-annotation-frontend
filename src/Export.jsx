@@ -1,18 +1,21 @@
-function Export( { labels, audioFileName } ){
+import React from "react"
+import { IconButton } from "@material-ui/core"
+import DownloadIcon from '@mui/icons-material/Download'
+import Tooltip from "@material-ui/core/Tooltip"
+import {icon, globalControlsBtn} from "./styles.js"
+
+function Export( { allLabels } ){
 
     function exportCSV(){
-        // Remove Protected Area labels
-        labels = labels.filter(label => label.clustername !== 'Protected Area🔒')
-
-        // Sort the labels ascending by onset
-        labels = labels.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+        // Flatten the allLabels Object into a single array
+        let labels = Object.values(allLabels).flat()
 
         // Transform to CSV data
-        let csvData = labels.map(label => `${label.onset},${label.offset},${label.clustername},${label.individual}`)
-        csvData.unshift('onset,offset,cluster,individual')
+        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.trackID}`)
+        csvData.unshift('onset,offset,species,individual,clustername,filename,track')
         csvData = csvData.join('\n')
 
-        const newCSVFileName = audioFileName.slice(0, -4) + '.csv'
+        const newCSVFileName = labels[0]?.annotation_instance ? `${labels[0]?.annotation_instance}.csv` : 'annotations.csv'
 
         const element = document.createElement('a')
         element.setAttribute('href', `data:text/csv;charset=utf-8,${csvData}`)
@@ -24,11 +27,14 @@ function Export( { labels, audioFileName } ){
     }
 
     return (
-        <button
-            id='export-btn'
-            onClick={exportCSV}>
-            Export
-        </button>
+        <Tooltip title="Download Annotations">
+            <IconButton
+                style={globalControlsBtn}
+                onClick={exportCSV}
+            >
+                <DownloadIcon style={icon} />
+            </IconButton>
+        </Tooltip>
     )
 }
 

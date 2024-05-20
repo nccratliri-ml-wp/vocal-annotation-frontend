@@ -1,13 +1,26 @@
 import React, {useEffect, useRef, useState} from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import StopIcon from '@mui/icons-material/Stop';
+import TuneIcon from '@mui/icons-material/Tune';
+import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import Export from "./Export.jsx";
+import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
+import {ANNOTATED_AREA} from "./species.js";
 
 // Classes
 
@@ -22,10 +35,10 @@ const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 
+
 function ScalableSpec(
                         {
-                            id,
-                            trackDurations,
+                            trackID,
                             speciesArray,
                             deletedItemID,
                             showOverviewInitialValue,
@@ -43,8 +56,6 @@ function ScalableSpec(
                             passTrackDurationToApp,
                             deletePreviousTrackDurationInApp,
                             removeTrackInApp,
-                            passActiveLabelToApp,
-                            activeLabel,
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
@@ -53,7 +64,12 @@ function ScalableSpec(
                             passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
                             passDefaultConfigToApp,
-                            audioPayload
+                            audioPayload,
+                            activeLabel,
+                            passActiveLabelToApp,
+                            strictMode,
+                            passLabelsToApp,
+                            csvImportedLabels
                         }
                     )
                 {
@@ -92,18 +108,21 @@ function ScalableSpec(
     // Audio
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
+    const [playWindowStartTime, setPlayWindowStartTime] = useState(null)
 
     // Waveform
     const waveformCanvasRef = useRef(null)
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
-    const [waveformScale, setWaveformScale] = useState(35)
+    const [waveformScale, setWaveformScale] = useState(25)
+    const [showWaveform, setShowWaveform] =  useState(true)
 
     // File Upload
     const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
     // Local Parameters
+    const [showLocalConfigWindow, setShowLocalConfigWindow] = useState(false)
     const [specCalMethod, setSpecCalMethod] = useState('log-mel')
     const [nfft, setNfft] = useState('')
     const [binsPerOctave, setBinsPerOctave] = useState('')
@@ -123,6 +142,15 @@ function ScalableSpec(
 
     // Label Window
     const [expandedLabel, setExpandedLabel] = useState(null)
+    const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
+
+    // Icons
+    const activeIcon = showWaveform ? icon : iconSmall
+    const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
+
+    // Database
+    const [annotationInstance, setAnnotationInstance] = useState(null)
+    const [filename, setFilename] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -130,8 +158,12 @@ function ScalableSpec(
         setSpectrogramIsLoading( boolean )
     }
 
-    const passSpecCalMethodToScalableSpec = ( newspecCalMethod ) => {
-        setSpecCalMethod( newspecCalMethod )
+    const passShowLocalConfigWindowToScalableSpec = ( boolean ) => {
+        setShowLocalConfigWindow( boolean )
+    }
+
+    const passSpecCalMethodToScalableSpec = ( newSpecCalMethod ) => {
+        setSpecCalMethod( newSpecCalMethod )
     }
 
     const passNfftToScalableSpec = ( newNfft ) => {
@@ -152,10 +184,15 @@ function ScalableSpec(
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
+        passLabelsToApp(createGenericLabelObjects(newLabelsArray), trackID)
     }
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
         setExpandedLabel( newExpandedLabel )
+    }
+
+    const passFileNameToScalableSpec = ( newFilename ) => {
+        setFilename( newFilename )
     }
 
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
@@ -220,6 +257,7 @@ function ScalableSpec(
             audioSnippet.currentTime = currentStartTime
         }
 
+        setSpectrogramIsLoading(true)
         getSpecAndAudioArray()
     }
 
@@ -246,25 +284,31 @@ function ScalableSpec(
         }
     }
 
-    const handleUploadResponse = (response) => {
-        const trackDuration = response.data.channels[0].audio_duration
-        const hopLength = response.data.configurations.hop_length
-        const numSpecColumns = response.data.configurations.num_spec_columns
-        const samplingRate = response.data.configurations.sampling_rate
+    const handleUploadResponse = (newResponse) => {
+        const trackDuration = newResponse.data.channels[0].audio_duration
+        const hopLength = newResponse.data.configurations.hop_length
+        const numSpecColumns = newResponse.data.configurations.num_spec_columns
+        const samplingRate = newResponse.data.configurations.sampling_rate
         const defaultConfig = {
             hop_length: hopLength,
             num_spec_columns: numSpecColumns,
             sampling_rate: samplingRate
         }
 
-        const newResponseData = response.data.channels[0]
-        const newSpecCalMethod = response.data.configurations.spec_cal_method
-        const newNfft = response.data.configurations.n_fft
-        const newBinsPerOctave = response.data.configurations.bins_per_octave
-        const newMinFreq = response.data.configurations.min_frequency
-        const newMaxFreq = response.data.configurations.max_frequency
+        const newResponseData = newResponse.data.channels[0]
+        const newSpecCalMethod = newResponse.data.configurations.spec_cal_method
+        const newNfft = newResponse.data.configurations.n_fft
+        const newBinsPerOctave = newResponse.data.configurations.bins_per_octave
+        const newMinFreq = newResponse.data.configurations.min_frequency
+        const newMaxFreq = newResponse.data.configurations.max_frequency
 
-        deletePreviousTrackDurationInApp( response.audio_duration ) // Remove outdated track duration of the previous file in the App component
+        // Remove outdated track duration of the previous file in the App component
+        if (response){
+            deletePreviousTrackDurationInApp( response.audio_duration )
+        }
+        // Close Label Window
+        setExpandedLabel(null)
+
         passTrackDurationToApp( trackDuration )
         passGlobalHopLengthToApp( hopLength )
         passGlobalNumSpecColumnsToApp( numSpecColumns )
@@ -322,44 +366,54 @@ function ScalableSpec(
         const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
+            setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
 
         // Add offset to existing label if necessary
-        const lastLabel = labels[labels.length-1]
-        if (labels.length > 0 && lastLabel.offset === undefined){
+        const newestLabel = labels[labels.length-1]
+        if (labels.length > 0 && newestLabel.offset === undefined){
             let newOffset = calculateTimestamp(event)
             newOffset = magnet(newOffset)
             /*
-            if (!checkIfNewOffsetIsValid(lastLabel.onset, newOffset) ){
+            if (!checkIfNewOffsetIsValid(newestLabel.onset, newOffset) ){
                 alert('Labels of the same individual may not stretch across one another.')
                 return
             }*/
             const labelsCopy = labels
-            if (newOffset < lastLabel.onset){
-                lastLabel.offset = newOffset
-                labelsCopy[labels.length-1] = flipOnsetOffset(lastLabel)
+            if (newOffset < newestLabel.onset){
+                newestLabel.offset = newOffset
+                labelsCopy[labels.length-1] = flipOnsetOffset(newestLabel)
             } else {
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passActiveLabelToApp( labelsCopy[labels.length-1] )
-            drawLineBetween(lastLabel)
+            passLabelsToApp(createGenericLabelObjects(labelsCopy), trackID)
+            passActiveLabelToApp(
+                {
+                    onset: labelsCopy[labels.length-1].onset,
+                    offset: labelsCopy[labels.length-1].offset,
+                    color: '#ffffff',
+                    trackId: trackID
+                }
+            )
+            drawLineBetween(newestLabel)
+            drawLine(newestLabel, newestLabel.onset)
+            drawLine(newestLabel, newestLabel.offset)
             return
         }
 
         // Add onset
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
+        passActiveLabelToApp({onset: clickedTimestamp, offset: undefined, color: '#ffffff', trackId: trackID})
         addNewLabel(clickedTimestamp)
-        passActiveLabelToApp( new Label(nanoid(), clickedTimestamp))
     }
 
     const handleMouseUp = (event) => {
         if (event.button !== 0) return
 
         removeDragEventListeners()
-
         //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         if (clickedLabel){
@@ -370,7 +424,9 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
-            passActiveLabelToApp(new Label(nanoid(), clickedLabel.onset, clickedLabel.offset))
+
+            passLabelsToScalableSpec(labels, id)
+            passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: trackID})
         }
 
         clickedLabel = undefined
@@ -386,6 +442,10 @@ function ScalableSpec(
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
     }
 
+    const handleMouseLeaveCanvases = (event) => {
+        handleMouseUp(event)
+    }
+
     const handleRightClick = (event) => {
         event.preventDefault()
 
@@ -395,18 +455,17 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
         const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
+
+        if (!labelToBeDeleted) return
+
         deleteLabel(labelToBeDeleted)
-        passActiveLabelToApp(null)
+
+        if (labelToBeDeleted.onset === activeLabel?.onset && labelToBeDeleted.offset === activeLabel?.offset){
+            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
+        }
     }
 
     const handleMouseMove = (event) => {
-        // Active label get sets to zero once user has set the offset of a label and moved his mouse
-        const mouseX = getMouseX(event)
-        const mouseY = getMouseY(event)
-        if (activeLabel && activeLabel.offset && !checkIfClickedOnLabel(mouseX, mouseY)){
-            console.log('setting active label to null')
-            passActiveLabelToApp(null)
-        }
         hoverLine(event)
         hoverLabel(event)
     }
@@ -453,7 +512,7 @@ function ScalableSpec(
             const offsetX = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
-            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted){
+            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted && event.target.className === 'label-canvas'){
                 drawLineBetween(label)
                 drawClustername(label)
                 drawLine(label, label.onset)
@@ -577,6 +636,31 @@ function ScalableSpec(
         })
     }
 
+    const createGenericLabelObjects = (labelsArray) => {
+        // Convert custom label objects into generic objects with the specific data that is needed for later export
+        let newLabelsArray = labelsArray.map( label => {
+                return {
+                    onset: label.onset,
+                    offset: label.offset,
+                    species: label.species,
+                    individual: label.individual,
+                    clustername: label.clustername,
+                    filename: label.filename,
+                    trackID: label.trackID,
+                    annotation_instance: annotationInstance
+                }
+            }
+        )
+
+        // Remove the Annotated Area labels because they are only necessary for WhisperSeg
+        newLabelsArray = newLabelsArray.filter( label => label.species !== ANNOTATED_AREA )
+
+        // Sort the labels ascending by onset
+        newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
+
+        return newLabelsArray
+    }
+
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
@@ -598,7 +682,6 @@ function ScalableSpec(
             drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            //drawActiveLabel()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -608,6 +691,30 @@ function ScalableSpec(
             drawTimeAxis()
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         }
+    }
+
+    const drawActiveLabel = (newAudioArray) => {
+        if (!specCanvasRef.current) return
+
+        const specCVS = specCanvasRef.current;
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
+        const image = new Image();
+
+        const labelCVS = labelCanvasRef.current
+        const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true, alpha: true });
+
+        // Draw Spectrogram, Waveform and labels
+        image.addEventListener('load', () => {
+            specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
+            specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
+            drawWaveform(newAudioArray)
+            labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
+            drawAllLabels()
+            drawLine(activeLabel, activeLabel.onset)
+            drawLine(activeLabel, activeLabel.offset)
+            //drawPlayhead(playheadRef.current.timeframe)
+        })
+        image.src = `data:image/png;base64,${spectrogram}`;
     }
 
     const drawTimeAxis = () => {
@@ -952,13 +1059,6 @@ function ScalableSpec(
         }
     }
 
-    const drawActiveLabel = () => {
-        if (!activeLabel) return
-
-        drawLine(activeLabel, activeLabel.onset)
-        drawLine(activeLabel, activeLabel.offset)
-    }
-
     const drawIndividualsCanvas = () => {
         const cvs = individualsCanvasRef.current
         const ctx = cvs.getContext('2d')
@@ -985,7 +1085,8 @@ function ScalableSpec(
             ctx.font = `${12}px sans-serif`
             ctx.fillText(speciesObj.name, xSpeciesName, ySpeciesName)
 
-            // Draw line separating Species
+            // Draw line separating Species, except for the last one (Annotated Area)
+            if (speciesObj.name === ANNOTATED_AREA) continue
             const x1 = 0
             const x2 = cvs.width
             const y = (i - 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 2
@@ -996,23 +1097,20 @@ function ScalableSpec(
             ctx.stroke()
         }
 
-        const text = '🔒'
-        const textWidth = ctx.measureText(text).width
-        const x = cvs.width - textWidth - 5
-        ctx.fillText(text, x, cvs.height)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
         const addNewLabel = (onset) => {
         const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
-        //const individual = clustername === 'Protected Area'? null : activeIndividual
 
         const allIndividualIDs = getAllIndividualIDs()
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
         const newLabel = new Label(
             nanoid(),
+            trackID,
+            filename,
             onset,
             undefined,
             activeSpecies.name,
@@ -1031,9 +1129,11 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
+        passLabelsToApp(createGenericLabelObjects(filteredLabels), trackID)
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
+            setGlobalMouseCoordinates(null)
         }
     }
 
@@ -1103,6 +1203,53 @@ function ScalableSpec(
         return timestamp
     }
 
+    const assignSpeciesInformationToImportedLabels = (genericLabelObjectsArray) => {
+        const allIndividualIDs = getAllIndividualIDs()
+
+        // Iterate over the imported labels array
+        return genericLabelObjectsArray.map( label => {
+
+            // Create a new Label object with the imported values
+            const updatedLabel = new Label(
+                nanoid(),
+                trackID,
+                filename,
+                label.onset,
+                label.offset,
+                label.species,
+                label.individual,
+                label.clustername,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+
+            // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
+            for (const speciesObj of speciesArray) {
+                if (updatedLabel.species === speciesObj.name) {
+                    updatedLabel.speciesID = speciesObj.id
+                    for (const individual of speciesObj.individuals) {
+                        if (updatedLabel.individual === individual.name) {
+                            updatedLabel.individualID = individual.id
+                            updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
+                        }
+                    }
+                    for (const clustername of speciesObj.clusternames) {
+                        if (updatedLabel.clustername === clustername.name) {
+                            updatedLabel.clusternameID = clustername.id
+                            updatedLabel.color = clustername.color
+                        }
+                    }
+                }
+            }
+
+            return updatedLabel
+        })
+    }
+
 
     /* ++++++++++++++++++ Overview Bar Methods ++++++++++++++++++ */
 
@@ -1113,6 +1260,7 @@ function ScalableSpec(
 
         // Deal with click on Start Frame
         if (mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
+            if (strictMode) return
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
@@ -1121,6 +1269,7 @@ function ScalableSpec(
 
         // Deal with click on End Frame
         if (mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
+            if (strictMode) return
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
             //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
@@ -1282,6 +1431,8 @@ function ScalableSpec(
     }
 
     const hoverViewportFrame = (event) => {
+        if (strictMode) return
+
         const xHovered = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
@@ -1297,36 +1448,48 @@ function ScalableSpec(
     const leftScrollOverview = () => {
         passCurrentStartTimeToApp(
             prevStartTime => Math.max(prevStartTime - globalClipDuration, 0)
-        );
+        )
         passCurrentEndTimeToApp(
             prevEndTime => Math.max(prevEndTime - globalClipDuration, globalClipDuration)
-        );
+        )
     }
 
     const rightScrollOverview = () => {
         passCurrentStartTimeToApp(
             prevStartTime => Math.min(prevStartTime + globalClipDuration, maxScrollTime)
-        );
+        )
         passCurrentEndTimeToApp(
             prevEndTime => Math.min(prevEndTime + globalClipDuration, globalAudioDuration)
-        );
+        )
     }
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
-    const getAudio = async () => {
+    const getAudio = async (newStartTime, newEndTime) => {
+        // Prevent user from clicking the play button twice in a row and playing the audio twice at the same time
+        if (audioSnippet && !audioSnippet.paused) return
+
+        // If the requested play start time hasn't changed and the current audio time is unequal to the start time, resume playback and return
+        if (newStartTime === playWindowStartTime && audioSnippet && audioSnippet.currentTime !== newStartTime){
+            playAudio()
+            return
+        }
+
+        // Else, start process to get a new audio snippet
         setAudioSnippet(null)
+        setPlayWindowStartTime(newStartTime)
+
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
                 audio_id: audioId,
-                start_time: currentStartTime,
-                clip_duration: globalClipDuration
-            });
+                start_time: newStartTime,
+                clip_duration: newEndTime
+            })
             handleNewAudio(response.data.wav);
         } catch (error) {
             console.error("Error fetching audio clip:", error);
         }
-    };
+    }
 
     const handleNewAudio = (newAudioBase64String) => {
         const audio = new Audio(`data:audio/ogg;base64,${newAudioBase64String}`);
@@ -1341,12 +1504,8 @@ function ScalableSpec(
     function loop(){
         if (audioSnippet.paused) return
 
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(specImgData.current, 0, 0);
-        drawAllLabels()
-        drawPlayhead(currentStartTime + audioSnippet.currentTime)
+        clearAndRedrawCanvases()
+        drawPlayhead(playWindowStartTime + audioSnippet.currentTime)
 
         window.requestAnimationFrame(() => loop() )
     }
@@ -1354,34 +1513,52 @@ function ScalableSpec(
     const pauseAudio = () => {
         if (!audioSnippet) return
         audioSnippet.pause()
-        updatePlayhead(currentStartTime + audioSnippet.currentTime)
+        updatePlayhead(playWindowStartTime + audioSnippet.currentTime)
     }
 
     const stopAudio = () => {
         if (!audioSnippet) return
 
         audioSnippet.pause()
-        audioSnippet.currentTime = currentStartTime
-        updatePlayhead(currentStartTime)
+        audioSnippet.currentTime = playWindowStartTime
+        updatePlayhead(playWindowStartTime)
 
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.putImageData(specImgData.current, 0, 0);
+        clearAndRedrawCanvases()
+    }
+
+    const clearAndRedrawCanvases = () => {
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d');
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d');
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
+        specCTX.putImageData(specImgData.current, 0, 0);
+        waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
         drawAllLabels()
     }
 
     const drawPlayhead = (timeframe) => {
-        const canvas = specCanvasRef.current
-        const ctx = canvas.getContext('2d');
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d');
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d');
+
         const x = calculateXPosition(timeframe)
 
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, canvas.height)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = "red"
-        ctx.stroke()
+        specCTX.beginPath()
+        specCTX.moveTo(x, 0)
+        specCTX.lineTo(x, specCVS.height)
+        specCTX.lineWidth = 2
+        specCTX.strokeStyle = "red"
+        specCTX.stroke()
+
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, 0)
+        waveformCTX.lineTo(x, waveformCVS.height)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = "red"
+        waveformCTX.stroke()
     }
 
     const updatePlayhead = (newTimeframe) => {
@@ -1434,29 +1611,38 @@ function ScalableSpec(
     }
 
      const waveformZoomIn = () => {
-        setWaveformScale(prevState => prevState + 10)
+        setWaveformScale(prevState => prevState * 1.3)
+         console.log(waveformScale)
      }
 
      const waveformZoomOut = () => {
-         setWaveformScale(prevState => Math.max(prevState - 10, 1))
+         setWaveformScale(prevState => Math.max(prevState * 0.7, 1))
+         console.log(waveformScale)
      }
+
+    const toggleShowWaveform = () => {
+        if (!spectrogram) return
+        setShowWaveform(!showWaveform)
+    }
 
 
     /* ++++++++++++++++++ Tracks ++++++++++++++++++ */
 
     const handleRemoveTrack = () => {
+        if (!confirm('Removing this track will delete any annotations you have made in it.')) return
+
         if (response){
             deletePreviousTrackDurationInApp( response.audio_duration )
         }
-        removeTrackInApp(id)
+        removeTrackInApp(trackID)
     }
 
     /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
     const handleMouseLeave = () => {
-        const lastLabel = labels[labels.length -1]
-        if (lastLabel && !lastLabel.offset){
-            deleteLabel(lastLabel)
-            passActiveLabelToApp(null)
+        const newestLabel = labels[labels.length -1]
+        if (newestLabel && !newestLabel.offset){
+            deleteLabel(newestLabel)
+            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
         }
     }
 
@@ -1486,20 +1672,39 @@ function ScalableSpec(
         const selectedFrequencies = indices.map(index => frequenciesArray[index])
 
         // Draw the frequencies
-        const lineDistance = cvs.height / selectedFrequencies.length
+        const correctionValue = showWaveform ? 0 : 20
+        const lineDistance = (cvs.height + correctionValue) / selectedFrequencies.length
         let y = cvs.height
         const x1 = cvs.width - 10
         const x2 = cvs.width
+        let i = 0
         for (let freq of selectedFrequencies){
+            let textY = y
+            let freqText = `${Math.round(freq / 10) * 10}`
+            if (!showWaveform){
+                if (i === 0){
+                    freqText += ' Hz'
+                }
+                if (i > 0 && i < 6){
+                    textY += 4
+                }
+                if (i === 6){
+                    textY += 8
+                }
+            }
             ctx.beginPath()
             ctx.moveTo(x1,y)
             ctx.lineTo(x2, y)
             ctx.stroke()
-            ctx.fillText(`${Math.round(freq / 10) * 10}`, 0, y);
+            ctx.fillText(freqText, 0, textY);
             y -= lineDistance
+            i++
         }
 
-        ctx.fillText('Hz', 0, 10);
+        if (showWaveform){
+            ctx.fillText('Hz', 0, 10);
+        }
+
     }
 
 
@@ -1518,8 +1723,10 @@ function ScalableSpec(
         const whisperObjects = response.data.labels
 
         const whisperLabels = whisperObjects.map( obj => {
-            const newLabel = new Label(
+            return new Label(
                 nanoid(),
+                trackID,
+                filename,
                 obj.onset,
                 obj.offset,
                 'currently not available',
@@ -1531,36 +1738,13 @@ function ScalableSpec(
                 null,
                 DEFAULT_LABEL_COLOR
             )
-
-            return newLabel
         })
 
-        setLabels(prevState => [...prevState, ...whisperLabels] )
+        const combinedLabelsArray = labels.concat(whisperLabels)
+        setLabels(combinedLabelsArray)
+        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackID)
+
         setWhisperSegIsLoading(false)
-    }
-
-    const submitAnnotations = async () => {
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
-
-        const requestParameters = {
-            annotations: [
-                {
-                    onset: 0,
-                    offset: 0,
-                    species: 'test_species',
-                    individual: 'test_individual',
-                    filename: 'test_filename',
-                    annotation_instance: 'test_annotation_instance'
-                }
-            ]
-        }
-
-        const headers = {
-            'Content-Type': 'application/json',
-            'accept': 'application/json'
-        }
-
-        const response = await axios.post(path, requestParameters, { headers } )
     }
 
 
@@ -1569,8 +1753,16 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
+    }, [labels, waveformScale, showWaveform] )
 
-    }, [labels, activeLabel, waveformScale] )
+    // When a user adds a new label, thus creating a new active label in the other tracks
+    useEffect( () => {
+        if (!spectrogram ||
+            trackID === activeLabel.trackId ||
+            activeSpecies.name === ANNOTATED_AREA) return
+
+        drawActiveLabel(audioArray)
+    }, [activeLabel] )
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
@@ -1579,11 +1771,13 @@ function ScalableSpec(
         const allIndividualIDs = getAllIndividualIDs()
 
         // Iterate over the labels array
-        const updatedLabels = labels
+        let updatedLabels = labels
             .map(label => {
                 // Create an updated label with old values
                 const updatedLabel = new Label(
                     label.id,
+                    trackID,
+                    filename,
                     label.onset,
                     label.offset,
                     label.species,
@@ -1625,7 +1819,14 @@ function ScalableSpec(
                 label.clusternameID !== deletedItemID
             )
 
+        // If imported CSV labels exist, add them now
+        if (csvImportedLabels){
+            const newCsvImportedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
+            updatedLabels = updatedLabels.concat(newCsvImportedLabels)
+        }
+
         setLabels(updatedLabels)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
 
     }, [speciesArray])
 
@@ -1649,65 +1850,33 @@ function ScalableSpec(
 
             setAudioId(response.audio_id)
 
+            const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
+
             // Add imported labels to the labels array
-            const allIndividualIDs = getAllIndividualIDs()
-            if (audioPayload && audioPayload.labels){
-
-                // Iterate over the imported labels array
-                const updatedLabels = audioPayload.labels
-                    .map(label => {
-
-                        // Create a new Label object with the imported values
-                        const updatedLabel = new Label(
-                            nanoid(),
-                            label.onset,
-                            label.offset,
-                            label.species,
-                            label.individual,
-                            label.clustername,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null
-                        )
-
-                        // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
-                        for (const speciesObj of speciesArray) {
-                            if (updatedLabel.species === speciesObj.name) {
-                                updatedLabel.speciesID = speciesObj.id
-                                for (const individual of speciesObj.individuals) {
-                                    if (updatedLabel.individual === individual.name) {
-                                        updatedLabel.individualID = individual.id
-                                        updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
-                                    }
-                                }
-                                for (const clustername of speciesObj.clusternames) {
-                                    if (updatedLabel.clustername === clustername.name) {
-                                        updatedLabel.clusternameID = clustername.id
-                                        updatedLabel.color = clustername.color
-                                    }
-                                }
-                            }
-                        }
-
-                        return updatedLabel
-                    })
+            if (importedLabelsSource){
+                const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabelsSource)
                 setLabels(updatedLabels)
+                passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+
+            // If there's no audio payload labels nor CSV imported labels delete all existing labels on this track
             } else {
                 setLabels([])
+                passLabelsToApp([], trackID)
             }
 
     }, [response])
 
+                    /*
     // When a new CSV File was uploaded
-    /*
     useEffect( () => {
-        if (!importedLabels) return
-        setLabels(importedLabels)
-    }, [importedLabels])
-    */
+        if (!csvImportedLabels) return
+
+        const updatedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
+        setLabels(updatedLabels)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+
+    }, [csvImportedLabels])
+*/
 
     // When a new audio snippet is returned from the backend
     useEffect( () => {
@@ -1719,34 +1888,25 @@ function ScalableSpec(
     useEffect( () => {
         if (!globalAudioDuration || !response ) return
 
-        /*
-        // This makes the zoom in level to show the largest track fully (better for multiple files locally). Use this for planned free mode.
+        playheadRef.current.timeframe = 0
+
+        // This makes the zoom in level to show the newest track fully (necessary for upload by url)
+        if (strictMode){
+            const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
+            const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
+            const newStartTime = 0
+            const newEndTime = newStartTime + newDuration
+            updateClipDurationAndTimes(globalHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
+            return
+        }
+
+        // This makes the zoom in level to show the largest track fully (better for multiple files locally)
         const newHopLength = Math.floor( (globalAudioDuration * globalSamplingRate) / globalNumSpecColumns )
         const newDuration = newHopLength / globalSamplingRate * globalNumSpecColumns
         const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
         const newStartTime = 0
         const newEndTime = newStartTime + newDuration
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
-         */
-
-        // This makes the zoom in level to show the newest track fully (necessary for upload by url). Use this for planned strict mode.
-        const newDuration = globalHopLength / globalSamplingRate * globalNumSpecColumns
-        const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
-        const newStartTime = 0
-        const newEndTime = newStartTime + newDuration
-        updateClipDurationAndTimes(globalHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
-
-        /*
-        Old way:
-
-        passClipDurationToApp(globalAudioDuration)
-        passCurrentStartTimeToApp(0)
-        passCurrentEndTimeToApp(globalAudioDuration)
-        passMaxScrollTimeToApp(0)
-        passScrollStepToApp(globalAudioDuration * SCROLL_STEP_RATIO)
-        */
-
-        playheadRef.current.timeframe = 0
 
     }, [response, globalAudioDuration] )
 
@@ -1755,7 +1915,11 @@ function ScalableSpec(
         if (!audioPayload) return
         uploadFileByURL(audioPayload)
 
+        setAnnotationInstance(audioPayload.annotation_instance)
+        setFilename(audioPayload.filename)
+
     }, [audioPayload])
+
 
     return (
         <div
@@ -1792,9 +1956,11 @@ function ScalableSpec(
                 </div>
             }
             <div className='track-container'>
-                <div className='side-window' >
-                    <div className='track-controls'>
+                <div className={showWaveform ? 'side-window' : 'side-window-small'} >
+                    <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                         <LocalFileUpload
+                            filename={filename}
+                            passFileNameToScalableSpec={passFileNameToScalableSpec}
                             specCalMethod={specCalMethod}
                             nfft={nfft}
                             binsPerOctave={binsPerOctave}
@@ -1803,90 +1969,96 @@ function ScalableSpec(
                             passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
                             handleUploadResponse={handleUploadResponse}
                             handleUploadError={handleUploadError}
+                            strictMode={strictMode}
                         />
-                        <Export
-                            audioFileName={'Example Audio File Name'}
-                            labels={labels}
-                        />
-                        <button onClick={submitAnnotations}>Submit Annotations</button>
-                        {id !== 'track_1' &&
-                            <button
-                                onClick={handleRemoveTrack}
-                            >
-                                Remove Track
-                            </button>
-                        }
-                        <button
-                            onClick={() => console.log(labels)}
-                        >
-                            Console log labels
-                        </button>
-                        <button
-                            onClick={waveformZoomIn}
-                        >
-                            Enhance Waveform
-                        </button>
-                        <button
-                            onClick={waveformZoomOut}
-                        >
-                            Decrease Waveform
-                        </button>
-                        <button
-                            onClick={callWhisperSeg}
-                        >
-                            Call WhisperSeg
-                        </button>
+                        <div>
+                            <Tooltip title="Call WhisperSeg">
+                                <IconButton style={{...activeIconBtnStyle, ...((strictMode || !response) && iconBtnDisabled)}}
+                                            disabled={strictMode || !response}
+                                            onClick={callWhisperSeg}
+                                >
+                                    <AutoFixHighIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Change Track Parameters">
+                                <IconButton style={activeIconBtnStyle} onClick={ () => setShowLocalConfigWindow(true)}>
+                                    <TuneIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={showWaveform? 'Hide Waveform' : 'Show Waveform'}>
+                                <IconButton style={activeIconBtnStyle} onClick={toggleShowWaveform}>
+                                    <GraphicEqIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            {trackID !== 'track_1' &&
+                                <Tooltip title="Delete Track">
+                                    <IconButton style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
+                                                disabled={strictMode}
+                                                onClick={handleRemoveTrack}
+                                    >
+                                        <DeleteIcon style={activeIcon}/>
+                                    </IconButton>
+                                </Tooltip>
+                            }
+                        </div>
                         <div className='audio-controls'>
-                            <button
-                                onClick={getAudio}
-                            >
-                                ▶
-                            </button>
-                            <button
-                                onClick={pauseAudio}
-                            >
-                                ⏸
-                            </button>
-                            <button
-                                onClick={stopAudio}
-                            >
-                                ⏹
-                            </button>
+                            <IconButton style={iconBtn} onClick={ () => getAudio(currentStartTime, globalClipDuration) }>
+                                <PlayArrowIcon style={activeIcon}/>
+                            </IconButton>
+                            <IconButton style={iconBtn} onClick={pauseAudio}>
+                                <PauseIcon style={activeIcon}/>
+                            </IconButton>
+                            <IconButton style={iconBtn} onClick={stopAudio}>
+                                <StopIcon style={activeIcon}/>
+                            </IconButton>
                         </div>
                         <Parameters
+                            showLocalConfigWindow={showLocalConfigWindow}
                             specCalMethod={specCalMethod}
                             nfft={nfft}
                             binsPerOctave={binsPerOctave}
                             minFreq={minFreq}
                             maxFreq={maxFreq}
+                            passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
                             passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
                             passNfftToScalableSpec={passNfftToScalableSpec}
                             passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
                             passMinFreqToScalableSpec={passMinFreqToScalableSpec}
                             passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                             submitLocalParameters={submitLocalParameters}
+                            strictMode={strictMode}
                         />
                     </div>
-                    <canvas
-                        className='frequencies-canvas'
-                        ref={frequenciesCanvasRef}
-                        width={40}
-                        height={175}
-                    />
+                    <div className='waveform-buttons-frequencies-canvas-container'>
+                        <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
+                            <IconButton style={freqBtn} onClick={waveformZoomIn}>
+                                <ZoomInIcon style={icon}/>
+                            </IconButton>
+                            <IconButton style={freqBtn} onClick={waveformZoomOut}>
+                                <ZoomOutIcon style={icon}/>
+                            </IconButton>
+                        </div>
+                        <canvas
+                            className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
+                            ref={frequenciesCanvasRef}
+                            width={40}
+                            height={showWaveform ? 140 : 120}
+                        />
+                    </div>
                     <canvas
                         className='individuals-canvas'
                         ref={individualsCanvasRef}
                         width={200}
-                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + 15}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                     />
                 </div>
 
-                <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseUp}>
+                <div className='waveform-spec-labels-canvases-container' onMouseLeave={handleMouseLeaveCanvases}>
                     <canvas
-                        className='waveform-canvas'
+                        className={showWaveform ? 'waveform-canvas' : 'hidden'}
                         ref={waveformCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={80}
+                        height={60}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -1896,7 +2068,7 @@ function ScalableSpec(
                         className='spec-canvas'
                         ref={specCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={150}
+                        height={120}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -1906,7 +2078,7 @@ function ScalableSpec(
                         className='label-canvas'
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
-                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES + HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                         onMouseDown={handleLMBDown}
                         onMouseUp={handleMouseUp}
                         onContextMenu={handleRightClick}
@@ -1914,6 +2086,7 @@ function ScalableSpec(
                     />
                     {
                         expandedLabel &&
+                        createPortal(
                             <LabelWindow
                                 speciesArray={speciesArray}
                                 labels={labels}
@@ -1921,9 +2094,11 @@ function ScalableSpec(
                                 passLabelsToScalableSpec={passLabelsToScalableSpec}
                                 passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
                                 getAllIndividualIDs={getAllIndividualIDs}
-                                calculateXPosition={calculateXPosition}
-                                HEIGHT_BETWEEN_INDIVIDUAL_LINES={HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                            />
+                                globalMouseCoordinates={globalMouseCoordinates}
+                                getAudio={getAudio}
+                            />,
+                            document.body
+                        )
                     }
                     {spectrogramIsLoading || whisperSegIsLoading? <Box sx={{ width: '100%' }}><LinearProgress /></Box> : ''}
                 </div>

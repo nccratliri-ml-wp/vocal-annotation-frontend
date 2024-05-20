@@ -2,22 +2,25 @@ import React, {useEffect, useState} from 'react';
 
 function Parameters(
         {
+            showLocalConfigWindow,
             specCalMethod,
             nfft,
             binsPerOctave,
             minFreq,
             maxFreq,
+            passShowLocalConfigWindowToScalableSpec,
             passSpecCalMethodToScalableSpec,
             passNfftToScalableSpec,
             passBinsPerOctaveToScalableSpec,
             passMinFreqToScalableSpec,
             passMaxFreqToScalableSpec,
-            submitLocalParameters
+            submitLocalParameters,
+            strictMode
         }
     )
 {
 
-    const [showConfigPanel, setShowConfigPanel] = useState(false)
+
     const [showNFftInput, setShowNFftInput] = useState(true)
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
@@ -42,7 +45,7 @@ function Parameters(
     }
 
     const handleSubmit = () => {
-        setShowConfigPanel(false)
+        passShowLocalConfigWindowToScalableSpec(false)
         submitLocalParameters()
     }
 
@@ -74,18 +77,22 @@ function Parameters(
 
     return (
         <>
-            <button onClick={ () => setShowConfigPanel(!showConfigPanel) }>Show ConfigPanel</button>
         {
-            showConfigPanel &&
+            showLocalConfigWindow &&
             <div
                 className="local-parameters-config-panel"
             >
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={ () => passShowLocalConfigWindowToScalableSpec(false) }>✖</button>
+                    <p className='window-header'>Track Parameters</p>
+                </div>
 
-                <div>
+                <div className={'local-config-window-label'}>
                     <label>
                         <input
                             type="radio"
                             value="log-mel"
+                            disabled={strictMode && specCalMethod !== 'log-mel'}
                             checked={specCalMethod === 'log-mel'}
                             onChange={() => handleRadioChange('log-mel')}
                         />
@@ -93,11 +100,12 @@ function Parameters(
                     </label>
                     {showNFftInput && (
                         <label>
-                            N-FFT:
+                            N-FFT
                             <input
                                 type="number"
                                 value={nfft}
-                                min={0}
+                                min={5}
+                                disabled={strictMode}
                                 onChange={handleNFftInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
@@ -107,11 +115,12 @@ function Parameters(
                     )}
                 </div>
 
-                <div>
+                <div className={'local-config-window-label'}>
                     <label>
                         <input
                             type="radio"
                             value="constant-q"
+                            disabled={strictMode && specCalMethod !== 'constant-q'}
                             checked={specCalMethod === 'constant-q'}
                             onChange={() => handleRadioChange('constant-q')}
                         />
@@ -119,11 +128,12 @@ function Parameters(
                     </label>
                     {showBinsPerOctaveInput && (
                         <label>
-                            BPO:
+                            BPO
                             <input
                                 type="number"
                                 value={binsPerOctave}
-                                min={0}
+                                min={25}
+                                disabled={strictMode}
                                 onChange={handleBinsPerOctaveInputChange}
                                 onKeyPress={excludeNonDigits}
                                 onFocus={(event) => event.target.select()}
@@ -133,25 +143,27 @@ function Parameters(
                     )}
                 </div>
 
-                <div>
-                    <label>
+                <div className='frequencies-labels-container'>
+                    <label className={'local-config-window-label'}>
                         Min Freq
                         <input
                             type="number"
                             value={minFreq}
                             min={0}
+                            disabled={strictMode}
                             onChange={handleMinFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
                             onPaste={(event) => event.preventDefault()}
                         />
                     </label>
-                    <label>
+                    <label className={'local-config-window-label'}>
                         Max Freq
                         <input
                             type="number"
                             value={maxFreq}
                             min={0}
+                            disabled={strictMode}
                             onChange={handleMaxFreqInputChange}
                             onKeyPress={excludeNonDigits}
                             onFocus={(event) => event.target.select()}
@@ -160,7 +172,10 @@ function Parameters(
                     </label>
                 </div>
 
-                <button onClick={handleSubmit}>Submit All</button>
+                <div className={'local-config-window-label'}>
+                    <button onClick={() => passShowLocalConfigWindowToScalableSpec(false)}>Cancel</button>
+                    <button disabled={strictMode} onClick={handleSubmit}>Submit</button>
+                </div>
 
             </div>
         }

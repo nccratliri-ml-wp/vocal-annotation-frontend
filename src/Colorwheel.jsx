@@ -6,9 +6,14 @@ function Colorwheel( { toggleColorwheel, passChosenColorToAnnotationLabels, sele
     const [disableAlpha, setDisableAlpha] = useState(false)
 
     return (
-        <div className='colorwheel'>
+        <div className='colorwheel' >
+            <div className='close-btn-container'>
+                <button className='close-btn' onClick={() => toggleColorwheel(selectedID, selectedClustername)}>
+                    ✖
+                </button>
+            </div>
             <Sketch
-                style={{ marginTop: 40 }}
+                style={{ borderRadius: 0 }}
                 color={hex}
                 disableAlpha={disableAlpha}
                 onChange={(color) => {
@@ -16,9 +21,6 @@ function Colorwheel( { toggleColorwheel, passChosenColorToAnnotationLabels, sele
                     passChosenColorToAnnotationLabels(selectedID, selectedClustername, color.hex)
                 }}
             />
-            <button onClick={() => toggleColorwheel(selectedID, selectedClustername)}>
-                Close
-            </button>
         </div>
     )
 }

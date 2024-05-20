@@ -2,7 +2,7 @@ import React from "react"
 import IconButton from "@material-ui/core/IconButton"
 import Tooltip from "@material-ui/core/Tooltip"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
-import { icon } from "./styles.js"
+import {globalControlsBtn, icon} from "./styles.js"
 
 function ImportCSV( {passCsvImportedLabelsToApp} ) {
 
@@ -78,7 +78,10 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
     return (
         <Tooltip title="Import CSV">
             <div style={{display: 'inline'}}>
-                <IconButton onClick={handleClick}>
+                <IconButton
+                    style={globalControlsBtn}
+                    onClick={handleClick}
+                >
                     <UploadFileIcon style={icon} />
                 </IconButton>
                 <input

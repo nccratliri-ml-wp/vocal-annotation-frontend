@@ -97,8 +97,6 @@ function App() {
 
     const [allLabels, setAllLabels] = useState({})
 
-    const [channels, setChannels] = useState(null)
-
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passTrackDurationToApp( newTrackDuration ) {
@@ -188,7 +186,7 @@ function App() {
         )
 
         if (!firstFalseTrack) return
-        console.log('got here')
+
         setTracks({
             ...tracks,
             [firstFalseTrack]: {visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
@@ -371,40 +369,67 @@ function App() {
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
     /*
-        1. Make a new handleUploadRepsonse function.
+        1. Make a new handleUploadRepsonse function. DONE
         1.1 Clicking the upload button does the following:
-            a) for each channel in the audio track, add the response to the reponse state array in App.jsx
-        2. Store all responses in a state array in app {trackId: response}
-        3. Remove response state in scalable spec
-        4. Feed responses to scalable spec
-        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does
+            a) for each channel in the audio track, add the response to the reponse state array in App.jsx DONE
+        2. Store all responses in a state array in app {trackId: response} DONE
+        3. Remove response state in scalable spec DONE
+        4. Feed responses to scalable spec DONE
+        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE, but do better
         6. pass handleUploadResponse to all other instances of Scalable Spec
+        6.1 Refactor track durations into tracks
+        6.2 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
         7. Adapt uploadbyURL method
+
+
      */
 
     const handleUploadResponse = (newResponse) => {
+        // Update tracks
         const newChannels = newResponse.data.channels
-        console.log(newResponse)
 
-        // Count the number of currently visible channels to get the correct starting point for the for loop
-        let i = Object.values(tracks).filter(value =>  value === true)
+        setTracks(prevTracks => {
+            const updatedTracks = { ...prevTracks }
 
-        // For each channel, turn on the track's visibility
-        /*
-        const newtracksObj = {}
-        for (let i = 0; i <= 20; i++) {
-            newtracksObj[`track_${i}`] = i <= newChannels.length
-        }
-        setTracks(newtracksObj)*/
+            let i = 1
+            for (const channel of newChannels) {
+                const trackKey = `track_${i}`
 
-        for (const channel of newChannels){
-            setChannels(
-                {
-                    ...channels,
+                updatedTracks[trackKey] = {
+                    ...updatedTracks[trackKey],
+                    visible: true,
+                    audioDuration: channel.audio_duration,
+                    audioID: channel.audio_id,
+                    frequencies: channel.freqs,
+                    spectrogram: channel.spec
                 }
-            )
+
+                i++
+            }
+
+            return updatedTracks
+        })
+
+        // Update Global Values
+        const newConfigurations = newResponse.data.configurations
+
+        const trackDuration = newChannels[0].audio_duration
+        const hopLength = newConfigurations.hop_length
+        const numSpecColumns = newConfigurations.num_spec_columns
+        const samplingRate = newConfigurations.sampling_rate
+        const defaultConfig = {
+            hop_length: hopLength,
+            num_spec_columns: numSpecColumns,
+            sampling_rate: samplingRate
         }
+
+        passTrackDurationToApp( trackDuration )
+        setGlobalHopLength( hopLength )
+        setGlobalNumSpecColumns( numSpecColumns )
+        setGlobalSamplingRate( samplingRate )
+        setDefaultConfig( defaultConfig )
     }
+
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
@@ -571,8 +596,9 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_1'] : null}
+                        csvImportedLabels={csvImportedLabels ? csvImportedLabels['track_1'] : null}
                         handleUploadResponse={handleUploadResponse}
+                        response={tracks['track_1']}
                     />
                 }
                 {tracks.track_2.visible &&
@@ -610,6 +636,7 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
                         handleUploadResponse={handleUploadResponse}
+                        response={tracks['track_2']}
                     />
                 }
                 {tracks.track_3.visible &&
@@ -646,6 +673,7 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
+                        response={tracks['track_3']}
                     />
                 }
                 {tracks.track_4.visible &&
@@ -682,6 +710,7 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
+                        response={tracks['track_4']}
                     />
                 }
                 {tracks.track_5.visible  &&
@@ -718,6 +747,7 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
+                        response={tracks['track_5']}
                     />
                 }
                 {tracks.track_6.visible  &&
@@ -754,6 +784,7 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
+                        response={tracks['track_6']}
                     />
                 }
                 {tracks.track_7.visible  &&

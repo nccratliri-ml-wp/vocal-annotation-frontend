@@ -70,7 +70,8 @@ function ScalableSpec(
                             strictMode,
                             passLabelsToApp,
                             csvImportedLabels,
-                            handleUploadResponse
+                            handleUploadResponse,
+                            response
                         }
                     )
                 {
@@ -119,7 +120,7 @@ function ScalableSpec(
     const [showWaveform, setShowWaveform] =  useState(true)
 
     // File Upload
-    const [response, setResponse] = useState(null)
+    //const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
     // Local Parameters
@@ -1853,7 +1854,11 @@ function ScalableSpec(
     useEffect( () => {
             if (!response) return
 
-            setAudioId(response.audio_id)
+            console.log('inside the use effect')
+            console.log(response)
+            setAudioId(response.audioID)
+            setFrequencies(response.frequencies)
+            setSpectrogram(response.spectrogram)
 
             const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
 

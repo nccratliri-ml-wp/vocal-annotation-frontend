@@ -257,6 +257,7 @@ function ScalableSpec(
             audioSnippet.currentTime = currentStartTime
         }
 
+        setSpectrogramIsLoading(true)
         getSpecAndAudioArray()
     }
 
@@ -320,8 +321,6 @@ function ScalableSpec(
         setBinsPerOctave( newBinsPerOctave ? newBinsPerOctave : 0)
         setMinFreq( newMinFreq ? newMinFreq : 0)
         setMaxFreq( newMaxFreq ? newMaxFreq : 16000)
-
-
     }
 
     const handleUploadError = (error) => {

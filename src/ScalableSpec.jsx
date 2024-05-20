@@ -69,7 +69,8 @@ function ScalableSpec(
                             passActiveLabelToApp,
                             strictMode,
                             passLabelsToApp,
-                            csvImportedLabels
+                            csvImportedLabels,
+                            handleUploadResponse
                         }
                     )
                 {
@@ -284,6 +285,9 @@ function ScalableSpec(
         }
     }
 
+
+
+    /*
     const handleUploadResponse = (newResponse) => {
         const trackDuration = newResponse.data.channels[0].audio_duration
         const hopLength = newResponse.data.configurations.hop_length
@@ -322,6 +326,7 @@ function ScalableSpec(
         setMinFreq( newMinFreq ? newMinFreq : 0)
         setMaxFreq( newMaxFreq ? newMaxFreq : 16000)
     }
+     */
 
     const handleUploadError = (error) => {
         setSpectrogramIsLoading( false )

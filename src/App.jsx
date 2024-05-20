@@ -37,7 +37,6 @@ function App() {
     const [csvImportedLabels, setCsvImportedLabels] = useState(null);
 
     const [speciesArray, setSpeciesArray] = useState(() => {
-
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
         const annotatedAreaClustername = new Clustername(nanoid(), ANNOTATED_AREA_CLUSTERNAME, ANNOTATED_AREA_COLOR)
         annotatedAreaIndividual.isActive = false
@@ -54,27 +53,27 @@ function App() {
     const [deletedItemID, setDeletedItemID] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
-    const [showTracks, setShowTracks] = useState({
-        track_1: true,
-        track_2: false,
-        track_3: false,
-        track_4: false,
-        track_5: false,
-        track_6: false,
-        track_7: false,
-        track_8: false,
-        track_9: false,
-        track_10: false,
-        track_11: false,
-        track_12: false,
-        track_13: false,
-        track_14: false,
-        track_15: false,
-        track_16: false,
-        track_17: false,
-        track_18: false,
-        track_19: false,
-        track_20: false,
+    const [tracks, setTracks] = useState({
+        track_1: {visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_2: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_3: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_4: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_5: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_6: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_7: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_8: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_9: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_10: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_11: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_12: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_13: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_14: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_15: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_16: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_17: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_18: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_19: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        track_20: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
     })
 
     // General
@@ -97,6 +96,8 @@ function App() {
     const [activeLabel, setActiveLabel] = useState(null)
 
     const [allLabels, setAllLabels] = useState({})
+
+    const [channels, setChannels] = useState(null)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -182,22 +183,22 @@ function App() {
     }
 
     function addTrack(){
-        const firstFalseTrack = Object.keys(showTracks).find(
-            trackKey => !showTracks[trackKey]
+        const firstFalseTrack = Object.keys(tracks).find(
+            trackKey => !tracks[trackKey].visible
         )
 
         if (!firstFalseTrack) return
-
-        setShowTracks({
-            ...showTracks,
-            [firstFalseTrack]: true
+        console.log('got here')
+        setTracks({
+            ...tracks,
+            [firstFalseTrack]: {visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
         })
     }
 
     function removeTrackInApp( trackID ){
-        setShowTracks({
-            ...showTracks,
-            [trackID]: false
+        setTracks({
+            ...tracks,
+            [trackID]: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
         })
         setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would replaced by the config of another
     }
@@ -367,6 +368,44 @@ function App() {
         setSpeciesArray(updatedSpeciesArray)
     }
 
+    /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
+
+    /*
+        1. Make a new handleUploadRepsonse function.
+        1.1 Clicking the upload button does the following:
+            a) for each channel in the audio track, add the response to the reponse state array in App.jsx
+        2. Store all responses in a state array in app {trackId: response}
+        3. Remove response state in scalable spec
+        4. Feed responses to scalable spec
+        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does
+        6. pass handleUploadResponse to all other instances of Scalable Spec
+        7. Adapt uploadbyURL method
+     */
+
+    const handleUploadResponse = (newResponse) => {
+        const newChannels = newResponse.data.channels
+        console.log(newResponse)
+
+        // Count the number of currently visible channels to get the correct starting point for the for loop
+        let i = Object.values(tracks).filter(value =>  value === true)
+
+        // For each channel, turn on the track's visibility
+        /*
+        const newtracksObj = {}
+        for (let i = 0; i <= 20; i++) {
+            newtracksObj[`track_${i}`] = i <= newChannels.length
+        }
+        setTracks(newtracksObj)*/
+
+        for (const channel of newChannels){
+            setChannels(
+                {
+                    ...channels,
+                }
+            )
+        }
+    }
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     useEffect( () => {
@@ -397,11 +436,11 @@ function App() {
         setAudioPayloads(decodedData)
 
         // For each audio payload, turn on the track's visibility
-        const newShowTracksObj = {}
+        const newtracksObj = {}
         for (let i = 1; i <= 20; i++) {
-            newShowTracksObj[`track_${i}`] = i <= decodedData.length
+            newtracksObj[`track_${i}`] = i <= decodedData.length
         }
-        setShowTracks(newShowTracksObj)
+        setTracks(newtracksObj)
 
         // Create Species, Individuals and clustername buttons deriving from the imported labels
         const urlImportedLabels = decodedData.flatMap(audioPayload => audioPayload.labels || [])
@@ -499,7 +538,7 @@ function App() {
                         strictMode={strictMode}
                     />
                 }
-                {showTracks.track_1 &&
+                {tracks.track_1.visible &&
                     <ScalableSpec
                         trackID='track_1'
                         speciesArray={speciesArray}
@@ -533,9 +572,10 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_1'] : null}
+                        handleUploadResponse={handleUploadResponse}
                     />
                 }
-                {showTracks.track_2 &&
+                {tracks.track_2.visible &&
                     <ScalableSpec
                         trackID='track_2'
                         speciesArray={speciesArray}
@@ -569,9 +609,10 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
+                        handleUploadResponse={handleUploadResponse}
                     />
                 }
-                {showTracks.track_3 &&
+                {tracks.track_3.visible &&
                     <ScalableSpec
                         trackID='track_3'
                         speciesArray={speciesArray}
@@ -607,7 +648,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
                     />
                 }
-                {showTracks.track_4 &&
+                {tracks.track_4.visible &&
                     <ScalableSpec
                         trackID='track_4'
                         speciesArray={speciesArray}
@@ -643,7 +684,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
                     />
                 }
-                {showTracks.track_5 &&
+                {tracks.track_5.visible  &&
                     <ScalableSpec
                         trackID='track_5'
                         speciesArray={speciesArray}
@@ -679,7 +720,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
                     />
                 }
-                {showTracks.track_6 &&
+                {tracks.track_6.visible  &&
                     <ScalableSpec
                         trackID='track_6'
                         speciesArray={speciesArray}
@@ -715,7 +756,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
                     />
                 }
-                {showTracks.track_7 &&
+                {tracks.track_7.visible  &&
                     <ScalableSpec
                         trackID='track_7'
                         speciesArray={speciesArray}
@@ -751,7 +792,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_7'] : null}
                     />
                 }
-                {showTracks.track_8 &&
+                {tracks.track_8.visible  &&
                     <ScalableSpec
                         trackID='track_8'
                         speciesArray={speciesArray}
@@ -787,7 +828,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_8'] : null}
                     />
                 }
-                {showTracks.track_9 &&
+                {tracks.track_9.visible  &&
                     <ScalableSpec
                         trackID='track_9'
                         speciesArray={speciesArray}
@@ -823,7 +864,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_9'] : null}
                     />
                 }
-                {showTracks.track_10 &&
+                {tracks.track_10.visible  &&
                     <ScalableSpec
                         trackID='track_10'
                         speciesArray={speciesArray}
@@ -859,7 +900,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_10'] : null}
                     />
                 }
-                {showTracks.track_11 &&
+                {tracks.track_11.visible  &&
                     <ScalableSpec
                         trackID='track_11'
                         speciesArray={speciesArray}
@@ -895,7 +936,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_11'] : null}
                     />
                 }
-                {showTracks.track_12 &&
+                {tracks.track_12.visible  &&
                     <ScalableSpec
                         trackID='track_12'
                         speciesArray={speciesArray}
@@ -931,7 +972,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_12'] : null}
                     />
                 }
-                {showTracks.track_13 &&
+                {tracks.track_13.visible  &&
                     <ScalableSpec
                         trackID='track_13'
                         speciesArray={speciesArray}
@@ -967,7 +1008,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_13'] : null}
                     />
                 }
-                {showTracks.track_14 &&
+                {tracks.track_14.visible  &&
                     <ScalableSpec
                         trackID='track_14'
                         speciesArray={speciesArray}
@@ -1003,7 +1044,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_14'] : null}
                     />
                 }
-                {showTracks.track_15 &&
+                {tracks.track_15.visible  &&
                     <ScalableSpec
                         trackID='track_15'
                         speciesArray={speciesArray}
@@ -1039,7 +1080,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_15'] : null}
                     />
                 }
-                {showTracks.track_16 &&
+                {tracks.track_16.visible  &&
                     <ScalableSpec
                         trackID='track_16'
                         speciesArray={speciesArray}
@@ -1075,7 +1116,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_16'] : null}
                     />
                 }
-                {showTracks.track_17 &&
+                {tracks.track_17.visible  &&
                     <ScalableSpec
                         trackID='track_17'
                         speciesArray={speciesArray}
@@ -1111,7 +1152,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_17'] : null}
                     />
                 }
-                {showTracks.track_18 &&
+                {tracks.track_18.visible  &&
                     <ScalableSpec
                         trackID='track_18'
                         speciesArray={speciesArray}
@@ -1147,7 +1188,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_18'] : null}
                     />
                 }
-                {showTracks.track_19 &&
+                {tracks.track_19.visible  &&
                     <ScalableSpec
                         trackID='track_19'
                         speciesArray={speciesArray}
@@ -1183,7 +1224,7 @@ function App() {
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_19'] : null}
                     />
                 }
-                {showTracks.track_20 &&
+                {tracks.track_20.visible  &&
                     <ScalableSpec
                         trackID='track_20'
                         speciesArray={speciesArray}

@@ -53,28 +53,28 @@ function App() {
     const [deletedItemID, setDeletedItemID] = useState(null)
 
     const [trackDurations, setTrackDurations] = useState([])
-    const [tracks, setTracks] = useState({
-        track_1: {visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_2: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_3: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_4: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_5: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_6: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_7: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_8: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_9: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_10: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_11: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_12: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_13: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_14: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_15: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_16: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_17: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_18: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_19: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        track_20: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-    })
+    const [tracks, setTracks] = useState([
+        {trackID: 0, visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 1, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 2, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 3, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 4, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 5, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 6, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 7, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 8, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 9, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 10, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 11, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 12, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 13, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 14, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 15, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 16, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 17, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 18, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 19, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+    ])
 
     // General
     const [globalAudioDuration, setGlobalAudioDuration] = useState(null)
@@ -181,24 +181,33 @@ function App() {
     }
 
     function addTrack(){
-        const firstFalseTrack = Object.keys(tracks).find(
-            trackKey => !tracks[trackKey].visible
-        )
+        const firstFalseTrack = tracks.find(track => !track.visible)
 
         if (!firstFalseTrack) return
 
-        setTracks({
-            ...tracks,
-            [firstFalseTrack]: {visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
+        const updatedTracks = tracks.map( track => {
+            if (track.trackID === firstFalseTrack.trackID){
+                return {...track, visible: true}
+            } else {
+                return track
+            }
         })
+
+        setTracks(updatedTracks)
     }
 
     function removeTrackInApp( trackID ){
-        setTracks({
-            ...tracks,
-            [trackID]: {visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
+        const updatedTracks = tracks.map( track => {
+            if (track.trackID === trackID){
+                return {...track, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
+            } else {
+                return track
+            }
         })
-        setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would replaced by the config of another
+
+        setTracks(updatedTracks)
+
+        setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would be replaced by the config of another
     }
 
 
@@ -376,9 +385,12 @@ function App() {
         3. Remove response state in scalable spec DONE
         4. Feed responses to scalable spec DONE
         5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE
-        6. pass handleUploadResponse to all other instances of Scalable Spec
-        6.1 Refactor track durations into tracks
-        6.2 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
+        6. pass handleUploadResponse to all other instances of Scalable Spec DONE
+        6.1 Fix issue: when uploading single file and then uploading multi-channel file, there is a key error in the backend
+        6.2
+        6.3 Refactor track durations into tracks
+        6.3.1 Display filenames as the button name
+        6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
         7. Adapt uploadbyURL method
 
      */
@@ -387,6 +399,7 @@ function App() {
         // Update tracks
         const newChannels = newResponse.data.channels
 
+        /*
         setTracks(prevTracks => {
             const updatedTracks = { ...prevTracks }
 
@@ -407,7 +420,25 @@ function App() {
             }
 
             return updatedTracks
+        })*/
+
+        const updatedTracks = tracks.map( (track, i) => {
+            if (newChannels[i]){
+                return {
+                    trackID: i,
+                    visible: true,
+                    audioDuration: newChannels[i].audio_duration,
+                    audioID: newChannels[i].audio_id,
+                    frequencies: newChannels[i].freqs,
+                    spectrogram: newChannels[i].spec
+                }
+            } else {
+                return track
+            }
+
         })
+
+        setTracks(updatedTracks)
 
         // Update Global Values
         const newConfigurations = newResponse.data.configurations
@@ -562,9 +593,9 @@ function App() {
                         strictMode={strictMode}
                     />
                 }
-                {tracks.track_1.visible &&
+                {tracks[0].visible &&
                     <ScalableSpec
-                        trackID='track_1'
+                        trackID={tracks[0].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={true}
@@ -597,12 +628,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels ? csvImportedLabels['track_1'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_1']}
+                        trackData={tracks[0]}
                     />
                 }
-                {tracks.track_2.visible &&
+                {tracks[1].visible &&
                     <ScalableSpec
-                        trackID='track_2'
+                        trackID={tracks[1].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -635,12 +666,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_2']}
+                        trackData={tracks[1]}
                     />
                 }
-                {tracks.track_3.visible &&
+                {tracks[2].visible &&
                     <ScalableSpec
-                        trackID='track_3'
+                        trackID={tracks[2].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -673,12 +704,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_3']}
+                        trackData={tracks[2]}
                     />
                 }
-                {tracks.track_4.visible &&
+                {tracks[3].visible &&
                     <ScalableSpec
-                        trackID='track_4'
+                        trackID={tracks[3].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -711,12 +742,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_4']}
+                        trackData={tracks[3]}
                     />
                 }
-                {tracks.track_5.visible  &&
+                {tracks[4].visible  &&
                     <ScalableSpec
-                        trackID='track_5'
+                        trackID={tracks[4].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -749,12 +780,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_5']}
+                        trackData={tracks[4]}
                     />
                 }
-                {tracks.track_6.visible  &&
+                {tracks[5].visible  &&
                     <ScalableSpec
-                        trackID='track_6'
+                        trackID={tracks[5].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -787,12 +818,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_6']}
+                        trackData={tracks[5]}
                     />
                 }
-                {tracks.track_7.visible  &&
+                {tracks[6].visible  &&
                     <ScalableSpec
-                        trackID='track_7'
+                        trackID={tracks[6].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -825,12 +856,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_7'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_7']}
+                        trackData={tracks[6]}
                     />
                 }
-                {tracks.track_8.visible  &&
+                {tracks[7].visible  &&
                     <ScalableSpec
-                        trackID='track_8'
+                        trackID={tracks[7].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -863,12 +894,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_8'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_8']}
+                        trackData={tracks[7]}
                     />
                 }
-                {tracks.track_9.visible  &&
+                {tracks[8].visible  &&
                     <ScalableSpec
-                        trackID='track_9'
+                        trackID={tracks[8].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -901,12 +932,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_9'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_9']}
+                        trackData={tracks[8]}
                     />
                 }
-                {tracks.track_10.visible  &&
+                {tracks[9].visible  &&
                     <ScalableSpec
-                        trackID='track_10'
+                        trackID={tracks[9].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -939,12 +970,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_10'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_10']}
+                        trackData={tracks[9]}
                     />
                 }
-                {tracks.track_11.visible  &&
+                {tracks[10].visible  &&
                     <ScalableSpec
-                        trackID='track_11'
+                        trackID={tracks[10].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -977,12 +1008,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_11'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_11']}
+                        trackData={tracks[10]}
                     />
                 }
-                {tracks.track_12.visible  &&
+                {tracks[11].visible  &&
                     <ScalableSpec
-                        trackID='track_12'
+                        trackID={tracks[11].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1015,12 +1046,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_12'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_12']}
+                        trackData={tracks[11]}
                     />
                 }
-                {tracks.track_13.visible  &&
+                {tracks[12].visible  &&
                     <ScalableSpec
-                        trackID='track_13'
+                        trackID={tracks[12].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1053,12 +1084,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_13'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_13']}
+                        trackData={tracks[12]}
                     />
                 }
-                {tracks.track_14.visible  &&
+                {tracks[13].visible  &&
                     <ScalableSpec
-                        trackID='track_14'
+                        trackID={tracks[13].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1091,12 +1122,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_14'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_14']}
+                        trackData={tracks[13]}
                     />
                 }
-                {tracks.track_15.visible  &&
+                {tracks[14].visible  &&
                     <ScalableSpec
-                        trackID='track_15'
+                        trackID={tracks[14].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1129,12 +1160,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_15'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_15']}
+                        trackData={tracks[14]}
                     />
                 }
-                {tracks.track_16.visible  &&
+                {tracks[15].visible  &&
                     <ScalableSpec
-                        trackID='track_16'
+                        trackID={tracks[15].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1167,12 +1198,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_16'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_16']}
+                        trackData={tracks[15]}
                     />
                 }
-                {tracks.track_17.visible  &&
+                {tracks[16].visible  &&
                     <ScalableSpec
-                        trackID='track_17'
+                        trackID={tracks[16].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1205,12 +1236,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_17'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_17']}
+                        trackData={tracks[16]}
                     />
                 }
-                {tracks.track_18.visible  &&
+                {tracks[17].visible  &&
                     <ScalableSpec
-                        trackID='track_18'
+                        trackID={tracks[17].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1243,12 +1274,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_18'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_18']}
+                        trackData={tracks[17]}
                     />
                 }
-                {tracks.track_19.visible  &&
+                {tracks[18].visible  &&
                     <ScalableSpec
-                        trackID='track_19'
+                        trackID={tracks[18].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1281,12 +1312,12 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_19'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_19']}
+                        trackData={tracks[18]}
                     />
                 }
-                {tracks.track_20.visible  &&
+                {tracks[19].visible  &&
                     <ScalableSpec
-                        trackID='track_20'
+                        trackID={tracks[19].trackID}
                         speciesArray={speciesArray}
                         deletedItemID={deletedItemID}
                         showOverviewInitialValue={false}
@@ -1319,7 +1350,7 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_20'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        trackData={tracks['track_20']}
+                        trackData={tracks[19]}
                     />
                 }
                 <Tooltip title="Add New Track">

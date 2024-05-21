@@ -1841,7 +1841,7 @@ function ScalableSpec(
 
     // When user zoomed or scrolled
     useEffect( () => {
-            if (!globalClipDuration || !trackData) return
+            if (!globalClipDuration || !trackData.audioID) return
 
             if (audioSnippet) {
                 audioSnippet.pause()
@@ -1855,11 +1855,15 @@ function ScalableSpec(
 
     // When a new audio file was uploaded
     useEffect( () => {
-            if (!trackData) return
+            if (!trackData.audioID) return
 
+            // Update track specific values
             setAudioId(trackData.audioID)
             setFrequencies(trackData.frequencies)
             setSpectrogram(trackData.spectrogram)
+
+            // Close Label Window
+            setExpandedLabel(null)
 
             const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
 
@@ -1875,7 +1879,7 @@ function ScalableSpec(
                 passLabelsToApp([], trackID)
             }
 
-    }, [trackData])
+    }, [trackData.audioID])
 
                     /*
     // When a new CSV File was uploaded
@@ -1896,6 +1900,7 @@ function ScalableSpec(
     }, [audioSnippet] )
 
     // When globalAudioDuration is updated in the App component
+
     useEffect( () => {
         if (!globalAudioDuration || !trackData ) return
 
@@ -2023,6 +2028,7 @@ function ScalableSpec(
                                 <StopIcon style={activeIcon}/>
                             </IconButton>
                         </div>
+                        {audioId?.substring(0,16)}
                         <Parameters
                             showLocalConfigWindow={showLocalConfigWindow}
                             specCalMethod={specCalMethod}

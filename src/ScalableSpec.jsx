@@ -71,7 +71,7 @@ function ScalableSpec(
                             passLabelsToApp,
                             csvImportedLabels,
                             handleUploadResponse,
-                            response
+                            trackData
                         }
                     )
                 {
@@ -240,6 +240,7 @@ function ScalableSpec(
                     getAudioArray()
                 ]
             )
+
             drawEditorCanvases(data.spec, data.freqs, newAudioArray)
             setSpectrogramIsLoading(false)
             setSpectrogram(data.spec)
@@ -252,7 +253,7 @@ function ScalableSpec(
     }
 
     const submitLocalParameters = () => {
-        if (!globalClipDuration || !response) return
+        if (!globalClipDuration || !trackData) return
 
         if (audioSnippet) {
             audioSnippet.pause()
@@ -1585,16 +1586,17 @@ function ScalableSpec(
         const response = await axios.post(path, requestParameters);
 
         return response.data.wav_array
-    };
+    }
 
     const drawWaveform = (newAudioArray) => {
         if (!waveformCanvasRef.current) return
+
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
         canvas.width = parent.innerWidth - 200
 
         const centerY = canvas.height / 2
-        const ratio = Math.min((response.audio_duration - currentStartTime) / globalClipDuration, 1)
+        const ratio = Math.min((trackData.audioDuration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
         for (let i=0; i < newAudioArray.length; i++) {
@@ -1637,8 +1639,8 @@ function ScalableSpec(
     const handleRemoveTrack = () => {
         if (!confirm('Removing this track will delete any annotations you have made in it.')) return
 
-        if (response){
-            deletePreviousTrackDurationInApp( response.audio_duration )
+        if (trackData){
+            deletePreviousTrackDurationInApp( trackData.audioDuration )
         }
         removeTrackInApp(trackID)
     }
@@ -1758,6 +1760,7 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
+
         drawEditorCanvases(spectrogram, frequencies,audioArray)
     }, [labels, waveformScale, showWaveform] )
 
@@ -1838,7 +1841,7 @@ function ScalableSpec(
 
     // When user zoomed or scrolled
     useEffect( () => {
-            if (!globalClipDuration || !response) return
+            if (!globalClipDuration || !trackData) return
 
             if (audioSnippet) {
                 audioSnippet.pause()
@@ -1850,15 +1853,13 @@ function ScalableSpec(
     }, [currentStartTime, globalClipDuration, audioId])
 
 
-    // When a new audio file is uploaded:
+    // When a new audio file was uploaded
     useEffect( () => {
-            if (!response) return
+            if (!trackData) return
 
-            console.log('inside the use effect')
-            console.log(response)
-            setAudioId(response.audioID)
-            setFrequencies(response.frequencies)
-            setSpectrogram(response.spectrogram)
+            setAudioId(trackData.audioID)
+            setFrequencies(trackData.frequencies)
+            setSpectrogram(trackData.spectrogram)
 
             const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
 
@@ -1874,7 +1875,7 @@ function ScalableSpec(
                 passLabelsToApp([], trackID)
             }
 
-    }, [response])
+    }, [trackData])
 
                     /*
     // When a new CSV File was uploaded
@@ -1896,7 +1897,7 @@ function ScalableSpec(
 
     // When globalAudioDuration is updated in the App component
     useEffect( () => {
-        if (!globalAudioDuration || !response ) return
+        if (!globalAudioDuration || !trackData ) return
 
         playheadRef.current.timeframe = 0
 
@@ -1918,7 +1919,7 @@ function ScalableSpec(
         const newEndTime = newStartTime + newDuration
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
 
-    }, [response, globalAudioDuration] )
+    }, [trackData, globalAudioDuration] )
 
     // When on of the audio payloads in the URL data parameter was assigned to this track
     useEffect( () => {
@@ -1936,7 +1937,7 @@ function ScalableSpec(
             className='editor-container'
             onMouseLeave={handleMouseLeave}
         >
-            {showOverviewInitialValue && response &&
+            {showOverviewInitialValue && trackData &&
                 <div className='overview-time-axis-container'>
                     <canvas
                         className='overview-canvas'
@@ -1983,8 +1984,8 @@ function ScalableSpec(
                         />
                         <div>
                             <Tooltip title="Call WhisperSeg">
-                                <IconButton style={{...activeIconBtnStyle, ...((strictMode || !response) && iconBtnDisabled)}}
-                                            disabled={strictMode || !response}
+                                <IconButton style={{...activeIconBtnStyle, ...((strictMode || !labels.length) && iconBtnDisabled)}}
+                                            disabled={strictMode || !labels.length}
                                             onClick={callWhisperSeg}
                                 >
                                     <AutoFixHighIcon style={activeIcon}/>

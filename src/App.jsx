@@ -375,12 +375,11 @@ function App() {
         2. Store all responses in a state array in app {trackId: response} DONE
         3. Remove response state in scalable spec DONE
         4. Feed responses to scalable spec DONE
-        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE, but do better
+        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE
         6. pass handleUploadResponse to all other instances of Scalable Spec
         6.1 Refactor track durations into tracks
         6.2 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
         7. Adapt uploadbyURL method
-
 
      */
 
@@ -598,7 +597,7 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels ? csvImportedLabels['track_1'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        response={tracks['track_1']}
+                        trackData={tracks['track_1']}
                     />
                 }
                 {tracks.track_2.visible &&
@@ -636,7 +635,7 @@ function App() {
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
                         handleUploadResponse={handleUploadResponse}
-                        response={tracks['track_2']}
+                        trackData={tracks['track_2']}
                     />
                 }
                 {tracks.track_3.visible &&
@@ -673,7 +672,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
-                        response={tracks['track_3']}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_3']}
                     />
                 }
                 {tracks.track_4.visible &&
@@ -710,7 +710,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
-                        response={tracks['track_4']}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_4']}
                     />
                 }
                 {tracks.track_5.visible  &&
@@ -747,7 +748,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
-                        response={tracks['track_5']}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_5']}
                     />
                 }
                 {tracks.track_6.visible  &&
@@ -784,7 +786,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
-                        response={tracks['track_6']}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_6']}
                     />
                 }
                 {tracks.track_7.visible  &&
@@ -821,6 +824,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_7'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_7']}
                     />
                 }
                 {tracks.track_8.visible  &&
@@ -857,6 +862,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_8'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_8']}
                     />
                 }
                 {tracks.track_9.visible  &&
@@ -893,6 +900,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_9'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_9']}
                     />
                 }
                 {tracks.track_10.visible  &&
@@ -929,6 +938,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_10'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_10']}
                     />
                 }
                 {tracks.track_11.visible  &&
@@ -965,6 +976,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_11'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_11']}
                     />
                 }
                 {tracks.track_12.visible  &&
@@ -1001,6 +1014,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_12'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_12']}
                     />
                 }
                 {tracks.track_13.visible  &&
@@ -1037,6 +1052,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_13'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_13']}
                     />
                 }
                 {tracks.track_14.visible  &&
@@ -1073,6 +1090,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_14'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_14']}
                     />
                 }
                 {tracks.track_15.visible  &&
@@ -1109,6 +1128,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_15'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_15']}
                     />
                 }
                 {tracks.track_16.visible  &&
@@ -1145,6 +1166,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_16'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_16']}
                     />
                 }
                 {tracks.track_17.visible  &&
@@ -1181,6 +1204,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_17'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_17']}
                     />
                 }
                 {tracks.track_18.visible  &&
@@ -1217,6 +1242,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_18'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_18']}
                     />
                 }
                 {tracks.track_19.visible  &&
@@ -1253,6 +1280,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_19'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_19']}
                     />
                 }
                 {tracks.track_20.visible  &&
@@ -1289,6 +1318,8 @@ function App() {
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
                         csvImportedLabels={csvImportedLabels? csvImportedLabels['track_20'] : null}
+                        handleUploadResponse={handleUploadResponse}
+                        trackData={tracks['track_20']}
                     />
                 }
                 <Tooltip title="Add New Track">

@@ -2038,7 +2038,6 @@ function ScalableSpec(
                                         <StopIcon style={activeIcon}/>
                                     </IconButton>
                                 </div>
-                                {audioId?.substring(0, 16)}
                                 <Parameters
                                     showLocalConfigWindow={showLocalConfigWindow}
                                     specCalMethod={specCalMethod}

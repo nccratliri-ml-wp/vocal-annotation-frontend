@@ -701,7 +701,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[2]}
                     />
-                {tracks[3].visible &&
+
                     <ScalableSpec
                         trackID={tracks[3].trackID}
                         speciesArray={speciesArray}
@@ -738,8 +738,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[3]}
                     />
-                }
-                {tracks[4].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[4].trackID}
                         speciesArray={speciesArray}
@@ -776,8 +775,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[4]}
                     />
-                }
-                {tracks[5].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[5].trackID}
                         speciesArray={speciesArray}
@@ -814,8 +812,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[5]}
                     />
-                }
-                {tracks[6].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[6].trackID}
                         speciesArray={speciesArray}
@@ -852,8 +849,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[6]}
                     />
-                }
-                {tracks[7].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[7].trackID}
                         speciesArray={speciesArray}
@@ -890,8 +886,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[7]}
                     />
-                }
-                {tracks[8].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[8].trackID}
                         speciesArray={speciesArray}
@@ -928,8 +923,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[8]}
                     />
-                }
-                {tracks[9].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[9].trackID}
                         speciesArray={speciesArray}
@@ -966,8 +960,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[9]}
                     />
-                }
-                {tracks[10].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[10].trackID}
                         speciesArray={speciesArray}
@@ -1004,8 +997,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[10]}
                     />
-                }
-                {tracks[11].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[11].trackID}
                         speciesArray={speciesArray}
@@ -1042,8 +1034,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[11]}
                     />
-                }
-                {tracks[12].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[12].trackID}
                         speciesArray={speciesArray}
@@ -1080,8 +1071,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[12]}
                     />
-                }
-                {tracks[13].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[13].trackID}
                         speciesArray={speciesArray}
@@ -1118,8 +1108,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[13]}
                     />
-                }
-                {tracks[14].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[14].trackID}
                         speciesArray={speciesArray}
@@ -1156,8 +1145,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[14]}
                     />
-                }
-                {tracks[15].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[15].trackID}
                         speciesArray={speciesArray}
@@ -1194,8 +1182,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[15]}
                     />
-                }
-                {tracks[16].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[16].trackID}
                         speciesArray={speciesArray}
@@ -1232,8 +1219,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[16]}
                     />
-                }
-                {tracks[17].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[17].trackID}
                         speciesArray={speciesArray}
@@ -1270,8 +1256,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[17]}
                     />
-                }
-                {tracks[18].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[18].trackID}
                         speciesArray={speciesArray}
@@ -1308,8 +1293,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[18]}
                     />
-                }
-                {tracks[19].visible  &&
+
                     <ScalableSpec
                         trackID={tracks[19].trackID}
                         speciesArray={speciesArray}
@@ -1346,7 +1330,7 @@ function App() {
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[19]}
                     />
-                }
+
                 <Tooltip title="Add New Track">
                     <IconButton style={strictMode ? iconBtnDisabled : iconBtn} disabled={strictMode} onClick={addTrack}>
                         <AddBoxIcon style={icon}/>

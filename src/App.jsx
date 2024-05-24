@@ -399,29 +399,6 @@ function App() {
         // Update tracks
         const newChannels = newResponse.data.channels
 
-        /*
-        setTracks(prevTracks => {
-            const updatedTracks = { ...prevTracks }
-
-            let i = 1
-            for (const channel of newChannels) {
-                const trackKey = `track_${i}`
-
-                updatedTracks[trackKey] = {
-                    ...updatedTracks[trackKey],
-                    visible: true,
-                    audioDuration: channel.audio_duration,
-                    audioID: channel.audio_id,
-                    frequencies: channel.freqs,
-                    spectrogram: channel.spec
-                }
-
-                i++
-            }
-
-            return updatedTracks
-        })*/
-
         const updatedTracks = tracks.map( (track, i) => {
             if (newChannels[i]){
                 return {

@@ -77,15 +77,15 @@ function ScalableSpec(
                 {
 
     // General
-    const [audioId, setAudioId] = useState(null);
+    const [audioId, setAudioId] = useState(trackData.audioID)
 
     // Spectrogram
-    const specCanvasRef = useRef(null);
+    const specCanvasRef = useRef(null)
     const specImgData = useRef(null)
-    const [spectrogram, setSpectrogram] = useState(null);
+    const [spectrogram, setSpectrogram] = useState(trackData.spectrogram)
 
     // Frequency
-    const [frequencies, setFrequencies] = useState(null)
+    const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
 
     // Individuals Canvas
@@ -1599,8 +1599,6 @@ function ScalableSpec(
         const ratio = Math.min((trackData.audioDuration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = '#ddd8ff'
 
-        console.log(newAudioArray)
-
         for (let i=0; i < newAudioArray.length; i++) {
             const datapoint = newAudioArray[i]
             const y = centerY + waveformScale * datapoint
@@ -1759,6 +1757,7 @@ function ScalableSpec(
 
 
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
+
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
@@ -1861,8 +1860,6 @@ function ScalableSpec(
 
             // Update track specific values
             setAudioId(trackData.audioID)
-            setFrequencies(trackData.frequencies)
-            setSpectrogram(trackData.spectrogram)
 
             // Close Label Window
             setExpandedLabel(null)
@@ -1902,9 +1899,8 @@ function ScalableSpec(
     }, [audioSnippet] )
 
     // When globalAudioDuration is updated in the App component
-
     useEffect( () => {
-        if (!globalAudioDuration || !trackData ) return
+        if (!globalAudioDuration || !trackData.audioID ) return
 
         playheadRef.current.timeframe = 0
 
@@ -1926,7 +1922,7 @@ function ScalableSpec(
         const newEndTime = newStartTime + newDuration
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
 
-    }, [trackData, globalAudioDuration] )
+    }, [trackData.audioID, globalAudioDuration] )
 
     // When on of the audio payloads in the URL data parameter was assigned to this track
     useEffect( () => {

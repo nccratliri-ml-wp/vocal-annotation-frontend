@@ -53,8 +53,6 @@ function ScalableSpec(
                             passMaxScrollTimeToApp,
                             passCurrentEndTimeToApp,
                             passCurrentStartTimeToApp,
-                            passTrackDurationToApp,
-                            deletePreviousTrackDurationInApp,
                             removeTrackInApp,
                             globalHopLength,
                             globalNumSpecColumns,
@@ -152,7 +150,6 @@ function ScalableSpec(
 
     // Database
     const [annotationInstance, setAnnotationInstance] = useState(null)
-    const [filename, setFilename] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -191,10 +188,6 @@ function ScalableSpec(
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
         setExpandedLabel( newExpandedLabel )
-    }
-
-    const passFileNameToScalableSpec = ( newFilename ) => {
-        setFilename( newFilename )
     }
 
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
@@ -1117,7 +1110,7 @@ function ScalableSpec(
         const newLabel = new Label(
             nanoid(),
             trackID,
-            filename,
+            trackData.filename,
             onset,
             undefined,
             activeSpecies.name,
@@ -1220,7 +1213,7 @@ function ScalableSpec(
             const updatedLabel = new Label(
                 nanoid(),
                 trackID,
-                filename,
+                trackData.filename,
                 label.onset,
                 label.offset,
                 label.species,
@@ -1639,9 +1632,6 @@ function ScalableSpec(
     const handleRemoveTrack = () => {
         if (!confirm('Removing this track will delete any annotations you have made in it.')) return
 
-        if (trackData){
-            deletePreviousTrackDurationInApp( trackData.audioDuration )
-        }
         removeTrackInApp(trackID)
     }
 
@@ -1734,7 +1724,7 @@ function ScalableSpec(
             return new Label(
                 nanoid(),
                 trackID,
-                filename,
+                trackData.filename,
                 obj.onset,
                 obj.offset,
                 'currently not available',
@@ -1787,7 +1777,7 @@ function ScalableSpec(
                 const updatedLabel = new Label(
                     label.id,
                     trackID,
-                    filename,
+                    trackData.filename,
                     label.onset,
                     label.offset,
                     label.species,
@@ -1930,7 +1920,7 @@ function ScalableSpec(
         uploadFileByURL(audioPayload)
 
         setAnnotationInstance(audioPayload.annotation_instance)
-        setFilename(audioPayload.filename)
+        //setFilename(audioPayload.filename)
 
     }, [audioPayload])
 
@@ -1977,8 +1967,7 @@ function ScalableSpec(
                         <div className={showWaveform ? 'side-window' : 'side-window-small'}>
                             <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                                 <LocalFileUpload
-                                    filename={filename}
-                                    passFileNameToScalableSpec={passFileNameToScalableSpec}
+                                    filename={trackData.filename}
                                     specCalMethod={specCalMethod}
                                     nfft={nfft}
                                     binsPerOctave={binsPerOctave}
@@ -1992,8 +1981,8 @@ function ScalableSpec(
                                 <div>
                                     <Tooltip title="Call WhisperSeg">
                                         <IconButton
-                                            style={{...activeIconBtnStyle, ...((strictMode || !labels.length) && iconBtnDisabled)}}
-                                            disabled={strictMode || !labels.length}
+                                            style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
+                                            disabled={strictMode || !audioId}
                                             onClick={callWhisperSeg}
                                         >
                                             <AutoFixHighIcon style={activeIcon}/>
@@ -2010,17 +1999,15 @@ function ScalableSpec(
                                             <GraphicEqIcon style={activeIcon}/>
                                         </IconButton>
                                     </Tooltip>
-                                    {trackID !== 'track_1' &&
-                                        <Tooltip title="Delete Track">
-                                            <IconButton
-                                                style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
-                                                disabled={strictMode}
-                                                onClick={handleRemoveTrack}
-                                            >
-                                                <DeleteIcon style={activeIcon}/>
-                                            </IconButton>
-                                        </Tooltip>
-                                    }
+                                    <Tooltip title="Delete Track">
+                                        <IconButton
+                                            style={{...activeIconBtnStyle, ...(strictMode || trackID === 0 && iconBtnDisabled)}}
+                                            disabled={strictMode || trackID === 0}
+                                            onClick={handleRemoveTrack}
+                                        >
+                                            <DeleteIcon style={activeIcon}/>
+                                        </IconButton>
+                                    </Tooltip>
                                 </div>
                                 <div className='audio-controls'>
                                     <IconButton style={iconBtn}

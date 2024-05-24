@@ -51,29 +51,28 @@ function App() {
     })
 
     const [deletedItemID, setDeletedItemID] = useState(null)
-
-    const [trackDurations, setTrackDurations] = useState([])
+    
     const [tracks, setTracks] = useState([
-        {trackID: 0, visible: true, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 1, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 2, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 3, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 4, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 5, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 6, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 7, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 8, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 9, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 10, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 11, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 12, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 13, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 14, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 15, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 16, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 17, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 18, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
-        {trackID: 19, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null},
+        {trackID: 0, visible: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 1, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 2, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 3, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 4, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 5, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 6, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 7, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 8, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 9, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 10, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 11, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 12, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 13, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 14, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 15, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 16, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 17, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 18, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: 19, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null}
     ])
 
     // General
@@ -98,10 +97,6 @@ function App() {
     const [allLabels, setAllLabels] = useState({})
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
-
-    function passTrackDurationToApp( newTrackDuration ) {
-        setTrackDurations(prevState => [...prevState, newTrackDuration])
-    }
 
     function passClipDurationToApp( newClipDuration ){
         setGlobalClipDuration( newClipDuration )
@@ -169,17 +164,7 @@ function App() {
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
-
-    function deletePreviousTrackDurationInApp( previousTrackDuration ) {
-        const indexToRemove = trackDurations.indexOf(previousTrackDuration)
-
-        if (indexToRemove === -1) return
-
-        const newTrackDurations = [...trackDurations]
-        newTrackDurations.splice(indexToRemove, 1)
-        setTrackDurations(newTrackDurations)
-    }
-
+    
     function addTrack(){
         const firstFalseTrack = tracks.find(track => !track.visible)
 
@@ -199,7 +184,7 @@ function App() {
     function removeTrackInApp( trackID ){
         const updatedTracks = tracks.map( track => {
             if (track.trackID === trackID){
-                return {...track, visible: false, audioDuration: null, audioID: null, frequencies: null, spectrogram: null}
+                return {...track, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null}
             } else {
                 return track
             }
@@ -386,8 +371,7 @@ function App() {
         4. Feed responses to scalable spec DONE
         5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE
         6. pass handleUploadResponse to all other instances of Scalable Spec DONE
-        6.1 Fix issue: when uploading single file and then uploading multi-channel file, there is a key error in the backend
-        6.2
+        6.1 Fix issue: when uploading single file and then uploading multi-channel file, there is a key error in the backend DONE
         6.3 Refactor track durations into tracks
         6.3.1 Display filenames as the button name
         6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
@@ -395,17 +379,19 @@ function App() {
 
      */
 
-    const handleUploadResponse = (newResponse) => {
+    const handleUploadResponse = (newResponse, filename) => {
         // Update tracks
         const newChannels = newResponse.data.channels
 
         const updatedTracks = tracks.map( (track, i) => {
             if (newChannels[i]){
                 return {
-                    trackID: i,
+                    ...tracks,
+                    trackID: i, // shouldn't this be deconstructed with ...tracks   ?
                     visible: true,
-                    audioDuration: newChannels[i].audio_duration,
                     audioID: newChannels[i].audio_id,
+                    filename: filename,
+                    audioDuration: newChannels[i].audio_duration,
                     frequencies: newChannels[i].freqs,
                     spectrogram: newChannels[i].spec
                 }
@@ -420,7 +406,6 @@ function App() {
         // Update Global Values
         const newConfigurations = newResponse.data.configurations
 
-        const trackDuration = newChannels[0].audio_duration
         const hopLength = newConfigurations.hop_length
         const numSpecColumns = newConfigurations.num_spec_columns
         const samplingRate = newConfigurations.sampling_rate
@@ -430,7 +415,6 @@ function App() {
             sampling_rate: samplingRate
         }
 
-        passTrackDurationToApp( trackDuration )
         setGlobalHopLength( hopLength )
         setGlobalNumSpecColumns( numSpecColumns )
         setGlobalSamplingRate( samplingRate )
@@ -439,7 +423,7 @@ function App() {
 
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
-
+/*
     useEffect( () => {
         if (trackDurations.length === 0) return
 
@@ -450,6 +434,15 @@ function App() {
         //setGlobalHopLength(newHopLength)
 
     }, [trackDurations])
+ */
+
+    // When tracks are being changed, recalculate currently longest track and set that as global audio duration
+    useEffect( () => {
+        const trackDurations = tracks.map(track => track.audioDuration)
+        const newGlobalDuration = Math.max(...trackDurations)// === -Infinity ? 0 : Math.max(...trackDurations)
+        
+        setGlobalAudioDuration(newGlobalDuration)
+    }, [tracks])
 
     // When the site was accessed with a URL data parameter
     useEffect( () => {
@@ -586,8 +579,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -622,8 +613,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -658,8 +647,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -695,8 +682,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -732,8 +717,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -769,8 +752,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -806,8 +787,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -843,8 +822,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -880,8 +857,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -917,8 +892,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -954,8 +927,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -991,8 +962,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1028,8 +997,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1065,8 +1032,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1102,8 +1067,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1139,8 +1102,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1176,8 +1137,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1213,8 +1172,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1250,8 +1207,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}
@@ -1287,8 +1242,6 @@ function App() {
                         passCurrentEndTimeToApp={passCurrentEndTimeToApp}
                         passClipDurationToApp={passClipDurationToApp}
                         passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        passTrackDurationToApp={passTrackDurationToApp}
-                        deletePreviousTrackDurationInApp={deletePreviousTrackDurationInApp}
                         removeTrackInApp={removeTrackInApp}
                         globalHopLength={globalHopLength}
                         globalNumSpecColumns={globalNumSpecColumns}

@@ -1,4 +1,3 @@
-import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
@@ -8,7 +7,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 function LocalFileUpload(
         {
             filename,
-            passFileNameToScalableSpec,
             specCalMethod,
             nfft,
             binsPerOctave,
@@ -26,7 +24,6 @@ function LocalFileUpload(
         const file = event.target.files[0]
         if (file && (file.type === 'audio/wav' || file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
             passSpectrogramIsLoadingToScalableSpec(true)
-            passFileNameToScalableSpec(file.name)
             createFormData(file)
         }
     }
@@ -40,14 +37,14 @@ function LocalFileUpload(
         formData.append('bins_per_octave', binsPerOctave);
         formData.append('min_frequency', minFreq);
         formData.append('max_frequency', maxFreq);
-        uploadLocalFile(formData);
+        uploadLocalFile(formData, file.name);
     }
 
-    const uploadLocalFile = async (formData) => {
+    const uploadLocalFile = async (formData, filename) => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'upload'
         try {
             const response = await axios.post(path, formData)
-            handleUploadResponse(response)
+            handleUploadResponse(response, filename)
         } catch (error) {
             handleUploadError(error)
         }

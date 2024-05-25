@@ -375,7 +375,7 @@ function App() {
         6.3 Refactor track durations into tracks DONE
         6.3.1 Display filenames as the button name DONE
         6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on. DONE
-        6.5 Loading animations for every channel
+        6.5 Loading animations for every channel DONE
         7. Adapt uploadbyURL method
 
      */

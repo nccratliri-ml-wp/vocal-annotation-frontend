@@ -258,7 +258,7 @@ function ScalableSpec(
     }
 
     const uploadFileByURL = async (audioPayload) => {
-        passSpectrogramIsLoadingToScalableSpec( true )
+        setSpectrogramIsLoading( true )
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
         const requestParameters = {
             audio_url: audioPayload.url,
@@ -1850,6 +1850,7 @@ function ScalableSpec(
 
             // Update track specific values
             setAudioId(trackData.audioID)
+            setSpectrogramIsLoading(true)
 
             // Close Label Window
             setExpandedLabel(null)

@@ -7,6 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 function LocalFileUpload(
         {
             filename,
+            trackID,
             specCalMethod,
             nfft,
             binsPerOctave,
@@ -44,7 +45,7 @@ function LocalFileUpload(
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'upload'
         try {
             const response = await axios.post(path, formData)
-            handleUploadResponse(response, filename)
+            handleUploadResponse(response, filename, trackID)
         } catch (error) {
             handleUploadError(error)
         }

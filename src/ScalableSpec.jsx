@@ -1968,6 +1968,7 @@ function ScalableSpec(
                             <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                                 <LocalFileUpload
                                     filename={trackData.filename}
+                                    trackID={trackID}
                                     specCalMethod={specCalMethod}
                                     nfft={nfft}
                                     binsPerOctave={binsPerOctave}

@@ -372,22 +372,30 @@ function App() {
         5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE
         6. pass handleUploadResponse to all other instances of Scalable Spec DONE
         6.1 Fix issue: when uploading single file and then uploading multi-channel file, there is a key error in the backend DONE
-        6.3 Refactor track durations into tracks
-        6.3.1 Display filenames as the button name
-        6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on.
+        6.3 Refactor track durations into tracks DONE
+        6.3.1 Display filenames as the button name DONE
+        6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on. DONE
+        6.5 Loading animations for every channel
         7. Adapt uploadbyURL method
 
      */
 
-    const handleUploadResponse = (newResponse, filename) => {
+    const handleUploadResponse = (newResponse, filename, clickedTrackID) => {
         // Update tracks
         const newChannels = newResponse.data.channels
 
-        const updatedTracks = tracks.map( (track, i) => {
+        let i = 0
+
+        const updatedTracks = tracks.map( (track) => {
+            // If the track comes before the track whose upload button was clicked, skip this track
+            if (track.trackID < clickedTrackID){
+                return track
+            }
+
+            // If the trackID matches the clicked track ID, feed it with the first channel
             if (newChannels[i]){
-                return {
-                    ...tracks,
-                    trackID: i, // shouldn't this be deconstructed with ...tracks   ?
+                const updatedTrack = {
+                    ...track,
                     visible: true,
                     audioID: newChannels[i].audio_id,
                     filename: filename,
@@ -395,10 +403,13 @@ function App() {
                     frequencies: newChannels[i].freqs,
                     spectrogram: newChannels[i].spec
                 }
+                i++
+                return updatedTrack
+
+            // Once all channels have been assigned to a track, leave the other tracks unaltered and hidden
             } else {
                 return track
             }
-
         })
 
         setTracks(updatedTracks)

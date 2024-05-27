@@ -604,7 +604,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels ? csvImportedLabels['track_1'] : null}
+                        csvImportedLabels={csvImportedLabels ? csvImportedLabels[0] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[0]}
                     />
@@ -638,7 +638,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_2'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[1] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[1]}
                     />
@@ -672,7 +672,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_3'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[2] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[2]}
                     />
@@ -707,7 +707,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_4'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[3] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[3]}
                     />
@@ -742,7 +742,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_5'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[4] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[4]}
                     />
@@ -777,7 +777,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_6'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[5] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[5]}
                     />
@@ -812,7 +812,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_7'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[6] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[6]}
                     />
@@ -847,7 +847,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_8'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[7] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[7]}
                     />
@@ -882,7 +882,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_9'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[8] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[8]}
                     />
@@ -917,7 +917,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_10'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[9] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[9]}
                     />
@@ -952,7 +952,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_11'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[10] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[10]}
                     />
@@ -987,7 +987,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_12'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[11] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[11]}
                     />
@@ -1022,7 +1022,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_13'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[12] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[12]}
                     />
@@ -1057,7 +1057,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_14'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[13] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[13]}
                     />
@@ -1092,7 +1092,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_15'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[14] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[14]}
                     />
@@ -1127,7 +1127,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_16'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[15] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[15]}
                     />
@@ -1162,7 +1162,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_17'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[16] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[16]}
                     />
@@ -1197,7 +1197,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_18'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[17] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[17]}
                     />
@@ -1232,7 +1232,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_19'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[18] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[18]}
                     />
@@ -1267,7 +1267,7 @@ function App() {
                         passActiveLabelToApp={passActiveLabelToApp}
                         strictMode={strictMode}
                         passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels['track_20'] : null}
+                        csvImportedLabels={csvImportedLabels? csvImportedLabels[19] : null}
                         handleUploadResponse={handleUploadResponse}
                         trackData={tracks[19]}
                     />

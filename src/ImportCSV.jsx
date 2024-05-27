@@ -30,7 +30,6 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
                         trackID: trackID.trim()
                     })
 
-                    // . investigae right click error
                 }
 
                 let allImportedLabelsObject = {

@@ -27,11 +27,13 @@ import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
 import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBig} from "./styles.js";
 import AddBoxIcon from "@mui/icons-material/AddBox.js";
+import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
 
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
+    const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -124,6 +126,13 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         })
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
+    }
+
+    const assignFrequencyRange = (event, minFreq, maxFreq, speciesID) => {
+        event.preventDefault()
+        console.log(minFreq)
+        console.log(maxFreq)
+        console.log(speciesID)
     }
 
 
@@ -524,8 +533,8 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     const handleCancel = (event) => {
         event.preventDefault()
-        //setInputFieldContent('')
         setShowSpeciesInputWindow(false)
+        setShowSpeciesFrequencyRangeWindow(false)
     }
 
     const toggleClusternameInputWindow = (event, selectedID) => {
@@ -635,6 +644,19 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                             >
                                 <legend>
                                     {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
+                                    <button className=''
+                                            onClick={() => setShowSpeciesFrequencyRangeWindow(true)}
+                                    >
+                                        🔊↕
+                                    </button>
+                                    {
+                                        showSpeciesFrequencyRangeWindow &&
+                                        <FrequencyRangeWindow
+                                            handleCancel={handleCancel}
+                                            speciesID={species.id}
+                                            assignFrequencyRange={assignFrequencyRange}
+                                        />
+                                    }
                                     {species.name !== UNKNOWN_SPECIES &&
                                         <button className='edit-species-btn'
                                                 onClick={() => editSpecies(species.id)}

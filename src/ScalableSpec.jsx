@@ -425,7 +425,7 @@ function ScalableSpec(
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
 
-            passLabelsToScalableSpec(labels, id)
+            passLabelsToScalableSpec(labels)
             passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: trackID})
         }
 

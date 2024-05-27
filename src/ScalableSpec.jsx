@@ -512,7 +512,7 @@ function ScalableSpec(
             const offsetX = calculateXPosition(label.offset)
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
-            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted && event.target.className === 'label-canvas'){
+            if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted && event.target.className === 'label-canvas' ){
                 drawLineBetween(label)
                 drawClustername(label)
                 drawLine(label, label.onset)
@@ -1046,8 +1046,8 @@ function ScalableSpec(
             if (!label.offset){
                 drawLine(label, label.onset)
             }
-            // Draw label that is being dragged with extended lines
-            if (label === clickedLabel){
+            // Draw label that is being dragged and expanded label with extended lines
+            if (label === clickedLabel || label.id === expandedLabel?.id){
                 drawLine(label, label.onset)
                 drawLine(label, label.offset)
                 drawLineBetween(label)
@@ -1751,9 +1751,8 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram) return
-
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale, showWaveform] )
+    }, [labels, waveformScale, showWaveform, expandedLabel] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {

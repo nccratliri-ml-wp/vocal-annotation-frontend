@@ -634,7 +634,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                 className='species'
                             >
                                 <legend>
-                                    {species.name}
+                                    {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
                                     {species.name !== UNKNOWN_SPECIES &&
                                         <button className='edit-species-btn'
                                                 onClick={() => editSpecies(species.id)}

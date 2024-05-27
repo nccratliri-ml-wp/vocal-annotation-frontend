@@ -1,4 +1,4 @@
-const UNKNOWN_SPECIES = 'Unknown Species'
+const UNKNOWN_SPECIES = 'Unknown'
 const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
 const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'

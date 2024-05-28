@@ -10,6 +10,10 @@ const iconBtnSmall = {
     padding: '4px 8px'
 }
 
+const iconBtnSmallest = {
+    padding: 0,
+}
+
 const iconBtnSmallDisabled = {
     padding: 8,
     opacity: 0.5
@@ -51,6 +55,7 @@ export {
     iconBtn,
     iconBtnDisabled,
     iconBtnSmall,
+    iconBtnSmallest,
     iconBtnSmallDisabled,
     globalControlsBtn,
     globalControlsBtnDisabled,

@@ -3,29 +3,39 @@ import {nanoid} from 'nanoid'
 import Colorwheel from "./Colorwheel.jsx";
 import InputWindow from "./InputWindow.jsx";
 import {
+    activateClustername,
+    activateIndividual,
+    ANNOTATED_AREA,
+    ANNOTATED_AREA_CLUSTERNAME,
+    ANNOTATED_AREA_COLOR,
+    ANNOTATED_AREA_INDIVIDUAL,
+    checkIfEveryObjectIsInactive,
+    Clustername,
+    deactivateExistingClusternames,
+    deactivateExistingIndividuals,
     DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
     INACTIVE_BUTTON_COLOR,
+    Individual,
+    Species,
     UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
-    UNKNOWN_SPECIES,
-    Species,
-    Individual,
-    Clustername,
-    activateIndividual,
-    activateClustername,
-    deactivateExistingIndividuals,
-    deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive,
-    ANNOTATED_AREA_INDIVIDUAL,
-    ANNOTATED_AREA_CLUSTERNAME,
-    ANNOTATED_AREA,
-    ANNOTATED_AREA_COLOR
+    UNKNOWN_SPECIES
 } from './species.js'
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
-import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBig} from "./styles.js";
+import BarChartIcon from '@mui/icons-material/BarChart';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {
+    globalControlsBtn,
+    globalControlsBtnDisabled,
+    icon,
+    iconBig,
+    iconBtnSmallest,
+    iconSmall
+} from "./styles.js";
 import AddBoxIcon from "@mui/icons-material/AddBox.js";
 import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
 
@@ -57,7 +67,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 speciesObject.id,
                 speciesObject.name,
                 [...updatedIndividuals],
-                [...updatedClusternames]
+                [...updatedClusternames],
+                speciesObject.minFreq,
+                speciesObject.maxFreq
             )
         })
 
@@ -87,7 +99,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -118,7 +132,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     editedSpeciesName,
                     speciesObject.individuals,
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -128,11 +144,26 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const assignFrequencyRange = (event, minFreq, maxFreq, speciesID) => {
+    const assignFrequencyRange = (event, newMinFreq, newMaxFreq, selectedSpeciesID) => {
         event.preventDefault()
-        console.log(minFreq)
-        console.log(maxFreq)
-        console.log(speciesID)
+
+        const modifiedSpeciesArray = speciesArray.map( speciesObj => {
+            if (speciesObj.id === selectedSpeciesID){
+                return new Species(
+                    speciesObj.id,
+                    speciesObj.name,
+                    speciesObj.individuals,
+                    speciesObj.clusternames,
+                    newMinFreq,
+                    newMaxFreq
+                )
+            } else {
+                return speciesObj
+            }
+        })
+
+        passSpeciesArrayToApp(modifiedSpeciesArray)
+        setShowSpeciesFrequencyRangeWindow(false)
     }
 
 
@@ -162,7 +193,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                         speciesObject.id,
                         speciesObject.name,
                         [...updatedIndividuals],
-                        [...updatedClusternames]
+                        [...updatedClusternames],
+                        speciesObject.minFreq,
+                        speciesObject.maxFreq
                     )
                 }
 
@@ -173,7 +206,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals, new Individual(nanoid(),newIndividualName)],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -184,7 +219,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             }
         })
@@ -214,7 +251,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -252,7 +291,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
 
             } else {
@@ -280,7 +321,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -290,7 +333,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             }
         })
@@ -326,7 +371,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                         speciesObject.id,
                         speciesObject.name,
                         [...updatedIndividuals],
-                        [...updatedClusternames]
+                        [...updatedClusternames],
+                        speciesObject.minFreq,
+                        speciesObject.maxFreq
                     )
                 }
 
@@ -337,7 +384,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)]
+                    [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -347,7 +396,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             }
         })
@@ -377,7 +428,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -415,7 +468,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
 
             } else {
@@ -443,7 +498,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -453,7 +510,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             }
         })
@@ -480,7 +539,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
 
             } else {
@@ -510,7 +571,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -550,7 +613,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = !speciesObject.showClusternameInputWindow
@@ -562,7 +627,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -586,7 +653,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = !speciesObject.showIndividualInputWindow
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -598,7 +667,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                     speciesObject.id,
                     speciesObject.name,
                     speciesObject.individuals,
-                    speciesObject.clusternames
+                    speciesObject.clusternames,
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -644,32 +715,39 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                             >
                                 <legend>
                                     {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
-                                    <button className=''
-                                            onClick={() => setShowSpeciesFrequencyRangeWindow(true)}
-                                    >
-                                        🔊↕
-                                    </button>
+                                    {species.name !== UNKNOWN_SPECIES &&
+                                        <IconButton
+                                            style={iconBtnSmallest}
+                                            onClick={() => setShowSpeciesFrequencyRangeWindow(species.id)}
+                                        >
+                                            <BarChartIcon style={iconSmall}/>
+                                        </IconButton>
+                                    }
                                     {
-                                        showSpeciesFrequencyRangeWindow &&
+                                        showSpeciesFrequencyRangeWindow === species.id &&
                                         <FrequencyRangeWindow
                                             handleCancel={handleCancel}
                                             speciesID={species.id}
+                                            minFreq={species.minFreq}
+                                            maxFreq={species.maxFreq}
                                             assignFrequencyRange={assignFrequencyRange}
                                         />
                                     }
                                     {species.name !== UNKNOWN_SPECIES &&
-                                        <button className='edit-species-btn'
-                                                onClick={() => editSpecies(species.id)}
+                                        <IconButton
+                                            style={iconBtnSmallest}
+                                            onClick={() => editSpecies(species.id)}
                                         >
-                                            ✏️
-                                        </button>
+                                            <EditIcon style={iconSmall}/>
+                                        </IconButton>
                                     }
                                     {species.name !== UNKNOWN_SPECIES &&
-                                        <button className='delete-species-btn'
-                                                onClick={() => deleteSpecies(species.id)}
+                                        <IconButton
+                                            style={iconBtnSmallest}
+                                            onClick={() => deleteSpecies(species.id)}
                                         >
-                                            🗑️
-                                        </button>
+                                            <DeleteIcon style={iconSmall}/>
+                                        </IconButton>
                                     }
                                 </legend>
 

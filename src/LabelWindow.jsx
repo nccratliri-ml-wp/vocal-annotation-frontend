@@ -103,7 +103,9 @@ function LabelWindow(
                     speciesObj.id,
                     speciesObj.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObj.minFreq,
+                    speciesObj.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -113,7 +115,9 @@ function LabelWindow(
                     speciesObj.id,
                     speciesObj.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames]
+                    [...updatedClusternames],
+                    speciesObj.minFreq,
+                    speciesObj.maxFreq
                 )
             }
         })

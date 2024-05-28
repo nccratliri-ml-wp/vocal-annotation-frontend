@@ -364,18 +364,6 @@ html, body {
   font-weight: bold;
 }
 
-.delete-species-btn, .edit-species-btn{
-  background-color: transparent;
-  border: none;
-  margin: 0;
-  padding: 0;
-  font-size: 12px;
-}
-
-.delete-species-btn:hover, .edit-species-btn:hover{
-  font-size: 13px;
-}
-
 .individual-btn-container, .clustername-btn-container{
   display: flex;
   flex-wrap: wrap;

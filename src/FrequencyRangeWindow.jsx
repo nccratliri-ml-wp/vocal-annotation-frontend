@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 
-function FrequencyRangeWindow ( {handleCancel, speciesID, assignFrequencyRange} ) {
+function FrequencyRangeWindow ( {handleCancel, speciesID, minFreq, maxFreq, assignFrequencyRange} ) {
 
-    const [minFreq, setMinFreq] = useState('')
-    const [maxFreq, setMaxFreq] = useState('')
+    const [minFreqInputField, setMinFreqInputField] = useState(minFreq ? minFreq.toString() : '')
+    const [maxFreqInputField, setMaxFreqInputField] = useState(maxFreq ? maxFreq.toString() : '')
 
     const excludeNonDigits = (event) => {
         // Prevent the default behavior if the pressed key is not a digit
@@ -22,30 +22,30 @@ function FrequencyRangeWindow ( {handleCancel, speciesID, assignFrequencyRange} 
 
             <form
                 className='input-window-form'
-                onSubmit={ (event) => assignFrequencyRange(event, Number(minFreq), Number(maxFreq), speciesID)}
+                onSubmit={ (event) => assignFrequencyRange(event, Number(minFreqInputField), Number(maxFreqInputField), speciesID)}
             >
                 <input
                     className='input-field'
                     type='number'
                     required='required'
-                    value={minFreq}
+                    value={minFreqInputField}
                     min={0}
                     placeholder={`Set min frequency`}
                     onKeyPress={excludeNonDigits}
                     onPaste={(event) => event.preventDefault()}
-                    onChange={ (event) => setMinFreq(event.target.value) }
+                    onChange={ (event) => setMinFreqInputField(event.target.value) }
                     autoFocus
                 />
                 <input
                     className='input-field'
                     type='number'
                     required='required'
-                    value={maxFreq}
+                    value={maxFreqInputField}
                     min={0}
                     placeholder={`Set max frequency`}
                     onKeyPress={excludeNonDigits}
                     onPaste={(event) => event.preventDefault()}
-                    onChange={ (event) => setMaxFreq(event.target.value) }
+                    onChange={ (event) => setMaxFreqInputField(event.target.value) }
                 />
                 <button className='input-window-submit-btn'>Submit</button>
             </form>

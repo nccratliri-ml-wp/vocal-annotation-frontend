@@ -14,6 +14,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
+import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
@@ -85,6 +86,8 @@ function ScalableSpec(
     // Frequency
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
+    const [showFrequencyLines, setShowFrequencyLines] = useState(false)
+    const [frequencyLines, setFrequencyLines] = useState([0, 120])
 
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
@@ -473,10 +476,13 @@ function ScalableSpec(
     const hoverLine = (event) => {
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
+
         if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas' /*|| checkIfClickedOnPlayhead(xHovered)*/){
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
+        } else if (mouseY < frequencyLines[0]+5 && mouseY > frequencyLines[0]-5){
+            specCanvasRef.current.style.cursor = 'row-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'
             waveformCanvasRef.current.style.cursor = 'default'
@@ -499,7 +505,8 @@ function ScalableSpec(
             waveformCTX.putImageData(waveformImgData.current, 0, 0)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawPlayhead(playheadRef.current.timeframe)
+            drawFrequencyLines()
+            //drawPlayhead(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
         }
@@ -682,6 +689,7 @@ function ScalableSpec(
             drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
+            drawFrequencyLines()
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -1170,6 +1178,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
+        drawFrequencyLines()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -1188,6 +1197,7 @@ function ScalableSpec(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
+        drawFrequencyLines()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
@@ -1705,6 +1715,25 @@ function ScalableSpec(
 
     }
 
+    const handleClickFrequencyLinesBtn = () => {
+        setShowFrequencyLines(prevState => !prevState)
+    }
+
+    const drawFrequencyLines = () => {
+        if (!showFrequencyLines) return
+
+        const cvs = specCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
+
+        ctx.strokeStyle = '#47ff14'
+        ctx.lineWidth = 2
+
+        ctx.beginPath()
+        ctx.moveTo(0,50)
+        ctx.lineTo(cvs.width, 50)
+        ctx.stroke()
+    }
+
 
     /* ++++++++++++++++++ Whisper ++++++++++++++++++ */
     const callWhisperSeg = async () => {
@@ -1752,7 +1781,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale, showWaveform, expandedLabel] )
+    }, [labels, waveformScale, showWaveform, expandedLabel, showFrequencyLines] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
@@ -2007,6 +2036,14 @@ function ScalableSpec(
                                             onClick={handleRemoveTrack}
                                         >
                                             <DeleteIcon style={activeIcon}/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Frequency Range">
+                                        <IconButton
+                                            style={activeIconBtnStyle}
+                                            onClick={handleClickFrequencyLinesBtn}
+                                        >
+                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: '#47ff14'})}}/>
                                         </IconButton>
                                     </Tooltip>
                                 </div>

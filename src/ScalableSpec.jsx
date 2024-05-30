@@ -88,6 +88,7 @@ function ScalableSpec(
     const frequenciesCanvasRef = useRef(null)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
     const [frequencyLines, setFrequencyLines] = useState([0, 120])
+    let clickedFrequencyLine = null
 
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
@@ -365,6 +366,13 @@ function ScalableSpec(
             }
         }
 
+        // Deal with click on Frequency Line
+        if (checkIfOccupiedByFrequencyLine(mouseY)){
+            clickedFrequencyLine = frequencyLines[0]
+            specCanvasRef.current.addEventListener('mousemove', dragFrequencyLine)
+            return
+        }
+
         // Deal with click inside an existing label
         const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
         if ( labelToBeExpanded ) {
@@ -433,16 +441,18 @@ function ScalableSpec(
         }
 
         clickedLabel = undefined
+        console.log('mouse up ' + clickedFrequencyLine)
+        clickedFrequencyLine = null
     }
 
     const removeDragEventListeners = () => {
-        //console.log('remove drag event listeners')
         specCanvasRef.current.removeEventListener('mousemove', dragOnset)
         specCanvasRef.current.removeEventListener('mousemove', dragOffset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
         labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
+        specCanvasRef.current.removeEventListener('mousemove', dragFrequencyLine)
     }
 
     const handleMouseLeaveCanvases = (event) => {
@@ -481,7 +491,7 @@ function ScalableSpec(
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
-        } else if (mouseY < frequencyLines[0]+5 && mouseY > frequencyLines[0]-5){
+        } else if (showFrequencyLines && checkIfOccupiedByFrequencyLine(mouseY)){
             specCanvasRef.current.style.cursor = 'row-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'
@@ -610,6 +620,10 @@ function ScalableSpec(
                 return label
             }
         }
+    }
+
+    const checkIfOccupiedByFrequencyLine = (mouseY) => {
+        return mouseY < frequencyLines[0]+5 && mouseY > frequencyLines[0]-5 || mouseY < frequencyLines[1]+5 && mouseY > frequencyLines[1]-5
     }
 
     const checkIfNewOffsetIsValid = (currentOnset, newOffset) =>{
@@ -1159,7 +1173,7 @@ function ScalableSpec(
         clickedLabel.onset = calculateTimestamp(event)
     }
 
-    const updateOffset  = (event) => {
+    const updateOffset = (event) => {
         clickedLabel.offset = calculateTimestamp(event)
     }
 
@@ -1180,6 +1194,24 @@ function ScalableSpec(
         drawAllLabels()
         drawFrequencyLines()
         //drawPlayhead(playheadRef.current.timeframe)
+    }
+
+    const dragFrequencyLine = (event) => {
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d')
+
+        updateFrequencyLine(event)
+
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
+        specCTX.putImageData(specImgData.current, 0, 0);
+
+        drawAllLabels()
+        drawFrequencyLines()
+    }
+
+    const updateFrequencyLine = (event) => {
+        clickedFrequencyLine = getMouseY(event)
+        console.log(clickedFrequencyLine)
     }
 
     const dragOffset = (event) => {
@@ -1728,9 +1760,16 @@ function ScalableSpec(
         ctx.strokeStyle = '#47ff14'
         ctx.lineWidth = 2
 
+        // Draw Max Frequency
         ctx.beginPath()
-        ctx.moveTo(0,50)
-        ctx.lineTo(cvs.width, 50)
+        ctx.moveTo(0,frequencyLines[0]+1)
+        ctx.lineTo(cvs.width, frequencyLines[0]+1)
+        ctx.stroke()
+
+        // Draw Min Frequency
+        ctx.beginPath()
+        ctx.moveTo(0,frequencyLines[1]-1)
+        ctx.lineTo(cvs.width, frequencyLines[1]-1)
         ctx.stroke()
     }
 

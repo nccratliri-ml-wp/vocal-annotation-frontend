@@ -87,8 +87,8 @@ function ScalableSpec(
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
-    const [frequencyLines, setFrequencyLines] = useState([0, 120])
-    let clickedFrequencyLine = null
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 120})
+    let clickedFrequencyLinesObject = null
 
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
@@ -366,10 +366,17 @@ function ScalableSpec(
             }
         }
 
-        // Deal with click on Frequency Line
-        if (checkIfOccupiedByFrequencyLine(mouseY)){
-            clickedFrequencyLine = frequencyLines[0]
-            specCanvasRef.current.addEventListener('mousemove', dragFrequencyLine)
+        // Deal with click on Max Frequency Line
+        if (checkIfOccupiedByMaxFreqLine(mouseY)){
+            clickedFrequencyLinesObject = frequencyLines
+            specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
+            return
+        }
+
+        // Deal with click on Min Frequency Line
+        if (checkIfOccupiedByMinFreqLine(mouseY)){
+            clickedFrequencyLinesObject = frequencyLines
+            specCanvasRef.current.addEventListener('mousemove', dragMinFreqLine)
             return
         }
 
@@ -441,8 +448,8 @@ function ScalableSpec(
         }
 
         clickedLabel = undefined
-        console.log('mouse up ' + clickedFrequencyLine)
-        clickedFrequencyLine = null
+        console.log('mouse up ' + clickedFrequencyLinesObject)
+        clickedFrequencyLinesObject = null
     }
 
     const removeDragEventListeners = () => {
@@ -452,7 +459,8 @@ function ScalableSpec(
         waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
         labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
-        specCanvasRef.current.removeEventListener('mousemove', dragFrequencyLine)
+        specCanvasRef.current.removeEventListener('mousemove', dragMaxFreqLine)
+        specCanvasRef.current.removeEventListener('mousemove', dragMinFreqLine)
     }
 
     const handleMouseLeaveCanvases = (event) => {
@@ -491,7 +499,7 @@ function ScalableSpec(
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
-        } else if (showFrequencyLines && checkIfOccupiedByFrequencyLine(mouseY)){
+        } else if (showFrequencyLines && checkIfOccupiedByMaxFreqLine(mouseY) || checkIfOccupiedByMinFreqLine(mouseY)){
             specCanvasRef.current.style.cursor = 'row-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'
@@ -622,8 +630,12 @@ function ScalableSpec(
         }
     }
 
-    const checkIfOccupiedByFrequencyLine = (mouseY) => {
-        return mouseY < frequencyLines[0]+5 && mouseY > frequencyLines[0]-5 || mouseY < frequencyLines[1]+5 && mouseY > frequencyLines[1]-5
+    const checkIfOccupiedByMaxFreqLine = (mouseY) => {
+        return mouseY < frequencyLines.maxFreqY + 5 && mouseY > frequencyLines.maxFreqY - 5
+    }
+        
+    const checkIfOccupiedByMinFreqLine = (mouseY) => {
+        return mouseY < frequencyLines.minFreqY + 5 && mouseY > frequencyLines.minFreqY - 5
     }
 
     const checkIfNewOffsetIsValid = (currentOnset, newOffset) =>{
@@ -1196,11 +1208,12 @@ function ScalableSpec(
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
-    const dragFrequencyLine = (event) => {
+    const dragMaxFreqLine = (event) => {
         const specCVS = specCanvasRef.current
         const specCTX = specCVS.getContext('2d')
 
-        updateFrequencyLine(event)
+        clickedFrequencyLinesObject.maxFreqY = getMouseY(event)
+        console.log(clickedFrequencyLinesObject)
 
         specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
         specCTX.putImageData(specImgData.current, 0, 0);
@@ -1209,9 +1222,18 @@ function ScalableSpec(
         drawFrequencyLines()
     }
 
-    const updateFrequencyLine = (event) => {
-        clickedFrequencyLine = getMouseY(event)
-        console.log(clickedFrequencyLine)
+    const dragMinFreqLine = (event) => {
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d')
+
+        clickedFrequencyLinesObject.minFreqY = getMouseY(event)
+        console.log(clickedFrequencyLinesObject)
+
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
+        specCTX.putImageData(specImgData.current, 0, 0);
+
+        drawAllLabels()
+        drawFrequencyLines()
     }
 
     const dragOffset = (event) => {
@@ -1762,14 +1784,14 @@ function ScalableSpec(
 
         // Draw Max Frequency
         ctx.beginPath()
-        ctx.moveTo(0,frequencyLines[0]+1)
-        ctx.lineTo(cvs.width, frequencyLines[0]+1)
+        ctx.moveTo(0,frequencyLines.maxFreqY+1)
+        ctx.lineTo(cvs.width, frequencyLines.maxFreqY+1)
         ctx.stroke()
 
         // Draw Min Frequency
         ctx.beginPath()
-        ctx.moveTo(0,frequencyLines[1]-1)
-        ctx.lineTo(cvs.width, frequencyLines[1]-1)
+        ctx.moveTo(0,frequencyLines.minFreqY-1)
+        ctx.lineTo(cvs.width, frequencyLines.minFreqY-1)
         ctx.stroke()
     }
 
@@ -2064,8 +2086,17 @@ function ScalableSpec(
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
-                                        <IconButton style={activeIconBtnStyle} onClick={toggleShowWaveform}>
+                                        <IconButton style={activeIconBtnStyle}
+                                                    onClick={toggleShowWaveform}>
                                             <GraphicEqIcon style={activeIcon}/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Frequency Range">
+                                        <IconButton
+                                            style={activeIconBtnStyle}
+                                            onClick={handleClickFrequencyLinesBtn}
+                                        >
+                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: '#47ff14'})}}/>
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Delete Track">
@@ -2077,15 +2108,8 @@ function ScalableSpec(
                                             <DeleteIcon style={activeIcon}/>
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Frequency Range">
-                                        <IconButton
-                                            style={activeIconBtnStyle}
-                                            onClick={handleClickFrequencyLinesBtn}
-                                        >
-                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: '#47ff14'})}}/>
-                                        </IconButton>
-                                    </Tooltip>
                                 </div>
+                                {JSON.stringify(frequencyLines)}
                                 <div className='audio-controls'>
                                     <IconButton style={iconBtn}
                                                 onClick={() => getAudio(currentStartTime, globalClipDuration)}>

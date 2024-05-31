@@ -35,6 +35,7 @@ class Playhead{
 const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
+const FREQUENCY_LINES_COLOR = '#47ff14'
 
 
 function ScalableSpec(
@@ -744,6 +745,7 @@ function ScalableSpec(
             drawWaveform(newAudioArray)
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
+            drawFrequencyLines()
             drawLine(activeLabel, activeLabel.onset)
             drawLine(activeLabel, activeLabel.offset)
             //drawPlayhead(playheadRef.current.timeframe)
@@ -1211,12 +1213,19 @@ function ScalableSpec(
     const dragMaxFreqLine = (event) => {
         const specCVS = specCanvasRef.current
         const specCTX = specCVS.getContext('2d')
+        const waveformCanvas = waveformCanvasRef.current
+        const waveformCTX = waveformCanvas.getContext('2d')
 
-        clickedFrequencyLinesObject.maxFreqY = getMouseY(event)
-        console.log(clickedFrequencyLinesObject)
+        const newMaxFreqY = getMouseY(event)
+        if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
+
+        clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
 
         specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
         specCTX.putImageData(specImgData.current, 0, 0);
+
+        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
         drawFrequencyLines()
@@ -1225,12 +1234,19 @@ function ScalableSpec(
     const dragMinFreqLine = (event) => {
         const specCVS = specCanvasRef.current
         const specCTX = specCVS.getContext('2d')
+        const waveformCanvas = waveformCanvasRef.current
+        const waveformCTX = waveformCanvas.getContext('2d')
 
-        clickedFrequencyLinesObject.minFreqY = getMouseY(event)
-        console.log(clickedFrequencyLinesObject)
+        const newMinFreqY = getMouseY(event)
+        if (newMinFreqY <= clickedFrequencyLinesObject.maxFreqY + 5 ) return
+
+        clickedFrequencyLinesObject.minFreqY = newMinFreqY
 
         specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
         specCTX.putImageData(specImgData.current, 0, 0);
+
+        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
         drawFrequencyLines()
@@ -1779,13 +1795,13 @@ function ScalableSpec(
         const cvs = specCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
 
-        ctx.strokeStyle = '#47ff14'
+        ctx.strokeStyle = FREQUENCY_LINES_COLOR
         ctx.lineWidth = 2
 
         // Draw Max Frequency
         ctx.beginPath()
-        ctx.moveTo(0,frequencyLines.maxFreqY+1)
-        ctx.lineTo(cvs.width, frequencyLines.maxFreqY+1)
+        ctx.moveTo(0,frequencyLines.maxFreqY)
+        ctx.lineTo(cvs.width, frequencyLines.maxFreqY)
         ctx.stroke()
 
         // Draw Min Frequency
@@ -2096,7 +2112,7 @@ function ScalableSpec(
                                             style={activeIconBtnStyle}
                                             onClick={handleClickFrequencyLinesBtn}
                                         >
-                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: '#47ff14'})}}/>
+                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Delete Track">
@@ -2109,7 +2125,6 @@ function ScalableSpec(
                                         </IconButton>
                                     </Tooltip>
                                 </div>
-                                {JSON.stringify(frequencyLines)}
                                 <div className='audio-controls'>
                                     <IconButton style={iconBtn}
                                                 onClick={() => getAudio(currentStartTime, globalClipDuration)}>

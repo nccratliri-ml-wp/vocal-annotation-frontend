@@ -1616,6 +1616,7 @@ function ScalableSpec(
         waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
         drawAllLabels()
+        drawFrequencyLines()
     }
 
     const drawPlayhead = (timeframe) => {

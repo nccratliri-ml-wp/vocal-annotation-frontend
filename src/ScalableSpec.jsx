@@ -449,7 +449,6 @@ function ScalableSpec(
         }
 
         clickedLabel = undefined
-        console.log('mouse up ' + clickedFrequencyLinesObject)
         clickedFrequencyLinesObject = null
     }
 
@@ -1210,6 +1209,25 @@ function ScalableSpec(
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
+    const dragOffset = (event) => {
+        const specCanvas = specCanvasRef.current
+        const specCTX = specCanvas.getContext('2d')
+        const waveformCanvas = waveformCanvasRef.current
+        const waveformCTX = waveformCanvas.getContext('2d')
+
+        updateOffset(event)
+
+        specCTX.clearRect(0, 0, specCanvas.width, specCanvas.height)
+        specCTX.putImageData(specImgData.current, 0, 0);
+
+        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
+
+        drawAllLabels()
+        drawFrequencyLines()
+        //drawPlayhead(playheadRef.current.timeframe)
+    }
+
     const dragMaxFreqLine = (event) => {
         const specCVS = specCanvasRef.current
         const specCTX = specCVS.getContext('2d')
@@ -1250,25 +1268,6 @@ function ScalableSpec(
 
         drawAllLabels()
         drawFrequencyLines()
-    }
-
-    const dragOffset = (event) => {
-        const specCanvas = specCanvasRef.current
-        const specCTX = specCanvas.getContext('2d')
-        const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d')
-
-        updateOffset(event)
-
-        specCTX.clearRect(0, 0, specCanvas.width, specCanvas.height)
-        specCTX.putImageData(specImgData.current, 0, 0);
-
-        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
-        drawAllLabels()
-        drawFrequencyLines()
-        //drawPlayhead(playheadRef.current.timeframe)
     }
 
     const magnet = (timestamp) => {
@@ -1694,12 +1693,10 @@ function ScalableSpec(
 
      const waveformZoomIn = () => {
         setWaveformScale(prevState => prevState * 1.3)
-         console.log(waveformScale)
      }
 
      const waveformZoomOut = () => {
          setWaveformScale(prevState => Math.max(prevState * 0.7, 1))
-         console.log(waveformScale)
      }
 
     const toggleShowWaveform = () => {
@@ -2126,6 +2123,7 @@ function ScalableSpec(
                                         </IconButton>
                                     </Tooltip>
                                 </div>
+                                {labels.length}
                                 <div className='audio-controls'>
                                     <IconButton style={iconBtn}
                                                 onClick={() => getAudio(currentStartTime, globalClipDuration)}>

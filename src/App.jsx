@@ -363,21 +363,11 @@ function App() {
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
     /*
-        1. Make a new handleUploadRepsonse function. DONE
-        1.1 Clicking the upload button does the following:
-            a) for each channel in the audio track, add the response to the reponse state array in App.jsx DONE
-        2. Store all responses in a state array in app {trackId: response} DONE
-        3. Remove response state in scalable spec DONE
-        4. Feed responses to scalable spec DONE
-        5. in the existing response use effect, when response changes, to the stuff that handleUploadRepsonse currently does DONE
-        6. pass handleUploadResponse to all other instances of Scalable Spec DONE
-        6.1 Fix issue: when uploading single file and then uploading multi-channel file, there is a key error in the backend DONE
-        6.3 Refactor track durations into tracks DONE
-        6.3.1 Display filenames as the button name DONE
-        6.4 Currently it loads simply the first n tracks. Later I want to detect the n button that was clicked and load the tracks from then on. DONE
-        6.5 Loading animations for every channel DONE
-        7. Adapt uploadbyURL method
-
+        0. If there's more than one new channel:
+        1. Find out which tracks are already occupied
+        2. Copy them and insert them after the new channels
+        3. Add labels property to the track objects
+        4. Add local parameters as a property to track objects
      */
 
     const handleUploadResponse = (newResponse, filename, clickedTrackID) => {
@@ -385,15 +375,16 @@ function App() {
         const newChannels = newResponse.data.channels
 
         let i = 0
+        const occupiedTracks = []
 
-        const updatedTracks = tracks.map( (track) => {
+        let updatedTracks = tracks.map( (track) => {
             // If the track comes before the track whose upload button was clicked, skip this track
             if (track.trackID < clickedTrackID){
                 return track
             }
 
             // If the trackID matches the clicked track ID, feed it with the first channel
-            if (newChannels[i]){
+            if (track.trackID === clickedTrackID){
                 const updatedTrack = {
                     ...track,
                     visible: true,
@@ -405,14 +396,56 @@ function App() {
                 }
                 i++
                 return updatedTrack
+            }
 
-            // Once all channels have been assigned to a track, leave the other tracks unaltered and hidden
+            // If the track comes after the clicked track
+            if (track.trackID > clickedTrackID){
+                // If it is already occupied with audio, make a copy of that track to refeed it later
+                if (track.audioID){
+                    occupiedTracks.push(track)
+                }
+                // Overwrite track with the new channel
+                if (newChannels[i]){
+                    const updatedTrack = {
+                        ...track,
+                        visible: true,
+                        audioID: newChannels[i].audio_id,
+                        filename: filename,
+                        audioDuration: newChannels[i].audio_duration,
+                        frequencies: newChannels[i].freqs,
+                        spectrogram: newChannels[i].spec
+                    }
+                    i++
+                    return updatedTrack
+                // Once all channels have been assigned to a track, leave the other tracks unaltered and hidden
+                } else {
+                    return track
+                }
+            }
+        })
+
+        // Add tracks that were overwritten by the new channels at the end
+        let index = 0
+        updatedTracks = updatedTracks.map( track => {
+            // Skip occupied tracks
+            if (track.audioID){
+                return track
+            }
+
+            // Start adding the occupied Tracks to the empty tracks
+            if (!track.audioID && occupiedTracks[index]){
+                const updatedTrack = occupiedTracks[index]
+                index++
+                return updatedTrack
+
+            // Once all occupied tracks have been reassigned, leave the other tracks unaltered and hidden
             } else {
                 return track
             }
         })
 
         setTracks(updatedTracks)
+
 
         // Update Global Values
         const newConfigurations = newResponse.data.configurations

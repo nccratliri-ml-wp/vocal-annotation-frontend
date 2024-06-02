@@ -499,7 +499,7 @@ function ScalableSpec(
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
-        } else if (showFrequencyLines && checkIfOccupiedByMaxFreqLine(mouseY) || checkIfOccupiedByMinFreqLine(mouseY)){
+        } else if (showFrequencyLines && ( checkIfOccupiedByMaxFreqLine(mouseY) || checkIfOccupiedByMinFreqLine(mouseY) )){
             specCanvasRef.current.style.cursor = 'row-resize'
         } else {
             specCanvasRef.current.style.cursor = 'default'

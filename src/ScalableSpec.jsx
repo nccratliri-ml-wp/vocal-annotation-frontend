@@ -512,11 +512,11 @@ function ScalableSpec(
     const hoverLabel = (event) => {
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted){
             const specCVS = specCanvasRef.current;
-            const specCTX = specCVS.getContext('2d');
+            const specCTX = specCVS.getContext('2d',{ willReadFrequently: true });
             const waveformCVS = waveformCanvasRef.current
-            const waveformCTX = waveformCVS.getContext('2d')
+            const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
             const labelCVS = labelCanvasRef.current
-            const labelCTX = labelCVS.getContext('2d')
+            const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true })
             specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
             specCTX.putImageData(specImgData.current, 0, 0);
             waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
@@ -728,7 +728,7 @@ function ScalableSpec(
     }
 
     const drawActiveLabel = (newAudioArray) => {
-        if (!specCanvasRef.current) return
+        if (!specCanvasRef.current || !activeLabel) return
 
         const specCVS = specCanvasRef.current;
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
@@ -754,7 +754,7 @@ function ScalableSpec(
 
     const drawTimeAxis = () => {
         const canvas = timeAxisRef.current
-        const ctx = canvas.getContext('2d')
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = '#9db4c0'
@@ -822,7 +822,7 @@ function ScalableSpec(
 
     const drawTimestamp = (timestamp, timestampText, lineHeight, fontSize, withText) => {
         const canvas = timeAxisRef.current
-        const ctx = timeAxisRef.current.getContext('2d')
+        const ctx = timeAxisRef.current.getContext('2d', { willReadFrequently: true })
         const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
 
         // Draw line under Timestamp text
@@ -917,7 +917,7 @@ function ScalableSpec(
 
     const drawLineBetween = (label) => {
         const cvs = labelCanvasRef.current
-        const ctx = cvs.getContext('2d');
+        const ctx = cvs.getContext('2d', { willReadFrequently: true });
 
         const xOnset = calculateXPosition(label.onset)
         const xOffset = calculateXPosition(label.offset)
@@ -949,7 +949,7 @@ function ScalableSpec(
 
     const drawClustername = (label) => {
         const cvs = labelCanvasRef.current
-        const ctx = cvs.getContext('2d')
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
 
         const xClustername = ( calculateXPosition(label.onset) + calculateXPosition(label.offset) ) / 2
         const y = calculateYPosition(label)
@@ -966,7 +966,7 @@ function ScalableSpec(
 
     const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
         const cvs = specCanvasRef.current
-        const ctx = cvs.getContext('2d')
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.fillStyle = color
 
         const marker_y_values = linspace(0, cvs.height, cvs.height)
@@ -999,7 +999,7 @@ function ScalableSpec(
 
         // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
         const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d')
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
         waveformCTX.fillStyle = color
 
         const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
@@ -1012,7 +1012,7 @@ function ScalableSpec(
 
     const drawCurvedOffset = (marker_end_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
         const cvs = specCanvasRef.current
-        const ctx = cvs.getContext('2d')
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.fillStyle = color
 
         const marker_y_values = linspace(0, cvs.height, cvs.height)
@@ -1044,7 +1044,7 @@ function ScalableSpec(
 
         // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
         const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d')
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
         waveformCTX.fillStyle = color
 
         const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
@@ -1057,7 +1057,7 @@ function ScalableSpec(
 
     const drawAllLabels = () => {
         const cvs = labelCanvasRef.current
-        const ctx = cvs.getContext('2d')
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.clearRect(0, 0, cvs.width, cvs.height)
 
         // Draw dotted visual support lines
@@ -1096,7 +1096,7 @@ function ScalableSpec(
 
     const drawIndividualsCanvas = () => {
         const cvs = individualsCanvasRef.current
-        const ctx = cvs.getContext('2d')
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.clearRect(0, 0, cvs.width, cvs.height)
 
         ctx.strokeStyle = '#ffffff'
@@ -1192,9 +1192,9 @@ function ScalableSpec(
 
     const dragOnset = (event) => {
         const specCanvas = specCanvasRef.current
-        const specCTX = specCanvas.getContext('2d')
+        const specCTX = specCanvas.getContext('2d', { willReadFrequently: true })
         const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d')
+        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
 
         updateOnset(event)
 
@@ -1211,9 +1211,9 @@ function ScalableSpec(
 
     const dragOffset = (event) => {
         const specCanvas = specCanvasRef.current
-        const specCTX = specCanvas.getContext('2d')
+        const specCTX = specCanvas.getContext('2d', { willReadFrequently: true })
         const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d')
+        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
 
         updateOffset(event)
 
@@ -1230,9 +1230,9 @@ function ScalableSpec(
 
     const dragMaxFreqLine = (event) => {
         const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d')
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true })
         const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d')
+        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
 
         const newMaxFreqY = getMouseY(event)
         if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
@@ -1251,9 +1251,9 @@ function ScalableSpec(
 
     const dragMinFreqLine = (event) => {
         const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d')
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true })
         const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d')
+        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
 
         const newMinFreqY = getMouseY(event)
         if (newMinFreqY <= clickedFrequencyLinesObject.maxFreqY + 5 ) return
@@ -1455,7 +1455,7 @@ function ScalableSpec(
 
     const drawViewport = (startFrame, endFrame, hexColorCode, lineWidth) => {
         const overviewCanvas = overviewRef.current
-        const ctx = overviewCanvas.getContext('2d');
+        const ctx = overviewCanvas.getContext('2d', { willReadFrequently: true });
         ctx.clearRect(0, 0, overviewCanvas.width, overviewCanvas.height);
 
         // Draw horizontal line representing the audio track
@@ -1607,9 +1607,9 @@ function ScalableSpec(
 
     const clearAndRedrawCanvases = () => {
         const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d');
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true });
         const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d');
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true });
         specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
         specCTX.putImageData(specImgData.current, 0, 0);
         waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
@@ -1620,9 +1620,9 @@ function ScalableSpec(
 
     const drawPlayhead = (timeframe) => {
         const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d');
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true });
         const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d');
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true });
 
         const x = calculateXPosition(timeframe)
 
@@ -1662,7 +1662,7 @@ function ScalableSpec(
     }
 
     const drawWaveform = (newAudioArray) => {
-        if (!waveformCanvasRef.current) return
+        if (!waveformCanvasRef.current || !newAudioArray) return
 
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
@@ -1854,14 +1854,14 @@ function ScalableSpec(
 
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
-        if (!spectrogram) return
+        if (!spectrogram || !audioArray) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
     }, [labels, waveformScale, showWaveform, expandedLabel, showFrequencyLines] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
         if (!spectrogram ||
-            trackID === activeLabel.trackId ||
+            trackID === activeLabel?.trackId ||
             activeSpecies.name === ANNOTATED_AREA) return
 
         drawActiveLabel(audioArray)
@@ -2030,210 +2030,203 @@ function ScalableSpec(
 
 
     return (
-        <>
-        {
-            trackData?.visible &&
-
-                <div
-                    className='editor-container'
-                    onMouseLeave={handleMouseLeave}
-                >
-                    {showOverviewInitialValue && trackData &&
-                        <div className='overview-time-axis-container'>
-                            <canvas
-                                className='overview-canvas'
-                                ref={overviewRef}
-                                width={parent.innerWidth - 200}
-                                height={40}
-                                onMouseDown={handleLMBDownOverview}
-                                onMouseUp={handleMouseUpOverview}
-                                onContextMenu={(event) => event.preventDefault()}
-                                onMouseMove={handleMouseMoveOverview}
-                            />
-                            <button
-                                id='left-scroll-overview-btn'
-                                onClick={leftScrollOverview}
-                            />
-                            <button
-                                id='right-scroll-overview-btn'
-                                onClick={rightScrollOverview}
-                            />
-                            <canvas
-                                className='time-axis-canvas'
-                                ref={timeAxisRef}
-                                width={parent.innerWidth - 200}
-                                height={40}
-                                onContextMenu={(event) => event.preventDefault()}
-                            />
-                        </div>
-                    }
-                    <div className='track-container'>
-                        <div className={showWaveform ? 'side-window' : 'side-window-small'}>
-                            <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
-                                <LocalFileUpload
-                                    filename={trackData.filename}
-                                    trackID={trackID}
-                                    specCalMethod={specCalMethod}
-                                    nfft={nfft}
-                                    binsPerOctave={binsPerOctave}
-                                    minFreq={minFreq}
-                                    maxFreq={maxFreq}
-                                    passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
-                                    handleUploadResponse={handleUploadResponse}
-                                    handleUploadError={handleUploadError}
-                                    strictMode={strictMode}
-                                />
-                                <div>
-                                    <Tooltip title="Call WhisperSeg">
-                                        <IconButton
-                                            style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
-                                            disabled={strictMode || !audioId}
-                                            onClick={callWhisperSeg}
-                                        >
-                                            <AutoFixHighIcon style={activeIcon}/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Change Track Parameters">
-                                        <IconButton style={activeIconBtnStyle}
-                                                    onClick={() => setShowLocalConfigWindow(true)}>
-                                            <TuneIcon style={activeIcon}/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
-                                        <IconButton style={activeIconBtnStyle}
-                                                    onClick={toggleShowWaveform}>
-                                            <GraphicEqIcon style={activeIcon}/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Frequency Range">
-                                        <IconButton
-                                            style={activeIconBtnStyle}
-                                            onClick={handleClickFrequencyLinesBtn}
-                                        >
-                                            <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Delete Track">
-                                        <IconButton
-                                            style={{...activeIconBtnStyle, ...(strictMode || trackID === 0 && iconBtnDisabled)}}
-                                            disabled={strictMode || trackID === 0}
-                                            onClick={handleRemoveTrack}
-                                        >
-                                            <DeleteIcon style={activeIcon}/>
-                                        </IconButton>
-                                    </Tooltip>
-                                </div>
-                                {labels.length}
-                                <div className='audio-controls'>
-                                    <IconButton style={iconBtn}
-                                                onClick={() => getAudio(currentStartTime, globalClipDuration)}>
-                                        <PlayArrowIcon style={activeIcon}/>
-                                    </IconButton>
-                                    <IconButton style={iconBtn} onClick={pauseAudio}>
-                                        <PauseIcon style={activeIcon}/>
-                                    </IconButton>
-                                    <IconButton style={iconBtn} onClick={stopAudio}>
-                                        <StopIcon style={activeIcon}/>
-                                    </IconButton>
-                                </div>
-                                <Parameters
-                                    showLocalConfigWindow={showLocalConfigWindow}
-                                    specCalMethod={specCalMethod}
-                                    nfft={nfft}
-                                    binsPerOctave={binsPerOctave}
-                                    minFreq={minFreq}
-                                    maxFreq={maxFreq}
-                                    passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
-                                    passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
-                                    passNfftToScalableSpec={passNfftToScalableSpec}
-                                    passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
-                                    passMinFreqToScalableSpec={passMinFreqToScalableSpec}
-                                    passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
-                                    submitLocalParameters={submitLocalParameters}
-                                    strictMode={strictMode}
-                                />
-                            </div>
-                            <div className='waveform-buttons-frequencies-canvas-container'>
-                                <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
-                                    <IconButton style={freqBtn} onClick={waveformZoomIn}>
-                                        <ZoomInIcon style={icon}/>
-                                    </IconButton>
-                                    <IconButton style={freqBtn} onClick={waveformZoomOut}>
-                                        <ZoomOutIcon style={icon}/>
-                                    </IconButton>
-                                </div>
-                                <canvas
-                                    className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
-                                    ref={frequenciesCanvasRef}
-                                    width={40}
-                                    height={showWaveform ? 140 : 120}
-                                />
-                            </div>
-                            <canvas
-                                className='individuals-canvas'
-                                ref={individualsCanvasRef}
-                                width={200}
-                                height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                            />
-                        </div>
-
-                        <div className='waveform-spec-labels-canvases-container'
-                             onMouseLeave={handleMouseLeaveCanvases}>
-                            <canvas
-                                className={showWaveform ? 'waveform-canvas' : 'hidden'}
-                                ref={waveformCanvasRef}
-                                width={parent.innerWidth - 200}
-                                height={60}
-                                onMouseDown={handleLMBDown}
-                                onMouseUp={handleMouseUp}
-                                onContextMenu={handleRightClick}
-                                onMouseMove={handleMouseMove}
-                            />
-                            <canvas
-                                className='spec-canvas'
-                                ref={specCanvasRef}
-                                width={parent.innerWidth - 200}
-                                height={120}
-                                onMouseDown={handleLMBDown}
-                                onMouseUp={handleMouseUp}
-                                onContextMenu={handleRightClick}
-                                onMouseMove={handleMouseMove}
-                            />
-                            <canvas
-                                className='label-canvas'
-                                ref={labelCanvasRef}
-                                width={parent.innerWidth - 200}
-                                height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                                onMouseDown={handleLMBDown}
-                                onMouseUp={handleMouseUp}
-                                onContextMenu={handleRightClick}
-                                onMouseMove={handleMouseMove}
-                            />
-                            {
-                                expandedLabel &&
-                                createPortal(
-                                    <LabelWindow
-                                        speciesArray={speciesArray}
-                                        labels={labels}
-                                        expandedLabel={expandedLabel}
-                                        passLabelsToScalableSpec={passLabelsToScalableSpec}
-                                        passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
-                                        getAllIndividualIDs={getAllIndividualIDs}
-                                        globalMouseCoordinates={globalMouseCoordinates}
-                                        getAudio={getAudio}
-                                    />,
-                                    document.body
-                                )
-                            }
-                            {spectrogramIsLoading || whisperSegIsLoading ?
-                                <Box sx={{width: '100%'}}><LinearProgress/></Box> : ''}
-                        </div>
-
-                    </div>
+        <div
+            className='editor-container'
+            onMouseLeave={handleMouseLeave}
+        >
+            {showOverviewInitialValue && trackData &&
+                <div className='overview-time-axis-container'>
+                    <canvas
+                        className='overview-canvas'
+                        ref={overviewRef}
+                        width={parent.innerWidth - 200}
+                        height={40}
+                        onMouseDown={handleLMBDownOverview}
+                        onMouseUp={handleMouseUpOverview}
+                        onContextMenu={(event) => event.preventDefault()}
+                        onMouseMove={handleMouseMoveOverview}
+                    />
+                    <button
+                        id='left-scroll-overview-btn'
+                        onClick={leftScrollOverview}
+                    />
+                    <button
+                        id='right-scroll-overview-btn'
+                        onClick={rightScrollOverview}
+                    />
+                    <canvas
+                        className='time-axis-canvas'
+                        ref={timeAxisRef}
+                        width={parent.innerWidth - 200}
+                        height={40}
+                        onContextMenu={(event) => event.preventDefault()}
+                    />
                 </div>
-        }
-        </>
-    );
+            }
+            <div className='track-container'>
+                <div className={showWaveform ? 'side-window' : 'side-window-small'}>
+                    <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
+                        <LocalFileUpload
+                            filename={trackData.filename}
+                            trackID={trackID}
+                            specCalMethod={specCalMethod}
+                            nfft={nfft}
+                            binsPerOctave={binsPerOctave}
+                            minFreq={minFreq}
+                            maxFreq={maxFreq}
+                            passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                            handleUploadResponse={handleUploadResponse}
+                            handleUploadError={handleUploadError}
+                            strictMode={strictMode}
+                        />
+                        <div>
+                            <Tooltip title="Call WhisperSeg">
+                                <IconButton
+                                    style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
+                                    disabled={strictMode || !audioId}
+                                    onClick={callWhisperSeg}
+                                >
+                                    <AutoFixHighIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Change Track Parameters">
+                                <IconButton style={activeIconBtnStyle}
+                                            onClick={() => setShowLocalConfigWindow(true)}>
+                                    <TuneIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
+                                <IconButton style={activeIconBtnStyle}
+                                            onClick={toggleShowWaveform}>
+                                    <GraphicEqIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Frequency Range">
+                                <IconButton
+                                    style={activeIconBtnStyle}
+                                    onClick={handleClickFrequencyLinesBtn}
+                                >
+                                    <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete Track">
+                                <IconButton
+                                    style={{...activeIconBtnStyle, ...(strictMode || showOverviewInitialValue && iconBtnDisabled)}}
+                                    disabled={strictMode || showOverviewInitialValue}
+                                    onClick={handleRemoveTrack}
+                                >
+                                    <DeleteIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                        <div className='audio-controls'>
+                            <IconButton style={iconBtn}
+                                        onClick={() => getAudio(currentStartTime, globalClipDuration)}>
+                                <PlayArrowIcon style={activeIcon}/>
+                            </IconButton>
+                            <IconButton style={iconBtn} onClick={pauseAudio}>
+                                <PauseIcon style={activeIcon}/>
+                            </IconButton>
+                            <IconButton style={iconBtn} onClick={stopAudio}>
+                                <StopIcon style={activeIcon}/>
+                            </IconButton>
+                        </div>
+                        <Parameters
+                            showLocalConfigWindow={showLocalConfigWindow}
+                            specCalMethod={specCalMethod}
+                            nfft={nfft}
+                            binsPerOctave={binsPerOctave}
+                            minFreq={minFreq}
+                            maxFreq={maxFreq}
+                            passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
+                            passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
+                            passNfftToScalableSpec={passNfftToScalableSpec}
+                            passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
+                            passMinFreqToScalableSpec={passMinFreqToScalableSpec}
+                            passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
+                            submitLocalParameters={submitLocalParameters}
+                            strictMode={strictMode}
+                        />
+                    </div>
+                    <div className='waveform-buttons-frequencies-canvas-container'>
+                        <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
+                            <IconButton style={freqBtn} onClick={waveformZoomIn}>
+                                <ZoomInIcon style={icon}/>
+                            </IconButton>
+                            <IconButton style={freqBtn} onClick={waveformZoomOut}>
+                                <ZoomOutIcon style={icon}/>
+                            </IconButton>
+                        </div>
+                        <canvas
+                            className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
+                            ref={frequenciesCanvasRef}
+                            width={40}
+                            height={showWaveform ? 140 : 120}
+                        />
+                    </div>
+                    <canvas
+                        className='individuals-canvas'
+                        ref={individualsCanvasRef}
+                        width={200}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                    />
+                </div>
+
+                <div className='waveform-spec-labels-canvases-container'
+                     onMouseLeave={handleMouseLeaveCanvases}>
+                    <canvas
+                        className={showWaveform ? 'waveform-canvas' : 'hidden'}
+                        ref={waveformCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={60}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    <canvas
+                        className='spec-canvas'
+                        ref={specCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={120}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    <canvas
+                        className='label-canvas'
+                        ref={labelCanvasRef}
+                        width={parent.innerWidth - 200}
+                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                        onMouseDown={handleLMBDown}
+                        onMouseUp={handleMouseUp}
+                        onContextMenu={handleRightClick}
+                        onMouseMove={handleMouseMove}
+                    />
+                    {
+                        expandedLabel &&
+                        createPortal(
+                            <LabelWindow
+                                speciesArray={speciesArray}
+                                labels={labels}
+                                expandedLabel={expandedLabel}
+                                passLabelsToScalableSpec={passLabelsToScalableSpec}
+                                passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
+                                getAllIndividualIDs={getAllIndividualIDs}
+                                globalMouseCoordinates={globalMouseCoordinates}
+                                getAudio={getAudio}
+                            />,
+                            document.body
+                        )
+                    }
+                    {spectrogramIsLoading || whisperSegIsLoading ?
+                        <Box sx={{width: '100%'}}><LinearProgress/></Box> : ''}
+                </div>
+
+            </div>
+        </div>
+    )
 }
 
 export default ScalableSpec;

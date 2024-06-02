@@ -53,26 +53,7 @@ function App() {
     const [deletedItemID, setDeletedItemID] = useState(null)
     
     const [tracks, setTracks] = useState([
-        {trackID: 0, visible: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 1, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 2, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 3, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 4, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 5, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 6, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 7, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 8, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 9, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 10, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 11, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 12, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 13, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 14, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 15, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 16, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 17, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 18, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
-        {trackID: 19, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null}
+        {trackID: nanoid(), showOverviewBarAndTimeAxis: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
     ])
 
     // General
@@ -166,30 +147,14 @@ function App() {
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
     
     function addTrack(){
-        const firstFalseTrack = tracks.find(track => !track.visible)
-
-        if (!firstFalseTrack) return
-
-        const updatedTracks = tracks.map( track => {
-            if (track.trackID === firstFalseTrack.trackID){
-                return {...track, visible: true}
-            } else {
-                return track
-            }
-        })
+        const updatedTracks = tracks.map(track => track)
+        updatedTracks.push({trackID: nanoid(), showOverviewBarAndTimeAxis: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null})
 
         setTracks(updatedTracks)
     }
 
     function removeTrackInApp( trackID ){
-        const updatedTracks = tracks.map( track => {
-            if (track.trackID === trackID){
-                return {...track, visible: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null}
-            } else {
-                return track
-            }
-        })
-
+        const updatedTracks = tracks.filter(track => track.trackID !== trackID)
         setTracks(updatedTracks)
 
         setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would be replaced by the config of another
@@ -362,90 +327,46 @@ function App() {
 
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
-    /*
-        0. If there's more than one new channel:
-        1. Find out which tracks are already occupied
-        2. Copy them and insert them after the new channels
-        3. Add labels property to the track objects
-        4. Add local parameters as a property to track objects
-     */
-
     const handleUploadResponse = (newResponse, filename, clickedTrackID) => {
-        // Update tracks
         const newChannels = newResponse.data.channels
+        let channelIndex = 0
 
-        let i = 0
-        const occupiedTracks = []
-
-        let updatedTracks = tracks.map( (track) => {
-            // If the track comes before the track whose upload button was clicked, skip this track
-            if (track.trackID < clickedTrackID){
-                return track
+        const updatedTracks = tracks.reduce((acc, track) => {
+            // Skip tracks before the clicked track (=return them unchanged)
+            if (track.trackID !== clickedTrackID) {
+                acc.push(track)
+                return acc
             }
 
-            // If the trackID matches the clicked track ID, feed it with the first channel
-            if (track.trackID === clickedTrackID){
-                const updatedTrack = {
-                    ...track,
-                    visible: true,
-                    audioID: newChannels[i].audio_id,
+            // Update the clicked track with the first channel's data
+            acc.push({
+                ...track,
+                audioID: newChannels[channelIndex].audio_id,
+                filename: filename,
+                audioDuration: newChannels[channelIndex].audio_duration,
+                frequencies: newChannels[channelIndex].freqs,
+                spectrogram: newChannels[channelIndex].spec,
+            })
+            channelIndex++
+
+            // Create additional tracks for remaining channels
+            while (channelIndex < newChannels.length) {
+                acc.push({
+                    trackID: nanoid(),
+                    showOverviewBarAndTimeAxis: false,
+                    audioID: newChannels[channelIndex].audio_id,
                     filename: filename,
-                    audioDuration: newChannels[i].audio_duration,
-                    frequencies: newChannels[i].freqs,
-                    spectrogram: newChannels[i].spec
-                }
-                i++
-                return updatedTrack
+                    audioDuration: newChannels[channelIndex].audio_duration,
+                    frequencies: newChannels[channelIndex].freqs,
+                    spectrogram: newChannels[channelIndex].spec,
+                })
+                channelIndex++
             }
 
-            // If the track comes after the clicked track
-            if (track.trackID > clickedTrackID){
-                // If it is already occupied with audio, make a copy of that track to refeed it later
-                if (track.audioID){
-                    occupiedTracks.push(track)
-                }
-                // Overwrite track with the new channel
-                if (newChannels[i]){
-                    const updatedTrack = {
-                        ...track,
-                        visible: true,
-                        audioID: newChannels[i].audio_id,
-                        filename: filename,
-                        audioDuration: newChannels[i].audio_duration,
-                        frequencies: newChannels[i].freqs,
-                        spectrogram: newChannels[i].spec
-                    }
-                    i++
-                    return updatedTrack
-                // Once all channels have been assigned to a track, leave the other tracks unaltered and hidden
-                } else {
-                    return track
-                }
-            }
-        })
-
-        // Add tracks that were overwritten by the new channels at the end
-        let index = 0
-        updatedTracks = updatedTracks.map( track => {
-            // Skip occupied tracks
-            if (track.audioID){
-                return track
-            }
-
-            // Start adding the occupied Tracks to the empty tracks
-            if (!track.audioID && occupiedTracks[index]){
-                const updatedTrack = occupiedTracks[index]
-                index++
-                return updatedTrack
-
-            // Once all occupied tracks have been reassigned, leave the other tracks unaltered and hidden
-            } else {
-                return track
-            }
-        })
+            return acc
+        }, [])
 
         setTracks(updatedTracks)
-
 
         // Update Global Values
         const newConfigurations = newResponse.data.configurations
@@ -467,18 +388,6 @@ function App() {
 
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
-/*
-    useEffect( () => {
-        if (trackDurations.length === 0) return
-
-        const newGlobalDuration = Math.max(...trackDurations) === -Infinity ? 0 : Math.max(...trackDurations)
-        //const newHopLength = Math.floor( (newGlobalDuration * globalSamplingRate) / globalNumSpecColumns )
-
-        setGlobalAudioDuration(newGlobalDuration)
-        //setGlobalHopLength(newHopLength)
-
-    }, [trackDurations])
- */
 
     // When tracks are being changed, recalculate currently longest track and set that as global audio duration
     useEffect( () => {
@@ -592,7 +501,6 @@ function App() {
                 id='all-tracks'
             >
                 {showGlobalConfigWindow &&
-
                     <GlobalConfig
                         globalAudioDuration={globalAudioDuration}
                         currentStartTime={currentStartTime}
@@ -607,703 +515,48 @@ function App() {
                         strictMode={strictMode}
                     />
                 }
-                    <ScalableSpec
-                        trackID={tracks[0].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={true}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[0] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels ? csvImportedLabels[0] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[0]}
-                    />
-                    <ScalableSpec
-                        trackID={tracks[1].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[1] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[1] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[1]}
-                    />
-                    <ScalableSpec
-                        trackID={tracks[2].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[2] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[2] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[2]}
-                    />
 
-                    <ScalableSpec
-                        trackID={tracks[3].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[3] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[3] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[3]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[4].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[4] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[4] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[4]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[5].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[5] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[5] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[5]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[6].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[6] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[6] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[6]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[7].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[7] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[7] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[7]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[8].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[8] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[8] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[8]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[9].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[9] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[9] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[9]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[10].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[10] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[10] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[10]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[11].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[11] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[11] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[11]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[12].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[12] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[12] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[12]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[13].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[13] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[13] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[13]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[14].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[14] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[14] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[14]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[15].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[15] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[15] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[15]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[16].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[16] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[16] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[16]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[17].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[17] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[17] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[17]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[18].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[18] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[18] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[18]}
-                    />
-
-                    <ScalableSpec
-                        trackID={tracks[19].trackID}
-                        speciesArray={speciesArray}
-                        deletedItemID={deletedItemID}
-                        showOverviewInitialValue={false}
-                        globalAudioDuration={globalAudioDuration}
-                        globalClipDuration={globalClipDuration}
-                        currentStartTime={currentStartTime}
-                        currentEndTime={currentEndTime}
-                        maxScrollTime={maxScrollTime}
-                        SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                        passScrollStepToApp={passScrollStepToApp}
-                        passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                        passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                        passClipDurationToApp={passClipDurationToApp}
-                        passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                        removeTrackInApp={removeTrackInApp}
-                        globalHopLength={globalHopLength}
-                        globalNumSpecColumns={globalNumSpecColumns}
-                        globalSamplingRate={globalSamplingRate}
-                        passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                        passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                        passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
-                        updateClipDurationAndTimes={updateClipDurationAndTimes}
-                        passDefaultConfigToApp={passDefaultConfigToApp}
-                        audioPayload={audioPayloads? audioPayloads[19] : null}
-                        activeLabel={activeLabel}
-                        passActiveLabelToApp={passActiveLabelToApp}
-                        strictMode={strictMode}
-                        passLabelsToApp={passLabelsToApp}
-                        csvImportedLabels={csvImportedLabels? csvImportedLabels[19] : null}
-                        handleUploadResponse={handleUploadResponse}
-                        trackData={tracks[19]}
-                    />
+                {
+                    tracks.map(track => {
+                        return (
+                            <ScalableSpec
+                                key={track.trackID}
+                                trackID={track.trackID}
+                                speciesArray={speciesArray}
+                                deletedItemID={deletedItemID}
+                                showOverviewInitialValue={track.showOverviewBarAndTimeAxis}
+                                globalAudioDuration={globalAudioDuration}
+                                globalClipDuration={globalClipDuration}
+                                currentStartTime={currentStartTime}
+                                currentEndTime={currentEndTime}
+                                maxScrollTime={maxScrollTime}
+                                SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                                passScrollStepToApp={passScrollStepToApp}
+                                passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                                passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                                passClipDurationToApp={passClipDurationToApp}
+                                passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                                removeTrackInApp={removeTrackInApp}
+                                globalHopLength={globalHopLength}
+                                globalNumSpecColumns={globalNumSpecColumns}
+                                globalSamplingRate={globalSamplingRate}
+                                passGlobalHopLengthToApp={passGlobalHopLengthToApp}
+                                passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
+                                passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
+                                updateClipDurationAndTimes={updateClipDurationAndTimes}
+                                passDefaultConfigToApp={passDefaultConfigToApp}
+                                audioPayload={audioPayloads? audioPayloads[0] : null}
+                                activeLabel={activeLabel}
+                                passActiveLabelToApp={passActiveLabelToApp}
+                                strictMode={strictMode}
+                                passLabelsToApp={passLabelsToApp}
+                                csvImportedLabels={csvImportedLabels ? csvImportedLabels[0] : null}
+                                handleUploadResponse={handleUploadResponse}
+                                trackData={track}
+                            />
+                        )
+                    })
+                }
 
                 <Tooltip title="Add New Track">
                     <IconButton style={strictMode ? iconBtnDisabled : iconBtn} disabled={strictMode} onClick={addTrack}>

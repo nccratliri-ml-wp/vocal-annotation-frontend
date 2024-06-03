@@ -18,6 +18,9 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
                 // Starting from the second line to skip the CSV header
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i]
+                    // Skip empty rows
+                    if(line === '') continue
+
                     const [onset, offset, species, individual, clustername, filename, trackID] = line.trim().split(',')
 
                     importedLabelsArray.push({

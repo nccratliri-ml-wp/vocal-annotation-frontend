@@ -346,6 +346,8 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
 
+        console.log('mouseX ' + mouseX)
+
         // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas'){
             // Deal with click on Onset
@@ -880,7 +882,7 @@ function ScalableSpec(
 
         if (specCalMethod === 'constant-q'){
             if (timestamp === label.onset){
-                drawCurvedOnset(timestamp, lineColor)
+                drawCurvedOnset3(timestamp, lineColor)
             }
             if (timestamp === label.offset){
                 drawCurvedOffset(timestamp, lineColor)
@@ -963,6 +965,92 @@ function ScalableSpec(
 
         ctx.fillText(text, xClustername, y - 4);
     }
+
+    const drawCurvedOnset2 = () => {
+        const curve_time=0.995
+        const n_bins=200
+        const globalHopLength = 80
+        const currentStartTime = 0
+        const globalSamplingRate = 16000
+        const minFreq = 100
+        const binsPerOctave = 32
+
+        const curve_top_pos = (curve_time - currentStartTime) * globalSamplingRate / globalHopLength
+        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
+
+        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
+
+        let xs = Array.from({ length: 400 }, (_, i) => i);
+
+        xs = xs.filter(x => (x >= curve_top_pos + offset_para - curve_width) && (x <= curve_top_pos));
+        console.log(xs)
+    }
+
+    const drawCurvedOnset3 = (curve_time, color) => {
+        const cvs = specCanvasRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+
+        const n_bins=200
+
+        //const curve_top_pos = (curve_time - currentStartTime) * globalSamplingRate / globalHopLength
+        const curve_top_pos = calculateXPosition(curve_time)
+        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
+        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
+
+        let xs = Array.from({ length: cvs.width }, (_, i) => i)
+        xs = xs.filter(x => x >= curve_top_pos + offset_para - curve_width && x <= curve_top_pos)
+
+        let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((curve_top_pos + offset_para - x) / curve_width))
+
+        let i = 0
+        let previousX = null
+        let previousY = null
+        for (let x of xs){
+            const x1 = previousX ? previousX : x
+            const x2 = x
+            const y1 = previousY ? previousY : ys[i]
+            const y2 = ys[i]
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+            previousX = x
+            previousY = ys[i]
+            i++
+        }
+
+        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
+        const x1 = xs[0]
+        const x2 = xs[xs.length-1]
+        const y = cvs.height - 1
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw waveform line
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
+
+        const x = curve_top_pos
+        const y1 = 0
+        const y2 = waveformCVS.height
+
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, y1)
+        waveformCTX.lineTo(x, y2)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = color
+        waveformCTX.stroke()
+    }
+
 
     const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
         const cvs = specCanvasRef.current
@@ -2118,6 +2206,7 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
+                            <button onClick={drawCurvedOnset3}>console</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}

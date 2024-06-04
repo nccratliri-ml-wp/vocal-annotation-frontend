@@ -658,11 +658,23 @@ function ScalableSpec(
         return true
     }
 
-    const linspace = (start, stop, num=50, endpoint=true) => {
-        const step = (stop - start) / (num - (endpoint ? 1 : 0))
-        const arr = Array.from({ length: num }, (_, i) => start + step * i)
-        if (!endpoint) arr.push(stop)
-        return arr
+    const findClosestPositiveToZeroIndex = (arr) => {
+        // Initialize a variable to store the index of the closest positive number
+        let closestIndex = -1;
+
+        // Iterate through the array
+        for (let i = 0; i < arr.length; i++) {
+            let num = arr[i]
+            // Check if the number is positive
+            if (num > 0) {
+                // If closestIndex is -1 (no positive number found yet) or the current number is closer to zero
+                if (closestIndex === -1 || num < arr[closestIndex]) {
+                    closestIndex = i
+                }
+            }
+        }
+
+        return closestIndex
     }
 
     const getAllIndividualIDs = () => {
@@ -882,7 +894,7 @@ function ScalableSpec(
 
         if (specCalMethod === 'constant-q'){
             if (timestamp === label.onset){
-                drawCurvedOnset3(timestamp, lineColor)
+                drawCurvedOnset(timestamp, lineColor)
             }
             if (timestamp === label.offset){
                 drawCurvedOffset(timestamp, lineColor)
@@ -966,27 +978,7 @@ function ScalableSpec(
         ctx.fillText(text, xClustername, y - 4);
     }
 
-    const drawCurvedOnset2 = () => {
-        const curve_time=0.995
-        const n_bins=200
-        const globalHopLength = 80
-        const currentStartTime = 0
-        const globalSamplingRate = 16000
-        const minFreq = 100
-        const binsPerOctave = 32
-
-        const curve_top_pos = (curve_time - currentStartTime) * globalSamplingRate / globalHopLength
-        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
-
-        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
-
-        let xs = Array.from({ length: 400 }, (_, i) => i);
-
-        xs = xs.filter(x => (x >= curve_top_pos + offset_para - curve_width) && (x <= curve_top_pos));
-        console.log(xs)
-    }
-
-    const drawCurvedOnset3 = (curve_time, color) => {
+    const drawCurvedOnset = (curve_time, color) => {
         const cvs = specCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.lineWidth = 2
@@ -1065,55 +1057,44 @@ function ScalableSpec(
         waveformCTX.stroke()
     }
 
-    function findClosestPositiveToZeroIndex(arr) {
-        // Initialize a variable to store the index of the closest positive number
-        let closestIndex = -1;
-
-        // Iterate through the array
-        for (let i = 0; i < arr.length; i++) {
-            let num = arr[i];
-            // Check if the number is positive
-            if (num > 0) {
-                // If closestIndex is -1 (no positive number found yet) or the current number is closer to zero
-                if (closestIndex === -1 || num < arr[closestIndex]) {
-                    closestIndex = i;
-                }
-            }
-        }
-
-        return closestIndex;
-    }
-
-// Example usage:
-    const numbers = [3, -1, 2, -4, 1, -6, 7];
-    const closestPositiveIndex = findClosestPositiveToZeroIndex(numbers);
-    console.log(closestPositiveIndex); // Output: 4 (position of number 1)
-
-
-
-    const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
+    const drawCurvedOffset = (curve_time, color) => {
         const cvs = specCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true })
-        ctx.fillStyle = color
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
 
-        const marker_y_values = linspace(0, cvs.height, cvs.height)
-        const curve_intensity = curve_intensity_factor / globalClipDuration
+        const n_bins=200
 
-        const start_marker_x_position_pixels = (marker_start_time - currentStartTime) / globalClipDuration * cvs.width
-        const start_marker_x_values = linspace(0, 2, cvs.height).map(x => start_marker_x_position_pixels + curve_intensity * -Math.exp(x ** 2))
+        const curve_top_pos = calculateXPosition(curve_time)
+        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
+        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
+
+        let xs = Array.from({ length: cvs.width }, (_, i) => i)
+        xs = xs.filter(x => x <= curve_top_pos - offset_para + curve_width && x >= curve_top_pos)
+
+        let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((x - (curve_top_pos - offset_para)) / curve_width))
 
         let i = 0
-        for (let x of start_marker_x_values){
-            const y = marker_y_values[i]
-            ctx.fillRect(x,y,1.5,2)
+        let previousX = null
+        let previousY = null
+        for (let x of xs){
+            const x1 = previousX ? previousX : x
+            const x2 = x
+            const y1 = previousY ? previousY : ys[i]
+            const y2 = ys[i]
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+            previousX = x
+            previousY = ys[i]
             i++
         }
 
         // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
-        const x1 = start_marker_x_values[0]
-        const x2 = start_marker_x_values[start_marker_x_values.length-1]
-        const y = cvs.height - 1
-
+        let x1 = xs[0]
+        let x2 = xs[xs.length-1]
+        let y = cvs.height - 1
         ctx.beginPath()
         ctx.setLineDash([1, 1])
         ctx.moveTo(x1, y)
@@ -1123,43 +1104,10 @@ function ScalableSpec(
         ctx.stroke()
         ctx.setLineDash([])
 
-
-        // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
-        const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
-        waveformCTX.fillStyle = color
-
-        const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
-        const x = start_marker_x_values[0]
-
-        for (let y of y_values){
-            waveformCTX.fillRect(x,y,1.5,2)
-        }
-    }
-
-    const drawCurvedOffset = (marker_end_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {
-        const cvs = specCanvasRef.current
-        const ctx = cvs.getContext('2d', { willReadFrequently: true })
-        ctx.fillStyle = color
-
-        const marker_y_values = linspace(0, cvs.height, cvs.height)
-        const curve_intensity = curve_intensity_factor / globalClipDuration
-
-        const end_marker_x_position_pixels = (marker_end_time - currentStartTime) / globalClipDuration * cvs.width
-        const end_marker_x_values = linspace(0, 2, cvs.height).map(x => end_marker_x_position_pixels + curve_intensity * Math.exp(x ** 2))
-
-        let i = 0
-        for (let x of end_marker_x_values){
-            const y = marker_y_values[i]
-            ctx.fillRect(x,y,1.5,2)
-            i++
-        }
-
-        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
-        const x1 = end_marker_x_values[0]
-        const x2 = end_marker_x_values[end_marker_x_values.length-1]
-        const y = cvs.height - 1
-
+        // Draw horizontal line connecting the top end of the curved line with the line in the waveform canvas
+        x1 = xs[findClosestPositiveToZeroIndex(ys)]
+        x2 = curve_top_pos
+        y = 1
         ctx.beginPath()
         ctx.setLineDash([1, 1])
         ctx.moveTo(x1, y)
@@ -1169,17 +1117,20 @@ function ScalableSpec(
         ctx.stroke()
         ctx.setLineDash([])
 
-        // Draw waveform line also with fillRect, so it aligns smoothly with the curved line
+        // Draw line inside the waveform
         const waveformCVS = waveformCanvasRef.current
         const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
-        waveformCTX.fillStyle = color
 
-        const y_values = linspace(0, waveformCVS.height, waveformCVS.height)
-        const x = end_marker_x_values[0]
+        const x = curve_top_pos
+        const y1 = 0
+        const y2 = waveformCVS.height
 
-        for (let y of y_values){
-            waveformCTX.fillRect(x,y,1.5,2)
-        }
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, y1)
+        waveformCTX.lineTo(x, y2)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = color
+        waveformCTX.stroke()
     }
 
     const drawAllLabels = () => {
@@ -2245,7 +2196,6 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
-                            <button onClick={drawCurvedOnset3}>console</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}

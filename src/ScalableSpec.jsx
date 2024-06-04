@@ -1022,9 +1022,9 @@ function ScalableSpec(
         }
 
         // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
-        const x1 = xs[0]
-        const x2 = xs[xs.length-1]
-        const y = cvs.height - 1
+        let x1 = xs[0]
+        let x2 = xs[xs.length-1]
+        let y = cvs.height - 1
 
         ctx.beginPath()
         ctx.setLineDash([1, 1])
@@ -1035,7 +1035,21 @@ function ScalableSpec(
         ctx.stroke()
         ctx.setLineDash([])
 
-        // Draw waveform line
+        // Draw horizontal line connecting the top end of the curved line with the line in the waveform canvas
+        x1 = xs[findClosestPositiveToZeroIndex(ys)]
+        x2 = curve_top_pos
+        y = 1
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw line inside the waveform
         const waveformCVS = waveformCanvasRef.current
         const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
 
@@ -1050,6 +1064,31 @@ function ScalableSpec(
         waveformCTX.strokeStyle = color
         waveformCTX.stroke()
     }
+
+    function findClosestPositiveToZeroIndex(arr) {
+        // Initialize a variable to store the index of the closest positive number
+        let closestIndex = -1;
+
+        // Iterate through the array
+        for (let i = 0; i < arr.length; i++) {
+            let num = arr[i];
+            // Check if the number is positive
+            if (num > 0) {
+                // If closestIndex is -1 (no positive number found yet) or the current number is closer to zero
+                if (closestIndex === -1 || num < arr[closestIndex]) {
+                    closestIndex = i;
+                }
+            }
+        }
+
+        return closestIndex;
+    }
+
+// Example usage:
+    const numbers = [3, -1, 2, -4, 1, -6, 7];
+    const closestPositiveIndex = findClosestPositiveToZeroIndex(numbers);
+    console.log(closestPositiveIndex); // Output: 4 (position of number 1)
+
 
 
     const drawCurvedOnset = (marker_start_time, color, num_spec_columns=1000, curve_intensity_factor=1) => {

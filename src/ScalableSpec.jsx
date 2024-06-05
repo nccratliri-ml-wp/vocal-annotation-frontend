@@ -346,8 +346,6 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
 
-        console.log('mouseX ' + mouseX)
-
         // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas'){
             // Deal with click on Onset
@@ -984,14 +982,17 @@ function ScalableSpec(
         ctx.lineWidth = 2
         ctx.strokeStyle = color
 
-        const n_bins=200
+        const n_bins = cvs.height
 
         //const curve_top_pos = (curve_time - currentStartTime) * globalSamplingRate / globalHopLength
         const curve_top_pos = calculateXPosition(curve_time)
         const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
         const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
 
-        let xs = Array.from({ length: cvs.width }, (_, i) => i)
+        let xs = []
+        for (let i = 0; i < cvs.width; i += 0.1){
+            xs.push(i)
+        }
         xs = xs.filter(x => x >= curve_top_pos + offset_para - curve_width && x <= curve_top_pos)
 
         let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((curve_top_pos + offset_para - x) / curve_width))
@@ -1027,20 +1028,6 @@ function ScalableSpec(
         ctx.stroke()
         ctx.setLineDash([])
 
-        // Draw horizontal line connecting the top end of the curved line with the line in the waveform canvas
-        x1 = xs[findClosestPositiveToZeroIndex(ys)]
-        x2 = curve_top_pos
-        y = 1
-
-        ctx.beginPath()
-        ctx.setLineDash([1, 1])
-        ctx.moveTo(x1, y)
-        ctx.lineTo(x2, y)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = color
-        ctx.stroke()
-        ctx.setLineDash([])
-
         // Draw line inside the waveform
         const waveformCVS = waveformCanvasRef.current
         const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
@@ -1063,13 +1050,16 @@ function ScalableSpec(
         ctx.lineWidth = 2
         ctx.strokeStyle = color
 
-        const n_bins=200
+        const n_bins = cvs.height
 
         const curve_top_pos = calculateXPosition(curve_time)
         const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
         const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
 
-        let xs = Array.from({ length: cvs.width }, (_, i) => i)
+        let xs = []
+        for (let i = 0; i < cvs.width; i += 0.1){
+            xs.push(i)
+        }
         xs = xs.filter(x => x <= curve_top_pos - offset_para + curve_width && x >= curve_top_pos)
 
         let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((x - (curve_top_pos - offset_para)) / curve_width))
@@ -2196,6 +2186,7 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
+                            {trackData.trackIndex}
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}

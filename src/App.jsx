@@ -53,7 +53,7 @@ function App() {
     const [deletedItemID, setDeletedItemID] = useState(null)
     
     const [tracks, setTracks] = useState([
-        {trackID: nanoid(), showOverviewBarAndTimeAxis: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {trackID: nanoid(), trackIndex: 0, showOverviewBarAndTimeAxis: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
     ])
 
     // General
@@ -148,13 +148,20 @@ function App() {
     
     function addTrack(){
         const updatedTracks = tracks.map(track => track)
-        updatedTracks.push({trackID: nanoid(), showOverviewBarAndTimeAxis: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null})
+        const newIndex = updatedTracks.length
+        updatedTracks.push({trackID: nanoid(), trackIndex: newIndex, showOverviewBarAndTimeAxis: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null})
 
         setTracks(updatedTracks)
     }
 
     function removeTrackInApp( trackID ){
-        const updatedTracks = tracks.filter(track => track.trackID !== trackID)
+        let updatedTracks = tracks.filter(track => track.trackID !== trackID)
+        updatedTracks = updatedTracks.map( (track, index) => {
+            return {
+                ...track,
+                trackIndex: index
+            }
+        })
         setTracks(updatedTracks)
 
         setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would be replaced by the config of another
@@ -331,7 +338,7 @@ function App() {
         const newChannels = newResponse.data.channels
         let channelIndex = 0
 
-        const updatedTracks = tracks.reduce((acc, track) => {
+        let updatedTracks = tracks.reduce((acc, track) => {
             // Skip tracks before the clicked track (=return them unchanged)
             if (track.trackID !== clickedTrackID) {
                 acc.push(track)
@@ -366,6 +373,14 @@ function App() {
             return acc
         }, [])
 
+        // Assign tracks the correct index
+        updatedTracks = updatedTracks.map( (track, index) => {
+            return {
+                ...track,
+                trackIndex: index
+            }
+        })
+
         setTracks(updatedTracks)
 
         // Update Global Values
@@ -399,6 +414,7 @@ function App() {
 
     // When the site was accessed with a URL data parameter
     useEffect( () => {
+        // Old stuff needs to be overhauled once I have endpoints from Sumit
         let ignore = false
 
         const queryParams = new URLSearchParams(location.search)

@@ -1862,19 +1862,49 @@ function ScalableSpec(
         const ctx = cvs.getContext('2d', { willReadFrequently: true, alpha: true })
 
         ctx.strokeStyle = FREQUENCY_LINES_COLOR
+        ctx.fillStyle = FREQUENCY_LINES_COLOR
         ctx.lineWidth = 2
+        const triangleHeight = 7
 
         // Draw Max Frequency
+        let x1 = 0
+        let x2 = cvs.width
+        let y = frequencyLines.maxFreqY
         ctx.beginPath()
-        ctx.moveTo(0,frequencyLines.maxFreqY)
-        ctx.lineTo(cvs.width, frequencyLines.maxFreqY)
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
         ctx.stroke()
 
-        // Draw Min Frequency
+        x1 = 5
+        x2 = x1 + triangleHeight
+        let x3 = x2 + triangleHeight
+        let y1 = frequencyLines.maxFreqY
+        let y2 = frequencyLines.maxFreqY - triangleHeight
         ctx.beginPath()
-        ctx.moveTo(0,frequencyLines.minFreqY-1)
-        ctx.lineTo(cvs.width, frequencyLines.minFreqY-1)
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.lineTo(x3, y1)
+        ctx.fill();
+
+        // Draw Min Frequency
+        x1 = 0
+        x2 = cvs.width
+        y = frequencyLines.minFreqY - 1
+        ctx.beginPath()
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
         ctx.stroke()
+
+        x1 = 5
+        x2 = x1 + triangleHeight
+        x3 = x2 + triangleHeight
+        y1 = frequencyLines.minFreqY
+        y2 = frequencyLines.minFreqY + triangleHeight
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.lineTo(x3, y1)
+        ctx.fill();
     }
 
 

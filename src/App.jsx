@@ -131,11 +131,11 @@ function App() {
         setActiveLabel( newActiveLabel )
     }
 
-    function passLabelsToApp( labels, trackID ){
+    function passLabelsToApp( labels, trackIndex ){
         setAllLabels(
             {
                 ...allLabels,
-                [trackID]: labels
+                [trackIndex]: labels
             }
         )
     }
@@ -228,7 +228,7 @@ function App() {
             return
         }
 
-        // Remove trackID property for all label objects (it's irrelevant for the database)
+        // Remove properties that irrelevant for the backend
         allLabelsArray = allLabelsArray.map(labelObj => {
             return {
                 onset: labelObj.onset,
@@ -258,6 +258,12 @@ function App() {
             console.log(error)
         }
 
+    }
+
+    /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
+
+    function getImportedLabelsForThisTrack(csvImportedLabels, trackIndex) {
+        return csvImportedLabels.filter( label => label.trackIndex === trackIndex)
     }
 
     function createSpeciesFromImportedLabels (importedLabels){
@@ -449,9 +455,7 @@ function App() {
     // When labels are imported from a local CSV file
     useEffect( () => {
         if (!csvImportedLabels) return
-
-        const csvImportedLabelsArray = Object.values(csvImportedLabels).flat()
-        createSpeciesFromImportedLabels(csvImportedLabelsArray)
+        createSpeciesFromImportedLabels(csvImportedLabels)
 
     }, [csvImportedLabels])
 
@@ -566,7 +570,7 @@ function App() {
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}
                                 passLabelsToApp={passLabelsToApp}
-                                csvImportedLabels={csvImportedLabels ? csvImportedLabels[0] : null}
+                                csvImportedLabels={csvImportedLabels && getImportedLabelsForThisTrack(csvImportedLabels, track.trackIndex)}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
                             />

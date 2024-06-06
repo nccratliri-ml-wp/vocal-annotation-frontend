@@ -21,7 +21,7 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
                     // Skip empty rows
                     if (line === '') continue
 
-                    const [onset, offset, species, individual, clustername, filename, trackID] = line.trim().split(',')
+                    const [onset, offset, species, individual, clustername, filename, trackIndex] = line.trim().split(',')
 
                     importedLabelsArray.push({
                         onset: parseFloat(onset),
@@ -30,22 +30,12 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
                         individual: individual.trim(),
                         clustername: clustername.trim(),
                         filename: filename.trim(),
-                        trackID: trackID.trim()
+                        trackIndex: parseFloat(trackIndex)
                     })
 
                 }
 
-                let allImportedLabelsObject = {}
-
-                for (const label of importedLabelsArray) {
-                    const trackID = label.trackID
-                    allImportedLabelsObject[trackID] = [
-                        ...(allImportedLabelsObject[trackID] || []), // Ensure the track array exists
-                        label
-                    ]
-                }
-
-                passCsvImportedLabelsToApp(allImportedLabelsObject)
+                passCsvImportedLabelsToApp(importedLabelsArray)
             }
             reader.readAsText(file)
         }

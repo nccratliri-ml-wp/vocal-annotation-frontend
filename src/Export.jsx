@@ -11,7 +11,7 @@ function Export( { allLabels } ){
         let labels = Object.values(allLabels).flat()
 
         // Transform to CSV data
-        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.trackID}`)
+        let csvData = labels.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.trackIndex}`)
         csvData.unshift('onset,offset,species,individual,clustername,filename,track')
         csvData = csvData.join('\n')
 

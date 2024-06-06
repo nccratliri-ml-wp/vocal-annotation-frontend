@@ -188,7 +188,7 @@ function ScalableSpec(
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
-        passLabelsToApp(createGenericLabelObjects(newLabelsArray), trackID)
+        passLabelsToApp(createGenericLabelObjects(newLabelsArray), trackData.trackIndex)
     }
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
@@ -407,7 +407,7 @@ function ScalableSpec(
                 labelsCopy[labels.length-1].offset = newOffset
             }
             setLabels(labelsCopy)
-            passLabelsToApp(createGenericLabelObjects(labelsCopy), trackID)
+            passLabelsToApp(createGenericLabelObjects(labelsCopy), trackData.trackIndex)
             passActiveLabelToApp(
                 {
                     onset: labelsCopy[labels.length-1].onset,
@@ -691,7 +691,7 @@ function ScalableSpec(
                     individual: label.individual,
                     clustername: label.clustername,
                     filename: label.filename,
-                    trackID: label.trackID,
+                    trackIndex: label.trackIndex,
                     annotation_instance: annotationInstance
                 }
             }
@@ -1212,7 +1212,7 @@ function ScalableSpec(
 
         const newLabel = new Label(
             nanoid(),
-            trackID,
+            trackData.trackIndex,
             trackData.filename,
             onset,
             undefined,
@@ -1232,7 +1232,7 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
-        passLabelsToApp(createGenericLabelObjects(filteredLabels), trackID)
+        passLabelsToApp(createGenericLabelObjects(filteredLabels), trackData.trackIndex)
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
@@ -1359,7 +1359,7 @@ function ScalableSpec(
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
                 nanoid(),
-                trackID,
+                trackData.trackIndex,
                 trackData.filename,
                 label.onset,
                 label.offset,
@@ -1925,7 +1925,7 @@ function ScalableSpec(
         const whisperLabels = whisperObjects.map( obj => {
             return new Label(
                 nanoid(),
-                trackID,
+                trackData.trackIndex,
                 trackData.filename,
                 obj.onset,
                 obj.offset,
@@ -1942,7 +1942,7 @@ function ScalableSpec(
 
         const combinedLabelsArray = labels.concat(whisperLabels)
         setLabels(combinedLabelsArray)
-        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackID)
+        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackData.trackIndex)
 
         setWhisperSegIsLoading(false)
     }
@@ -1977,7 +1977,7 @@ function ScalableSpec(
                 // Create an updated label with old values
                 const updatedLabel = new Label(
                     label.id,
-                    trackID,
+                    trackData.trackIndex,
                     trackData.filename,
                     label.onset,
                     label.offset,
@@ -2027,7 +2027,7 @@ function ScalableSpec(
         }
 
         setLabels(updatedLabels)
-        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
 
     }, [speciesArray])
 
@@ -2062,12 +2062,12 @@ function ScalableSpec(
             if (importedLabelsSource){
                 const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabelsSource)
                 setLabels(updatedLabels)
-                passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+                passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
 
             // If there's no audio payload labels nor CSV imported labels delete all existing labels on this track
             } else {
                 setLabels([])
-                passLabelsToApp([], trackID)
+                passLabelsToApp([], trackData.trackIndex)
             }
 
     }, [trackData.audioID])
@@ -2079,7 +2079,7 @@ function ScalableSpec(
 
         const updatedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
         setLabels(updatedLabels)
-        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackID)
+        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
 
     }, [csvImportedLabels])
 */

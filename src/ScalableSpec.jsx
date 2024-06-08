@@ -15,6 +15,8 @@ import StopIcon from '@mui/icons-material/Stop';
 import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import DensityLargeIcon from '@mui/icons-material/DensityLarge';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "./styles.js"
@@ -91,9 +93,13 @@ function ScalableSpec(
     const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 121})
     let clickedFrequencyLinesObject = null
 
+    // Label Canvas
+    const labelCanvasRef = useRef(null)
+
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
     const numberOfIndividuals = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
+    const [showLabelAndIndividualsCanvas, setShowLabelAndIndividualsCanvas] = useState(true)
 
     // Time Axis
     const timeAxisRef = useRef(null);
@@ -123,7 +129,6 @@ function ScalableSpec(
     const [showWaveform, setShowWaveform] =  useState(true)
 
     // File Upload
-    //const [response, setResponse] = useState(null)
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
 
     // Local Parameters
@@ -133,9 +138,6 @@ function ScalableSpec(
     const [binsPerOctave, setBinsPerOctave] = useState('')
     const [minFreq, setMinFreq] = useState('')
     const [maxFreq, setMaxFreq] = useState('')
-
-    // Label Canvas
-    const labelCanvasRef = useRef(null)
 
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
@@ -2208,18 +2210,26 @@ function ScalableSpec(
                                     <TuneIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
-                                <IconButton style={activeIconBtnStyle}
-                                            onClick={toggleShowWaveform}>
-                                    <GraphicEqIcon style={activeIcon}/>
-                                </IconButton>
-                            </Tooltip>
                             <Tooltip title="Frequency Range">
                                 <IconButton
                                     style={activeIconBtnStyle}
                                     onClick={handleClickFrequencyLinesBtn}
                                 >
                                     <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
+                                <IconButton style={activeIconBtnStyle}
+                                            onClick={toggleShowWaveform}>
+                                    <GraphicEqIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={`${showLabelAndIndividualsCanvas ? 'Hide' : 'Show'} Annotations Panel`}>
+                                <IconButton
+                                    style={activeIconBtnStyle}
+                                    onClick={() => setShowLabelAndIndividualsCanvas(prevState => !prevState)}
+                                >
+                                    {showLabelAndIndividualsCanvas ? <ExpandLessIcon style={activeIcon}/> : <ExpandMoreIcon style={activeIcon}/>}
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Delete Track">
@@ -2231,7 +2241,6 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
-                            {trackData.trackIndex}
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}
@@ -2279,7 +2288,7 @@ function ScalableSpec(
                         />
                     </div>
                     <canvas
-                        className='individuals-canvas'
+                        className={showLabelAndIndividualsCanvas ? 'individuals-canvas' : 'hidden'}
                         ref={individualsCanvasRef}
                         width={200}
                         height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
@@ -2309,7 +2318,7 @@ function ScalableSpec(
                         onMouseMove={handleMouseMove}
                     />
                     <canvas
-                        className='label-canvas'
+                        className={showLabelAndIndividualsCanvas ? 'label-canvas' : 'hidden'}
                         ref={labelCanvasRef}
                         width={parent.innerWidth - 200}
                         height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}

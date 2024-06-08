@@ -2195,6 +2195,12 @@ function ScalableSpec(
                             strictMode={strictMode}
                         />
                         <div>
+                            <Tooltip title="Change Track Parameters">
+                                <IconButton style={activeIconBtnStyle}
+                                            onClick={() => setShowLocalConfigWindow(true)}>
+                                    <TuneIcon style={activeIcon}/>
+                                </IconButton>
+                            </Tooltip>
                             <Tooltip title="Call WhisperSeg">
                                 <IconButton
                                     style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
@@ -2202,12 +2208,6 @@ function ScalableSpec(
                                     onClick={callWhisperSeg}
                                 >
                                     <AutoFixHighIcon style={activeIcon}/>
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Change Track Parameters">
-                                <IconButton style={activeIconBtnStyle}
-                                            onClick={() => setShowLocalConfigWindow(true)}>
-                                    <TuneIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Frequency Range">

@@ -798,7 +798,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                 </div>
 
                                 <div className='clustername-btn-container'>
-                                    Clusternames:
+                                    Classes:
                                     {
                                         species.clusternames.map(clustername =>
                                             <div
@@ -847,7 +847,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                         )
                                     }
 
-                                    <Tooltip title='Add New Clustername'>
+                                    <Tooltip title='Add New Class'>
                                         <IconButton style={{padding: 0}} onClick={ (event) => toggleClusternameInputWindow(event, species.id) }>
                                             <AddBoxIcon style={icon}/>
                                         </IconButton>

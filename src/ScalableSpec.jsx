@@ -1401,6 +1401,9 @@ function ScalableSpec(
     /* ++++++++++++++++++ Overview Bar Methods ++++++++++++++++++ */
 
     const handleLMBDownOverview = (event) => {
+        // Ignore clicks from other mouse buttons
+        if (event.button !== 0) return
+
         const mouseX = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
@@ -1893,7 +1896,7 @@ function ScalableSpec(
         ctx.moveTo(x1, y1)
         ctx.lineTo(x2, y2)
         ctx.lineTo(x3, y1)
-        ctx.fill();
+        ctx.fill()
 
         // Draw Min Frequency
         x1 = 0
@@ -1904,7 +1907,7 @@ function ScalableSpec(
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
         ctx.stroke()
-        ctx.fillText(currentMinFreq, 0, frequencyLines.minFreqY - 10)
+        ctx.fillText(currentMinFreq, 0, frequencyLines.minFreqY - 4)
 
         // Draw Bottom Triangle
         x1 = 5
@@ -1916,7 +1919,7 @@ function ScalableSpec(
         ctx.moveTo(x1, y1)
         ctx.lineTo(x2, y2)
         ctx.lineTo(x3, y1)
-        ctx.fill();
+        ctx.fill()
     }
 
 

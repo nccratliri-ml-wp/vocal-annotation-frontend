@@ -88,7 +88,7 @@ function ScalableSpec(
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
-    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 120})
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 121})
     let clickedFrequencyLinesObject = null
 
     // Individuals Canvas
@@ -1855,6 +1855,12 @@ function ScalableSpec(
         setShowFrequencyLines(prevState => !prevState)
     }
 
+    const getFrequencyAtMousePosition = (mouseY, canvasHeight, arrayLength ) => {
+        let index = Math.floor(((canvasHeight - mouseY) / canvasHeight) * arrayLength)
+        index = index >= arrayLength ? arrayLength - 1 : index
+        return Math.round(frequencies[index])
+    }
+
     const drawFrequencyLines = () => {
         if (!showFrequencyLines) return
 
@@ -1870,11 +1876,14 @@ function ScalableSpec(
         let x1 = 0
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
+        const currentMaxFreq = `${getFrequencyAtMousePosition(y, cvs.height, frequencies.length)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
         ctx.stroke()
+        ctx.fillText(currentMaxFreq, 0, frequencyLines.maxFreqY + 10)
 
+        // Draw Top Triangle
         x1 = 5
         x2 = x1 + triangleHeight
         let x3 = x2 + triangleHeight
@@ -1890,11 +1899,14 @@ function ScalableSpec(
         x1 = 0
         x2 = cvs.width
         y = frequencyLines.minFreqY - 1
+        const currentMinFreq = `${getFrequencyAtMousePosition(y, cvs.height, frequencies.length)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
         ctx.stroke()
+        ctx.fillText(currentMinFreq, 0, frequencyLines.minFreqY - 10)
 
+        // Draw Bottom Triangle
         x1 = 5
         x2 = x1 + triangleHeight
         x3 = x2 + triangleHeight

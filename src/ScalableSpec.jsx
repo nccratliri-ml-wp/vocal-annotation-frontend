@@ -1414,14 +1414,14 @@ function ScalableSpec(
         if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
-            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
             return
         }
 
         // Deal with click on End Frame
         if (!strictMode && mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
-            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
             return
         }
 
@@ -1432,17 +1432,15 @@ function ScalableSpec(
             widthBetween_xStartTime_mouseX = mouseX - xStartTime
             widthBetween_xEndTime_mouseX = xCurrentEndTime - mouseX
             overviewRef.current.addEventListener('mousemove', dragViewport)
-            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
         }
     }
 
-    const handleMouseUpOverview = (event) => {
-        if (event.button !== 0) return
-
+    const stopDragViewport = () => {
         overviewRef.current.removeEventListener('mousemove', dragStartFrame)
         overviewRef.current.removeEventListener('mousemove', dragEndFrame)
         overviewRef.current.removeEventListener('mousemove', dragViewport)
-        overviewRef.current.removeEventListener('mouseleave', handleMouseUpOverview)
+        overviewRef.current.removeEventListener('mouseleave', stopDragViewport)
 
         // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar
         if (widthBetween_xStartTime_mouseX && (newViewportStartFrame || newViewportStartFrame)){
@@ -1453,13 +1451,13 @@ function ScalableSpec(
             passClipDurationToApp( newDuration )
             passMaxScrollTimeToApp( newMaxScrollTime )
             passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
-        // Set new Start Frame only
+            // Set new Start Frame only
         } else if (newViewportStartFrame){
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
             updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newViewportStartFrame, currentEndTime)
-        // Set new End frame only
+            // Set new End frame only
         } else if (newViewportEndFrame){
             const newDuration = newViewportEndFrame - currentStartTime
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
@@ -1473,15 +1471,32 @@ function ScalableSpec(
         widthBetween_xEndTime_mouseX = null
     }
 
+    const handleMouseUpOverview = (event) => {
+        if (event.button !== 0) return
+        stopDragViewport()
+    }
+
     const dragStartFrame = (event) => {
         const mouseX = getMouseX(event)
         newViewportStartFrame = calculateViewportTimestamp(mouseX)
+
+        // Prevent the user from setting the viewport too small or the start Frame to go beyond the end Frame
+        if (newViewportStartFrame > currentEndTime - 0.05){
+            newViewportStartFrame = currentEndTime - 0.05
+        }
+
         drawViewport(newViewportStartFrame, currentEndTime, 'white', 2)
     }
 
     const dragEndFrame = (event) => {
         const mouseX = getMouseX(event)
         newViewportEndFrame = calculateViewportTimestamp(mouseX)
+
+        // Prevent the user from setting the viewport too small or the end Frame to go before the start Frame
+        if (newViewportEndFrame < currentStartTime + 0.05){
+            newViewportEndFrame = currentStartTime + 0.05
+        }
+
         drawViewport(currentStartTime, newViewportEndFrame, 'white', 2)
     }
 

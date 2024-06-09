@@ -1411,19 +1411,17 @@ function ScalableSpec(
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
         // Deal with click on Start Frame
-        if (mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
-            if (strictMode) return
+        if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
             overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
-            //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
         }
 
         // Deal with click on End Frame
-        if (mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
-            if (strictMode) return
+        if (!strictMode && mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
             overviewRef.current.addEventListener('mousemove', dragEndFrame)
-            //overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
+            overviewRef.current.addEventListener('mouseleave', handleMouseUpOverview)
             return
         }
 
@@ -1439,17 +1437,15 @@ function ScalableSpec(
     }
 
     const handleMouseUpOverview = (event) => {
-        if (event.button !== 0) {
-            return
-        }
+        if (event.button !== 0) return
 
         overviewRef.current.removeEventListener('mousemove', dragStartFrame)
         overviewRef.current.removeEventListener('mousemove', dragEndFrame)
         overviewRef.current.removeEventListener('mousemove', dragViewport)
         overviewRef.current.removeEventListener('mouseleave', handleMouseUpOverview)
 
-        // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar.
-        if (widthBetween_xStartTime_mouseX){
+        // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar
+        if (widthBetween_xStartTime_mouseX && (newViewportStartFrame || newViewportStartFrame)){
             const newDuration = newViewportEndFrame - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             passCurrentStartTimeToApp( newViewportStartFrame )

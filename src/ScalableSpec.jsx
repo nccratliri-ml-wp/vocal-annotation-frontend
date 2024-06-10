@@ -369,14 +369,14 @@ function ScalableSpec(
         }
 
         // Deal with click on Max Frequency Line
-        if (checkIfOccupiedByMaxFreqLine(mouseY)){
+        if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             clickedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
             return
         }
 
         // Deal with click on Min Frequency Line
-        if (checkIfOccupiedByMinFreqLine(mouseY)){
+        if (checkIfOccupiedByMinFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             clickedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMinFreqLine)
             return
@@ -385,6 +385,7 @@ function ScalableSpec(
         // Deal with click inside an existing label
         const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
         if ( labelToBeExpanded ) {
+            console.log(3)
             setExpandedLabel( labelToBeExpanded )
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
@@ -1412,7 +1413,6 @@ function ScalableSpec(
 
         // Deal with click on Start Frame
         if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
-            overviewRef.current.style.cursor = 'col-resize'
             overviewRef.current.addEventListener('mousemove', dragStartFrame)
             overviewRef.current.addEventListener('mouseleave', stopDragViewport)
             return
@@ -1600,7 +1600,7 @@ function ScalableSpec(
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
-        // Deal with click on Start Frame
+        // Deal with hover on Start Frame
         if ( (xHovered >= xStartFrame - 2 && xHovered <= xStartFrame + 2) || (xHovered >= xEndFrame - 2 && xHovered <= xEndFrame + 2) ){
             overviewRef.current.style.cursor = 'col-resize'
         } else {

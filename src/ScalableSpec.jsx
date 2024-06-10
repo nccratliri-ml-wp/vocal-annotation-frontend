@@ -23,7 +23,7 @@ import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall} from "
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
-import {ANNOTATED_AREA} from "./species.js";
+import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
 
 // Classes
 
@@ -34,7 +34,6 @@ class Playhead{
 }
 
 // Global variables
-const DEFAULT_LABEL_COLOR = "#fff"
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 const FREQUENCY_LINES_COLOR = '#47ff14'
@@ -1950,6 +1949,11 @@ function ScalableSpec(
 
         const whisperObjects = response.data.labels
 
+        // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
+        const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
+        const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
+        const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
+
         const whisperLabels = whisperObjects.map( obj => {
             return new Label(
                 nanoid(),
@@ -1957,21 +1961,21 @@ function ScalableSpec(
                 trackData.filename,
                 obj.onset,
                 obj.offset,
-                'currently not available',
-                'currently not available',
-                obj.clustername,
-                null,
-                null,
-                null,
-                null,
-                DEFAULT_LABEL_COLOR
+                unknownSpecies.name,
+                unknownIndividual.name,
+                unknownClustername.name,
+                unknownSpecies.id,
+                unknownIndividual.id,
+                unknownClustername.id,
+                0,
+                'Whisper',
+                unknownClustername.color
             )
         })
 
         const combinedLabelsArray = labels.concat(whisperLabels)
         setLabels(combinedLabelsArray)
         passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackData.trackIndex)
-
         setWhisperSegIsLoading(false)
     }
 

@@ -1187,7 +1187,8 @@ function ScalableSpec(
             const xSpeciesName = 0
             const ySpeciesName = (i - speciesObj.individuals.length) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
             ctx.font = `${12}px sans-serif`
-            ctx.fillText(speciesObj.name, xSpeciesName, ySpeciesName)
+            const speciesName = speciesObj.name === UNKNOWN_SPECIES ? 'Unknown Species' : speciesObj.name
+            ctx.fillText(speciesName, xSpeciesName, ySpeciesName)
 
             // Draw line separating Species, except for the last one (Annotated Area)
             if (speciesObj.name === ANNOTATED_AREA) continue

@@ -1940,10 +1940,48 @@ function ScalableSpec(
         setWhisperSegIsLoading(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
 
+        // Extract annotated areas from the labels array
+        const annotatedAreas = labels.reduce( (acc, label) => {
+            if (label.species === ANNOTATED_AREA) {
+                acc.push({
+                    annotatedAreaStarTime: label.onset,
+                    annotatedAreaEndTime: label.offset
+                })
+                return acc
+            }
+            return acc
+        }, [])
+
+
+        // Remove the Annotated Area labels from labels
+        let newLabelsArray = labels.filter( label => label.species !== ANNOTATED_AREA )
+
+        // Convert custom label objects into generic objects with the specific data that is needed for Whisper
+        newLabelsArray = newLabelsArray.map( label => {
+                return {
+                    onset: label.onset,
+                    offset: label.offset,
+                    species: label.species,
+                    individual: label.individual,
+                    clustername: label.clustername,
+                    speciesID: label.speciesID,
+                    individualID: label.individualID,
+                    clusternameID: label.clusternameID,
+                    filename: label.filename,
+                    trackIndex: label.trackIndex,
+                }
+            }
+        )
+
+        console.log(newLabelsArray)
+
         const requestParameters = {
             audio_id: audioId,
-            // In the future add labels and protected area when Whisper Seg Endpoint takes human annotated area as a parameter
+            annotated_areas: annotatedAreas,
+            human_labels: newLabelsArray
         }
+
+        console.log(requestParameters)
 
         const response = await axios.post(path, requestParameters)
 

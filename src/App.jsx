@@ -420,6 +420,44 @@ function App() {
 
     // When the site was accessed with a URL data parameter
     useEffect( () => {
+        let ignore = false
+
+        const queryParams = new URLSearchParams(location.search)
+        const hashID = queryParams?.get('hash-id')
+        const strictMode = queryParams?.get('strict-mode')
+
+        if (!hashID) return
+
+        if (strictMode?.toLowerCase() === 'true'){
+            setStrictMode(true)
+        }
+
+        //const path = 'http://vocallbase.evolvinglanguage.ch/metadata/64bec7e26642cadf5dc0eb01'
+        const path = `/api/metadata/${hashID}`;
+
+        const getMetaData = async () => {
+            const response = await axios.get(path)
+
+            // Create Species, Individuals and clustername buttons deriving from the imported labels
+            const allLabels = response.data.labels.track_1
+            createSpeciesFromImportedLabels(allLabels)
+
+            // Feed audio payloads
+            setAudioPayloads(response.data)
+        }
+
+        getMetaData()
+
+
+        return () => {
+            ignore = true
+        }
+
+    }, [location])
+
+    /*
+    // When the site was accessed with a URL data parameter
+    useEffect( () => {
         // Old stuff needs to be overhauled once I have endpoints from Sumit
         let ignore = false
 
@@ -451,6 +489,7 @@ function App() {
         }
 
     }, [location])
+     */
 
     // When labels are imported from a local CSV file
     useEffect( () => {
@@ -565,7 +604,8 @@ function App() {
                                 passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                                 updateClipDurationAndTimes={updateClipDurationAndTimes}
                                 passDefaultConfigToApp={passDefaultConfigToApp}
-                                audioPayload={audioPayloads? audioPayloads[0] : null}
+                                //audioPayload={audioPayloads? audioPayloads[0] : null}
+                                audioPayload={audioPayloads}
                                 activeLabel={activeLabel}
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}

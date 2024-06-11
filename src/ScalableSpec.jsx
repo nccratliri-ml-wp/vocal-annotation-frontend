@@ -280,54 +280,11 @@ function ScalableSpec(
 
         try {
             const response = await axios.post(path, requestParameters)
-            handleUploadResponse(response)
+            handleUploadResponse(response, audioPayload.filename, trackID)
         } catch (error){
             handleUploadError(error)
         }
     }
-
-
-
-    /*
-    const handleUploadResponse = (newResponse) => {
-        const trackDuration = newResponse.data.channels[0].audio_duration
-        const hopLength = newResponse.data.configurations.hop_length
-        const numSpecColumns = newResponse.data.configurations.num_spec_columns
-        const samplingRate = newResponse.data.configurations.sampling_rate
-        const defaultConfig = {
-            hop_length: hopLength,
-            num_spec_columns: numSpecColumns,
-            sampling_rate: samplingRate
-        }
-
-        const newResponseData = newResponse.data.channels[0]
-        const newSpecCalMethod = newResponse.data.configurations.spec_cal_method
-        const newNfft = newResponse.data.configurations.n_fft
-        const newBinsPerOctave = newResponse.data.configurations.bins_per_octave
-        const newMinFreq = newResponse.data.configurations.min_frequency
-        const newMaxFreq = newResponse.data.configurations.max_frequency
-
-        // Remove outdated track duration of the previous file in the App component
-        if (response){
-            deletePreviousTrackDurationInApp( response.audio_duration )
-        }
-        // Close Label Window
-        setExpandedLabel(null)
-
-        passTrackDurationToApp( trackDuration )
-        passGlobalHopLengthToApp( hopLength )
-        passGlobalNumSpecColumnsToApp( numSpecColumns )
-        passGlobalSamplingRateToApp( samplingRate )
-        passDefaultConfigToApp( defaultConfig )
-
-        setResponse( newResponseData )
-        setSpecCalMethod( newSpecCalMethod )
-        setNfft( newNfft ? newNfft : 512)
-        setBinsPerOctave( newBinsPerOctave ? newBinsPerOctave : 0)
-        setMinFreq( newMinFreq ? newMinFreq : 0)
-        setMaxFreq( newMaxFreq ? newMaxFreq : 16000)
-    }
-     */
 
     const handleUploadError = (error) => {
         setSpectrogramIsLoading( false )
@@ -1974,15 +1931,11 @@ function ScalableSpec(
             }
         )
 
-        console.log(newLabelsArray)
-
         const requestParameters = {
             audio_id: audioId,
             annotated_areas: annotatedAreas,
             human_labels: newLabelsArray
         }
-
-        console.log(requestParameters)
 
         const response = await axios.post(path, requestParameters)
 
@@ -2127,7 +2080,7 @@ function ScalableSpec(
             // Close Label Window
             setExpandedLabel(null)
 
-            const importedLabelsSource = audioPayload && audioPayload.labels ? audioPayload.labels : csvImportedLabels
+            const importedLabelsSource = audioPayload && audioPayload.labels.track_1 ? audioPayload.labels.track_1 : csvImportedLabels
 
             // Add imported labels to the labels array
             if (importedLabelsSource){
@@ -2193,7 +2146,6 @@ function ScalableSpec(
         uploadFileByURL(audioPayload)
 
         setAnnotationInstance(audioPayload.annotation_instance)
-        //setFilename(audioPayload.filename)
 
     }, [audioPayload])
 

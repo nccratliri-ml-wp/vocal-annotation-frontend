@@ -2080,7 +2080,7 @@ function ScalableSpec(
             // Close Label Window
             setExpandedLabel(null)
 
-            const importedLabelsSource = audioPayload && audioPayload.labels.track_1 ? audioPayload.labels.track_1 : csvImportedLabels
+            const importedLabelsSource = audioPayload && audioPayload.labels.track_0 ? audioPayload.labels.track_0 : csvImportedLabels
 
             // Add imported labels to the labels array
             if (importedLabelsSource){

@@ -439,11 +439,20 @@ function App() {
             const response = await axios.get(path)
 
             // Create Species, Individuals and clustername buttons deriving from the imported labels
-            const allLabels = response.data.labels.track_1
+            const audioFilesArray = response.data.response
+
+            const allLabels = []
+            for (let audioFile of audioFilesArray){
+                for (const track in audioFile.labels){
+                    const labels = audioFile.labels[track]
+                    allLabels.push(...labels)
+                }
+            }
+
             createSpeciesFromImportedLabels(allLabels)
 
             // Feed audio payloads
-            setAudioPayloads(response.data)
+            setAudioPayloads(response.data.response[0])
         }
 
         getMetaData()

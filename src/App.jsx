@@ -443,8 +443,8 @@ function App() {
 
             const allLabels = []
             for (let audioFile of audioFilesArray){
-                for (const track in audioFile.labels){
-                    const labels = audioFile.labels[track]
+                for (const trackIndex in audioFile.labels.tracks){
+                    const labels = audioFile.labels.tracks[trackIndex]
                     allLabels.push(...labels)
                 }
             }

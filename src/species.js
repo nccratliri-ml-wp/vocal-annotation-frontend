@@ -88,6 +88,137 @@ const checkIfEveryObjectIsInactive = (objects) => {
     return objects.every(object => !object.isActive)
 }
 
+const dummyData = {
+    "response": [
+        {
+            "url": "https://www2.iis.fraunhofer.de/AAC/ChID-BLITS-EBU-Narration441-16b.wav",
+            "id": "64bec7e26642cadf5dc0eb01",
+            "filename": "6 channel test.wav",
+            "annotation_instance": "XC785219_fd453602-a4a9-4f57-95f2-fd9084e9a161",
+            "time": "2024-03-27 20:01:43",
+            "nfft": 40,
+            "f_high": 8000,
+            "f_low": 6000,
+            "spec_cal_method": "log-mel",
+            "labels": {
+                "tracks": {
+                    "0": [
+                        {
+                            "onset": 1.2,
+                            "offset": 1.7,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 2.4,
+                            "offset": 2.6,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ],
+                    "1": [
+                        {
+                            "onset": 1.5,
+                            "offset": 1.8,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 2.7,
+                            "offset": 2.9,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ],
+                    "2": [
+                        {
+                            "onset": 1.9,
+                            "offset": 2,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 3,
+                            "offset": 3.2,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "url": "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+            "id": "64bec7e26642cadf5dc0eb01",
+            "filename": "BabyElephantWalk60.wav",
+            "annotation_instance": "XC785219_fd453602-a4a9-4f57-95f2-fd9084e9a161",
+            "time": "2024-03-27 20:01:43",
+            "nfft": 40,
+            "f_high": 8000,
+            "f_low": 0,
+            "spec_cal_method": "log-mel",
+            "labels": {
+                "tracks": {
+                    "0": [
+                        {
+                            "onset": 1.2,
+                            "offset": 1.7,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 2.4,
+                            "offset": 2.6,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ],
+                    "1": [
+                        {
+                            "onset": 1.5,
+                            "offset": 1.8,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 2.7,
+                            "offset": 2.9,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ],
+                    "2": [
+                        {
+                            "onset": 1.9,
+                            "offset": 2,
+                            "species": "Unknown Species",
+                            "individual": "Unknown",
+                            "clustername": "Unknown"
+                        },
+                        {
+                            "onset": 3,
+                            "offset": 3.2,
+                            "species": "Unknown Species",
+                            "individual": "Ind4",
+                            "clustername": "call 3"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+
 export {
     UNKNOWN_SPECIES,
     UNKNOWN_INDIVIDUAL,
@@ -106,5 +237,6 @@ export {
     activateClustername,
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive
+    checkIfEveryObjectIsInactive,
+    dummyData
 }

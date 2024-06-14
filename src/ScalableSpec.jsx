@@ -26,7 +26,6 @@ import LabelWindow from "./LabelWindow.jsx";
 import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
 
 // Classes
-
 class Playhead{
     constructor(timeframe) {
         this.timeframe = timeframe

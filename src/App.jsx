@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -7,17 +7,18 @@ import ScalableSpec from "./ScalableSpec.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
 import {
-    UNKNOWN_SPECIES,
-    UNKNOWN_INDIVIDUAL,
-    UNKNOWN_CLUSTERNAME,
-    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
     ANNOTATED_AREA,
-    ANNOTATED_AREA_INDIVIDUAL,
     ANNOTATED_AREA_CLUSTERNAME,
     ANNOTATED_AREA_COLOR,
-    Species,
+    ANNOTATED_AREA_INDIVIDUAL,
+    Clustername,
+    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    dummyData,
     Individual,
-    Clustername
+    Species,
+    UNKNOWN_CLUSTERNAME,
+    UNKNOWN_INDIVIDUAL,
+    UNKNOWN_SPECIES
 } from './species.js'
 import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBtn, iconBtnDisabled} from "./styles.js"
 import {nanoid} from "nanoid";
@@ -27,7 +28,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import axios from "axios";
 import Export from "./Export.jsx";
 import ImportCSV from "./ImportCSV.jsx";
-import { ToastContainer, toast } from 'react-toastify';
+import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Global Variables
@@ -408,6 +409,50 @@ function App() {
     }
 
 
+    const handleURLUploadResponses = (allResponses) => {
+
+        let i = 0
+        const allNewTracks = []
+
+        for (const response of allResponses){
+            const newChannels = response.data.channels
+
+            for (const channel of newChannels){
+                allNewTracks.push({
+                    trackID: nanoid(),
+                    trackIndex: i,
+                    showOverviewBarAndTimeAxis: i === 0,
+                    audioID: channel.audio_id,
+                    filename: response.filename,
+                    audioDuration: channel.audio_duration,
+                    frequencies: channel.freqs,
+                    spectrogram: channel.spec,
+                })
+                i++
+            }
+        }
+
+        setTracks(allNewTracks)
+
+        // Update Global Values with the values of the first Response
+        const newConfigurations = allResponses[0].data.configurations
+
+        const hopLength = newConfigurations.hop_length
+        const numSpecColumns = newConfigurations.num_spec_columns
+        const samplingRate = newConfigurations.sampling_rate
+        const defaultConfig = {
+            hop_length: hopLength,
+            num_spec_columns: numSpecColumns,
+            sampling_rate: samplingRate
+        }
+
+        setGlobalHopLength( hopLength )
+        setGlobalNumSpecColumns( numSpecColumns )
+        setGlobalSamplingRate( samplingRate )
+        setDefaultConfig( defaultConfig )
+    }
+
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     // When tracks are being changed, recalculate currently longest track and set that as global audio duration
@@ -432,14 +477,14 @@ function App() {
             setStrictMode(true)
         }
 
-        //const path = 'http://vocallbase.evolvinglanguage.ch/metadata/64bec7e26642cadf5dc0eb01'
-        const path = `/api/metadata/${hashID}`;
+        const path = `/api/metadata/${hashID}`
 
         const getMetaData = async () => {
             const response = await axios.get(path)
 
             // Create Species, Individuals and clustername buttons deriving from the imported labels
-            const audioFilesArray = response.data.response
+            //const audioFilesArray = response.data.response
+            const audioFilesArray = dummyData.response
 
             const allLabels = []
             for (let audioFile of audioFilesArray){
@@ -452,7 +497,13 @@ function App() {
             createSpeciesFromImportedLabels(allLabels)
 
             // Feed audio payloads
-            setAudioPayloads(response.data.response[0])
+            //setAudioPayloads(response.data.response)
+            processAudioFilesSequentially(audioFilesArray)
+            /*
+            1. Collect responses here
+            2. Pass all channels together rto handleUploadMethod
+            */
+
         }
 
         getMetaData()
@@ -463,6 +514,38 @@ function App() {
         }
 
     }, [location])
+
+    const uploadFileByURL = async (audioPayload) => {
+        //setSpectrogramIsLoading( true )
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
+        const requestParameters = {
+            audio_url: audioPayload.url,
+            hop_length: audioPayload.hop_length,
+            num_spec_columns: audioPayload.num_spec_columns,
+            sampling_rate: audioPayload.sampling_rate,
+            spec_cal_method: audioPayload.spec_cal_method,
+            n_fft: audioPayload.nfft,
+            bins_per_octave: audioPayload.bins_per_octave,
+            min_frequency: audioPayload.f_low,
+            max_frequency: audioPayload.f_high
+        }
+
+        try {
+            return await axios.post(path, requestParameters)
+        } catch (error){
+            console.error(error)
+            // Move handleuploaderror to App.jsx and pass it down as prop to Scalablespec.jsx
+        }
+    }
+
+    const processAudioFilesSequentially = async (audioFilesArray) => {
+        const allResponses = []
+        for (let audioPayload of audioFilesArray) {
+            const newResponse = await uploadFileByURL(audioPayload);
+            allResponses.push({...newResponse, filename: audioPayload.filename})
+        }
+        handleURLUploadResponses(allResponses)
+    };
 
     /*
     // When the site was accessed with a URL data parameter
@@ -613,13 +696,14 @@ function App() {
                                 passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                                 updateClipDurationAndTimes={updateClipDurationAndTimes}
                                 passDefaultConfigToApp={passDefaultConfigToApp}
-                                //audioPayload={audioPayloads? audioPayloads[0] : null}
-                                audioPayload={audioPayloads}
+                                audioPayload={audioPayloads? audioPayloads[track.trackIndex] : null}
+                                //audioPayload={audioPayloads}
                                 activeLabel={activeLabel}
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}
                                 passLabelsToApp={passLabelsToApp}
                                 csvImportedLabels={csvImportedLabels && getImportedLabelsForThisTrack(csvImportedLabels, track.trackIndex)}
+                                //urlImportedLabels={audioPayloads[track.trackIndex]}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
                             />

@@ -28,8 +28,10 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import axios from "axios";
 import Export from "./Export.jsx";
 import ImportCSV from "./ImportCSV.jsx";
+import LoadingCircle from './LoadingCircle.jsx';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
@@ -77,6 +79,9 @@ function App() {
     const [activeLabel, setActiveLabel] = useState(null)
 
     const [allLabels, setAllLabels] = useState({})
+
+    const [filesUploading, setFilesUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -341,6 +346,45 @@ function App() {
 
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
+    const uploadFileByURL = async (audioPayload) => {
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
+        const requestParameters = {
+            audio_url: audioPayload.url,
+            hop_length: audioPayload.hop_length,
+            num_spec_columns: audioPayload.num_spec_columns,
+            sampling_rate: audioPayload.sampling_rate,
+            spec_cal_method: audioPayload.spec_cal_method,
+            n_fft: audioPayload.nfft,
+            bins_per_octave: audioPayload.bins_per_octave,
+            min_frequency: audioPayload.f_low,
+            max_frequency: audioPayload.f_high
+        }
+
+        try {
+            return await axios.post(path, requestParameters)
+        } catch (error){
+            setFilesUploading(false)
+            console.error("Error uploading file:", error)
+            alert('Error while uploading. Check the console for more information.')
+        }
+    }
+
+    const processAudioFilesSequentially = async (audioFilesArray) => {
+        const loadingProgressStep = 100 / audioFilesArray.length
+        setFilesUploading(true)
+        setUploadProgress(0)
+
+        const allResponses = []
+        for (let audioPayload of audioFilesArray) {
+            const newResponse = await uploadFileByURL(audioPayload)
+            allResponses.push({...newResponse, filename: audioPayload.filename})
+            setUploadProgress(prevState => prevState + loadingProgressStep)
+        }
+
+        handleURLUploadResponses(allResponses)
+        setFilesUploading(false)
+    }
+
     const handleUploadResponse = (newResponse, filename, clickedTrackID) => {
         const newChannels = newResponse.data.channels
         let channelIndex = 0
@@ -392,25 +436,11 @@ function App() {
 
         // Update Global Values
         const newConfigurations = newResponse.data.configurations
-
-        const hopLength = newConfigurations.hop_length
-        const numSpecColumns = newConfigurations.num_spec_columns
-        const samplingRate = newConfigurations.sampling_rate
-        const defaultConfig = {
-            hop_length: hopLength,
-            num_spec_columns: numSpecColumns,
-            sampling_rate: samplingRate
-        }
-
-        setGlobalHopLength( hopLength )
-        setGlobalNumSpecColumns( numSpecColumns )
-        setGlobalSamplingRate( samplingRate )
-        setDefaultConfig( defaultConfig )
+        updateGlobalValues(newConfigurations)
     }
 
 
     const handleURLUploadResponses = (allResponses) => {
-
         let i = 0
         const allNewTracks = []
 
@@ -436,7 +466,10 @@ function App() {
 
         // Update Global Values with the values of the first Response
         const newConfigurations = allResponses[0].data.configurations
+        updateGlobalValues(newConfigurations)
+    }
 
+    const updateGlobalValues = (newConfigurations) => {
         const hopLength = newConfigurations.hop_length
         const numSpecColumns = newConfigurations.num_spec_columns
         const samplingRate = newConfigurations.sampling_rate
@@ -481,11 +514,10 @@ function App() {
 
         const getMetaData = async () => {
             const response = await axios.get(path)
-
-            // Create Species, Individuals and clustername buttons deriving from the imported labels
             //const audioFilesArray = response.data.response
             const audioFilesArray = dummyData.response
 
+            // Create Species, Individuals and clustername buttons deriving from the imported labels
             const allLabels = []
             for (let audioFile of audioFilesArray){
                 for (const trackIndex in audioFile.labels.tracks){
@@ -493,95 +525,19 @@ function App() {
                     allLabels.push(...labels)
                 }
             }
-
             createSpeciesFromImportedLabels(allLabels)
 
-            // Feed audio payloads
-            //setAudioPayloads(response.data.response)
+            // Prepare for upload
             processAudioFilesSequentially(audioFilesArray)
-            /*
-            1. Collect responses here
-            2. Pass all channels together rto handleUploadMethod
-            */
-
         }
 
         getMetaData()
 
-
         return () => {
             ignore = true
         }
 
     }, [location])
-
-    const uploadFileByURL = async (audioPayload) => {
-        //setSpectrogramIsLoading( true )
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
-        const requestParameters = {
-            audio_url: audioPayload.url,
-            hop_length: audioPayload.hop_length,
-            num_spec_columns: audioPayload.num_spec_columns,
-            sampling_rate: audioPayload.sampling_rate,
-            spec_cal_method: audioPayload.spec_cal_method,
-            n_fft: audioPayload.nfft,
-            bins_per_octave: audioPayload.bins_per_octave,
-            min_frequency: audioPayload.f_low,
-            max_frequency: audioPayload.f_high
-        }
-
-        try {
-            return await axios.post(path, requestParameters)
-        } catch (error){
-            console.error(error)
-            // Move handleuploaderror to App.jsx and pass it down as prop to Scalablespec.jsx
-        }
-    }
-
-    const processAudioFilesSequentially = async (audioFilesArray) => {
-        const allResponses = []
-        for (let audioPayload of audioFilesArray) {
-            const newResponse = await uploadFileByURL(audioPayload);
-            allResponses.push({...newResponse, filename: audioPayload.filename})
-        }
-        handleURLUploadResponses(allResponses)
-    };
-
-    /*
-    // When the site was accessed with a URL data parameter
-    useEffect( () => {
-        // Old stuff needs to be overhauled once I have endpoints from Sumit
-        let ignore = false
-
-        const queryParams = new URLSearchParams(location.search)
-        const decodedData = queryParams.get('data') ? JSON.parse(atob(decodeURIComponent(queryParams.get('data') ))) : null
-        const strictMode = queryParams.get('strict-mode') ? queryParams.get('strict-mode') : null
-
-        if (strictMode?.toLowerCase() === 'true'){
-            setStrictMode(true)
-        }
-
-        if (!decodedData) return
-
-        setAudioPayloads(decodedData)
-
-        // For each audio payload, turn on the track's visibility
-        const newtracksObj = {}
-        for (let i = 1; i <= 20; i++) {
-            newtracksObj[`track_${i}`] = i <= decodedData.length
-        }
-        setTracks(newtracksObj)
-
-        // Create Species, Individuals and clustername buttons deriving from the imported labels
-        const urlImportedLabels = decodedData.flatMap(audioPayload => audioPayload.labels || [])
-        createSpeciesFromImportedLabels(urlImportedLabels)
-
-        return () => {
-            ignore = true
-        }
-
-    }, [location])
-     */
 
     // When labels are imported from a local CSV file
     useEffect( () => {
@@ -710,6 +666,8 @@ function App() {
                         )
                     })
                 }
+
+                {filesUploading && <LoadingCircle progress={uploadProgress} />}
 
                 <Tooltip title="Add New Track">
                     <IconButton style={strictMode ? iconBtnDisabled : iconBtn} disabled={strictMode} onClick={addTrack}>

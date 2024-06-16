@@ -150,6 +150,10 @@ function App() {
         setCsvImportedLabels( newImportedLabels )
     }
 
+    function passFilesUploadingToApp( boolean ){
+        setFilesUploading(boolean)
+    }
+
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
     
     function addTrack(){
@@ -387,7 +391,6 @@ function App() {
         }
 
         handleURLUploadResponses(allResponses)
-        setFilesUploading(false)
     }
 
     const handleUploadResponse = (newResponse, filename, clickedTrackID) => {
@@ -443,7 +446,6 @@ function App() {
         const newConfigurations = newResponse.data.configurations
         updateGlobalValues(newConfigurations)
     }
-
 
     const handleURLUploadResponses = (allResponses) => {
         let i = 0
@@ -667,6 +669,7 @@ function App() {
                                 //urlImportedLabels={audioPayloads[track.trackIndex]}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
+                                passFilesUploadingToApp={passFilesUploadingToApp}
                             />
                         )
                     })

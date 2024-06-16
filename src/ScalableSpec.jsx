@@ -71,7 +71,8 @@ function ScalableSpec(
                             passLabelsToApp,
                             csvImportedLabels,
                             handleUploadResponse,
-                            trackData
+                            trackData,
+                            passFilesUploadingToApp
                         }
                     )
                 {
@@ -241,6 +242,7 @@ function ScalableSpec(
 
             drawEditorCanvases(data.spec, data.freqs, newAudioArray)
             setSpectrogramIsLoading(false)
+            passFilesUploadingToApp(false)
             setSpectrogram(data.spec)
             setFrequencies(data.freqs)
             setAudioArray(newAudioArray)

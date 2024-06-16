@@ -31,11 +31,11 @@ const LoadingCircle = ({ progress }) => {
                     justifyContent="center"
                 >
                     <Typography variant="caption" component="div" sx={{ color: 'white' }}>
-                        {`${Math.round(progress)}%`}
+                        {`${Math.ceil(progress)}%`}
                     </Typography>
                 </Box>
             </Box>
-            <div style={{whiteSpace: 'nowrap'}}>Loading Audio...</div>
+            <div style={{whiteSpace: 'nowrap'}}>{progress < 100 ? 'Loading Audio...' : 'Computing Spectrograms...'}</div>
         </Box>
     );
 };

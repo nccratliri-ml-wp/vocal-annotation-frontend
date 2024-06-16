@@ -370,15 +370,20 @@ function App() {
     }
 
     const processAudioFilesSequentially = async (audioFilesArray) => {
-        const loadingProgressStep = 100 / audioFilesArray.length
+        const loadingProgressStep = 100 / audioFilesArray.length;
+
         setFilesUploading(true)
         setUploadProgress(0)
 
         const allResponses = []
+        let cumulativeProgress = 0
+
         for (let audioPayload of audioFilesArray) {
             const newResponse = await uploadFileByURL(audioPayload)
             allResponses.push({...newResponse, filename: audioPayload.filename})
-            setUploadProgress(prevState => prevState + loadingProgressStep)
+
+            cumulativeProgress += loadingProgressStep
+            setUploadProgress(cumulativeProgress)
         }
 
         handleURLUploadResponses(allResponses)

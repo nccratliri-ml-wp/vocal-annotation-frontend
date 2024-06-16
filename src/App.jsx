@@ -37,7 +37,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const SCROLL_STEP_RATIO = 0.1
 
 function App() {
-    const [csvImportedLabels, setCsvImportedLabels] = useState(null);
+    const [importedLabels, setImportedLabels] = useState(null)
 
     const [speciesArray, setSpeciesArray] = useState(() => {
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
@@ -56,7 +56,17 @@ function App() {
     const [deletedItemID, setDeletedItemID] = useState(null)
     
     const [tracks, setTracks] = useState([
-        {trackID: nanoid(), trackIndex: 0, showOverviewBarAndTimeAxis: true, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null},
+        {
+            trackID: nanoid(),
+            trackIndex: 0,
+            showOverviewBarAndTimeAxis: true,
+            audioID: null,
+            filename: null,
+            annotationInstance: null,
+            audioDuration: null,
+            frequencies: null,
+            spectrogram: null
+        }
     ])
 
     // General
@@ -73,7 +83,6 @@ function App() {
     const [defaultConfig, setDefaultConfig] = useState(null)
     const [showGlobalConfigWindow, setShowGlobalConfigWindow] = useState(false)
 
-    const [audioPayloads, setAudioPayloads] = useState(null)
     const [strictMode, setStrictMode] = useState(false)
 
     const [activeLabel, setActiveLabel] = useState(null)
@@ -109,20 +118,12 @@ function App() {
         setSpeciesArray( newSpeciesArray )
     }
 
-    function passGlobalHopLengthToApp( newHopLength ){
-        setGlobalHopLength( newHopLength )
-    }
-
     function passGlobalNumSpecColumnsToApp( newNumSpecColumns ){
         setGlobalNumSpecColumns( newNumSpecColumns )
     }
 
     function passGlobalSamplingRateToApp( newSamplingRate ){
         setGlobalSamplingRate( newSamplingRate )
-    }
-
-    function passDefaultConfigToApp( newDefaultConfig ){
-        setDefaultConfig( newDefaultConfig )
     }
 
     function passShowGlobalConfigWindowToApp ( boolean ){
@@ -146,8 +147,8 @@ function App() {
         )
     }
 
-    function passCsvImportedLabelsToApp ( newImportedLabels ){
-        setCsvImportedLabels( newImportedLabels )
+    function passImportedLabelsToApp ( newImportedLabels ){
+        setImportedLabels( newImportedLabels )
     }
 
     function passFilesUploadingToApp( boolean ){
@@ -159,7 +160,19 @@ function App() {
     function addTrack(){
         const updatedTracks = tracks.map(track => track)
         const newIndex = updatedTracks.length
-        updatedTracks.push({trackID: nanoid(), trackIndex: newIndex, showOverviewBarAndTimeAxis: false, audioID: null, filename: null, audioDuration: null, frequencies: null, spectrogram: null})
+        updatedTracks.push(
+            {
+                trackID: nanoid(),
+                trackIndex: newIndex,
+                showOverviewBarAndTimeAxis: false,
+                audioID: null,
+                filename: null,
+                annotationInstance: null,
+                audioDuration: null,
+                frequencies: null,
+                spectrogram: null
+            }
+        )
 
         setTracks(updatedTracks)
     }
@@ -238,7 +251,7 @@ function App() {
             return
         }
 
-        // Remove properties that irrelevant for the backend
+        // Only keep properties that are relevant for the backend
         allLabelsArray = allLabelsArray.map(labelObj => {
             return {
                 onset: labelObj.onset,
@@ -254,6 +267,8 @@ function App() {
         const requestParameters = {
             annotations: allLabelsArray
         }
+
+        console.log(requestParameters)
 
         const headers = {
             'Content-Type': 'application/json',
@@ -272,8 +287,8 @@ function App() {
 
     /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
 
-    function getImportedLabelsForThisTrack(csvImportedLabels, trackIndex) {
-        return csvImportedLabels.filter( label => label.trackIndex === trackIndex)
+    function getImportedLabelsForThisTrack(newImportedLabels, trackIndex) {
+        return newImportedLabels.filter( label => label.trackIndex === trackIndex)
     }
 
     function createSpeciesFromImportedLabels (importedLabels){
@@ -384,7 +399,7 @@ function App() {
 
         for (let audioPayload of audioFilesArray) {
             const newResponse = await uploadFileByURL(audioPayload)
-            allResponses.push({...newResponse, filename: audioPayload.filename})
+            allResponses.push({...newResponse, filename: audioPayload.filename, annotationInstance: audioPayload.annotation_instance})
 
             cumulativeProgress += loadingProgressStep
             setUploadProgress(cumulativeProgress)
@@ -422,6 +437,7 @@ function App() {
                     showOverviewBarAndTimeAxis: false,
                     audioID: newChannels[channelIndex].audio_id,
                     filename: filename,
+                    annotationInstance: null,
                     audioDuration: newChannels[channelIndex].audio_duration,
                     frequencies: newChannels[channelIndex].freqs,
                     spectrogram: newChannels[channelIndex].spec,
@@ -461,6 +477,7 @@ function App() {
                     showOverviewBarAndTimeAxis: i === 0,
                     audioID: channel.audio_id,
                     filename: response.filename,
+                    annotationInstance: response.annotationInstance,
                     audioDuration: channel.audio_duration,
                     frequencies: channel.freqs,
                     spectrogram: channel.spec,
@@ -524,15 +541,17 @@ function App() {
             //const audioFilesArray = response.data.response
             const audioFilesArray = dummyData.response
 
-            // Create Species, Individuals and clustername buttons deriving from the imported labels
+            // Create Species, Individuals and clustername buttons deriving from the imported labels. Extract labels for the tracks.
             const allLabels = []
             for (let audioFile of audioFilesArray){
                 for (const trackIndex in audioFile.labels.tracks){
-                    const labels = audioFile.labels.tracks[trackIndex]
+                    let labels = audioFile.labels.tracks[trackIndex]
+                    labels = labels.map( label => ( {...label, filename: audioFile.filename, trackIndex: Number(trackIndex)} ) )
                     allLabels.push(...labels)
                 }
             }
             createSpeciesFromImportedLabels(allLabels)
+            setImportedLabels(allLabels)
 
             // Prepare for upload
             processAudioFilesSequentially(audioFilesArray)
@@ -548,10 +567,10 @@ function App() {
 
     // When labels are imported from a local CSV file
     useEffect( () => {
-        if (!csvImportedLabels) return
-        createSpeciesFromImportedLabels(csvImportedLabels)
+        if (!importedLabels) return
+        createSpeciesFromImportedLabels(importedLabels)
 
-    }, [csvImportedLabels])
+    }, [importedLabels])
 
 
     return (
@@ -582,10 +601,11 @@ function App() {
                 </div>
                 <div id={'settings-download-submit-container'}>
                     <ImportCSV
-                        passCsvImportedLabelsToApp={passCsvImportedLabelsToApp}
+                        passImportedLabelsToApp={passImportedLabelsToApp}
                     />
                     <Export
                         allLabels={allLabels}
+                        annotationInstance={tracks[0]?.annotationInstance}
                     />
                     <Tooltip title='Submit Annotations'>
                         <IconButton
@@ -654,19 +674,12 @@ function App() {
                                 globalHopLength={globalHopLength}
                                 globalNumSpecColumns={globalNumSpecColumns}
                                 globalSamplingRate={globalSamplingRate}
-                                passGlobalHopLengthToApp={passGlobalHopLengthToApp}
-                                passGlobalNumSpecColumnsToApp={passGlobalNumSpecColumnsToApp}
-                                passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                                 updateClipDurationAndTimes={updateClipDurationAndTimes}
-                                passDefaultConfigToApp={passDefaultConfigToApp}
-                                audioPayload={audioPayloads? audioPayloads[track.trackIndex] : null}
-                                //audioPayload={audioPayloads}
                                 activeLabel={activeLabel}
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}
                                 passLabelsToApp={passLabelsToApp}
-                                csvImportedLabels={csvImportedLabels && getImportedLabelsForThisTrack(csvImportedLabels, track.trackIndex)}
-                                //urlImportedLabels={audioPayloads[track.trackIndex]}
+                                importedLabels={importedLabels && getImportedLabelsForThisTrack(importedLabels, track.trackIndex)}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
                                 passFilesUploadingToApp={passFilesUploadingToApp}

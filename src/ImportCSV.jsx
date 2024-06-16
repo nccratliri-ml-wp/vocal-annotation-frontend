@@ -4,7 +4,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
 import {globalControlsBtn, icon} from "./styles.js"
 
-function ImportCSV( {passCsvImportedLabelsToApp} ) {
+function ImportCSV( {passImportedLabelsToApp} ) {
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
@@ -35,7 +35,7 @@ function ImportCSV( {passCsvImportedLabelsToApp} ) {
 
                 }
 
-                passCsvImportedLabelsToApp(importedLabelsArray)
+                passImportedLabelsToApp(importedLabelsArray)
             }
             reader.readAsText(file)
         }

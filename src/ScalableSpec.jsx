@@ -59,17 +59,12 @@ function ScalableSpec(
                             globalHopLength,
                             globalNumSpecColumns,
                             globalSamplingRate,
-                            passGlobalHopLengthToApp,
-                            passGlobalNumSpecColumnsToApp,
-                            passGlobalSamplingRateToApp,
                             updateClipDurationAndTimes,
-                            passDefaultConfigToApp,
-                            audioPayload,
                             activeLabel,
                             passActiveLabelToApp,
                             strictMode,
                             passLabelsToApp,
-                            csvImportedLabels,
+                            importedLabels,
                             handleUploadResponse,
                             trackData,
                             passFilesUploadingToApp
@@ -153,9 +148,6 @@ function ScalableSpec(
     // Icons
     const activeIcon = showWaveform ? icon : iconSmall
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
-
-    // Database
-    const [annotationInstance, setAnnotationInstance] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -262,29 +254,6 @@ function ScalableSpec(
 
         setSpectrogramIsLoading(true)
         getSpecAndAudioArray()
-    }
-
-    const uploadFileByURL = async (audioPayload) => {
-        setSpectrogramIsLoading( true )
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
-        const requestParameters = {
-            audio_url: audioPayload.url,
-            hop_length: audioPayload.hop_length,
-            num_spec_columns: audioPayload.num_spec_columns,
-            sampling_rate: audioPayload.sampling_rate,
-            spec_cal_method: audioPayload.spec_cal_method,
-            n_fft: audioPayload.nfft,
-            bins_per_octave: audioPayload.bins_per_octave,
-            min_frequency: audioPayload.f_low,
-            max_frequency: audioPayload.f_high
-        }
-
-        try {
-            const response = await axios.post(path, requestParameters)
-            handleUploadResponse(response, audioPayload.filename, trackID)
-        } catch (error){
-            handleUploadError(error)
-        }
     }
 
     const handleUploadError = (error) => {
@@ -643,6 +612,9 @@ function ScalableSpec(
 
     const createGenericLabelObjects = (labelsArray) => {
         // Convert custom label objects into generic objects with the specific data that is needed for later export
+        console.log(trackData.trackIndex)
+        console.log(labelsArray)
+        console.log('+++ +++ ')
         let newLabelsArray = labelsArray.map( label => {
                 return {
                     onset: label.onset,
@@ -652,7 +624,7 @@ function ScalableSpec(
                     clustername: label.clustername,
                     filename: label.filename,
                     trackIndex: label.trackIndex,
-                    annotation_instance: annotationInstance
+                    annotation_instance: trackData.annotationInstance
                 }
             }
         )
@@ -2046,8 +2018,8 @@ function ScalableSpec(
             )
 
         // If imported CSV labels exist, add them now
-        if (csvImportedLabels){
-            const newCsvImportedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
+        if (importedLabels){
+            const newCsvImportedLabels = assignSpeciesInformationToImportedLabels(importedLabels)
             updatedLabels = updatedLabels.concat(newCsvImportedLabels)
         }
 
@@ -2081,11 +2053,9 @@ function ScalableSpec(
             // Close Label Window
             setExpandedLabel(null)
 
-            const importedLabelsSource = audioPayload && audioPayload.labels.tracks[trackData.trackIndex] ? audioPayload.labels.tracks[trackData.trackIndex] : csvImportedLabels
-
             // Add imported labels to the labels array
-            if (importedLabelsSource){
-                const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabelsSource)
+            if (importedLabels){
+                const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabels)
                 setLabels(updatedLabels)
                 passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
 
@@ -2096,18 +2066,6 @@ function ScalableSpec(
             }
 
     }, [trackData.audioID])
-
-                    /*
-    // When a new CSV File was uploaded
-    useEffect( () => {
-        if (!csvImportedLabels) return
-
-        const updatedLabels = assignSpeciesInformationToImportedLabels(csvImportedLabels)
-        setLabels(updatedLabels)
-        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
-
-    }, [csvImportedLabels])
-*/
 
     // When a new audio snippet is returned from the backend
     useEffect( () => {
@@ -2140,16 +2098,6 @@ function ScalableSpec(
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
 
     }, [trackData.audioID, globalAudioDuration] )
-
-    // When on of the audio payloads in the URL data parameter was assigned to this track
-    useEffect( () => {
-        if (!audioPayload) return
-        uploadFileByURL(audioPayload)
-
-        setAnnotationInstance(audioPayload.annotation_instance)
-
-    }, [audioPayload])
-
 
     return (
         <div

@@ -4,7 +4,7 @@ import DownloadIcon from '@mui/icons-material/Download'
 import Tooltip from "@material-ui/core/Tooltip"
 import {icon, globalControlsBtn} from "./styles.js"
 
-function Export( { allLabels } ){
+function Export( { allLabels, annotationInstance } ){
 
     function exportCSV(){
         // Flatten the allLabels Object into a single array
@@ -15,7 +15,7 @@ function Export( { allLabels } ){
         csvData.unshift('onset,offset,species,individual,clustername,filename,track')
         csvData = csvData.join('\n')
 
-        const newCSVFileName = labels[0]?.annotation_instance ? `${labels[0]?.annotation_instance}.csv` : 'annotations.csv'
+        const newCSVFileName = annotationInstance ? `${annotationInstance}.csv` : 'annotations.csv'
 
         const element = document.createElement('a')
         element.setAttribute('href', `data:text/csv;charset=utf-8,${csvData}`)

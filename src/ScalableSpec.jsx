@@ -63,11 +63,13 @@ function ScalableSpec(
                             activeLabel,
                             passActiveLabelToApp,
                             strictMode,
-                            passLabelsToApp,
                             importedLabels,
                             handleUploadResponse,
                             trackData,
-                            passFilesUploadingToApp
+                            passFilesUploadingToApp,
+                            addLabelsToApp,
+                            exportRequest,
+                            submitRequest
                         }
                     )
                 {
@@ -181,7 +183,6 @@ function ScalableSpec(
 
     const passLabelsToScalableSpec = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
-        passLabelsToApp(createGenericLabelObjects(newLabelsArray), trackData.trackIndex)
     }
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
@@ -335,8 +336,8 @@ function ScalableSpec(
             } else {
                 labelsCopy[labels.length-1].offset = newOffset
             }
+
             setLabels(labelsCopy)
-            passLabelsToApp(createGenericLabelObjects(labelsCopy), trackData.trackIndex)
             passActiveLabelToApp(
                 {
                     onset: labelsCopy[labels.length-1].onset,
@@ -608,31 +609,6 @@ function ScalableSpec(
         return speciesArray.flatMap(speciesObj => {
             return speciesObj.individuals.map(individual => individual.id)
         })
-    }
-
-    const createGenericLabelObjects = (labelsArray) => {
-        // Convert custom label objects into generic objects with the specific data that is needed for later export
-        let newLabelsArray = labelsArray.map( label => {
-                return {
-                    onset: label.onset,
-                    offset: label.offset,
-                    species: label.species,
-                    individual: label.individual,
-                    clustername: label.clustername,
-                    filename: label.filename,
-                    trackIndex: label.trackIndex,
-                    annotation_instance: trackData.annotationInstance
-                }
-            }
-        )
-
-        // Remove the Annotated Area labels because they are only necessary for WhisperSeg
-        newLabelsArray = newLabelsArray.filter( label => label.species !== ANNOTATED_AREA )
-
-        // Sort the labels ascending by onset
-        newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
-
-        return newLabelsArray
     }
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
@@ -1162,7 +1138,6 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
-        passLabelsToApp(createGenericLabelObjects(filteredLabels), trackData.trackIndex)
 
         if (labelToBeDeleted === expandedLabel){
             setExpandedLabel(null)
@@ -1937,7 +1912,6 @@ function ScalableSpec(
 
         const combinedLabelsArray = labels.concat(whisperLabels)
         setLabels(combinedLabelsArray)
-        passLabelsToApp(createGenericLabelObjects(combinedLabelsArray), trackData.trackIndex)
         setWhisperSegIsLoading(false)
     }
 
@@ -2021,9 +1995,6 @@ function ScalableSpec(
         }
 
         setLabels(updatedLabels)
-        passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
-        console.log(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
-        console.log('+++ +++')
 
     }, [speciesArray])
 
@@ -2056,12 +2027,10 @@ function ScalableSpec(
             if (importedLabels){
                 const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabels)
                 setLabels(updatedLabels)
-                passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
 
-            // If there's no audio payload labels nor CSV imported labels delete all existing labels on this track
+            // If there's no URL imported labels nor CSV imported labels delete all existing labels on this track
             } else {
                 setLabels([])
-                passLabelsToApp([], trackData.trackIndex)
             }
 
     }, [trackData.audioID])
@@ -2097,6 +2066,12 @@ function ScalableSpec(
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime)
 
     }, [trackData.audioID, globalAudioDuration] )
+
+    // When the user clicks the Export button in Export.jsx or Submit button in App.jsx
+    useEffect( () => {
+        if (!exportRequest && !submitRequest) return
+        addLabelsToApp(labels)
+    }, [exportRequest, submitRequest])
 
     return (
         <div
@@ -2195,8 +2170,6 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
-                            {trackData.trackIndex}
-                            <button onClick={() => console.log(labels)}>c</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}

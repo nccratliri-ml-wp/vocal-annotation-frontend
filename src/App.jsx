@@ -62,7 +62,6 @@ function App() {
             showOverviewBarAndTimeAxis: true,
             audioID: null,
             filename: null,
-            annotationInstance: null,
             audioDuration: null,
             frequencies: null,
             spectrogram: null
@@ -88,6 +87,9 @@ function App() {
     const [activeLabel, setActiveLabel] = useState(null)
 
     const [allLabels, setAllLabels] = useState([])
+    const [exportRequest, setExportRequest] = useState(false)
+    const [submitRequest, setSubmitRequest] = useState(false)
+    const [annotationInstance, setAnnotationInstance] = useState(null)
 
     const [filesUploading, setFilesUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -138,28 +140,24 @@ function App() {
         setActiveLabel( newActiveLabel )
     }
 
-    /*
-    1. Store all labels as label objects are in allLabels
-    2. Add and remove labels by their ID
-    3. Only in Export.jsx and Submit button create generic label objects
-    4. Since AnnotationInstance is the same for all files, we can ignore it and only add it in submit function (remember to remove it from track object property at the end)
-     */
-
-    function passLabelsToApp( labels, trackIndex ){
-        setAllLabels(
-            {
-                ...allLabels,
-                [trackIndex]: labels
-            }
-        )
+    function addLabelsToApp( newLabels ) {
+        setAllLabels(previousLabels => [...previousLabels, ...newLabels])
     }
 
-    function passImportedLabelsToApp ( newImportedLabels ){
+    function deleteAllLabelsInApp() {
+        setAllLabels([])
+    }
+
+    function passExportRequestToApp( boolean ){
+        setExportRequest( boolean )
+    }
+
+    function passImportedLabelsToApp( newImportedLabels ){
         setImportedLabels( newImportedLabels )
     }
 
     function passFilesUploadingToApp( boolean ){
-        setFilesUploading(boolean)
+        setFilesUploading( boolean )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -174,7 +172,6 @@ function App() {
                 showOverviewBarAndTimeAxis: false,
                 audioID: null,
                 filename: null,
-                annotationInstance: null,
                 audioDuration: null,
                 frequencies: null,
                 spectrogram: null
@@ -246,20 +243,20 @@ function App() {
         setScrollStep( newDuration * SCROLL_STEP_RATIO )
     }
 
+    function handleClickSubmitBtn(){
+        setSubmitRequest(true)
+    }
+
     async function submitAllAnnotations(){
-        if (!allLabels) return
-
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
-
-        let allLabelsArray = Object.values(allLabels).flat()
-
-        if (!allLabelsArray.length) {
+        if (!allLabels.length) {
             alert('There are currently no annotations. Add some and try again.')
             return
         }
 
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
+
         // Only keep properties that are relevant for the backend
-        allLabelsArray = allLabelsArray.map(labelObj => {
+        const modifiedLabels = allLabels.map(labelObj => {
             return {
                 onset: labelObj.onset,
                 offset: labelObj.offset,
@@ -267,12 +264,12 @@ function App() {
                 individual: labelObj.individual,
                 clustername: labelObj.clustername,
                 filename: labelObj.filename,
-                annotation_instance: labelObj.annotation_instance
+                annotation_instance: annotationInstance
             }
         })
 
         const requestParameters = {
-            annotations: allLabelsArray
+            annotations: modifiedLabels
         }
 
         console.log(requestParameters)
@@ -406,7 +403,7 @@ function App() {
 
         for (let audioPayload of audioFilesArray) {
             const newResponse = await uploadFileByURL(audioPayload)
-            allResponses.push({...newResponse, filename: audioPayload.filename, annotationInstance: audioPayload.annotation_instance})
+            allResponses.push({...newResponse, filename: audioPayload.filename})
 
             cumulativeProgress += loadingProgressStep
             setUploadProgress(cumulativeProgress)
@@ -444,7 +441,6 @@ function App() {
                     showOverviewBarAndTimeAxis: false,
                     audioID: newChannels[channelIndex].audio_id,
                     filename: filename,
-                    annotationInstance: null,
                     audioDuration: newChannels[channelIndex].audio_duration,
                     frequencies: newChannels[channelIndex].freqs,
                     spectrogram: newChannels[channelIndex].spec,
@@ -484,7 +480,6 @@ function App() {
                     showOverviewBarAndTimeAxis: i === 0,
                     audioID: channel.audio_id,
                     filename: response.filename,
-                    annotationInstance: response.annotationInstance,
                     audioDuration: channel.audio_duration,
                     frequencies: channel.freqs,
                     spectrogram: channel.spec,
@@ -557,8 +552,12 @@ function App() {
                     allLabels.push(...labels)
                 }
             }
+
+            if (!ignore) return
+
             createSpeciesFromImportedLabels(allLabels)
             setImportedLabels(allLabels)
+            setAnnotationInstance(audioFilesArray[0].annotation_instance)
 
             // Prepare for upload
             processAudioFilesSequentially(audioFilesArray)
@@ -576,8 +575,15 @@ function App() {
     useEffect( () => {
         if (!importedLabels) return
         createSpeciesFromImportedLabels(importedLabels)
-
     }, [importedLabels])
+
+    // When all the tracks have pushed their labels to allLabels state variable in App.jsx
+    useEffect( () => {
+        if (!allLabels || !submitRequest) return
+        submitAllAnnotations()
+        setSubmitRequest(false)
+        deleteAllLabelsInApp()
+    }, [allLabels])
 
 
     return (
@@ -612,13 +618,17 @@ function App() {
                     />
                     <Export
                         allLabels={allLabels}
-                        annotationInstance={tracks[0]?.annotationInstance}
+                        annotationInstance={annotationInstance}
+                        exportRequest={exportRequest}
+                        passExportRequestToApp={passExportRequestToApp}
+                        deleteAllLabelsInApp={deleteAllLabelsInApp}
                     />
                     <Tooltip title='Submit Annotations'>
                         <IconButton
                             style={{...globalControlsBtn, ...(!strictMode && iconBtnDisabled)}}
                             disabled={!strictMode}
-                            onClick={submitAllAnnotations}
+                            //onClick={submitAllAnnotations}
+                            onClick={handleClickSubmitBtn}
                         >
                             <DoneAllIcon style={icon} />
                         </IconButton>
@@ -685,11 +695,13 @@ function App() {
                                 activeLabel={activeLabel}
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}
-                                passLabelsToApp={passLabelsToApp}
                                 importedLabels={importedLabels && getImportedLabelsForThisTrack(importedLabels, track.trackIndex)}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
                                 passFilesUploadingToApp={passFilesUploadingToApp}
+                                addLabelsToApp={addLabelsToApp}
+                                exportRequest={exportRequest}
+                                submitRequest={submitRequest}
                             />
                         )
                     })

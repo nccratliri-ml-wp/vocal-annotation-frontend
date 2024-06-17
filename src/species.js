@@ -180,38 +180,6 @@ const dummyData = {
                             "individual": "Ind4",
                             "clustername": "call 3"
                         }
-                    ],
-                    "1": [
-                        {
-                            "onset": 1.5,
-                            "offset": 1.8,
-                            "species": "Unknown Species",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 2.7,
-                            "offset": 2.9,
-                            "species": "Unknown Species",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        }
-                    ],
-                    "2": [
-                        {
-                            "onset": 1.9,
-                            "offset": 2,
-                            "species": "Unknown Species",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 3,
-                            "offset": 3.2,
-                            "species": "Unknown Species",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        }
                     ]
                 }
             }

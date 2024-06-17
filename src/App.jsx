@@ -87,7 +87,7 @@ function App() {
 
     const [activeLabel, setActiveLabel] = useState(null)
 
-    const [allLabels, setAllLabels] = useState({})
+    const [allLabels, setAllLabels] = useState([])
 
     const [filesUploading, setFilesUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -137,6 +137,13 @@ function App() {
     function passActiveLabelToApp( newActiveLabel ){
         setActiveLabel( newActiveLabel )
     }
+
+    /*
+    1. Store all labels as label objects are in allLabels
+    2. Add and remove labels by their ID
+    3. Only in Export.jsx and Submit button create generic label objects
+    4. Since AnnotationInstance is the same for all files, we can ignore it and only add it in submit function (remember to remove it from track object property at the end)
+     */
 
     function passLabelsToApp( labels, trackIndex ){
         setAllLabels(

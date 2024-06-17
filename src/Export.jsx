@@ -7,6 +7,8 @@ import {icon, globalControlsBtn} from "./styles.js"
 function Export( { allLabels, annotationInstance } ){
 
     function exportCSV(){
+        console.log(allLabels)
+
         // Flatten the allLabels Object into a single array
         let labels = Object.values(allLabels).flat()
 

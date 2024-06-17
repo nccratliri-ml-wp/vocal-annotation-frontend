@@ -612,9 +612,6 @@ function ScalableSpec(
 
     const createGenericLabelObjects = (labelsArray) => {
         // Convert custom label objects into generic objects with the specific data that is needed for later export
-        console.log(trackData.trackIndex)
-        console.log(labelsArray)
-        console.log('+++ +++ ')
         let newLabelsArray = labelsArray.map( label => {
                 return {
                     onset: label.onset,
@@ -2025,6 +2022,8 @@ function ScalableSpec(
 
         setLabels(updatedLabels)
         passLabelsToApp(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
+        console.log(createGenericLabelObjects(updatedLabels), trackData.trackIndex)
+        console.log('+++ +++')
 
     }, [speciesArray])
 
@@ -2196,6 +2195,8 @@ function ScalableSpec(
                                     <DeleteIcon style={activeIcon}/>
                                 </IconButton>
                             </Tooltip>
+                            {trackData.trackIndex}
+                            <button onClick={() => console.log(labels)}>c</button>
                         </div>
                         <div className='audio-controls'>
                             <IconButton style={iconBtn}

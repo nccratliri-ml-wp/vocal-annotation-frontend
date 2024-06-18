@@ -65,11 +65,6 @@ function App() {
             audioDuration: null,
             frequencies: null,
             spectrogram: null,
-            specCalMethod: 'log-mel',
-            nfft: '',
-            binsPerOctave: '',
-            minFreq: '',
-            maxFreq: '',
         }
     ])
 

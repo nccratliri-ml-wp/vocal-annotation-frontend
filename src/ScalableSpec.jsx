@@ -129,11 +129,12 @@ function ScalableSpec(
 
     // Local Parameters
     const [showLocalConfigWindow, setShowLocalConfigWindow] = useState(false)
-    const [specCalMethod, setSpecCalMethod] = useState('log-mel')
-    const [nfft, setNfft] = useState('')
+    const [specCalMethod, setSpecCalMethod] = useState(trackData.specCalMethod ? trackData.specCalMethod : 'log-mel')
+    const [nfft, setNfft] = useState(trackData.nfft ? trackData.nfft : '')
+    //const [binsPerOctave, setBinsPerOctave] = useState(trackData.binsPerOctave ? trackData.binsPerOctave: '')
     const [binsPerOctave, setBinsPerOctave] = useState('')
-    const [minFreq, setMinFreq] = useState('')
-    const [maxFreq, setMaxFreq] = useState('')
+    const [minFreq, setMinFreq] = useState(trackData.minFreq ? trackData.minFreq : '')
+    const [maxFreq, setMaxFreq] = useState(trackData.maxFreq ? trackData.maxFreq : '')
 
     // WhisperSeg
     const [whisperSegIsLoading, setWhisperSegIsLoading] = useState(false)
@@ -588,7 +589,7 @@ function ScalableSpec(
 
     const findClosestPositiveToZeroIndex = (arr) => {
         // Initialize a variable to store the index of the closest positive number
-        let closestIndex = -1;
+        let closestIndex = -1
 
         // Iterate through the array
         for (let i = 0; i < arr.length; i++) {

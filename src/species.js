@@ -99,7 +99,7 @@ const dummyData = {
             "nfft": 40,
             "f_high": 8000,
             "f_low": 6000,
-            "spec_cal_method": "log-mel",
+            "spec_cal_method": "constant-q",
             "labels": {
                 "tracks": {
                     "0": [
@@ -159,7 +159,7 @@ const dummyData = {
             "filename": "BabyElephantWalk60.wav",
             "annotation_instance": "XC785219_fd453602-a4a9-4f57-95f2-fd9084e9a161",
             "time": "2024-03-27 20:01:43",
-            "nfft": 40,
+            "nfft": 500,
             "f_high": 8000,
             "f_low": 0,
             "spec_cal_method": "log-mel",

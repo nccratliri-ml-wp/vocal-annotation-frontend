@@ -64,7 +64,12 @@ function App() {
             filename: null,
             audioDuration: null,
             frequencies: null,
-            spectrogram: null
+            spectrogram: null,
+            specCalMethod: 'log-mel',
+            nfft: '',
+            binsPerOctave: '',
+            minFreq: '',
+            maxFreq: '',
         }
     ])
 
@@ -472,7 +477,8 @@ function App() {
 
         for (const response of allResponses){
             const newChannels = response.data.channels
-
+            const config = response.data.configurations
+            console.log(config)
             for (const channel of newChannels){
                 allNewTracks.push({
                     trackID: nanoid(),
@@ -483,6 +489,11 @@ function App() {
                     audioDuration: channel.audio_duration,
                     frequencies: channel.freqs,
                     spectrogram: channel.spec,
+                    specCalMethod: config.spec_cal_method,
+                    nfft: config.n_fft,
+                    binsPerOctave: config.bins_per_octave,
+                    minFreq: config.min_frequency,
+                    maxFreq: config.max_frequency
                 })
                 i++
             }

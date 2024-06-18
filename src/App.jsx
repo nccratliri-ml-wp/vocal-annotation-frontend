@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -31,6 +31,7 @@ import ImportCSV from "./ImportCSV.jsx";
 import LoadingCircle from './LoadingCircle.jsx';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import usePreventClose from "./usePreventClose.jsx";
 
 
 // Global Variables
@@ -591,6 +592,65 @@ function App() {
         deleteAllLabelsInApp()
     }, [allLabels])
 
+    const tracksRef = useRef(tracks);
+
+    // Keep tracksRef.current up to date
+    useEffect(() => {
+        tracksRef.current = tracks;
+    }, [tracks]);
+
+    // Set Up Before Unload Event Handler upon mount
+    useEffect(() => {
+        const releaseAudioIDs = async () => {
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'release-audio-given-ids';
+            const audioIds = tracksRef.current.map(track => track.audioID);
+
+            const requestParameters = { audio_id_list: audioIds };
+
+            try {
+                const response = await fetch(path, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestParameters),
+                    keepalive: true
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                console.log('Request sent successfully with keepalive');
+            } catch (error) {
+                console.error('An error occurred:', error);
+            }
+        };
+
+        const handleBeforeUnload = (event) => {
+                // Standard message to show confirmation dialog
+                const confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
+
+                event.preventDefault(); // Required to show the confirmation dialog in some browsers
+                event.returnValue = confirmationMessage;
+
+                // Returning a non-empty string is essential to trigger the dialog
+                return confirmationMessage;
+
+        };
+
+        const handleUnload = () => {
+            releaseAudioIDs()
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('unload', handleUnload);
+
+        // Cleanup the event listeners on component unmount
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('unload', handleUnload);
+        }
+    }, [])
 
     return (
         <>

@@ -31,8 +31,6 @@ import ImportCSV from "./ImportCSV.jsx";
 import LoadingCircle from './LoadingCircle.jsx';
 import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import usePreventClose from "./usePreventClose.jsx";
-
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1

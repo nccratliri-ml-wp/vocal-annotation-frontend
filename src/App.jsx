@@ -622,19 +622,16 @@ function App() {
             } catch (error) {
                 console.error('An error occurred:', error);
             }
-        };
+        }
 
         const handleBeforeUnload = (event) => {
-                // Standard message to show confirmation dialog
-                const confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
+                const confirmationMessage = 'Are you sure you want to leave? Make sure to save your work, if have not done so already'
 
-                event.preventDefault(); // Required to show the confirmation dialog in some browsers
-                event.returnValue = confirmationMessage;
+                event.preventDefault()
+                event.returnValue = confirmationMessage
 
-                // Returning a non-empty string is essential to trigger the dialog
                 return confirmationMessage;
-
-        };
+        }
 
         const handleUnload = () => {
             releaseAudioIDs()

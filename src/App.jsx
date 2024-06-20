@@ -625,7 +625,7 @@ function App() {
         }
 
         const handleBeforeUnload = (event) => {
-                const confirmationMessage = 'Are you sure you want to leave? Make sure to save your work, if have not done so already'
+                const confirmationMessage = 'Are you sure you want to leave? Make sure to save your work, if have not done so already.'
 
                 event.preventDefault()
                 event.returnValue = confirmationMessage

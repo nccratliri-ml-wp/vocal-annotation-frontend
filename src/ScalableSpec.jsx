@@ -36,6 +36,7 @@ class Playhead{
 const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 const FREQUENCY_LINES_COLOR = '#47ff14'
+const ACTIVE_LABEL_COLOR = '#ffffff'
 
 
 function ScalableSpec(
@@ -314,8 +315,14 @@ function ScalableSpec(
         // Deal with click inside an existing label
         const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
         if ( labelToBeExpanded ) {
-            console.log(3)
             setExpandedLabel( labelToBeExpanded )
+            passActiveLabelToApp({
+                onset: labelToBeExpanded.onset,
+                offset: labelToBeExpanded.offset,
+                id: labelToBeExpanded.id,
+                trackID: trackID,
+                color: ACTIVE_LABEL_COLOR,
+            })
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
@@ -339,14 +346,13 @@ function ScalableSpec(
             }
 
             setLabels(labelsCopy)
-            passActiveLabelToApp(
-                {
-                    onset: labelsCopy[labels.length-1].onset,
-                    offset: labelsCopy[labels.length-1].offset,
-                    color: '#ffffff',
-                    trackId: trackID
-                }
-            )
+            passActiveLabelToApp({
+                onset: labelsCopy[labels.length-1].onset,
+                offset: labelsCopy[labels.length-1].offset,
+                id: labelsCopy[labels.length-1].id,
+                trackID: trackID,
+                color: ACTIVE_LABEL_COLOR,
+            })
             drawLineBetween(newestLabel)
             drawLine(newestLabel, newestLabel.onset)
             drawLine(newestLabel, newestLabel.offset)
@@ -356,7 +362,6 @@ function ScalableSpec(
         // Add onset
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
-        passActiveLabelToApp({onset: clickedTimestamp, offset: undefined, color: '#ffffff', trackId: trackID})
         addNewLabel(clickedTimestamp)
     }
 
@@ -376,7 +381,13 @@ function ScalableSpec(
             clickedLabel.offset = magnet(clickedLabel.offset)
 
             passLabelsToScalableSpec(labels)
-            passActiveLabelToApp({onset: clickedLabel.onset, offset: clickedLabel.offset, color: '#ffffff', trackId: trackID})
+            passActiveLabelToApp({
+                onset: clickedLabel.onset,
+                offset: clickedLabel.offset,
+                id: clickedLabel.id,
+                trackID: trackID,
+                color: ACTIVE_LABEL_COLOR,
+            })
         }
 
         clickedLabel = undefined
@@ -412,8 +423,14 @@ function ScalableSpec(
 
         deleteLabel(labelToBeDeleted)
 
-        if (labelToBeDeleted.onset === activeLabel?.onset && labelToBeDeleted.offset === activeLabel?.offset){
-            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
+        if (labelToBeDeleted.id === activeLabel?.id){
+            passActiveLabelToApp({
+                onset: undefined,
+                offset: undefined,
+                id: undefined,
+                trackID: undefined,
+                color: undefined
+            })
         }
     }
 
@@ -663,8 +680,8 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawFrequencyLines()
-            drawLine(activeLabel, activeLabel.onset)
-            drawLine(activeLabel, activeLabel.offset)
+            drawLine(activeLabel, activeLabel?.onset)
+            drawLine(activeLabel, activeLabel?.offset)
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -1056,7 +1073,7 @@ function ScalableSpec(
                 drawLine(label, label.onset)
             }
             // Draw label that is being dragged and expanded label with extended lines
-            if (label === clickedLabel || label.id === expandedLabel?.id){
+            if (label === clickedLabel || label.id === expandedLabel?.id || label.id === activeLabel.id){
                 drawLine(label, label.onset)
                 drawLine(label, label.offset)
                 drawLineBetween(label)
@@ -1134,6 +1151,14 @@ function ScalableSpec(
             clustername.color)
 
         setLabels( current => [...current, newLabel] )
+
+        passActiveLabelToApp({
+            onset: newLabel.onset,
+            offset: newLabel.offset,
+            id: newLabel.id,
+            trackID: trackID,
+            color: ACTIVE_LABEL_COLOR,
+        })
     }
 
     const deleteLabel = (labelToBeDeleted) => {
@@ -1367,8 +1392,6 @@ function ScalableSpec(
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
             updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, currentStartTime, newViewportEndFrame)
         }
-
-        console.log(newViewportStartFrame)
 
         newViewportStartFrame = null
         newViewportEndFrame = null
@@ -1707,7 +1730,13 @@ function ScalableSpec(
         const newestLabel = labels[labels.length -1]
         if (newestLabel && !newestLabel.offset){
             deleteLabel(newestLabel)
-            passActiveLabelToApp({onset: undefined, offset: undefined, color: undefined, trackId: undefined})
+            passActiveLabelToApp({
+                onset: undefined,
+                offset: undefined,
+                id: undefined,
+                trackID: undefined,
+                color: undefined
+            })
         }
     }
 
@@ -1930,7 +1959,7 @@ function ScalableSpec(
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
         if (!spectrogram ||
-            trackID === activeLabel?.trackId ||
+            trackID === activeLabel?.trackID ||
             activeSpecies.name === ANNOTATED_AREA) return
 
         drawActiveLabel(audioArray)

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { createPortal } from 'react-dom';
+import {createPortal} from 'react-dom';
 import axios from 'axios';
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -111,6 +111,7 @@ function ScalableSpec(
     // Labels
     const [labels, setLabels] = useState([])
     let clickedLabel = undefined
+    let draggedActiveLabel = null
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
     // Audio
@@ -298,6 +299,22 @@ function ScalableSpec(
             }
         }
 
+        // Deal with click on Active Label onset
+        if (checkIfClickedOnActiveLabelOnset(mouseX)) {
+            draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
+            specCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
+            waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
+            return
+        }
+
+        // Deal with click on Active Label offset
+        if (checkIfClickedOnActiveLabelOffset(mouseX)) {
+            draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
+            specCanvasRef.current.addEventListener('mousemove', dragActiveLabelOffset)
+            waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOffset)
+            return
+        }
+
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             clickedFrequencyLinesObject = frequencyLines
@@ -313,7 +330,7 @@ function ScalableSpec(
         }
 
         // Deal with click inside an existing label
-        const labelToBeExpanded = checkIfClickedOnLabel (mouseX, mouseY)
+        const labelToBeExpanded = checkIfClickedOnLabel (event, mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
             passActiveLabelToApp({
@@ -390,12 +407,28 @@ function ScalableSpec(
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
             })
+        }
 
-            // Clear and redraw canvases to get rid of outdated activeLabel
-            //clearAndRedrawSpecAndWaveformCanvases()
+        // Only do this when mouse up event stems from dragging the active label (equivalent to draggedActiveLabel being true)
+        if (draggedActiveLabel){
+
+            // Flip onset with offset if necessary
+            if (draggedActiveLabel.onset > draggedActiveLabel.offset){
+                draggedActiveLabel = flipOnsetOffset(draggedActiveLabel)
+            }
+            // Create zero gap labels if necessary
+            draggedActiveLabel.onset = magnet(draggedActiveLabel.onset)
+            draggedActiveLabel.offset = magnet(draggedActiveLabel.offset)
+
+            passActiveLabelToApp({
+                ...activeLabel,
+                onset: draggedActiveLabel.onset,
+                offset: draggedActiveLabel.offset,
+            })
         }
 
         clickedLabel = undefined
+        draggedActiveLabel = null
         clickedFrequencyLinesObject = null
     }
 
@@ -408,6 +441,10 @@ function ScalableSpec(
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
         specCanvasRef.current.removeEventListener('mousemove', dragMaxFreqLine)
         specCanvasRef.current.removeEventListener('mousemove', dragMinFreqLine)
+        specCanvasRef.current.removeEventListener('mousemove', dragActiveLabelOnset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragActiveLabelOnset)
+        specCanvasRef.current.removeEventListener('mousemove', dragActiveLabelOffset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragActiveLabelOffset)
     }
 
     const handleMouseLeaveCanvases = (event) => {
@@ -422,7 +459,7 @@ function ScalableSpec(
 
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
-        const labelToBeDeleted = checkIfClickedOnLabel(mouseX, mouseY)
+        const labelToBeDeleted = checkIfClickedOnLabel(event, mouseX, mouseY)
 
         if (!labelToBeDeleted) return
 
@@ -530,7 +567,7 @@ function ScalableSpec(
 
         return label.clustername === 'Protected Area🔒' ? labelCanvasRef.current.height - 1 : individualCount * HEIGHT_BETWEEN_INDIVIDUAL_LINES;
          */
-        return (label.individualIndex + 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+        return (label?.individualIndex + 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
     const calculateTimestamp = (event) => {
@@ -540,23 +577,30 @@ function ScalableSpec(
     }
 
     const checkIfOccupiedByOnsetOrOffset = (mouseX, mouseY) => {
-        return ( checkIfClickedOnOnset(mouseX, mouseY) || checkIfClickedOnOffset(mouseX, mouseY) )
+        return checkIfClickedOnOnset(mouseX, mouseY) || checkIfClickedOnOffset(mouseX, mouseY)
     }
 
     const checkIfOccupiedByActiveLabel = (mouseX) => {
-        if (!activeLabel) return
+        // Active label is only drawn on the other tracks, so we ignore the active label that originated from this track
+        if (!activeLabel || activeLabel.trackID === trackID) return
+
+        return checkIfClickedOnActiveLabelOnset(mouseX) || checkIfClickedOnActiveLabelOffset(mouseX)
+    }
+
+    const checkIfClickedOnActiveLabelOnset = (mouseX) => {
+        // Active label is only drawn on the other tracks, so we ignore the active label that originated from this track
+        if (!activeLabel || activeLabel.trackID === trackID) return
 
         const activeLabelOnsetX = calculateXPosition(activeLabel.onset)
-        const activeLabelOffsetX = calculateXPosition(activeLabel.offset)
+        return activeLabelOnsetX >= mouseX - 5 && activeLabelOnsetX <= mouseX + 5
+    }
 
+    const checkIfClickedOnActiveLabelOffset = (mouseX) => {
         // Active label is only drawn on the other tracks, so we ignore the active label that originated from this track
-        if (activeLabel.trackID === trackID) return
+        if (!activeLabel || activeLabel.trackID === trackID) return
 
-        return (
-            ( activeLabelOnsetX >= mouseX - 5 && activeLabelOnsetX <= mouseX + 5 )
-            ||
-            ( activeLabelOffsetX >= mouseX - 5 && activeLabelOffsetX <= mouseX + 5 )
-        )
+        const activeLabelOffsetX = calculateXPosition(activeLabel.offset)
+        return activeLabelOffsetX >= mouseX - 5 && activeLabelOffsetX <= mouseX + 5
     }
 
     const checkIfClickedOnOnset = (mouseX, mouseY) => {
@@ -581,7 +625,9 @@ function ScalableSpec(
         }
     }
 
-    const checkIfClickedOnLabel = (mouseX, mouseY) => {
+    const checkIfClickedOnLabel = (event, mouseX, mouseY) => {
+        if (event.target.className !== 'label-canvas') return
+
         for (let label of labels) {
             const onsetX = calculateXPosition(label.onset)
             const offsetX = calculateXPosition(label.offset)
@@ -1082,6 +1128,8 @@ function ScalableSpec(
             ctx.setLineDash([])
         }
 
+        if (!labels.length) return
+
         for (let label of labels) {
 
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
@@ -1115,9 +1163,11 @@ function ScalableSpec(
         }
 
         // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
-        if (activeLabel?.trackID !== trackID){
-            drawLine(activeLabel, activeLabel.onset)
-            drawLine(activeLabel, activeLabel.offset)
+        const allLabelIDs = labels.map(label => label.id)
+        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
+        //if (activeLabel.trackID !== trackID) {
+            drawLine(activeLabel, activeLabel?.onset)
+            drawLine(activeLabel, activeLabel?.offset)
         }
     }
 
@@ -1234,90 +1284,54 @@ function ScalableSpec(
         return label
     }
 
-    const updateOnset = (event) => {
-        clickedLabel.onset = calculateTimestamp(event)
-    }
-
-    const updateOffset = (event) => {
-        clickedLabel.offset = calculateTimestamp(event)
-    }
-
     const dragOnset = (event) => {
-        const specCanvas = specCanvasRef.current
-        const specCTX = specCanvas.getContext('2d', { willReadFrequently: true })
-        const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
-
-        updateOnset(event)
-
-        specCTX.clearRect(0, 0, specCanvas.width, specCanvas.height)
-        specCTX.putImageData(specImgData.current, 0, 0);
-
-        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
+        clearAndRedrawSpecAndWaveformCanvases()
+        clickedLabel.onset = calculateTimestamp(event)
         drawAllLabels()
         drawFrequencyLines()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
     const dragOffset = (event) => {
-        const specCanvas = specCanvasRef.current
-        const specCTX = specCanvas.getContext('2d', { willReadFrequently: true })
-        const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
-
-        updateOffset(event)
-
-        specCTX.clearRect(0, 0, specCanvas.width, specCanvas.height)
-        specCTX.putImageData(specImgData.current, 0, 0);
-
-        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
+        clearAndRedrawSpecAndWaveformCanvases()
+        clickedLabel.offset = calculateTimestamp(event)
         drawAllLabels()
         drawFrequencyLines()
         //drawPlayhead(playheadRef.current.timeframe)
     }
 
-    const dragMaxFreqLine = (event) => {
-        const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d', { willReadFrequently: true })
-        const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
+    const dragActiveLabelOnset = (event) => {
+        clearAndRedrawSpecAndWaveformCanvases()
+        draggedActiveLabel.onset = calculateTimestamp(event)
+        drawLine(draggedActiveLabel, draggedActiveLabel.onset)
+        drawLine(draggedActiveLabel, draggedActiveLabel.offset)
+        drawFrequencyLines()
+    }
 
+    const dragActiveLabelOffset = (event) => {
+        clearAndRedrawSpecAndWaveformCanvases()
+        draggedActiveLabel.offset = calculateTimestamp(event)
+        drawLine(draggedActiveLabel, draggedActiveLabel.onset)
+        drawLine(draggedActiveLabel, draggedActiveLabel.offset)
+        drawFrequencyLines()
+    }
+
+    const dragMaxFreqLine = (event) => {
         const newMaxFreqY = getMouseY(event)
         if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
 
+        clearAndRedrawSpecAndWaveformCanvases()
         clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
-
-        specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
-        specCTX.putImageData(specImgData.current, 0, 0);
-
-        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
         drawAllLabels()
         drawFrequencyLines()
     }
 
     const dragMinFreqLine = (event) => {
-        const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d', { willReadFrequently: true })
-        const waveformCanvas = waveformCanvasRef.current
-        const waveformCTX = waveformCanvas.getContext('2d', { willReadFrequently: true })
-
         const newMinFreqY = getMouseY(event)
         if (newMinFreqY <= clickedFrequencyLinesObject.maxFreqY + 5 ) return
 
+        clearAndRedrawSpecAndWaveformCanvases()
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
-
-        specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
-        specCTX.putImageData(specImgData.current, 0, 0);
-
-        waveformCTX.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
         drawAllLabels()
         drawFrequencyLines()
     }
@@ -2007,16 +2021,44 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale, showWaveform, expandedLabel, showFrequencyLines, activeLabel] )
+    }, [labels, waveformScale, showWaveform, showFrequencyLines] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
-        if (!spectrogram ||
-            trackID === activeLabel?.trackID ||
-            activeSpecies.name === ANNOTATED_AREA) return
+        if (!spectrogram || trackID === activeLabel?.trackID || activeSpecies.name === ANNOTATED_AREA) {
+            // Updating the original label with the new onset or offset from the dragged active label
+            const updatedLabels = labels.map( label => {
+
+                if (label.id === activeLabel.id){
+                    return new Label(
+                        label.id,
+                        label.trackIndex,
+                        label.filename,
+                        activeLabel.onset,
+                        activeLabel.offset,
+                        label.species,
+                        label.individual,
+                        label.clustername,
+                        label.speciesID,
+                        label.individualID,
+                        label.clusternameID,
+                        label.individualIndex,
+                        label.annotator,
+                        label.color,
+                    )
+
+                } else {
+                    return label
+                }
+            })
+
+            setLabels(updatedLabels)
+            return
+        }
 
         drawActiveLabel(audioArray)
-    }, [activeLabel, expandedLabel] )
+
+    }, [activeLabel] )
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
     useEffect(() => {
@@ -2163,6 +2205,7 @@ function ScalableSpec(
             className='editor-container'
             onMouseLeave={handleMouseLeave}
         >
+
             {showOverviewInitialValue && trackData &&
                 <div className='overview-time-axis-container'>
                     <canvas

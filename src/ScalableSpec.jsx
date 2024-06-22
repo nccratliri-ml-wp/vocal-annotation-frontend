@@ -412,8 +412,6 @@ function ScalableSpec(
 
     const handleMouseLeaveCanvases = (event) => {
         handleMouseUp(event)
-        drawAllLabels()
-        drawFrequencyLines()
     }
 
     const handleRightClick = (event) => {
@@ -465,18 +463,6 @@ function ScalableSpec(
             waveformCanvasRef.current.style.cursor = 'default'
             labelCanvasRef.current.style.cursor = 'default'
         }
-    }
-
-    const clearAndRedrawSpecAndWaveformCanvases = () => {
-        const specCVS = specCanvasRef.current;
-        const specCTX = specCVS.getContext('2d',{ willReadFrequently: true });
-        const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
-        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
-        specCTX.putImageData(specImgData.current, 0, 0);
-        waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
-        //drawAllLabels()
     }
 
     // this isn't very neat or resourceful, but it works well enough for now. possible candidate for re-factoring in the future
@@ -1180,7 +1166,17 @@ function ScalableSpec(
             ctx.strokeStyle = ctx.strokeStyle = '#ffffff'
             ctx.stroke()
         }
+    }
 
+    const clearAndRedrawSpecAndWaveformCanvases = () => {
+        const specCVS = specCanvasRef.current;
+        const specCTX = specCVS.getContext('2d',{ willReadFrequently: true });
+        const waveformCVS = waveformCanvasRef.current
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
+        specCTX.putImageData(specImgData.current, 0, 0);
+        waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
+        waveformCTX.putImageData(waveformImgData.current, 0, 0)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */

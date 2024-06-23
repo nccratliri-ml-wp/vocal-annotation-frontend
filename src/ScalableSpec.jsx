@@ -1129,7 +1129,6 @@ function ScalableSpec(
         }
 
         if (!labels.length) return
-        console.log('gto here')
 
         for (let label of labels) {
 

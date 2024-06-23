@@ -1129,6 +1129,7 @@ function ScalableSpec(
         }
 
         if (!labels.length) return
+        console.log('gto here')
 
         for (let label of labels) {
 
@@ -1145,7 +1146,7 @@ function ScalableSpec(
             }
 
             // If no label is currently dragged (clickedLabel is false) draw the active label in full
-            if (!clickedLabel) {
+            if (!clickedLabel && activeLabel) {
                 if (label.id === activeLabel.id){
                     drawFullLabel(label)
                 }

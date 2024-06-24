@@ -741,7 +741,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                             <EditIcon style={iconSmall}/>
                                         </IconButton>
                                     }
-                                    {species.name !== UNKNOWN_SPECIES &&
+                                    {!strictMode &&
                                         <IconButton
                                             style={iconBtnSmallest}
                                             onClick={() => deleteSpecies(species.id)}

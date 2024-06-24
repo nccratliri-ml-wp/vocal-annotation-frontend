@@ -32,6 +32,11 @@ const freqBtn = {
     padding: 0
 }
 
+const toggleVisibilityBtn = {
+    display: 'block',
+    padding: '0 12px'
+}
+
 const icon = {
     color: 'white',
     margin: 0,
@@ -51,6 +56,7 @@ const iconBig = {
 
 }
 
+
 export {
     iconBtn,
     iconBtnDisabled,
@@ -60,6 +66,7 @@ export {
     globalControlsBtn,
     globalControlsBtnDisabled,
     freqBtn,
+    toggleVisibilityBtn,
     icon,
     iconSmall,
     iconBig

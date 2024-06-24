@@ -58,6 +58,15 @@ html, body {
   border-bottom: 5px double #082536;
 }
 
+.hidden-track-container{
+  display: flex;
+  padding: 0 0 10px 0;
+  margin: 0 0 10px 0;
+  border-bottom: 5px double #082536;
+  height: 36.5px;
+  align-items: center;
+}
+
 .side-window{
   display: grid;
   grid-template-columns: 160px 40px;
@@ -65,6 +74,10 @@ html, body {
   grid-template-areas:
     "track-controls waveform-buttons-frequencies-canvas-container"
     "individuals-canvas individuals-canvas";
+}
+
+.show-track-file-upload-container{
+  display: flex;
 }
 
 .track-controls{

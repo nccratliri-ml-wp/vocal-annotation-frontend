@@ -58,6 +58,7 @@ function App() {
         {
             trackID: nanoid(),
             trackIndex: 0,
+            visible: true,
             showOverviewBarAndTimeAxis: true,
             audioID: null,
             filename: null,
@@ -168,6 +169,7 @@ function App() {
             {
                 trackID: nanoid(),
                 trackIndex: newIndex,
+                visible: true,
                 showOverviewBarAndTimeAxis: false,
                 audioID: null,
                 filename: null,
@@ -191,6 +193,20 @@ function App() {
         setTracks(updatedTracks)
 
         setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would be replaced by the config of another
+    }
+
+    function toggleTrackVisibility( trackID ){
+        const updatedTracks = tracks.map( track => {
+            if (track.trackID === trackID){
+                return {
+                    ...track,
+                    visible: !track.visible
+                }
+            }
+            return track
+        })
+
+        setTracks(updatedTracks)
     }
 
 
@@ -437,6 +453,7 @@ function App() {
             while (channelIndex < newChannels.length) {
                 acc.push({
                     trackID: nanoid(),
+                    visible: true,
                     showOverviewBarAndTimeAxis: false,
                     audioID: newChannels[channelIndex].audio_id,
                     filename: filename,
@@ -477,6 +494,7 @@ function App() {
                 allNewTracks.push({
                     trackID: nanoid(),
                     trackIndex: i,
+                    visible: true,
                     showOverviewBarAndTimeAxis: i === 0,
                     audioID: channel.audio_id,
                     filename: response.filename,
@@ -736,7 +754,7 @@ function App() {
                                 trackID={track.trackID}
                                 speciesArray={speciesArray}
                                 deletedItemID={deletedItemID}
-                                showOverviewInitialValue={track.showOverviewBarAndTimeAxis}
+                                showOverviewBarAndTimeAxis={track.showOverviewBarAndTimeAxis}
                                 globalAudioDuration={globalAudioDuration}
                                 globalClipDuration={globalClipDuration}
                                 currentStartTime={currentStartTime}
@@ -763,6 +781,7 @@ function App() {
                                 addLabelsToApp={addLabelsToApp}
                                 exportRequest={exportRequest}
                                 submitRequest={submitRequest}
+                                toggleTrackVisibility={toggleTrackVisibility}
                             />
                         )
                     })

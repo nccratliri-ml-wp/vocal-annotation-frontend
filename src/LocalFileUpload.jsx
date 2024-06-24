@@ -66,7 +66,7 @@ function LocalFileUpload(
     })
 
     const ButtonText = styled('span')({
-        maxWidth: '160px',
+        maxWidth: '70px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',

@@ -84,10 +84,12 @@ html, body {
   grid-area: track-controls;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .audio-controls{
   display: flex;
+  justify-content: center;
   background-color: #082536;
   border-radius: 30px;
 }

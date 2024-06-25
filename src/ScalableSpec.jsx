@@ -19,6 +19,8 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
+import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
 import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./styles.js"
@@ -73,7 +75,9 @@ function ScalableSpec(
                             addLabelsToApp,
                             exportRequest,
                             submitRequest,
-                            toggleTrackVisibility
+                            toggleTrackVisibility,
+                            moveTrackUp,
+                            moveTrackDown
                         }
                     )
                 {
@@ -2318,6 +2322,24 @@ function ScalableSpec(
                                         {showLabelAndIndividualsCanvas ? <ExpandLessIcon style={activeIcon}/> : <ExpandMoreIcon style={activeIcon}/>}
                                     </IconButton>
                                 </Tooltip>
+                                <Tooltip title="Move Track Up">
+                                    <IconButton
+                                        style={activeIconBtnStyle}
+                                        disabled={strictMode}
+                                        onClick={() => moveTrackUp(trackID)}
+                                    >
+                                        <VerticalAlignTopIcon style={activeIcon}/>
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Move Track Down">
+                                    <IconButton
+                                        style={activeIconBtnStyle}
+                                        disabled={strictMode}
+                                        onClick={() => moveTrackDown(trackID)}
+                                    >
+                                        <VerticalAlignBottomIcon style={activeIcon}/>
+                                    </IconButton>
+                                </Tooltip>
                                 <Tooltip title="Delete Track">
                                     <IconButton
                                         style={{...activeIconBtnStyle, ...(strictMode || showOverviewBarAndTimeAxis && iconBtnDisabled)}}
@@ -2327,6 +2349,7 @@ function ScalableSpec(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
+                                {trackData.trackIndex}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

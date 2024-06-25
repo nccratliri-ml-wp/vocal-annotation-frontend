@@ -209,6 +209,59 @@ function App() {
         setTracks(updatedTracks)
     }
 
+    function moveTrackUp( clickedTrackID ){
+        const clickedTrack = tracks.find(track => track.trackID === clickedTrackID)
+
+        if (clickedTrack.trackIndex < 1) return
+
+        const newIndexClickedTrack = clickedTrack.trackIndex - 1
+
+        // Remove clicked track from tracks Array
+        let updatedTracks = tracks.filter(track => track.trackID !== clickedTrackID)
+
+        // Reinsert the clicked track at the new index
+        updatedTracks.splice(newIndexClickedTrack, 0, clickedTrack);
+
+        // Update trackIndex for all tracks
+        updatedTracks = updatedTracks.map( (track, index) => {
+            return {
+                ...track,
+                trackIndex: index
+            }
+        })
+
+        setTracks(updatedTracks)
+
+    }
+
+    function moveTrackDown( clickedTrackID ){
+        const clickedTrack = tracks.find(track => track.trackID === clickedTrackID)
+
+        if (clickedTrack.trackIndex >= tracks.length - 1) {
+          console.log('end')
+          return
+        }
+
+        const newIndexClickedTrack = clickedTrack.trackIndex + 1
+
+        // Remove clicked track from tracks Array
+        let updatedTracks = tracks.filter(track => track.trackID !== clickedTrackID)
+
+        // Reinsert the clicked track at the new index
+        updatedTracks.splice(newIndexClickedTrack, 0, clickedTrack);
+
+        // Update trackIndex for all tracks
+        updatedTracks = updatedTracks.map( (track, index) => {
+            return {
+                ...track,
+                trackIndex: index
+            }
+        })
+
+        setTracks(updatedTracks)
+
+    }
+
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
@@ -782,6 +835,8 @@ function App() {
                                 exportRequest={exportRequest}
                                 submitRequest={submitRequest}
                                 toggleTrackVisibility={toggleTrackVisibility}
+                                moveTrackUp={moveTrackUp}
+                                moveTrackDown={moveTrackDown}
                             />
                         )
                     })

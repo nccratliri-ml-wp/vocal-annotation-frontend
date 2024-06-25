@@ -700,6 +700,12 @@ function ScalableSpec(
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
+        // Draw Time Axis, Viewport
+        if (showOverviewBarAndTimeAxis){
+            drawTimeAxis()
+            drawViewport(currentStartTime, currentEndTime, 'white', 2)
+        }
+
         if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
@@ -722,12 +728,6 @@ function ScalableSpec(
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
-
-        // Draw Time Axis, Viewport
-        if (showOverviewBarAndTimeAxis){
-            drawTimeAxis()
-            drawViewport(currentStartTime, currentEndTime, 'white', 2)
-        }
     }
 
     const drawActiveLabel = (newAudioArray) => {
@@ -2028,7 +2028,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible] )
+    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {

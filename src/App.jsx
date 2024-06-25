@@ -226,7 +226,8 @@ function App() {
         updatedTracks = updatedTracks.map( (track, index) => {
             return {
                 ...track,
-                trackIndex: index
+                trackIndex: index,
+                showOverviewBarAndTimeAxis: index === 0
             }
         })
 
@@ -237,10 +238,7 @@ function App() {
     function moveTrackDown( clickedTrackID ){
         const clickedTrack = tracks.find(track => track.trackID === clickedTrackID)
 
-        if (clickedTrack.trackIndex >= tracks.length - 1) {
-          console.log('end')
-          return
-        }
+        if (clickedTrack.trackIndex >= tracks.length - 1) return
 
         const newIndexClickedTrack = clickedTrack.trackIndex + 1
 
@@ -254,7 +252,8 @@ function App() {
         updatedTracks = updatedTracks.map( (track, index) => {
             return {
                 ...track,
-                trackIndex: index
+                trackIndex: index,
+                showOverviewBarAndTimeAxis: index === 0
             }
         })
 
@@ -524,7 +523,8 @@ function App() {
         updatedTracks = updatedTracks.map( (track, index) => {
             return {
                 ...track,
-                trackIndex: index
+                trackIndex: index,
+                showOverviewBarAndTimeAxis: index === 0
             }
         })
 

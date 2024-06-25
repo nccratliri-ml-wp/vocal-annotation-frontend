@@ -749,6 +749,7 @@ function App() {
                         passImportedLabelsToApp={passImportedLabelsToApp}
                     />
                     <Export
+                        tracks={tracks}
                         allLabels={allLabels}
                         annotationInstance={annotationInstance}
                         exportRequest={exportRequest}

@@ -1246,7 +1246,7 @@ function ScalableSpec(
 
         const newLabel = new Label(
             nanoid(),
-            trackData.trackIndex,
+            trackID,
             trackData.filename,
             onset,
             undefined,
@@ -1364,7 +1364,7 @@ function ScalableSpec(
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
                 nanoid(),
-                trackData.trackIndex,
+                trackID,
                 trackData.filename,
                 label.onset,
                 label.offset,
@@ -1977,7 +1977,7 @@ function ScalableSpec(
                     individualID: label.individualID,
                     clusternameID: label.clusternameID,
                     filename: label.filename,
-                    trackIndex: label.trackIndex,
+                    trackID: label.trackID,
                 }
             }
         )
@@ -2000,7 +2000,7 @@ function ScalableSpec(
         const whisperLabels = whisperObjects.map( obj => {
             return new Label(
                 nanoid(),
-                trackData.trackIndex,
+                trackID,
                 trackData.filename,
                 obj.onset,
                 obj.offset,
@@ -2039,7 +2039,7 @@ function ScalableSpec(
                 if (label.id === activeLabel.id){
                     return new Label(
                         label.id,
-                        label.trackIndex,
+                        label.trackID,
                         label.filename,
                         activeLabel.onset,
                         activeLabel.offset,
@@ -2079,7 +2079,7 @@ function ScalableSpec(
                 // Create an updated label with old values
                 const updatedLabel = new Label(
                     label.id,
-                    trackData.trackIndex,
+                    trackID,
                     trackData.filename,
                     label.onset,
                     label.offset,

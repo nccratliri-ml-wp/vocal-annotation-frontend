@@ -5,7 +5,7 @@ import Tooltip from "@material-ui/core/Tooltip"
 import {icon, globalControlsBtn} from "./styles.js"
 import {ANNOTATED_AREA} from "./species.js";
 
-function Export( { allLabels, annotationInstance, exportRequest, passExportRequestToApp, deleteAllLabelsInApp } ){
+function Export( { tracks, allLabels, annotationInstance, exportRequest, passExportRequestToApp, deleteAllLabelsInApp } ){
 
     function handleClick(){
         passExportRequestToApp(true)
@@ -13,7 +13,16 @@ function Export( { allLabels, annotationInstance, exportRequest, passExportReque
 
     function exportCSV(){
         // Remove the Annotated Area labels because they are only necessary for WhisperSeg
-        const newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
+        let newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
+
+        // Assign each label it's correct trackIndex
+        newLabelsArray = newLabelsArray.map( label => {
+            const correctTrackIndex = tracks.find( track => track.trackID === label.trackID).trackIndex
+            return {
+                ...label,
+                trackIndex: correctTrackIndex
+            }
+        })
 
         // Sort the labels ascending by onset
         //newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )

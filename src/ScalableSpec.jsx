@@ -2349,7 +2349,6 @@ function ScalableSpec(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
-                                {trackData.trackIndex}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

@@ -17,10 +17,10 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
 
         // Assign each label it's correct trackIndex
         newLabelsArray = newLabelsArray.map( label => {
-            const correctTrackIndex = tracks.find( track => track.trackID === label.trackID).trackIndex
+            const correctChannelIndex = tracks.find( track => track.trackID === label.trackID).channelIndex
             return {
                 ...label,
-                trackIndex: correctTrackIndex
+                channelIndex: correctChannelIndex
             }
         })
 
@@ -28,8 +28,8 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
         //newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
 
         // Transform to CSV data
-        let csvData = newLabelsArray.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.trackIndex}`)
-        csvData.unshift('onset,offset,species,individual,clustername,filename,track')
+        let csvData = newLabelsArray.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.channelIndex}`)
+        csvData.unshift('onset,offset,species,individual,clustername,filename,channelIndex')
         csvData = csvData.join('\n')
 
         const newCSVFileName = annotationInstance ? `${annotationInstance}.csv` : 'annotations.csv'

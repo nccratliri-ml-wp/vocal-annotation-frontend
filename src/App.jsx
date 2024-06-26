@@ -58,6 +58,7 @@ function App() {
         {
             trackID: nanoid(),
             trackIndex: 0,
+            channelIndex: null,
             visible: true,
             showOverviewBarAndTimeAxis: true,
             audioID: null,
@@ -169,6 +170,7 @@ function App() {
             {
                 trackID: nanoid(),
                 trackIndex: newIndex,
+                channelIndex: null,
                 visible: true,
                 showOverviewBarAndTimeAxis: false,
                 audioID: null,
@@ -358,8 +360,8 @@ function App() {
 
     /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
 
-    function getImportedLabelsForThisTrack(newImportedLabels, trackIndex) {
-        return newImportedLabels.filter( label => label.trackIndex === trackIndex)
+    function getImportedLabelsForThisTrack(newImportedLabels, track) {
+        return newImportedLabels.filter( label => label.channelIndex === track.channelIndex && label.filename === track.filename)
     }
 
     function createSpeciesFromImportedLabels (importedLabels){
@@ -493,6 +495,7 @@ function App() {
             // Update the clicked track with the first channel's data
             acc.push({
                 ...track,
+                channelIndex: channelIndex,
                 audioID: newChannels[channelIndex].audio_id,
                 filename: filename,
                 audioDuration: newChannels[channelIndex].audio_duration,
@@ -505,6 +508,8 @@ function App() {
             while (channelIndex < newChannels.length) {
                 acc.push({
                     trackID: nanoid(),
+                    trackIndex: null,
+                    channelIndex: channelIndex,
                     visible: true,
                     showOverviewBarAndTimeAxis: false,
                     audioID: newChannels[channelIndex].audio_id,
@@ -542,11 +547,13 @@ function App() {
         for (const response of allResponses){
             const newChannels = response.data.channels
             const config = response.data.configurations
+            let channelIndex = 0
             console.log(config)
             for (const channel of newChannels){
                 allNewTracks.push({
                     trackID: nanoid(),
                     trackIndex: i,
+                    channelIndex: channelIndex,
                     visible: true,
                     showOverviewBarAndTimeAxis: i === 0,
                     audioID: channel.audio_id,
@@ -560,6 +567,7 @@ function App() {
                     minFreq: config.min_frequency,
                     maxFreq: config.max_frequency
                 })
+                channelIndex++
                 i++
             }
         }
@@ -616,15 +624,15 @@ function App() {
 
         const getMetaData = async () => {
             const response = await axios.get(path)
-            //const audioFilesArray = response.data.response
-            const audioFilesArray = dummyData.response
+            const audioFilesArray = response.data.response
+            //const audioFilesArray = dummyData.response // For testing purposes
 
             // Create Species, Individuals and clustername buttons deriving from the imported labels. Extract labels for the tracks.
             const allLabels = []
             for (let audioFile of audioFilesArray){
-                for (const trackIndex in audioFile.labels.tracks){
-                    let labels = audioFile.labels.tracks[trackIndex]
-                    labels = labels.map( label => ( {...label, filename: audioFile.filename, trackIndex: Number(trackIndex)} ) )
+                for (const channelIndex in audioFile.labels.channels){
+                    let labels = audioFile.labels.channels[channelIndex]
+                    labels = labels.map( label => ( {...label, filename: audioFile.filename, channelIndex: Number(channelIndex)} ) )
                     allLabels.push(...labels)
                 }
             }
@@ -780,7 +788,6 @@ function App() {
             >
             </div>
 
-
             <div
                 id='all-tracks'
             >
@@ -828,7 +835,7 @@ function App() {
                                 activeLabel={activeLabel}
                                 passActiveLabelToApp={passActiveLabelToApp}
                                 strictMode={strictMode}
-                                importedLabels={importedLabels && getImportedLabelsForThisTrack(importedLabels, track.trackIndex)}
+                                importedLabels={importedLabels}
                                 handleUploadResponse={handleUploadResponse}
                                 trackData={track}
                                 passFilesUploadingToApp={passFilesUploadingToApp}

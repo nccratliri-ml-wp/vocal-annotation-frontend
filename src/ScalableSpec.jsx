@@ -2122,12 +2122,6 @@ function ScalableSpec(
                 label.clusternameID !== deletedItemID
             )
 
-        // If imported CSV labels exist, add them now
-        if (importedLabels){
-            const newCsvImportedLabels = assignSpeciesInformationToImportedLabels(importedLabels)
-            updatedLabels = updatedLabels.concat(newCsvImportedLabels)
-        }
-
         setLabels(updatedLabels)
 
     }, [speciesArray])
@@ -2145,6 +2139,16 @@ function ScalableSpec(
 
     }, [currentStartTime, globalClipDuration, audioId])
 
+    // When a CSV File is uploaded (or labels are passed through the URL paramater)
+    useEffect( () => {
+        if (!importedLabels) return
+
+        let newImportedLabels = importedLabels.filter( label => label.channelIndex === trackData.channelIndex && label.filename === trackData.filename)
+
+        newImportedLabels = assignSpeciesInformationToImportedLabels(newImportedLabels)
+        setLabels((prevLabels) => [...prevLabels, ...newImportedLabels])
+
+    }, [importedLabels])
 
     // When a new audio file was uploaded
     useEffect( () => {
@@ -2157,15 +2161,11 @@ function ScalableSpec(
             // Close Label Window
             setExpandedLabel(null)
 
-            // Add imported labels to the labels array
-            if (importedLabels){
-                const updatedLabels = assignSpeciesInformationToImportedLabels(importedLabels)
-                setLabels(updatedLabels)
+            // If imported labels exist don't delete them
+            if (importedLabels) return
 
             // If there's no URL imported labels nor CSV imported labels delete all existing labels on this track
-            } else {
-                setLabels([])
-            }
+            setLabels([])
 
     }, [trackData.audioID])
 
@@ -2325,7 +2325,6 @@ function ScalableSpec(
                                 <Tooltip title="Move Track Up">
                                     <IconButton
                                         style={activeIconBtnStyle}
-                                        disabled={strictMode}
                                         onClick={() => moveTrackUp(trackID)}
                                     >
                                         <VerticalAlignTopIcon style={activeIcon}/>
@@ -2334,7 +2333,6 @@ function ScalableSpec(
                                 <Tooltip title="Move Track Down">
                                     <IconButton
                                         style={activeIconBtnStyle}
-                                        disabled={strictMode}
                                         onClick={() => moveTrackDown(trackID)}
                                     >
                                         <VerticalAlignBottomIcon style={activeIcon}/>

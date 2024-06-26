@@ -21,7 +21,7 @@ function ImportCSV( {passImportedLabelsToApp} ) {
                     // Skip empty rows
                     if (line === '') continue
 
-                    const [onset, offset, species, individual, clustername, filename, trackIndex] = line.trim().split(',')
+                    const [onset, offset, species, individual, clustername, filename, channelIndex] = line.trim().split(',')
 
                     importedLabelsArray.push({
                         onset: parseFloat(onset),
@@ -30,7 +30,7 @@ function ImportCSV( {passImportedLabelsToApp} ) {
                         individual: individual.trim(),
                         clustername: clustername.trim(),
                         filename: filename.trim(),
-                        trackIndex: parseFloat(trackIndex)
+                        channelIndex: parseFloat(channelIndex)
                     })
 
                 }

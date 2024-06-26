@@ -104,7 +104,7 @@ const dummyData = {
             "f_low": 6000,
             "spec_cal_method": "constant-q",
             "labels": {
-                "tracks": {
+                "channels": {
                     "0": [
                         {
                             "onset": 1.2,
@@ -168,8 +168,8 @@ const dummyData = {
             "f_low": 0,
             "spec_cal_method": "log-mel",
             "labels": {
-                "tracks": {
-                    "6": [
+                "channels": {
+                    "0": [
                         {
                             "onset": 1.2,
                             "offset": 1.7,

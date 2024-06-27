@@ -38,6 +38,7 @@ import {
 } from "./styles.js";
 import AddBoxIcon from "@mui/icons-material/AddBox.js";
 import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
+import {toast} from "react-toastify";
 
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
@@ -228,16 +229,22 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const deleteIndividual = (event, selectedID, selectedIndividual) => {
+    const deleteIndividual = (event, selectedSpeciesID, selectedIndividual) => {
         event.preventDefault()
 
-        if (selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
+        if (strictMode && selectedIndividual.name === UNKNOWN_INDIVIDUAL) return
+
+        const individualsArray = speciesArray.find(speciesObj => speciesObj.id === selectedSpeciesID).individuals
+        if (individualsArray.length <= 1){
+            toast.error("At least one individual per species needed.")
+            return
+        }
 
         if (!confirm('Deleting this Individual will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedIndividual.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
-            if (speciesObject.id === selectedID) {
+            if (speciesObject.id === selectedSpeciesID) {
 
                 // Delete selected Individual
                 let updatedIndividuals = speciesObject.individuals.filter( individual => individual !== selectedIndividual)
@@ -405,16 +412,22 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const deleteClustername = (event, selectedID, selectedClustername) => {
+    const deleteClustername = (event, selectedSpeciesID, selectedClustername) => {
         event.preventDefault()
 
-        if (selectedClustername.name === UNKNOWN_CLUSTERNAME) return
+        if (strictMode && selectedClustername.name === UNKNOWN_CLUSTERNAME) return
+
+        const clusternamesArray = speciesArray.find(speciesObj => speciesObj.id === selectedSpeciesID).clusternames
+        if (clusternamesArray.length <= 1){
+            toast.error("At least one class per species needed.")
+            return
+        }
 
         if (!confirm('Deleting this Clustername will remove any annotations associated with it.')) return
         passDeletedItemIDToApp(selectedClustername.id)
 
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
-            if (speciesObject.id === selectedID) {
+            if (speciesObject.id === selectedSpeciesID) {
 
                 // Delete selected clustername
                 let updatedClusternames = speciesObject.clusternames.filter( clustername => clustername !== selectedClustername)
@@ -733,7 +746,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                             assignFrequencyRange={assignFrequencyRange}
                                         />
                                     }
-                                    {species.name !== UNKNOWN_SPECIES &&
+                                    {!strictMode &&
                                         <IconButton
                                             style={iconBtnSmallest}
                                             onClick={() => editSpecies(species.id)}
@@ -767,7 +780,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                     {individual.name}
                                                 </div>
                                                 {
-                                                    individual.name !== UNKNOWN_INDIVIDUAL &&
+                                                    !strictMode &&
                                                     <button
                                                         className='edit-name-btn'
                                                         onClick={() => editIndividual(species.id, individual)}
@@ -834,7 +847,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                             selectedClustername={clustername}/>
                                                 }
                                                 {
-                                                    clustername.name !== UNKNOWN_CLUSTERNAME &&
+                                                    !strictMode &&
                                                         <button
                                                             className='edit-name-btn'
                                                             onClick={() => editClustername(species.id, clustername)}

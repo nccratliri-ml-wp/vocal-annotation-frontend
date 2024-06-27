@@ -1238,6 +1238,12 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
         const addNewLabel = (onset) => {
+
+        if (!activeSpecies){
+            alert('Add at least one species before annotating.')
+            return
+        }
+
         const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
 

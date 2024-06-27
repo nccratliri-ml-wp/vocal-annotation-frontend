@@ -2255,7 +2255,7 @@ function ScalableSpec(
                                 <VisibilityIcon style={icon}/>
                             </IconButton>
                         </Tooltip>
-                        {`Track ${trackData.trackIndex} - ${trackData.filename}`}
+                        {`Track ${trackData.trackIndex} - ${trackData.filename ? trackData.filename : 'No audio'}`}
                     </div>
                 :
                 <div

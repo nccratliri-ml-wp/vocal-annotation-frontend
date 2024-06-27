@@ -2247,7 +2247,7 @@ function ScalableSpec(
                                 <VisibilityIcon style={icon}/>
                             </IconButton>
                         </Tooltip>
-                        {trackData.filename}
+                        {`Track ${trackData.trackIndex} - ${trackData.filename}`}
                     </div>
                 :
                 <div
@@ -2257,7 +2257,7 @@ function ScalableSpec(
                     <div className={showWaveform ? 'side-window' : 'side-window-small'}>
                         <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
                             <div className='show-track-file-upload-container'>
-                                <Tooltip title={'Hide Track'}>
+                                <Tooltip title={`Hide Track ${trackData.trackIndex}`}>
                                     <IconButton
                                         style={toggleVisibilityBtn}
                                         onClick={() => toggleTrackVisibility(trackID)}

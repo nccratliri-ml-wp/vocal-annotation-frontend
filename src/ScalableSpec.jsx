@@ -2289,6 +2289,14 @@ function ScalableSpec(
                             </div>
 
                             <div>
+                                <Tooltip title="Move Track Up">
+                                    <IconButton
+                                        style={activeIconBtnStyle}
+                                        onClick={() => moveTrackUp(trackID)}
+                                    >
+                                        <VerticalAlignTopIcon style={activeIcon}/>
+                                    </IconButton>
+                                </Tooltip>
                                 <Tooltip title="Change Track Parameters">
                                     <IconButton
                                         style={activeIconBtnStyle}
@@ -2314,6 +2322,14 @@ function ScalableSpec(
                                         <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
                                     </IconButton>
                                 </Tooltip>
+                                <Tooltip title="Move Track Down">
+                                    <IconButton
+                                        style={activeIconBtnStyle}
+                                        onClick={() => moveTrackDown(trackID)}
+                                    >
+                                        <VerticalAlignBottomIcon style={activeIcon}/>
+                                    </IconButton>
+                                </Tooltip>
                                 <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
                                     <IconButton
                                         style={activeIconBtnStyle}
@@ -2328,22 +2344,6 @@ function ScalableSpec(
                                         onClick={() => setShowLabelAndIndividualsCanvas(prevState => !prevState)}
                                     >
                                         {showLabelAndIndividualsCanvas ? <ExpandLessIcon style={activeIcon}/> : <ExpandMoreIcon style={activeIcon}/>}
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Move Track Up">
-                                    <IconButton
-                                        style={activeIconBtnStyle}
-                                        onClick={() => moveTrackUp(trackID)}
-                                    >
-                                        <VerticalAlignTopIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Move Track Down">
-                                    <IconButton
-                                        style={activeIconBtnStyle}
-                                        onClick={() => moveTrackDown(trackID)}
-                                    >
-                                        <VerticalAlignBottomIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Delete Track">

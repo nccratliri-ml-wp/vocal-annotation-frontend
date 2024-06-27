@@ -1341,8 +1341,13 @@ function ScalableSpec(
     }
 
     const dragMinFreqLine = (event) => {
-        const newMinFreqY = getMouseY(event)
+        let newMinFreqY = getMouseY(event)
         if (newMinFreqY <= clickedFrequencyLinesObject.maxFreqY + 5 ) return
+
+        // Adjust the minFreq line manually to allow it to be dragged to the very bottom of the canvas
+        if (newMinFreqY >= specCanvasRef.current.height - 1) {
+            newMinFreqY = specCanvasRef.current.height + 1
+        }
 
         clearAndRedrawSpecAndWaveformCanvases()
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
@@ -1833,29 +1838,25 @@ function ScalableSpec(
         ctx.fillStyle = '#ffffff'
         ctx.lineWidth = 1.5
 
-        // Calculate the index distance to select 5 frequencies between the first and last value
-        const indexDistance = Math.floor((frequenciesArray.length - 2) / 6)
+        // Get correct frequencies
+        const specCanvasHeight = specCanvasRef.current.height
+        const distanceBetweenLines = specCanvasHeight / 6
 
-        // Initialize the indices array with the indices of the selected frequencies
-        let indices = [0] // Include the first frequency
-        for (let i = 1; i <= 5; i++) {
-            indices.push(i * indexDistance)
+        const linePositions = []
+        for (let i = specCanvasHeight; i >= 0; i-= distanceBetweenLines){
+            linePositions.push(i)
         }
-        indices.push(frequenciesArray.length - 1) // Include the last frequency
 
-        // Get the frequencies at the selected indices
-        const selectedFrequencies = indices.map(index => frequenciesArray[index])
+        const selectedFrequencies = linePositions.map( y => getFrequencyAtYPosition(y, specCanvasHeight, frequenciesArray))
 
         // Draw the frequencies
-        const correctionValue = showWaveform ? 0 : 20
-        const lineDistance = (cvs.height + correctionValue) / selectedFrequencies.length
         let y = cvs.height
         const x1 = cvs.width - 10
         const x2 = cvs.width
         let i = 0
         for (let freq of selectedFrequencies){
             let textY = y
-            let freqText = `${Math.round(freq / 10) * 10}`
+            let freqText = `${/*Math.round*/(freq / 10) * 10}`
             if (!showWaveform){
                 if (i === 0){
                     freqText += ' Hz'
@@ -1872,7 +1873,7 @@ function ScalableSpec(
             ctx.lineTo(x2, y)
             ctx.stroke()
             ctx.fillText(freqText, 0, textY);
-            y -= lineDistance
+            y -= distanceBetweenLines
             i++
         }
 
@@ -1886,10 +1887,10 @@ function ScalableSpec(
         setShowFrequencyLines(prevState => !prevState)
     }
 
-    const getFrequencyAtMousePosition = (mouseY, canvasHeight, arrayLength ) => {
-        let index = Math.floor(((canvasHeight - mouseY) / canvasHeight) * arrayLength)
-        index = index >= arrayLength ? arrayLength - 1 : index
-        return Math.round(frequencies[index])
+    const getFrequencyAtYPosition = (y, canvasHeight, frequenciesArray ) => {
+        let index = Math.floor(((canvasHeight - y) / canvasHeight) * frequenciesArray.length)
+        index = index >= frequenciesArray.length ? frequenciesArray.length - 1 : index
+        return Math.round(frequenciesArray[index])
     }
 
     const drawFrequencyLines = () => {
@@ -1907,7 +1908,7 @@ function ScalableSpec(
         let x1 = 0
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
-        const currentMaxFreq = `${getFrequencyAtMousePosition(y, cvs.height, frequencies.length)} Hz`
+        const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
@@ -1930,7 +1931,7 @@ function ScalableSpec(
         x1 = 0
         x2 = cvs.width
         y = frequencyLines.minFreqY - 1
-        const currentMinFreq = `${getFrequencyAtMousePosition(y, cvs.height, frequencies.length)} Hz`
+        const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)

@@ -28,6 +28,7 @@ import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
 import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
+import {toast} from "react-toastify";
 
 // Classes
 class Playhead{
@@ -250,8 +251,8 @@ function ScalableSpec(
             setFrequencies(data.freqs)
             setAudioArray(newAudioArray)
         } catch (error) {
+            toast.error('An error occurred trying to generate the spectrogram. Check the console for more information')
             console.error('Error fetching data:', error)
-            alert(error+' \nPlease try again later.')
         }
     }
 
@@ -270,7 +271,7 @@ function ScalableSpec(
     const handleUploadError = (error) => {
         setSpectrogramIsLoading( false )
         console.error("Error uploading file:", error)
-        alert('Error while uploading. Check the console for more information.')
+        toast.error('Error while uploading. Check the console for more information.')
     }
 
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
@@ -1240,7 +1241,7 @@ function ScalableSpec(
         const addNewLabel = (onset) => {
 
         if (!activeSpecies){
-            alert('Add at least one species before annotating.')
+            toast.error('Add at least one species before annotating.')
             return
         }
 

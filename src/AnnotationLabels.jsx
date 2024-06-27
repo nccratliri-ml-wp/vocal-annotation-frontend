@@ -55,7 +55,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
         const allSpeciesNames = speciesArray.map( speciesObject => speciesObject.name )
         if (checkIfObjectNameAlreadyExists(inputFieldContent, allSpeciesNames)){
-            alert(`${inputFieldContent} already exists. Add a different one.`)
+            toast.error(`Species '${inputFieldContent}' already exists. Add a different one.`)
             return
         }
 
@@ -117,13 +117,13 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         if (!editedSpeciesName) return
 
         if (editedSpeciesName.includes(',') || editedSpeciesName.length > 45) {
-            alert('Invalid input. Please provide a valid species name without commas and no longer than 45 characters.')
+            toast.error('Invalid input. Please provide a valid species name without commas and no longer than 45 characters.')
             return
         }
 
         const allSpeciesNames = speciesArray.map(speciesObject => speciesObject.name)
         if (allSpeciesNames.some(name => name === editedSpeciesName)) {
-            alert(`${editedSpeciesName} already exists. Add a different one.`)
+            toast.error(`Species '${editedSpeciesName}' already exists. Add a different one.`)
             return
         }
 
@@ -189,7 +189,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(newIndividualName, allIndividualNames)
                 if ( alreadyExistingObjectName ) {
                     const updatedIndividuals = activateClustername(speciesObject.individuals, alreadyExistingObjectName)
-                    alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
+                    toast.error(`Individual '${alreadyExistingObjectName}' already exists. Add a different one.`)
                     return new Species(
                         speciesObject.id,
                         speciesObject.name,
@@ -275,7 +275,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         if (!editedIndividual) return
 
         if (editedIndividual.includes(',') || editedIndividual.length > 45) {
-            alert('Invalid input. Please provide a valid Individual name without commas and no longer than 45 characters.')
+            toast.error('Invalid input. Please provide a valid Individual name without commas and no longer than 45 characters.')
             return
         }
 
@@ -285,7 +285,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const allIndividualNames = speciesObject.individuals.map( individual => individual.name)
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(editedIndividual, allIndividualNames)
                 if ( alreadyExistingObjectName) {
-                    alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
+                    toast.error(`Individual '${alreadyExistingObjectName}' already exists. Add a different one.`)
                     return speciesObject
                 }
 
@@ -372,7 +372,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(newClusternameName, allClusternameNames)
                 if ( alreadyExistingObjectName ) {
                     const updatedClusternames = activateClustername(speciesObject.clusternames, alreadyExistingObjectName)
-                    alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
+                    toast.error(`Class '${alreadyExistingObjectName}' already exists. Add a different one.`)
 
                     return new Species(
                         speciesObject.id,
@@ -454,11 +454,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const editClustername = (selectedID, selectedClustername) => {
-        let editedClustername = prompt('Change clustername: ')
+        let editedClustername = prompt('Change class: ')
         if (!editedClustername) return
 
         if (editedClustername.includes(',') || editedClustername.length > 45) {
-            alert('Invalid input. Please provide a valid clustername without commas and no longer than 45 characters.')
+            toast.error('Invalid input. Please provide a valid class without commas and no longer than 45 characters.')
             return
         }
 
@@ -468,7 +468,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const allClusternameNames = speciesObject.clusternames.map( clustername => clustername.name)
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(editedClustername, allClusternameNames)
                 if ( alreadyExistingObjectName) {
-                    alert(`${alreadyExistingObjectName} already exists. Add a different one.`)
+                    toast.error(`Class '${alreadyExistingObjectName}' already exists. Add a different one.`)
                     return speciesObject
                 }
 
@@ -869,7 +869,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                         species.showClusternameInputWindow &&
                                             <InputWindow
                                                 handleCancel={toggleClusternameInputWindow}
-                                                objectType='Clustername'
+                                                objectType='Class'
                                                 speciesID={species.id}
                                                 addNewObject={addNewClustername}
                                             />

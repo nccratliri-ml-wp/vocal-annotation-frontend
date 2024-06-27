@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import {toast} from "react-toastify";
 
 function GlobalConfig (
             {
@@ -40,7 +41,7 @@ function GlobalConfig (
             setHopLengthInputValue(lastValidConfigCombination.hopLength)
             setColumnsInputValue(lastValidConfigCombination.numSpecColumns)
             setSamplingRateInputValue(lastValidConfigCombination.samplingRate)
-            alert('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
+            toast.error('Combination of values is not valid. Returned to previous valid combination. The following must be satisfied:\n\nAudioDuration >= HopLength / SamplingRate * NumSpecColumns')
             return
         }
 

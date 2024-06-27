@@ -318,7 +318,7 @@ function App() {
 
     async function submitAllAnnotations(){
         if (!allLabels.length) {
-            alert('There are currently no annotations. Add some and try again.')
+            toast.error('There are currently no annotations. Add some and try again.')
             return
         }
 
@@ -352,7 +352,7 @@ function App() {
             await axios.post(path, requestParameters, { headers } )
             toast.success('Annotations submitted successfully!')
         } catch (error) {
-            alert('Something went wrong trying to submit the annotations. Check the console for more information.')
+            toast.error('Something went wrong trying to submit the annotations. Check the console for more information.')
             console.log(error)
         }
 
@@ -457,7 +457,7 @@ function App() {
         } catch (error){
             setFilesUploading(false)
             console.error("Error uploading file:", error)
-            alert('Error while uploading. Check the console for more information.')
+            toast.error('Error while uploading. Check the console for more information.')
         }
     }
 

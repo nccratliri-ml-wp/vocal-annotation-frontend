@@ -68,6 +68,7 @@ function App() {
             spectrogram: null,
         }
     ])
+    const tracksRef = useRef(tracks);
 
     // General
     const [globalAudioDuration, setGlobalAudioDuration] = useState(null)
@@ -359,10 +360,6 @@ function App() {
     }
 
     /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
-
-    function getImportedLabelsForThisTrack(newImportedLabels, track) {
-        return newImportedLabels.filter( label => label.channelIndex === track.channelIndex && label.filename === track.filename)
-    }
 
     function createSpeciesFromImportedLabels (importedLabels){
         let updatedSpeciesArray = [...speciesArray]
@@ -668,8 +665,6 @@ function App() {
         setSubmitRequest(false)
         deleteAllLabelsInApp()
     }, [allLabels])
-
-    const tracksRef = useRef(tracks);
 
     // Keep tracksRef.current up to date
     useEffect(() => {

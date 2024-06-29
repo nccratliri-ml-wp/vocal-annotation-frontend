@@ -1,10 +1,12 @@
-import React from "react"
+import React, {useState} from "react"
 import IconButton from "@material-ui/core/IconButton"
 import Tooltip from "@material-ui/core/Tooltip"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
 import {globalControlsBtn, icon} from "./styles.js"
 
 function ImportCSV( {passImportedLabelsToApp} ) {
+
+    const [fileUploaded, setFileUploaded] = useState(false);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0]
@@ -36,18 +38,23 @@ function ImportCSV( {passImportedLabelsToApp} ) {
                 }
 
                 passImportedLabelsToApp(importedLabelsArray)
+                setFileUploaded(event.target.files[0].name)
             }
             reader.readAsText(file)
         }
     }
 
     const handleClick = () => {
+        if (fileUploaded){
+            const answer = confirm(`A file named ${fileUploaded} has already been uploaded. Uploading a new CSV file will add the new labels to the existing one's.`)
+            if (!answer) return
+        }
         // Trigger the file input click
         document.getElementById("csv-file-input").click()
     }
 
     return (
-        <Tooltip title="Import CSV">
+        <Tooltip title={fileUploaded ? fileUploaded : "Import CSV"}>
             <div style={{display: 'inline'}}>
                 <IconButton
                     style={globalControlsBtn}

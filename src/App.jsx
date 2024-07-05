@@ -668,8 +668,8 @@ function App() {
 
     // Keep tracksRef.current up to date
     useEffect(() => {
-        tracksRef.current = tracks;
-    }, [tracks]);
+        tracksRef.current = tracks
+    }, [tracks])
 
     // Set Up Before Unload Event Handler upon mount
     useEffect(() => {

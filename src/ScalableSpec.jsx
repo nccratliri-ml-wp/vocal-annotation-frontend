@@ -1368,6 +1368,58 @@ function ScalableSpec(
         return timestamp
     }
 
+    const updateLabelsWithSpeciesArrayData = () => {
+        const allIndividualIDs = getAllIndividualIDs()
+
+        // Iterate over the labels array
+        return labels.map(label => {
+            // Create an updated label with old values
+            const updatedLabel = new Label(
+                label.id,
+                trackID,
+                trackData.filename,
+                label.onset,
+                label.offset,
+                label.species,
+                label.individual,
+                label.clustername,
+                label.speciesID,
+                label.individualID,
+                label.clusternameID,
+                label.individualIndex,
+                label.annotator,
+                label.color
+            )
+
+            // Iterate over speciesArray and update the potentially new names, colors and individualIndexes to updatedLabel
+            for (const speciesObj of speciesArray) {
+                if (updatedLabel.speciesID === speciesObj.id) {
+                    updatedLabel.species = speciesObj.name
+                }
+                for (const individual of speciesObj.individuals) {
+                    if (updatedLabel.individualID === individual.id) {
+                        updatedLabel.individual = individual.name
+                        updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
+                    }
+                }
+                for (const clustername of speciesObj.clusternames) {
+                    if (updatedLabel.clusternameID === clustername.id) {
+                        updatedLabel.clustername = clustername.name
+                        updatedLabel.color = clustername.color
+                    }
+                }
+            }
+
+            return updatedLabel
+        })
+            // Remove labels that have a species, Individual or clustername that have been deleted in Annotation Label Component
+            .filter(label =>
+                label.speciesID !== deletedItemID &&
+                label.individualID !== deletedItemID &&
+                label.clusternameID !== deletedItemID
+            )
+    }
+
     const assignSpeciesInformationToImportedLabels = (genericLabelObjectsArray) => {
         const allIndividualIDs = getAllIndividualIDs()
 
@@ -2080,56 +2132,7 @@ function ScalableSpec(
     useEffect(() => {
         if (!speciesArray) return
 
-        const allIndividualIDs = getAllIndividualIDs()
-
-        // Iterate over the labels array
-        let updatedLabels = labels
-            .map(label => {
-                // Create an updated label with old values
-                const updatedLabel = new Label(
-                    label.id,
-                    trackID,
-                    trackData.filename,
-                    label.onset,
-                    label.offset,
-                    label.species,
-                    label.individual,
-                    label.clustername,
-                    label.speciesID,
-                    label.individualID,
-                    label.clusternameID,
-                    label.individualIndex,
-                    label.annotator,
-                    label.color
-                )
-
-                // Iterate over speciesArray and update the potentially new names, colors and individualIndexes to updatedLabel
-                for (const speciesObj of speciesArray) {
-                    if (updatedLabel.speciesID === speciesObj.id) {
-                        updatedLabel.species = speciesObj.name
-                    }
-                    for (const individual of speciesObj.individuals) {
-                        if (updatedLabel.individualID === individual.id) {
-                            updatedLabel.individual = individual.name
-                            updatedLabel.individualIndex = allIndividualIDs.indexOf(individual.id)
-                        }
-                    }
-                    for (const clustername of speciesObj.clusternames) {
-                        if (updatedLabel.clusternameID === clustername.id) {
-                            updatedLabel.clustername = clustername.name
-                            updatedLabel.color = clustername.color
-                        }
-                    }
-                }
-
-                return updatedLabel
-            })
-            // Remove labels that have a species, Individual or clustername that have been deleted in Annotation Label Component
-            .filter(label =>
-                label.speciesID !== deletedItemID &&
-                label.individualID !== deletedItemID &&
-                label.clusternameID !== deletedItemID
-            )
+        const updatedLabels = updateLabelsWithSpeciesArrayData()
 
         setLabels(updatedLabels)
 
@@ -2148,7 +2151,7 @@ function ScalableSpec(
 
     }, [currentStartTime, globalClipDuration, audioId])
 
-    // When a CSV File is uploaded (or labels are passed through the URL paramater)
+    // When a CSV File is uploaded (or labels are passed through the URL parameter)
     useEffect( () => {
         if (!importedLabels) return
 

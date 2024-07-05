@@ -91,23 +91,15 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         // Delete Species
         let modifiedSpeciesArray = speciesArray.filter(speciesObject => speciesObject.id !== selectedID)
 
-        // Activate Clusternames and Individual of the Unknown Species
-        modifiedSpeciesArray = modifiedSpeciesArray.map((speciesObject) => {
-            if (speciesObject.name === UNKNOWN_SPECIES) {
-                const updatedIndividuals = activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
-                const updatedClusternames = activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
-                return new Species(
-                    speciesObject.id,
-                    speciesObject.name,
-                    [...updatedIndividuals],
-                    [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
-                )
-            } else {
-                return speciesObject
-            }
-        })
+        // Activate Clusternames and Individual of the first Species, but not if it's the special annotated area species object
+        const firstSpecies = modifiedSpeciesArray[0]
+
+        if (firstSpecies.name !== ANNOTATED_AREA) {
+            const updatedIndividuals = activateIndividual(firstSpecies.individuals, firstSpecies.individuals[0].name)
+            const updatedClusternames = activateClustername(firstSpecies.clusternames, firstSpecies.clusternames[0].name)
+            firstSpecies.individuals = updatedIndividuals
+            firstSpecies.clusternames = updatedClusternames
+        }
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
@@ -179,9 +171,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
-                // Activate "Unknown" Clustername, only if all other clusternames are inactive (this happens when the user switches species)
+                // Activate first Clustername, only if all other clusternames are inactive (this happens when the user switches species)
                 const updatedClusternames = checkIfEveryObjectIsInactive(speciesObject.clusternames)
-                    ? activateClustername(speciesObject.clusternames, UNKNOWN_CLUSTERNAME)
+                    ? activateClustername(speciesObject.clusternames, speciesObject.clusternames[0].name)
                     : speciesObject.clusternames
 
                 // If individual already exists, activate that one and alert the user
@@ -249,9 +241,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Delete selected Individual
                 let updatedIndividuals = speciesObject.individuals.filter( individual => individual !== selectedIndividual)
 
-                // If the deleted clustername was the active one, activate "Unknown Clustername"
+                // If the deleted individual was the active one, activate the first individual
                 updatedIndividuals = checkIfEveryObjectIsInactive(updatedIndividuals) && !checkIfEveryObjectIsInactive(speciesObject.clusternames)
-                    ? activateClustername(updatedIndividuals, UNKNOWN_INDIVIDUAL)
+                    ? activateIndividual(updatedIndividuals, updatedIndividuals[0].name)
                     : updatedIndividuals
 
                 return new Species(
@@ -291,6 +283,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 const updatedIndividuals = speciesObject.individuals.map( individual => {
                     const updatedIndividual = new Individual( individual.id, editedIndividual)
+                    updatedIndividual.isActive = selectedIndividual.isActive
                     return individual.name === selectedIndividual.name ? updatedIndividual : individual
                 })
 
@@ -318,8 +311,8 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Activate selected individual, deactivate all others
                 const updatedIndividuals = activateIndividual(speciesObject.individuals, selectedIndividual.name)
 
-                // Activate Unknown clustername or Annotated Area clustername, only if all other clusternames are inactive (this happens when the user switches species)
-                const fallbackClustername = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_CLUSTERNAME : UNKNOWN_CLUSTERNAME
+                // Activate the first clustername or Annotated Area clustername, only if all other clusternames are inactive (this happens when the user switches species)
+                const fallbackClustername = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_CLUSTERNAME : speciesObject.clusternames[0].name
                 const updatedClusternames = checkIfEveryObjectIsInactive(speciesObject.individuals)
                     ? activateClustername(speciesObject.clusternames, fallbackClustername)
                     : speciesObject.clusternames
@@ -362,9 +355,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
-                // Activate "Unknown" Individual, only if all other Individuals are inactive (this happens when the user switches species)
+                // Activate first Individual, only if all other Individuals are inactive (this happens when the user switches species)
                 const updatedIndividuals = checkIfEveryObjectIsInactive(speciesObject.individuals)
-                    ? activateIndividual(speciesObject.individuals, UNKNOWN_INDIVIDUAL)
+                    ? activateIndividual(speciesObject.individuals, speciesObject.individuals[0].name)
                     : speciesObject.individuals
 
                 // If clustername already exists, activate that one and alert the user
@@ -432,9 +425,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Delete selected clustername
                 let updatedClusternames = speciesObject.clusternames.filter( clustername => clustername !== selectedClustername)
 
-                // If the deleted clustername was the active one, activate "Unknown Clustername"
+                // If the deleted clustername was the active one, activate the first one
                 updatedClusternames = checkIfEveryObjectIsInactive(updatedClusternames) && !checkIfEveryObjectIsInactive(speciesObject.individuals)
-                    ? activateClustername(updatedClusternames, UNKNOWN_CLUSTERNAME)
+                    ? activateClustername(updatedClusternames, updatedClusternames[0].name)
                     : updatedClusternames
 
                 return new Species(
@@ -474,6 +467,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     const updatedClustername = new Clustername(clustername.id, editedClustername, clustername.color)
+                    updatedClustername.isActive = selectedClustername.isActive
                     return clustername.name === selectedClustername.name ? updatedClustername : clustername
                 })
 
@@ -502,7 +496,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const updatedClusternames = activateClustername(speciesObject.clusternames, selectedClustername.name)
 
                 // Activate Unknown individual or Annotated Area Individual, only if all other Individuals are inactive (this happens when the user switches species)
-                const fallbackIndividual = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_INDIVIDUAL : UNKNOWN_INDIVIDUAL
+                const fallbackIndividual = speciesObject.name === ANNOTATED_AREA ? ANNOTATED_AREA_INDIVIDUAL :  speciesObject.individuals[0].name
                 const updatedIndividuals = checkIfEveryObjectIsInactive(speciesObject.individuals)
                     ? activateIndividual(speciesObject.individuals, fallbackIndividual)
                     : speciesObject.individuals

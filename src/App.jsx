@@ -840,6 +840,7 @@ function App() {
                                 toggleTrackVisibility={toggleTrackVisibility}
                                 moveTrackUp={moveTrackUp}
                                 moveTrackDown={moveTrackDown}
+                                lastTrackIndex={tracks[tracks.length - 1].trackIndex}
                             />
                         )
                     })

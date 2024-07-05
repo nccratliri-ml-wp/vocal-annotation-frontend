@@ -78,7 +78,8 @@ function ScalableSpec(
                             submitRequest,
                             toggleTrackVisibility,
                             moveTrackUp,
-                            moveTrackDown
+                            moveTrackDown,
+                            lastTrackIndex
                         }
                     )
                 {
@@ -2291,7 +2292,8 @@ function ScalableSpec(
                             <div>
                                 <Tooltip title="Move Track Up">
                                     <IconButton
-                                        style={activeIconBtnStyle}
+                                        style={{...activeIconBtnStyle, ...(trackData.trackIndex === 0 && iconBtnDisabled)}}
+                                        disabled={trackData.trackIndex === 0}
                                         onClick={() => moveTrackUp(trackID)}
                                     >
                                         <VerticalAlignTopIcon style={activeIcon}/>
@@ -2324,7 +2326,8 @@ function ScalableSpec(
                                 </Tooltip>
                                 <Tooltip title="Move Track Down">
                                     <IconButton
-                                        style={activeIconBtnStyle}
+                                        style={{...activeIconBtnStyle, ...(trackData.trackIndex === lastTrackIndex && iconBtnDisabled)}}
+                                        disabled={trackData.trackIndex === lastTrackIndex}
                                         onClick={() => moveTrackDown(trackID)}
                                     >
                                         <VerticalAlignBottomIcon style={activeIcon}/>

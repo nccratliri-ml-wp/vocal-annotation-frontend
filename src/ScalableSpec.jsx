@@ -29,6 +29,7 @@ import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
 import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
 import {toast} from "react-toastify";
+import WhisperSeg from "./WhisperSeg.jsx"
 
 // Classes
 class Playhead{
@@ -199,6 +200,10 @@ function ScalableSpec(
 
     const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
         setExpandedLabel( newExpandedLabel )
+    }
+
+    const passWhisperSegIsLoadingToScalableSpec = ( boolean ) => {
+        setWhisperSegIsLoading( boolean )
     }
 
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
@@ -2004,85 +2009,6 @@ function ScalableSpec(
         ctx.fill()
     }
 
-
-    /* ++++++++++++++++++ Whisper ++++++++++++++++++ */
-    const callWhisperSeg = async () => {
-        setWhisperSegIsLoading(true)
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
-
-        // Extract annotated areas from the labels array
-        const annotatedAreas = labels.reduce( (acc, label) => {
-            if (label.species === ANNOTATED_AREA) {
-                acc.push({
-                    annotatedAreaStarTime: label.onset,
-                    annotatedAreaEndTime: label.offset
-                })
-                return acc
-            }
-            return acc
-        }, [])
-
-
-        // Remove the Annotated Area labels from labels
-        let newLabelsArray = labels.filter( label => label.species !== ANNOTATED_AREA )
-
-        // Convert custom label objects into generic objects with the specific data that is needed for Whisper
-        newLabelsArray = newLabelsArray.map( label => {
-                return {
-                    onset: label.onset,
-                    offset: label.offset,
-                    species: label.species,
-                    individual: label.individual,
-                    clustername: label.clustername,
-                    speciesID: label.speciesID,
-                    individualID: label.individualID,
-                    clusternameID: label.clusternameID,
-                    filename: label.filename,
-                    trackID: label.trackID,
-                }
-            }
-        )
-
-        const requestParameters = {
-            audio_id: audioId,
-            annotated_areas: annotatedAreas,
-            human_labels: newLabelsArray
-        }
-
-        const response = await axios.post(path, requestParameters)
-
-        const whisperObjects = response.data.labels
-
-        // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
-        const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
-        const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
-        const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
-
-        const whisperLabels = whisperObjects.map( obj => {
-            return new Label(
-                nanoid(),
-                trackID,
-                trackData.filename,
-                obj.onset,
-                obj.offset,
-                unknownSpecies.name,
-                unknownIndividual.name,
-                unknownClustername.name,
-                unknownSpecies.id,
-                unknownIndividual.id,
-                unknownClustername.id,
-                0,
-                'Whisper',
-                unknownClustername.color
-            )
-        })
-
-        const combinedLabelsArray = labels.concat(whisperLabels)
-        setLabels(combinedLabelsArray)
-        setWhisperSegIsLoading(false)
-    }
-
-
     /* ++++++++++++++++++ UseEffect Hooks ++++++++++++++++++ */
 
     // When labels or the Waveform Scale value are manipulated
@@ -2310,15 +2236,18 @@ function ScalableSpec(
                                         <TuneIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
-                                <Tooltip title="Call WhisperSeg">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
-                                        disabled={strictMode || !audioId}
-                                        onClick={callWhisperSeg}
-                                    >
-                                        <AutoFixHighIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
+                                <WhisperSeg
+                                    audioId={audioId}
+                                    trackID={trackID}
+                                    filename={trackData.filename}
+                                    labels={labels}
+                                    speciesArray={speciesArray}
+                                    passLabelsToScalableSpec={passLabelsToScalableSpec}
+                                    passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                                    activeIconBtnStyle={activeIconBtnStyle}
+                                    activeIcon={activeIcon}
+                                    strictMode={strictMode}
+                                />
                                 <Tooltip title="Frequency Range">
                                     <IconButton
                                         style={activeIconBtnStyle}

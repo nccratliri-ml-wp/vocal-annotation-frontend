@@ -1,12 +1,9 @@
-import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
-import axios from "axios";
-import {Label} from "./label.js";
-import {nanoid} from "nanoid";
 import IconButton from "@material-ui/core/IconButton";
 import {iconBtnDisabled} from "./styles.js";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
 import Tooltip from "@material-ui/core/Tooltip";
-import React from "react";
+import React, {useState} from "react";
+import ModelsWindow from "./ModelsWindow.jsx";
 
 function WhisperSeg(
         {
@@ -24,92 +21,115 @@ function WhisperSeg(
     )
 {
 
-    const callWhisperSeg = async () => {
-        passWhisperSegIsLoadingToScalableSpec(true)
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
+    const [showFinetuningModelsWindow, setShowFinetuningModelsWindow] = useState(false)
+    const [modelsAvailableForFinetuning, setModelsAvailableForFinetuning] = useState()
+    const [showInferenceModelsWindow, setShowInferenceModelsWindow] = useState(false)
+    const [modelsAvailableForInference, setModelsAvailableForInference] = useState()
 
-        // Extract annotated areas from the labels array
-        const annotatedAreas = labels.reduce( (acc, label) => {
-            if (label.species === ANNOTATED_AREA) {
-                acc.push({
-                    annotatedAreaStarTime: label.onset,
-                    annotatedAreaEndTime: label.offset
-                })
-                return acc
+    const passShowFinetuningModelsWindowToWhisperSeg = ( boolean) => {
+        setShowFinetuningModelsWindow( boolean )
+    }
+
+    const passShowInferenceModelsWindowToWhisperSeg = ( boolean) => {
+        setShowInferenceModelsWindow( boolean )
+    }
+
+    const getModelsAvailableForFinetuning = async () => {
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-finetuning'
+
+        /*
+        const response = await axios.post(path, {}, {
+            headers: {
+                'Content-Type': 'application/json'
             }
-            return acc
-        }, [])
+        })*/
 
+        const placeholder = {'response': [{'eta': '--:--:--',
+                'model_name': 'whisperseg-base',
+                'status': 'ready'},
+                {'eta': '--:--:--', 'model_name': 'whisperseg-large', 'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg_base',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg-base-v2.0',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg-large',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'new-whisperseg-bengalese-finch',
+                    'status': 'ready'}]}
 
-        // Remove the Annotated Area labels from labels
-        let newLabelsArray = labels.filter( label => label.species !== ANNOTATED_AREA )
+        setModelsAvailableForFinetuning(placeholder.response)
+        setShowFinetuningModelsWindow(true)
+    }
 
-        // Convert custom label objects into generic objects with the specific data that is needed for Whisper
-        newLabelsArray = newLabelsArray.map( label => {
-                return {
-                    onset: label.onset,
-                    offset: label.offset,
-                    species: label.species,
-                    individual: label.individual,
-                    clustername: label.clustername,
-                    speciesID: label.speciesID,
-                    individualID: label.individualID,
-                    clusternameID: label.clusternameID,
-                    filename: label.filename,
-                    trackID: label.trackID,
-                }
+    const getModelsAvailableForInference = async () => {
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-inference'
+        /*
+        const response = await axios.post(path, {}, {
+            headers: {
+                'Content-Type': 'application/json'
             }
-        )
+        })*/
 
-        const requestParameters = {
-            audio_id: audioId,
-            annotated_areas: annotatedAreas,
-            human_labels: newLabelsArray
-        }
+        const placeholder = {'response': [{'eta': '--:--:--',
+                'model_name': 'whisperseg-base',
+                'status': 'ready'},
+                {'eta': '--:--:--', 'model_name': 'whisperseg-large', 'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg_base',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg-base-v2.0',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'r3428-99dph-whisperseg-large',
+                    'status': 'ready'},
+                {'eta': '--:--:--',
+                    'model_name': 'new-whisperseg-bengalese-finch',
+                    'status': 'ready'}]}
 
-        const response = await axios.post(path, requestParameters)
-
-        const whisperObjects = response.data.labels
-
-        // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
-        const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
-        const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
-        const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
-
-        const whisperLabels = whisperObjects.map( obj => {
-            return new Label(
-                nanoid(),
-                trackID,
-                filename,
-                obj.onset,
-                obj.offset,
-                unknownSpecies.name,
-                unknownIndividual.name,
-                unknownClustername.name,
-                unknownSpecies.id,
-                unknownIndividual.id,
-                unknownClustername.id,
-                0,
-                'Whisper',
-                unknownClustername.color
-            )
-        })
-
-        const combinedLabelsArray = labels.concat(whisperLabels)
-        passLabelsToScalableSpec(combinedLabelsArray)
-        passWhisperSegIsLoadingToScalableSpec(false)
+        setModelsAvailableForInference(placeholder.response)
+        setShowInferenceModelsWindow(true)
     }
 
     return (
-        <Tooltip title="Call WhisperSeg">
-            <IconButton
-                style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
-                disabled={strictMode || !audioId}
-                onClick={callWhisperSeg}
-            >
-                <AutoFixHighIcon style={activeIcon}/>
-            </IconButton>
-         </Tooltip>
+        <>
+            <Tooltip title="Call WhisperSeg">
+                <IconButton
+                    style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
+                    disabled={strictMode || !audioId}
+                    onClick={getModelsAvailableForInference}
+                >
+                    <AutoFixHighIcon style={activeIcon}/>
+                </IconButton>
+            </Tooltip>
+
+            {showFinetuningModelsWindow &&
+                <ModelsWindow
+                    modelsAvailableForFinetuning={modelsAvailableForFinetuning}
+                    passShowFinetuningModelsWindowToWhisperSeg={passShowFinetuningModelsWindowToWhisperSeg}
+                />
+            }
+
+            {showInferenceModelsWindow &&
+                <ModelsWindow
+                    models={modelsAvailableForInference}
+                    showWindow={passShowInferenceModelsWindowToWhisperSeg}
+                    audioId={audioId}
+                    trackID={trackID}
+                    filename={filename}
+                    labels={labels}
+                    speciesArray={speciesArray}
+                    passLabelsToScalableSpec={passLabelsToScalableSpec}
+                    passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                />
+            }
+
+        </>
+
     )
 }
 

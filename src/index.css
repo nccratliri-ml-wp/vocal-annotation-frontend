@@ -559,6 +559,34 @@ html, body {
   color: white;
 }
 
+/* -------------------------- WhisperSeg -------------------------- */
+
+#models-window{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  border: 2px solid #ffffff;
+  border-radius: 5px;
+  background: #082536;
+}
+
+#models-container{
+  padding: 5px 5px;
+}
+
+#models-buttons-container{
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  margin: 10px 0 0 0;
+}
+
+.models-table-header{
+  text-align: left;
+}
+
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */
 
 .waveform-spec-labels-canvases-container{

@@ -572,19 +572,32 @@ html, body {
   background: #082536;
 }
 
-#models-container{
+.models-container{
   padding: 5px 5px;
 }
 
-#models-buttons-container{
-  display: flex;
-  justify-content: space-between;
-  padding: 5px;
-  margin: 10px 0 0 0;
+.models-table{
+  table-layout: fixed;
 }
 
-.models-table-header{
+.models-table-header-1{
   text-align: left;
+  width: 600px;
+}
+
+.models-table-header-2, .models-table-header-3{
+  text-align: left;
+  width: 70px;
+}
+
+.models-table-cell{
+  word-break: break-all
+}
+
+.models-buttons-container{
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 10px;
 }
 
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */

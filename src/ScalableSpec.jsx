@@ -2240,6 +2240,7 @@ function ScalableSpec(
                                     audioId={audioId}
                                     trackID={trackID}
                                     filename={trackData.filename}
+                                    minFreq={minFreq}
                                     labels={labels}
                                     speciesArray={speciesArray}
                                     passLabelsToScalableSpec={passLabelsToScalableSpec}

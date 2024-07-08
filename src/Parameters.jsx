@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {excludeNonDigits} from "./utils.js";
 
 function Parameters(
         {
@@ -48,14 +49,6 @@ function Parameters(
         passShowLocalConfigWindowToScalableSpec(false)
         submitLocalParameters()
     }
-
-    const excludeNonDigits = (event) => {
-        // Prevent the default behavior if the pressed key is not a digit
-        if (!/\d/.test(event.key)) {
-            event.preventDefault()
-        }
-    }
-
 
     /* ++++++++++++++++++ Use Effect Hooks ++++++++++++++++++ */
 

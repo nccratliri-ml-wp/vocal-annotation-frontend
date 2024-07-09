@@ -562,11 +562,14 @@ html, body {
 /* -------------------------- WhisperSeg -------------------------- */
 
 #models-window{
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
+  height: 80vh;
+  width: 50vw;
   transform: translate(-50%, -50%);
-  z-index: 3;
+  z-index: 4;
+  overflow-y: auto;
   border: 2px solid #ffffff;
   border-radius: 5px;
   background: #082536;
@@ -582,12 +585,12 @@ html, body {
 
 .models-table-header-1{
   text-align: left;
-  width: 600px;
+  width: 36vw;
 }
 
 .models-table-header-2, .models-table-header-3{
   text-align: left;
-  width: 70px;
+  width: 7vw;
 }
 
 .models-table-cell{

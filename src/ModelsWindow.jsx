@@ -6,7 +6,7 @@ import {Label} from "./label.js";
 import {nanoid} from "nanoid";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-import {excludeNonDigits} from "./utils.js";
+import {excludeNonDigits, excludeSpecialCharacters} from "./utils.js";
 
 function ModelsWindow (
     {
@@ -29,6 +29,7 @@ function ModelsWindow (
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
     const [minFreqInput, setMinFreqInput] = useState(minFreq)
+    const [newModelName, setNewModelName] = useState('')
 
     const callWhisperSeg = async() => {
         passWhisperSegIsLoadingToScalableSpec(true)
@@ -125,6 +126,11 @@ function ModelsWindow (
         passShowModelsWindowToWhisperSeg(false)
     }
 
+    const handleClickSubmitTrainingRequestBtn = (event) => {
+        event.preventDefault()
+
+    }
+
     return (
         <div id='models-window'>
 
@@ -144,31 +150,36 @@ function ModelsWindow (
                     </tr>
                     </thead>
                     <tbody>
-                    {modelsAvailableForInference && modelsAvailableForInference.map(model => (
-                        <tr key={nanoid()}>
-                            <td className='models-table-cell'>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="inferenceModel"
-                                        disabled={model.status !== 'ready'}
-                                        checked={selectedInferenceModel === model.model_name}
-                                        onChange={() => setSelectedInferenceModel(model.model_name)}
-                                    />
-                                    {model.model_name}
-                                </label>
-                            </td>
-                            <td className='models-table-cell'>{model.eta}</td>
-                            <td className='models-table-cell'>{model.status}</td>
-                        </tr>
-                    ))}
+                    {
+                        modelsAvailableForInference && modelsAvailableForInference.map(model => {
+                            if (model.status !== 'ready'){
+                                return <></>
+                            }
+                            return (
+                                <tr key={nanoid()}>
+                                    <td className='models-table-cell'>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="inferenceModel"
+                                                disabled={model.status !== 'ready'}
+                                                checked={selectedInferenceModel === model.model_name}
+                                                onChange={() => setSelectedInferenceModel(model.model_name)}
+                                            />
+                                            {model.model_name}
+                                        </label>
+                                    </td>
+                                    <td className='models-table-cell'>{model.eta}</td>
+                                    <td className='models-table-cell'>{model.status}</td>
+                                </tr>
+                            )
+                        })
+                    }
                     </tbody>
                 </table>
-                {!modelsAvailableForInference && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
-
                 <div className='models-buttons-container'>
                     <label>
-                        Min Freq
+                        Min Freq:
                         <input
                             type="number"
                             value={minFreqInput}
@@ -181,7 +192,7 @@ function ModelsWindow (
                     </label>
                     <button onClick={callWhisperSeg}>Call WhisperSeg</button>
                 </div>
-
+                {!modelsAvailableForInference && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
             </div>
 
             <div className='models-container'>
@@ -195,25 +206,51 @@ function ModelsWindow (
                     </tr>
                     </thead>
                     <tbody>
-                    {modelsAvailableForFinetuning && modelsAvailableForFinetuning.map(model => (
-                        <tr key={nanoid()}>
-                            <td>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="finetuningModel"
-                                        checked={selectedFinetuningModel === model.model_name}
-                                        onChange={() => setSelectedFinetuningModel(model.model_name)}
-                                    />
-                                    {model.model_name}
-                                </label>
-                            </td>
-                            <td>{model.eta}</td>
-                            <td>{model.status}</td>
-                        </tr>
-                    ))}
+                    {
+                        modelsAvailableForFinetuning && modelsAvailableForFinetuning.map(model => {
+                            if (model.status !== 'ready'){
+                                return <></>
+                            }
+                            return (
+                                <tr key={nanoid()}>
+                                    <td>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="finetuningModel"
+                                                checked={selectedFinetuningModel === model.model_name}
+                                                onChange={() => setSelectedFinetuningModel(model.model_name)}
+                                            />
+                                            {model.model_name}
+                                        </label>
+                                    </td>
+                                    <td>{model.eta}</td>
+                                    <td>{model.status}</td>
+                                </tr>
+                            )
+                        })
+                    }
                     </tbody>
                 </table>
+                <div className='models-buttons-container'>
+                    <form
+                        onSubmit={handleClickSubmitTrainingRequestBtn}
+                    >
+                        <label>
+                            New Model Name:
+                            <input
+                                type="text"
+                                value={newModelName}
+                                required='required'
+                                pattern='^[a-zA-Z0-9\-_\.]+$'
+                                title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
+                                onChange={ (event) => setNewModelName(event.target.value) }
+                                onFocus={(event) => event.target.select()}
+                            />
+                            <button>Submit Training Request</button>
+                        </label>
+                    </form>
+                </div>
                 {!modelsAvailableForFinetuning && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
             </div>
 

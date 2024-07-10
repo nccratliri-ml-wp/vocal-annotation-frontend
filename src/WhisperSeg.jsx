@@ -70,7 +70,7 @@ function WhisperSeg(
                 {'eta': '--:--:--', 'model_name': 'whisperseg-large', 'status': 'ready'},
                 {'eta': '--:--:--',
                     'model_name': 'r3428-99dph-whisperseg_base',
-                    'status': 'ready'},
+                    'status': 'progress'},
                 {'eta': '--:--:--',
                     'model_name': 'r3428-99dph-whisperseg-base-v2.0',
                     'status': 'ready'},

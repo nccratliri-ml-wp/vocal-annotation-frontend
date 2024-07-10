@@ -31,28 +31,12 @@ function ModelsWindow (
     const [minFreqInput, setMinFreqInput] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
 
-    const callWhisperSeg = async() => {
-        passWhisperSegIsLoadingToScalableSpec(true)
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
-
-        // Extract annotated areas from the labels array
-        const annotatedAreas = labels.reduce( (acc, label) => {
-            if (label.species === ANNOTATED_AREA) {
-                acc.push({
-                    onset: label.onset,
-                    offset: label.offset
-                })
-                return acc
-            }
-            return acc
-        }, [])
-
-
+    const filterAndConvertLabelsForWhisper = () => {
         // Remove the Annotated Area labels from labels
         let newLabelsArray = labels.filter( label => label.species !== ANNOTATED_AREA )
 
         // Convert custom label objects into generic objects with the specific data that is needed for Whisper
-        newLabelsArray = newLabelsArray.map( label => {
+        return newLabelsArray.map( label => {
                 return {
                     onset: label.onset,
                     offset: label.offset,
@@ -67,68 +51,127 @@ function ModelsWindow (
                 }
             }
         )
+    }
+
+    const filterAndConvertAnnotatedAreasForWhisper = () => {
+        // Extract annotated areas from the labels array
+        return labels.reduce( (acc, label) => {
+            if (label.species === ANNOTATED_AREA) {
+                acc.push({
+                    onset: label.onset,
+                    offset: label.offset
+                })
+                return acc
+            }
+            return acc
+        }, [])
+    }
+
+    const callWhisperSeg = async() => {
+        passWhisperSegIsLoadingToScalableSpec(true)
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
+
+        const annotatedAreas = filterAndConvertAnnotatedAreasForWhisper()
+        const convertedLabels = filterAndConvertLabelsForWhisper()
 
         const requestParameters = {
             audio_id: audioId,
             annotated_areas: annotatedAreas,
-            human_labels: newLabelsArray,
+            human_labels: convertedLabels,
             model_name: selectedInferenceModel,
             min_frequency: minFreqInput
         }
 
-        const response = await axios.post(path, requestParameters)
+        try {
+            const response = await axios.post(path, requestParameters)
+            const whisperObjects = response.data.labels
 
-        console.log(response)
+            /*
+            const whisperObjects = [
+                {
+                    onset: 1.2,
+                    offset: 3.4,
+                },
+                {
+                    onset: 4.2,
+                    offset: 6.4,
+                },
+            ]
+            */
 
-        const whisperObjects = response.data.labels
+            // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
+            const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
+            const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
+            const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
 
-        /*
-        const whisperObjects = [
-            {
-                onset: 1.2,
-                offset: 3.4,
-            },
-            {
-                onset: 4.2,
-                offset: 6.4,
-            },
-        ]
-        */
+            const whisperLabels = whisperObjects.map( obj => {
+                return new Label(
+                    nanoid(),
+                    trackID,
+                    filename,
+                    obj.onset,
+                    obj.offset,
+                    unknownSpecies.name,
+                    unknownIndividual.name,
+                    unknownClustername.name,
+                    unknownSpecies.id,
+                    unknownIndividual.id,
+                    unknownClustername.id,
+                    0,
+                    'Whisper',
+                    unknownClustername.color
+                )
+            })
 
-        // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
-        const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
-        const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
-        const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
-
-        const whisperLabels = whisperObjects.map( obj => {
-            return new Label(
-                nanoid(),
-                trackID,
-                filename,
-                obj.onset,
-                obj.offset,
-                unknownSpecies.name,
-                unknownIndividual.name,
-                unknownClustername.name,
-                unknownSpecies.id,
-                unknownIndividual.id,
-                unknownClustername.id,
-                0,
-                'Whisper',
-                unknownClustername.color
-            )
-        })
-
-        const annotatedAreaLabels = labels.filter( label => label.species === ANNOTATED_AREA)
-        const combinedLabels = whisperLabels.concat(annotatedAreaLabels)
-        passLabelsToScalableSpec(combinedLabels)
-        passWhisperSegIsLoadingToScalableSpec(false)
-        passShowModelsWindowToWhisperSeg(false)
+            const annotatedAreaLabels = labels.filter( label => label.species === ANNOTATED_AREA)
+            const combinedLabels = whisperLabels.concat(annotatedAreaLabels)
+            passLabelsToScalableSpec(combinedLabels)
+            passShowModelsWindowToWhisperSeg(false)
+        } catch (error){
+            toast.error('Something went wrong with your request. Check the console to view the error.')
+            console.error(error)
+        } finally {
+            passWhisperSegIsLoadingToScalableSpec(false)
+        }
     }
 
-    const handleClickSubmitTrainingRequestBtn = (event) => {
+    const handleClickSubmitTrainingRequestBtn = async (event) => {
         event.preventDefault()
 
+        const annotatedAreas = filterAndConvertAnnotatedAreasForWhisper()
+        const convertedLabels = filterAndConvertLabelsForWhisper()
+
+        const allModels = [...modelsAvailableForInference, ...modelsAvailableForFinetuning, ...modelsCurrentlyTrained]
+
+        for (const model of allModels){
+            if (model.model_name === newModelName) {
+                toast.error(`Model with the name "${newModelName}" already exists.`)
+                return
+            }
+        }
+
+        if (!annotatedAreas.length || !convertedLabels.length){
+            toast.error('Provide at least one annotated Area and one label to train the new model on.')
+        }
+
+        const path= import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'finetune-whisperseg'
+
+        const requestParameters = {
+            audio_id: audioId,
+            annotated_areas: annotatedAreas,
+            human_labels: convertedLabels,
+            new_model_name: newModelName,
+            inital_model_name: selectedFinetuningModel,
+            min_frequency: minFreqInput
+        }
+
+        try {
+            await axios.post(path, requestParameters)
+            toast.success('Custom model started training and will be available soon.')
+        } catch (error){
+            toast.error('Something went wrong with your request. Check the console to view the error.')
+            console.error(error)
+        }
     }
 
     return (
@@ -145,8 +188,7 @@ function ModelsWindow (
                     <thead>
                     <tr>
                         <th className='models-table-header-1'>Model</th>
-                        <th className='models-table-header-2'>ETA</th>
-                        <th className='models-table-header-3'>Status</th>
+                        <th className='models-table-header-2'>Status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -169,7 +211,6 @@ function ModelsWindow (
                                             {model.model_name}
                                         </label>
                                     </td>
-                                    <td className='models-table-cell'>{model.eta}</td>
                                     <td className='models-table-cell'>{model.status}</td>
                                 </tr>
                             )
@@ -201,8 +242,7 @@ function ModelsWindow (
                     <thead>
                     <tr>
                         <th className='models-table-header-1'>Model</th>
-                        <th className='models-table-header-2'>ETA</th>
-                        <th className='models-table-header-3'>Status</th>
+                        <th className='models-table-header-2'>Status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -224,7 +264,6 @@ function ModelsWindow (
                                             {model.model_name}
                                         </label>
                                     </td>
-                                    <td>{model.eta}</td>
                                     <td>{model.status}</td>
                                 </tr>
                             )

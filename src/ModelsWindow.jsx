@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {toast} from "react-toastify";
 import {ANNOTATED_AREA, createSpeciesFromImportedLabels} from "./species.js";
 import axios from "axios";
@@ -8,21 +8,30 @@ import Box from "@mui/material/Box";
 import {excludeNonDigits} from "./utils.js";
 
 function ModelsWindow (
-    {
-        modelsAvailableForInference,
-        modelsAvailableForFinetuning,
-        modelsCurrentlyTrained,
-        passShowModelsWindowToWhisperSeg,
-        audioId,
-        minFreq,
-        labels,
-        speciesArray,
-        passLabelsToScalableSpec,
-        passWhisperSegIsLoadingToScalableSpec,
-        passSpeciesArrayToApp,
-        assignSpeciesInformationToImportedLabels
-    }
-){
+        {
+            modelsAreLoading,
+            modelsAvailableForInference,
+            modelsAvailableForFinetuning,
+            modelsCurrentlyTrained,
+            passShowModelsWindowToWhisperSeg,
+            audioId,
+            minFreq,
+            labels,
+            speciesArray,
+            passLabelsToScalableSpec,
+            passWhisperSegIsLoadingToScalableSpec,
+            passSpeciesArrayToApp,
+            assignSpeciesInformationToImportedLabels
+        }
+    )
+{
+
+    // Task: Get toast when model is finsihed training
+    /*
+    * 1. collect list with model names being trained
+    * 2. When model disappears from modelsCurrentlyTrained, remove it from the list and display the pop-up message
+    * */
+
     const [showInferenceTab, setShowInferenceTab] = useState(true)
     const [showFinetuningTab, setShowFinetuningTab] = useState(false)
     const [showTrainingTab, setShowTrainingTab] = useState(false)
@@ -32,6 +41,8 @@ function ModelsWindow (
 
     const [minFreqInput, setMinFreqInput] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
+
+    const [modelsInTrainingQueue, setModelsInTrainingQueue] = useState([])
 
     const handleClickInferenceTab = () => {
         setShowInferenceTab(true)
@@ -104,8 +115,9 @@ function ModelsWindow (
 
         try {
             const response = await axios.post(path, requestParameters)
-            //const whisperObjects = response.data.labels
+            const whisperObjects = response.data.labels
 
+            /*
             const whisperObjects = [
                 {
                     clustername: 'Unknown',
@@ -150,14 +162,7 @@ function ModelsWindow (
                     offset: 7.8,
                 },
             ]
-
-
-            // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
-            /*
-            const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
-            const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
-            const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
-             */
+            */
 
             // Create new species, Individuals and Clusternames in the Species panel from the whisper labels
             const updatedSpeciesArray = createSpeciesFromImportedLabels(whisperObjects, speciesArray)
@@ -211,11 +216,33 @@ function ModelsWindow (
         try {
             await axios.post(path, requestParameters)
             toast.success('Custom model started training and will be available soon.')
+            setModelsInTrainingQueue(prevState => [...prevState, newModelName])
+            setNewModelName('')
+
         } catch (error){
             toast.error('Something went wrong with your request. Check the console to view the error.')
             console.error(error)
         }
     }
+
+    useEffect( () => {
+        if (!modelsCurrentlyTrained) return
+
+        const allCurrentlyTrainedModelNames = modelsCurrentlyTrained.map(model => model.model_name)
+
+        const updatedModelsInTrainingQueue = []
+
+        for (const modelName of modelsInTrainingQueue){
+            if (allCurrentlyTrainedModelNames.includes(modelName)){
+                updatedModelsInTrainingQueue.push(modelName)
+            } else {
+                toast.success(`New custom model "${modelName}" has finished training!`)
+            }
+        }
+
+        setModelsInTrainingQueue(updatedModelsInTrainingQueue)
+
+    }, [modelsCurrentlyTrained])
 
     return (
         <div id='models-window'>
@@ -246,7 +273,7 @@ function ModelsWindow (
                         In Training
                     </div>
                 </div>
-                {!modelsAvailableForInference && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
+                {modelsAreLoading && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
             </div>
 
             {showInferenceTab &&

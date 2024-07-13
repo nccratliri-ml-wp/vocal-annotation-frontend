@@ -2,7 +2,7 @@ import IconButton from "@material-ui/core/IconButton";
 import {iconBtnDisabled} from "./styles.js";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
 import Tooltip from "@material-ui/core/Tooltip";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import ModelsWindow from "./ModelsWindow.jsx";
 import axios from "axios";
 import {toast} from "react-toastify";
@@ -10,8 +10,6 @@ import {toast} from "react-toastify";
 function WhisperSeg(
         {
             audioId,
-            trackID,
-            filename,
             minFreq,
             labels,
             speciesArray,
@@ -27,6 +25,7 @@ function WhisperSeg(
 {
 
     const [showModelsWindow, setShowModelsWindow] = useState(false)
+    const [modelsAreLoading, setModelsAreLoading] = useState(false)
     const [modelsAvailableForFinetuning, setModelsAvailableForFinetuning] = useState()
     const [modelsAvailableForInference, setModelsAvailableForInference] = useState()
     const [modelsCurrentlyTrained, setModelsCurrentlyTrained] = useState()
@@ -35,9 +34,14 @@ function WhisperSeg(
         setShowModelsWindow( boolean )
     }
 
+    const handleClickWhisperSeg = () => {
+        setShowModelsWindow(true)
+    }
 
     const getAllModels = async () => {
-        setShowModelsWindow(true)
+        if (!showModelsWindow) return
+
+        setModelsAreLoading(true)
 
         try {
             const [inferenceModels, finetuneModels, currentlyTrainedModels] = await Promise.all([
@@ -46,6 +50,7 @@ function WhisperSeg(
                 getModelsCurrentlyTrained()
             ])
 
+            setModelsAreLoading(false)
             setModelsAvailableForInference(inferenceModels)
             setModelsAvailableForFinetuning(finetuneModels)
             setModelsCurrentlyTrained(currentlyTrainedModels)
@@ -53,6 +58,7 @@ function WhisperSeg(
         } catch (error) {
             toast.error('An error occurred trying to access the WhisperSeg API. Check the console for more information')
             console.error('Error fetching data:', error)
+            setModelsAreLoading(false)
             setShowModelsWindow(false)
         }
     }
@@ -130,21 +136,35 @@ function WhisperSeg(
         return response.data.response
     }
 
+    // When user clicks on CallWhisperSeg button
+    useEffect(() => {
+        // Get Models immediately
+        getAllModels()
+
+        // Set up an interval that will refresh the models every 10 seconds
+        const interval = setInterval(() => {
+            getAllModels()
+        }, 10000)
+
+        // Clean up the interval on component unmount
+        return () => clearInterval(interval)
+    }, [showModelsWindow])
+
     return (
         <>
             <Tooltip title="Call WhisperSeg">
                 <IconButton
                     style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
                     disabled={strictMode || !audioId}
-                    onClick={getAllModels}
+                    onClick={handleClickWhisperSeg}
                 >
                     <AutoFixHighIcon style={activeIcon}/>
                 </IconButton>
             </Tooltip>
 
-
             {showModelsWindow &&
                 <ModelsWindow
+                    modelsAreLoading={modelsAreLoading}
                     modelsAvailableForInference={modelsAvailableForInference}
                     modelsAvailableForFinetuning={modelsAvailableForFinetuning}
                     modelsCurrentlyTrained={modelsCurrentlyTrained}
@@ -161,7 +181,6 @@ function WhisperSeg(
             }
 
         </>
-
     )
 }
 

@@ -6,7 +6,6 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -27,7 +26,7 @@ import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggle
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";
-import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
+import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
 import {toast} from "react-toastify";
 import WhisperSeg from "./WhisperSeg.jsx"
 
@@ -80,7 +79,8 @@ function ScalableSpec(
                             toggleTrackVisibility,
                             moveTrackUp,
                             moveTrackDown,
-                            lastTrackIndex
+                            lastTrackIndex,
+                            passSpeciesArrayToApp
                         }
                     )
                 {
@@ -698,8 +698,8 @@ function ScalableSpec(
         return closestIndex
     }
 
-    const getAllIndividualIDs = () => {
-        return speciesArray.flatMap(speciesObj => {
+    const getAllIndividualIDs = (currentSpeciesArray) => {
+        return currentSpeciesArray.flatMap(speciesObj => {
             return speciesObj.individuals.map(individual => individual.id)
         })
     }
@@ -1254,7 +1254,7 @@ function ScalableSpec(
         const individual = activeSpecies? activeSpecies.individuals.find(individual => individual.isActive): null
         const clustername = activeSpecies? activeSpecies.clusternames.find(clustername => clustername.isActive): null
 
-        const allIndividualIDs = getAllIndividualIDs()
+        const allIndividualIDs = getAllIndividualIDs(speciesArray)
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
         const newLabel = new Label(
@@ -1374,7 +1374,7 @@ function ScalableSpec(
     }
 
     const updateLabelsWithSpeciesArrayData = () => {
-        const allIndividualIDs = getAllIndividualIDs()
+        const allIndividualIDs = getAllIndividualIDs(speciesArray)
 
         // Iterate over the labels array
         return labels.map(label => {
@@ -1425,8 +1425,8 @@ function ScalableSpec(
             )
     }
 
-    const assignSpeciesInformationToImportedLabels = (genericLabelObjectsArray) => {
-        const allIndividualIDs = getAllIndividualIDs()
+    const assignSpeciesInformationToImportedLabels = (currentSpeciesArray, genericLabelObjectsArray) => {
+        const allIndividualIDs = getAllIndividualIDs(speciesArray)
 
         // Iterate over the imported labels array
         return genericLabelObjectsArray.map( label => {
@@ -1450,7 +1450,7 @@ function ScalableSpec(
             )
 
             // Iterate over speciesArray and assign the new label it's correct IDs and color from existing
-            for (const speciesObj of speciesArray) {
+            for (const speciesObj of currentSpeciesArray) {
                 if (updatedLabel.species === speciesObj.name) {
                     updatedLabel.speciesID = speciesObj.id
                     for (const individual of speciesObj.individuals) {
@@ -2083,7 +2083,7 @@ function ScalableSpec(
 
         let newImportedLabels = importedLabels.filter( label => label.channelIndex === trackData.channelIndex && label.filename === trackData.filename)
 
-        newImportedLabels = assignSpeciesInformationToImportedLabels(newImportedLabels)
+        newImportedLabels = assignSpeciesInformationToImportedLabels(speciesArray, newImportedLabels)
         setLabels((prevLabels) => [...prevLabels, ...newImportedLabels])
 
     }, [importedLabels])
@@ -2248,6 +2248,8 @@ function ScalableSpec(
                                     activeIconBtnStyle={activeIconBtnStyle}
                                     activeIcon={activeIcon}
                                     strictMode={strictMode}
+                                    passSpeciesArrayToApp={passSpeciesArrayToApp}
+                                    assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
                                 />
                                 <Tooltip title="Frequency Range">
                                     <IconButton

@@ -19,7 +19,9 @@ function WhisperSeg(
             passWhisperSegIsLoadingToScalableSpec,
             activeIconBtnStyle,
             activeIcon,
-            strictMode
+            strictMode,
+            passSpeciesArrayToApp,
+            assignSpeciesInformationToImportedLabels
         }
     )
 {
@@ -148,13 +150,13 @@ function WhisperSeg(
                     modelsCurrentlyTrained={modelsCurrentlyTrained}
                     passShowModelsWindowToWhisperSeg={passShowModelsWindowToWhisperSeg}
                     audioId={audioId}
-                    trackID={trackID}
-                    filename={filename}
                     minFreq={minFreq}
                     labels={labels}
                     speciesArray={speciesArray}
                     passLabelsToScalableSpec={passLabelsToScalableSpec}
                     passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                    passSpeciesArrayToApp={passSpeciesArrayToApp}
+                    assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
                 />
             }
 

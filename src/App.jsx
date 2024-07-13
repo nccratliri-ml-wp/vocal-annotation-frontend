@@ -18,7 +18,8 @@ import {
     Species,
     UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
-    UNKNOWN_SPECIES
+    UNKNOWN_SPECIES,
+    createSpeciesFromImportedLabels
 } from './species.js'
 import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBtn, iconBtnDisabled} from "./styles.js"
 import {nanoid} from "nanoid";
@@ -361,77 +362,7 @@ function App() {
 
     /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
 
-    function createSpeciesFromImportedLabels (importedLabels){
-        let updatedSpeciesArray = [...speciesArray]
-        const allExistingSpeciesNames = speciesArray.map(speciesObj => speciesObj.name)
 
-        for (let label of importedLabels){
-
-            for (let speciesObj of updatedSpeciesArray){
-
-                // For Existing species, update Individuals and Clusternames
-                if (speciesObj.name === label.species){
-                    const allIndividualNames = speciesObj.individuals.map(individual => individual.name)
-                    if ( !allIndividualNames.includes(label.individual) ){
-                        const newIndividual = new Individual(nanoid(), label.individual)
-                        newIndividual.isActive = false
-                        speciesObj.individuals = [...speciesObj.individuals, newIndividual]
-                    }
-
-                    const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
-                    if ( !allClusternamesNames.includes(label.clustername) ){
-                        const newClustername = new Clustername(nanoid(), label.clustername)
-                        newClustername.isActive = false
-                        speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
-                    }
-                }
-            }
-
-            // If imported species does not exist already, create a new one
-            if (!allExistingSpeciesNames.includes(label.species)){
-
-                const newIndividualsArray = []
-                // Create Unknown Individual
-                const newUnknownIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
-                newUnknownIndividual.isActive = false
-                newIndividualsArray.unshift(newUnknownIndividual)
-
-                // If that label's individual is not Unknown, create that individual for this species
-                if (label.individual !== UNKNOWN_INDIVIDUAL){
-                    const newIndividual = new Individual(nanoid(), label.individual)
-                    newIndividual.isActive = false
-                    newIndividualsArray.push(newIndividual)
-                }
-
-
-                const newClusternamesArray = []
-                // Create Unknown Clustername
-                const newUnknownClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
-                newUnknownClustername.isActive = false
-                newClusternamesArray.push(newUnknownClustername)
-
-                // If that label's clustername is not Unknown, create that clustername for this species
-                if (label.clustername !== UNKNOWN_CLUSTERNAME) {
-                    const newClustername = new Clustername(nanoid(), label.clustername)
-                    newClustername.isActive = false
-                    newClusternamesArray.push(newClustername)
-                }
-
-                const newSpecies = new Species(
-                    nanoid(),
-                    label.species,
-                    newIndividualsArray,
-                    newClusternamesArray,
-                )
-
-                const insertionIndex = updatedSpeciesArray.length - 1
-                allExistingSpeciesNames.splice(insertionIndex,0,label.species)
-                updatedSpeciesArray.splice(insertionIndex,0,newSpecies)
-            }
-        }
-
-        setSpeciesArray(updatedSpeciesArray)
-    }
 
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
@@ -636,7 +567,8 @@ function App() {
 
             if (!ignore) return
 
-            createSpeciesFromImportedLabels(allLabels)
+            const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)
+            setSpeciesArray(updatedSpeciesArray)
             setImportedLabels(allLabels)
             setAnnotationInstance(audioFilesArray[0].annotation_instance)
 
@@ -655,7 +587,8 @@ function App() {
     // When labels are imported from a local CSV file
     useEffect( () => {
         if (!importedLabels) return
-        createSpeciesFromImportedLabels(importedLabels)
+        const updatedSpeciesArray = createSpeciesFromImportedLabels(importedLabels, speciesArray)
+        setSpeciesArray(updatedSpeciesArray)
     }, [importedLabels])
 
     // When all the tracks have pushed their labels to allLabels state variable in App.jsx
@@ -841,6 +774,7 @@ function App() {
                                 moveTrackUp={moveTrackUp}
                                 moveTrackDown={moveTrackDown}
                                 lastTrackIndex={tracks[tracks.length - 1].trackIndex}
+                                passSpeciesArrayToApp={passSpeciesArrayToApp}
                             />
                         )
                     })

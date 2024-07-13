@@ -57,7 +57,7 @@ function LabelWindow(
     }
 
     const changeIndividual = (clickedIndividual) => {
-        const allIndividualIDs = getAllIndividualIDs()
+        const allIndividualIDs = getAllIndividualIDs(speciesArray)
         updatedLabel.individual = clickedIndividual.name
         updatedLabel.individualID = clickedIndividual.id
         updatedLabel.individualIndex = allIndividualIDs.indexOf(clickedIndividual.id)

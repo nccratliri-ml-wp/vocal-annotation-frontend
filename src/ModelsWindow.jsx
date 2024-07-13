@@ -1,12 +1,11 @@
 import React, {useState} from "react";
 import {toast} from "react-toastify";
-import {ANNOTATED_AREA, UNKNOWN_CLUSTERNAME, UNKNOWN_INDIVIDUAL, UNKNOWN_SPECIES} from "./species.js";
+import {ANNOTATED_AREA, createSpeciesFromImportedLabels} from "./species.js";
 import axios from "axios";
-import {Label} from "./label.js";
 import {nanoid} from "nanoid";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-import {excludeNonDigits, excludeSpecialCharacters} from "./utils.js";
+import {excludeNonDigits} from "./utils.js";
 
 function ModelsWindow (
     {
@@ -15,21 +14,42 @@ function ModelsWindow (
         modelsCurrentlyTrained,
         passShowModelsWindowToWhisperSeg,
         audioId,
-        trackID,
-        filename,
         minFreq,
         labels,
         speciesArray,
         passLabelsToScalableSpec,
         passWhisperSegIsLoadingToScalableSpec,
+        passSpeciesArrayToApp,
+        assignSpeciesInformationToImportedLabels
     }
 ){
+    const [showInferenceTab, setShowInferenceTab] = useState(true)
+    const [showFinetuningTab, setShowFinetuningTab] = useState(false)
+    const [showTrainingTab, setShowTrainingTab] = useState(false)
 
     const [selectedInferenceModel, setSelectedInferenceModel] = useState('whisperseg-base')
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
     const [minFreqInput, setMinFreqInput] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
+
+    const handleClickInferenceTab = () => {
+        setShowInferenceTab(true)
+        setShowFinetuningTab(false)
+        setShowTrainingTab(false)
+    }
+
+    const handleClickFinetuningTab = () => {
+        setShowInferenceTab(false)
+        setShowFinetuningTab(true)
+        setShowTrainingTab(false)
+    }
+
+    const handleClickTrainingTab = () => {
+        setShowInferenceTab(false)
+        setShowFinetuningTab(false)
+        setShowTrainingTab(true)
+    }
 
     const filterAndConvertLabelsForWhisper = () => {
         // Remove the Annotated Area labels from labels
@@ -84,44 +104,67 @@ function ModelsWindow (
 
         try {
             const response = await axios.post(path, requestParameters)
-            const whisperObjects = response.data.labels
+            //const whisperObjects = response.data.labels
 
-            /*
             const whisperObjects = [
                 {
+                    clustername: 'Unknown',
+                    individual: 'Unknown',
+                    species: 'Unknown',
                     onset: 1.2,
                     offset: 3.4,
                 },
                 {
+                    clustername: 'Hungry call',
+                    individual: 'Bob',
+                    species: 'Unknown',
+                    onset: 5.2,
+                    offset: 6.0,
+                },
+                {
+                    clustername: 'Hungry call',
+                    individual: 'Bob',
+                    species: 'Hamster',
                     onset: 4.2,
-                    offset: 6.4,
+                    offset: 4.8,
+                },
+                {
+                    clustername: 'Hungry call',
+                    individual: 'Bob',
+                    species: 'Hamster',
+                    onset: 0.2,
+                    offset: 0.4,
+                },
+                {
+                    clustername: 'Mating call',
+                    individual: 'Jim',
+                    species: 'Hamster',
+                    onset: 4.9,
+                    offset: 5.1,
+                },
+                {
+                    clustername: 'Hello',
+                    individual: 'Suzie',
+                    species: 'Cat',
+                    onset: 7.2,
+                    offset: 7.8,
                 },
             ]
-            */
+
 
             // Currently assign all labels returned by Whisper as Unknonw Species, Individual and Clustername, until Whisper support is implemented
+            /*
             const unknownSpecies = speciesArray.find( species => species.name === UNKNOWN_SPECIES)
             const unknownIndividual = unknownSpecies.individuals.find( individual => individual.name === UNKNOWN_INDIVIDUAL)
             const unknownClustername = unknownSpecies.clusternames.find( clustername => clustername.name === UNKNOWN_CLUSTERNAME)
+             */
 
-            const whisperLabels = whisperObjects.map( obj => {
-                return new Label(
-                    nanoid(),
-                    trackID,
-                    filename,
-                    obj.onset,
-                    obj.offset,
-                    unknownSpecies.name,
-                    unknownIndividual.name,
-                    unknownClustername.name,
-                    unknownSpecies.id,
-                    unknownIndividual.id,
-                    unknownClustername.id,
-                    0,
-                    'Whisper',
-                    unknownClustername.color
-                )
-            })
+            // Create new species, Individuals and Clusternames in the Species panel from the whisper labels
+            const updatedSpeciesArray = createSpeciesFromImportedLabels(whisperObjects, speciesArray)
+            passSpeciesArrayToApp(updatedSpeciesArray)
+
+            // Assign Species Information to the new labels
+            const whisperLabels = assignSpeciesInformationToImportedLabels(updatedSpeciesArray, whisperObjects)
 
             const annotatedAreaLabels = labels.filter( label => label.species === ANNOTATED_AREA)
             const combinedLabels = whisperLabels.concat(annotatedAreaLabels)
@@ -177,147 +220,166 @@ function ModelsWindow (
     return (
         <div id='models-window'>
 
-            <div className='close-btn-container'>
-                <button className='close-btn' onClick={() => passShowModelsWindowToWhisperSeg(false)}>✖</button>
-                <p className='window-header'>WhisperSeg</p>
-            </div>
+            <div className='models-window-header'>
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={() => passShowModelsWindowToWhisperSeg(false)}>✖</button>
+                    <p className='window-header'>WhisperSeg</p>
+                </div>
 
-            <div className='models-container'>
-                <table className='models-table'>
-                    <caption>Inference Models</caption>
-                    <thead>
-                    <tr>
-                        <th className='models-table-header-1'>Model</th>
-                        <th className='models-table-header-2'>Status</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {
-                        modelsAvailableForInference && modelsAvailableForInference.map(model => {
-                            if (model.status !== 'ready'){
-                                return <></>
-                            }
-                            return (
-                                <tr key={nanoid()}>
-                                    <td className='models-table-cell'>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                name="inferenceModel"
-                                                disabled={model.status !== 'ready'}
-                                                checked={selectedInferenceModel === model.model_name}
-                                                onChange={() => setSelectedInferenceModel(model.model_name)}
-                                            />
-                                            {model.model_name}
-                                        </label>
-                                    </td>
-                                    <td className='models-table-cell'>{model.status}</td>
-                                </tr>
-                            )
-                        })
-                    }
-                    </tbody>
-                </table>
-                <div className='models-buttons-container'>
-                    <label>
-                        Min Freq:
-                        <input
-                            type="number"
-                            value={minFreqInput}
-                            min={0}
-                            onChange={ (event) => setMinFreqInput(event.target.value) }
-                            onKeyPress={excludeNonDigits}
-                            onFocus={(event) => event.target.select()}
-                            onPaste={(event) => event.preventDefault()}
-                        />
-                    </label>
-                    <button onClick={callWhisperSeg}>Call WhisperSeg</button>
+                <div className='models-header-tabs-container'>
+                    <div
+                        className={showInferenceTab ? 'models-header-tab-opened' : 'models-header-tab'}
+                        onClick={handleClickInferenceTab}
+                    >
+                        Inference Models
+                    </div>
+                    <div
+                        className={showFinetuningTab ? 'models-header-tab-opened' : 'models-header-tab'}
+                        onClick={handleClickFinetuningTab}
+                    >
+                        Finetune Models
+                    </div>
+                    <div
+                        className={showTrainingTab ? 'models-header-tab-opened' : 'models-header-tab'}
+                        onClick={handleClickTrainingTab}
+                    >
+                        In Training
+                    </div>
                 </div>
                 {!modelsAvailableForInference && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
             </div>
 
-            <div className='models-container'>
-                <table className='models-table'>
-                    <caption>Finetune Models</caption>
-                    <thead>
-                    <tr>
-                        <th className='models-table-header-1'>Model</th>
-                        <th className='models-table-header-2'>Status</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {
-                        modelsAvailableForFinetuning && modelsAvailableForFinetuning.map(model => {
-                            if (model.status !== 'ready'){
-                                return <></>
-                            }
-                            return (
-                                <tr key={nanoid()}>
-                                    <td>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                name="finetuningModel"
-                                                checked={selectedFinetuningModel === model.model_name}
-                                                onChange={() => setSelectedFinetuningModel(model.model_name)}
-                                            />
-                                            {model.model_name}
-                                        </label>
-                                    </td>
-                                    <td>{model.status}</td>
-                                </tr>
-                            )
-                        })
-                    }
-                    </tbody>
-                </table>
-                <div className='models-buttons-container'>
-                    <form
-                        onSubmit={handleClickSubmitTrainingRequestBtn}
-                    >
-                        <label>
-                            New Model Name:
-                            <input
-                                type="text"
-                                value={newModelName}
-                                required='required'
-                                pattern='^[a-zA-Z0-9\-_\.]+$'
-                                title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
-                                onChange={ (event) => setNewModelName(event.target.value) }
-                                onFocus={(event) => event.target.select()}
-                            />
-                            <button>Submit Training Request</button>
-                        </label>
-                    </form>
-                </div>
-                {!modelsAvailableForFinetuning && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
-            </div>
-
-            <div className='models-container'>
-                <table className='models-table'>
-                    <caption>Models in Training</caption>
-                    <thead>
-                    <tr>
-                        <th className='models-table-header-1'>Model</th>
-                        <th className='models-table-header-2'>ETA</th>
-                        <th className='models-table-header-3'>Status</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {modelsCurrentlyTrained && modelsCurrentlyTrained.map(model => (
-                        <tr key={nanoid()}>
-                            <td>{model.model_name}</td>
-                            <td>{model.eta}</td>
-                            <td>{model.status}</td>
+            {showInferenceTab &&
+                <div className='models-container'>
+                    <table className='models-table'>
+                        <thead>
+                        <tr>
+                            <th className='models-table-header-1'>Model</th>
+                            <th className='models-table-header-2'>ETA</th>
+                            <th className='models-table-header-3'>Status</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
-                {!modelsCurrentlyTrained && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
-            </div>
+                        </thead>
+                        <tbody>
+                        {
+                            modelsAvailableForInference && modelsAvailableForInference.map(model => {
+                                return (
+                                    <tr key={nanoid()}>
+                                        <td className='models-table-cell'>
+                                            <label>
+                                                <input
+                                                    type="radio"
+                                                    name="inferenceModel"
+                                                    disabled={model.status !== 'ready'}
+                                                    checked={selectedInferenceModel === model.model_name}
+                                                    onChange={() => setSelectedInferenceModel(model.model_name)}
+                                                />
+                                                {model.model_name}
+                                            </label>
+                                        </td>
+                                        <td className='models-table-cell'>{model.eta === '--:--:--' ? '' : model.eta}</td>
+                                        <td className='models-table-cell'>{model.status}</td>
+                                    </tr>
+                                )
+                            })
+                        }
+                        </tbody>
+                    </table>
+                    <div className='models-buttons-container'>
+                        <label>
+                            Min Freq:
+                            <input
+                                type="number"
+                                value={minFreqInput}
+                                min={0}
+                                onChange={(event) => setMinFreqInput(event.target.value)}
+                                onKeyPress={excludeNonDigits}
+                                onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
+                            />
+                        </label>
+                        <button onClick={callWhisperSeg}>Call WhisperSeg</button>
+                    </div>
+                </div>
+            }
 
-            <button onClick={() => passShowModelsWindowToWhisperSeg(false)}>Cancel</button>
+            {showFinetuningTab &&
+                <div className='models-container'>
+                    <table className='models-table'>
+                        <thead>
+                        <tr>
+                            <th className='models-table-header-1'>Model</th>
+                            <th className='models-table-header-2'>ETA</th>
+                            <th className='models-table-header-3'>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {
+                            modelsAvailableForFinetuning && modelsAvailableForFinetuning.map(model => {
+                                return (
+                                    <tr key={nanoid()}>
+                                        <td>
+                                            <label>
+                                                <input
+                                                    type="radio"
+                                                    name="finetuningModel"
+                                                    checked={selectedFinetuningModel === model.model_name}
+                                                    onChange={() => setSelectedFinetuningModel(model.model_name)}
+                                                />
+                                                {model.model_name}
+                                            </label>
+                                        </td>
+                                        <td className='models-table-cell'>{model.eta === '--:--:--' ? '' : model.eta}</td>
+                                        <td>{model.status}</td>
+                                    </tr>
+                                )
+                            })
+                        }
+                        </tbody>
+                    </table>
+                    <div className='models-buttons-container'>
+                        <form
+                            onSubmit={handleClickSubmitTrainingRequestBtn}
+                        >
+                            <label>
+                                New Model Name:
+                                <input
+                                    type="text"
+                                    value={newModelName}
+                                    required='required'
+                                    pattern='^[a-zA-Z0-9\-_\.]+$'
+                                    title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
+                                    onChange={(event) => setNewModelName(event.target.value)}
+                                    onFocus={(event) => event.target.select()}
+                                />
+                                <button>Submit Training Request</button>
+                            </label>
+                        </form>
+                    </div>
+                </div>
+            }
 
+            {showTrainingTab &&
+                <div className='models-container'>
+                    <table className='models-table'>
+                        <thead>
+                        <tr>
+                            <th className='models-table-header-1'>Model</th>
+                            <th className='models-table-header-2'>ETA</th>
+                            <th className='models-table-header-3'>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {modelsCurrentlyTrained && modelsCurrentlyTrained.map(model => (
+                            <tr key={nanoid()}>
+                                <td>{model.model_name}</td>
+                                <td>{model.eta}</td>
+                                <td>{model.status}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            }
 
         </div>
     )

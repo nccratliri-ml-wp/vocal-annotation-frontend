@@ -565,18 +565,50 @@ html, body {
   position: fixed;
   top: 50%;
   left: 50%;
-  height: 80vh;
-  width: 50vw;
+  height: 50vh;
+  width: 40vw;
   transform: translate(-50%, -50%);
   z-index: 4;
-  overflow-y: auto;
+  overflow-y: scroll;
   border: 2px solid #ffffff;
   border-radius: 5px;
   background: #082536;
 }
 
+.models-window-header{
+  position: sticky;
+  top: 0;
+}
+
+.models-header-tabs-container{
+  display: flex;
+  justify-content: space-evenly;
+  background: #082536;
+}
+
+.models-header-tab{
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+}
+
+.models-header-tab-opened{
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+  background: #0e495b;
+}
+
+.models-header-tab:hover{
+  background-color: #0d3249;
+}
+
 .models-container{
-  padding: 5px 5px;
+  height: 87%;
+  padding: 15px 5px 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .models-table{
@@ -600,7 +632,8 @@ html, body {
 .models-buttons-container{
   display: flex;
   justify-content: space-between;
-  margin: 5px 10px;
+  padding: 5px 10px;
+  background: #082536;
 }
 
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */

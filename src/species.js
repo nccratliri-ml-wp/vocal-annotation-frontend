@@ -1,3 +1,5 @@
+import {nanoid} from "nanoid";
+
 const UNKNOWN_SPECIES = 'Unknown'
 const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
@@ -88,6 +90,78 @@ const checkIfEveryObjectIsInactive = (objects) => {
     return objects.every(object => !object.isActive)
 }
 
+const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) => {
+    let updatedSpeciesArray = [...currentSpeciesArray]
+    const allExistingSpeciesNames = currentSpeciesArray.map(speciesObj => speciesObj.name)
+
+    for (let label of importedLabels){
+
+        for (let speciesObj of updatedSpeciesArray){
+
+            // For Existing species, update Individuals and Clusternames
+            if (speciesObj.name === label.species){
+                const allIndividualNames = speciesObj.individuals.map(individual => individual.name)
+                if ( !allIndividualNames.includes(label.individual) ){
+                    const newIndividual = new Individual(nanoid(), label.individual)
+                    newIndividual.isActive = false
+                    speciesObj.individuals = [...speciesObj.individuals, newIndividual]
+                }
+
+                const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
+                if ( !allClusternamesNames.includes(label.clustername) ){
+                    const newClustername = new Clustername(nanoid(), label.clustername)
+                    newClustername.isActive = false
+                    speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
+                }
+            }
+        }
+
+        // If imported species does not exist already, create a new one
+        if (!allExistingSpeciesNames.includes(label.species)){
+
+            const newIndividualsArray = []
+            // Create Unknown Individual
+            const newUnknownIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL, 0)
+            newUnknownIndividual.isActive = false
+            newIndividualsArray.unshift(newUnknownIndividual)
+
+            // If that label's individual is not Unknown, create that individual for this species
+            if (label.individual !== UNKNOWN_INDIVIDUAL){
+                const newIndividual = new Individual(nanoid(), label.individual)
+                newIndividual.isActive = false
+                newIndividualsArray.push(newIndividual)
+            }
+
+
+            const newClusternamesArray = []
+            // Create Unknown Clustername
+            const newUnknownClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+            newUnknownClustername.isActive = false
+            newClusternamesArray.push(newUnknownClustername)
+
+            // If that label's clustername is not Unknown, create that clustername for this species
+            if (label.clustername !== UNKNOWN_CLUSTERNAME) {
+                const newClustername = new Clustername(nanoid(), label.clustername)
+                newClustername.isActive = false
+                newClusternamesArray.push(newClustername)
+            }
+
+            const newSpecies = new Species(
+                nanoid(),
+                label.species,
+                newIndividualsArray,
+                newClusternamesArray,
+            )
+
+            const insertionIndex = updatedSpeciesArray.length - 1
+            allExistingSpeciesNames.splice(insertionIndex,0,label.species)
+            updatedSpeciesArray.splice(insertionIndex,0,newSpecies)
+        }
+    }
+
+    return updatedSpeciesArray
+}
+
 const dummyData = {
     "response": [
         {
@@ -109,14 +183,14 @@ const dummyData = {
                         {
                             "onset": 1.2,
                             "offset": 1.7,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Unknown",
                             "clustername": "Unknown"
                         },
                         {
                             "onset": 2.4,
                             "offset": 2.6,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Ind4",
                             "clustername": "call 3"
                         }
@@ -125,14 +199,14 @@ const dummyData = {
                         {
                             "onset": 1.5,
                             "offset": 1.8,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Unknown",
                             "clustername": "Unknown"
                         },
                         {
                             "onset": 2.7,
                             "offset": 2.9,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Ind4",
                             "clustername": "call 3"
                         }
@@ -141,14 +215,14 @@ const dummyData = {
                         {
                             "onset": 1.9,
                             "offset": 2,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Unknown",
                             "clustername": "Unknown"
                         },
                         {
                             "onset": 3,
                             "offset": 3.2,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Ind4",
                             "clustername": "call 3"
                         }
@@ -173,16 +247,23 @@ const dummyData = {
                         {
                             "onset": 1.2,
                             "offset": 1.7,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Unknown",
                             "clustername": "Unknown"
                         },
                         {
                             "onset": 2.4,
                             "offset": 2.6,
-                            "species": "Unknown Species",
+                            "species": "Unknown",
                             "individual": "Ind4",
                             "clustername": "call 3"
+                        },
+                        {
+                            "onset": 4.4,
+                            "offset": 4.9,
+                            "species": "Hamster",
+                            "individual": "Bobby",
+                            "clustername": "i am hungry"
                         }
                     ]
                 }
@@ -210,5 +291,6 @@ export {
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
     checkIfEveryObjectIsInactive,
+    createSpeciesFromImportedLabels,
     dummyData
 }

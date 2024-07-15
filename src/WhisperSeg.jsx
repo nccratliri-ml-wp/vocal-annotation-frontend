@@ -40,6 +40,9 @@ function WhisperSeg(
 
     const getAllModels = async () => {
         if (!showModelsWindow) return
+        /* Add additional run condition:
+        * Function should run when window is open or when user has sent a finetune request. (Store that information in a state)
+        * */
 
         setModelsAreLoading(true)
 

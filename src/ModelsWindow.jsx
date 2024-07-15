@@ -40,9 +40,10 @@ function ModelsWindow (
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
     const [minFreqInput, setMinFreqInput] = useState(minFreq)
+    const [minFreqFinetuneInput, setMinFreqFinetuneInput] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
 
-    const [modelsInTrainingQueue, setModelsInTrainingQueue] = useState([])
+    const [currentlyTrainedModelsNames, setCurrentlyTrainedModelsNames] = useState([])
 
     const handleClickInferenceTab = () => {
         setShowInferenceTab(true)
@@ -210,13 +211,13 @@ function ModelsWindow (
             human_labels: convertedLabels,
             new_model_name: newModelName,
             inital_model_name: selectedFinetuningModel,
-            min_frequency: minFreqInput
+            min_frequency: minFreqFinetuneInput
         }
 
         try {
             await axios.post(path, requestParameters)
             toast.success('Custom model started training and will be available soon.')
-            setModelsInTrainingQueue(prevState => [...prevState, newModelName])
+            setCurrentlyTrainedModelsNames(prevState => [...prevState, newModelName])
             setNewModelName('')
 
         } catch (error){
@@ -232,7 +233,7 @@ function ModelsWindow (
 
         const updatedModelsInTrainingQueue = []
 
-        for (const modelName of modelsInTrainingQueue){
+        for (const modelName of currentlyTrainedModelsNames){
             if (allCurrentlyTrainedModelNames.includes(modelName)){
                 updatedModelsInTrainingQueue.push(modelName)
             } else {
@@ -240,7 +241,7 @@ function ModelsWindow (
             }
         }
 
-        setModelsInTrainingQueue(updatedModelsInTrainingQueue)
+        setCurrentlyTrainedModelsNames(updatedModelsInTrainingQueue)
 
     }, [modelsCurrentlyTrained])
 
@@ -377,6 +378,16 @@ function ModelsWindow (
                                     title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
                                     onChange={(event) => setNewModelName(event.target.value)}
                                     onFocus={(event) => event.target.select()}
+                                />
+                                Min Freq:
+                                <input
+                                    type="number"
+                                    value={minFreqFinetuneInput}
+                                    min={0}
+                                    onChange={(event) => setMinFreqFinetuneInput(event.target.value)}
+                                    onKeyPress={excludeNonDigits}
+                                    onFocus={(event) => event.target.select()}
+                                    onPaste={(event) => event.preventDefault()}
                                 />
                                 <button>Submit Training Request</button>
                             </label>

@@ -189,7 +189,7 @@ function WhisperSeg(
                     <AutoFixHighIcon style={activeIcon}/>
                 </IconButton>
             </Tooltip>
-            {currentlyTrainedModelsNames.length}
+
             {showModelsWindow &&
                 <ModelsWindow
                     modelsAreLoading={modelsAreLoading}

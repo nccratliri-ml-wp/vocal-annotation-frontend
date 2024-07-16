@@ -629,11 +629,34 @@ html, body {
   word-break: break-all
 }
 
-.models-buttons-container{
+.inference-models-buttons-container{
   display: flex;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 5px 5px;
   background: #082536;
+}
+
+.finetuning-label{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 5px 5px;
+  background: #082536;
+}
+
+.finetuning-label > button{
+  height: fit-content;
+}
+
+.finetuning-models-inputs-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.finetuning-models-inputs-container > div {
+  display: flex;
+  justify-content: space-between;
 }
 
 /* -------------------------- Waveform-, Spectrogram- and Labels-Canvases -------------------------- */

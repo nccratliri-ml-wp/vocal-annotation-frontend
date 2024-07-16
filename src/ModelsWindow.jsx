@@ -289,7 +289,7 @@ function ModelsWindow (
                         }
                         </tbody>
                     </table>
-                    <div className='models-buttons-container'>
+                    <div className='inference-models-buttons-container'>
                         <label>
                             Min Freq:
                             <input
@@ -341,35 +341,39 @@ function ModelsWindow (
                         }
                         </tbody>
                     </table>
-                    <div className='models-buttons-container'>
-                        <form
-                            onSubmit={handleClickSubmitTrainingRequestBtn}
-                        >
-                            <label>
-                                New Model Name:
-                                <input
-                                    type="text"
-                                    value={newModelName}
-                                    required='required'
-                                    pattern='^[a-zA-Z0-9\-_\.]+$'
-                                    title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
-                                    onChange={(event) => setNewModelName(event.target.value)}
-                                    onFocus={(event) => event.target.select()}
-                                />
-                                Min Freq:
-                                <input
-                                    type="number"
-                                    value={minFreqFinetuneInput}
-                                    min={0}
-                                    onChange={(event) => setMinFreqFinetuneInput(event.target.value)}
-                                    onKeyPress={excludeNonDigits}
-                                    onFocus={(event) => event.target.select()}
-                                    onPaste={(event) => event.preventDefault()}
-                                />
-                                <button>Submit Training Request</button>
-                            </label>
-                        </form>
-                    </div>
+                    <form
+                        onSubmit={handleClickSubmitTrainingRequestBtn}
+                    >
+                        <label className='finetuning-label'>
+                            <div className='finetuning-models-inputs-container'>
+                                <div>
+                                    New Model Name:
+                                    <input
+                                        type="text"
+                                        value={newModelName}
+                                        required='required'
+                                        pattern='^[a-zA-Z0-9\-_\.]+$'
+                                        title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
+                                        onChange={(event) => setNewModelName(event.target.value)}
+                                        onFocus={(event) => event.target.select()}
+                                    />
+                                </div>
+                                <div>
+                                    Min Freq:
+                                    <input
+                                        type="number"
+                                        value={minFreqFinetuneInput}
+                                        min={0}
+                                        onChange={(event) => setMinFreqFinetuneInput(event.target.value)}
+                                        onKeyPress={excludeNonDigits}
+                                        onFocus={(event) => event.target.select()}
+                                        onPaste={(event) => event.preventDefault()}
+                                    />
+                                </div>
+                            </div>
+                            <button>Submit Training Request</button>
+                        </label>
+                    </form>
                 </div>
             }
 

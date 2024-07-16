@@ -182,7 +182,7 @@ function WhisperSeg(
         <>
             <Tooltip title="Call WhisperSeg">
                 <IconButton
-                    style={{...activeIconBtnStyle, ...(strictMode || !audioId && iconBtnDisabled)}}
+                    style={{...activeIconBtnStyle, ...((strictMode || !audioId) && iconBtnDisabled)}}
                     disabled={strictMode || !audioId}
                     onClick={handleClickWhisperSeg}
                 >

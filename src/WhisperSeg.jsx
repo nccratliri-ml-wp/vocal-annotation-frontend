@@ -29,9 +29,14 @@ function WhisperSeg(
     const [modelsAvailableForFinetuning, setModelsAvailableForFinetuning] = useState()
     const [modelsAvailableForInference, setModelsAvailableForInference] = useState()
     const [modelsCurrentlyTrained, setModelsCurrentlyTrained] = useState()
+    const [currentlyTrainedModelsNames, setCurrentlyTrainedModelsNames] = useState([])
 
     const passShowModelsWindowToWhisperSeg = ( boolean) => {
         setShowModelsWindow( boolean )
+    }
+
+    const passCurrentlyTrainedModelsNamesToWhisperSeg = ( updatedArray ) => {
+        setCurrentlyTrainedModelsNames( updatedArray )
     }
 
     const handleClickWhisperSeg = () => {
@@ -39,7 +44,7 @@ function WhisperSeg(
     }
 
     const getAllModels = async () => {
-        if (!showModelsWindow) return
+        if (!showModelsWindow && currentlyTrainedModelsNames.length === 0) return
         /* Add additional run condition:
         * Function should run when window is open or when user has sent a finetune request. (Store that information in a state)
         * */
@@ -153,6 +158,26 @@ function WhisperSeg(
         return () => clearInterval(interval)
     }, [showModelsWindow])
 
+    // When currently trained models change, check if a new model has finished training and display a pop-up
+    useEffect( () => {
+        if (!modelsCurrentlyTrained) return
+
+        const allCurrentlyTrainedModelNames = modelsCurrentlyTrained.map(model => model.model_name)
+
+        const updatedModelsInTrainingQueue = []
+
+        for (const modelName of currentlyTrainedModelsNames){
+            if (allCurrentlyTrainedModelNames.includes(modelName)){
+                updatedModelsInTrainingQueue.push(modelName)
+            } else {
+                toast.success(`New custom model "${modelName}" has finished training!`)
+            }
+        }
+
+        passCurrentlyTrainedModelsNamesToWhisperSeg(updatedModelsInTrainingQueue)
+
+    }, [modelsCurrentlyTrained])
+
     return (
         <>
             <Tooltip title="Call WhisperSeg">
@@ -164,7 +189,7 @@ function WhisperSeg(
                     <AutoFixHighIcon style={activeIcon}/>
                 </IconButton>
             </Tooltip>
-
+            {currentlyTrainedModelsNames.length}
             {showModelsWindow &&
                 <ModelsWindow
                     modelsAreLoading={modelsAreLoading}
@@ -180,6 +205,8 @@ function WhisperSeg(
                     passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
                     passSpeciesArrayToApp={passSpeciesArrayToApp}
                     assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
+                    currentlyTrainedModelsNames={currentlyTrainedModelsNames}
+                    passCurrentlyTrainedModelsNamesToWhisperSeg={passCurrentlyTrainedModelsNamesToWhisperSeg}
                 />
             }
 

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {toast} from "react-toastify";
 import {ANNOTATED_AREA, createSpeciesFromImportedLabels} from "./species.js";
 import axios from "axios";
@@ -21,16 +21,12 @@ function ModelsWindow (
             passLabelsToScalableSpec,
             passWhisperSegIsLoadingToScalableSpec,
             passSpeciesArrayToApp,
-            assignSpeciesInformationToImportedLabels
+            assignSpeciesInformationToImportedLabels,
+            currentlyTrainedModelsNames,
+            passCurrentlyTrainedModelsNamesToWhisperSeg
         }
     )
 {
-
-    // Task: Get toast when model is finsihed training
-    /*
-    * 1. collect list with model names being trained
-    * 2. When model disappears from modelsCurrentlyTrained, remove it from the list and display the pop-up message
-    * */
 
     const [showInferenceTab, setShowInferenceTab] = useState(true)
     const [showFinetuningTab, setShowFinetuningTab] = useState(false)
@@ -43,7 +39,6 @@ function ModelsWindow (
     const [minFreqFinetuneInput, setMinFreqFinetuneInput] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
 
-    const [currentlyTrainedModelsNames, setCurrentlyTrainedModelsNames] = useState([])
 
     const handleClickInferenceTab = () => {
         setShowInferenceTab(true)
@@ -217,7 +212,8 @@ function ModelsWindow (
         try {
             await axios.post(path, requestParameters)
             toast.success('Custom model started training and will be available soon.')
-            setCurrentlyTrainedModelsNames(prevState => [...prevState, newModelName])
+            const updatedArray = [...currentlyTrainedModelsNames, newModelName]
+            passCurrentlyTrainedModelsNamesToWhisperSeg(updatedArray)
             setNewModelName('')
 
         } catch (error){
@@ -225,25 +221,6 @@ function ModelsWindow (
             console.error(error)
         }
     }
-
-    useEffect( () => {
-        if (!modelsCurrentlyTrained) return
-
-        const allCurrentlyTrainedModelNames = modelsCurrentlyTrained.map(model => model.model_name)
-
-        const updatedModelsInTrainingQueue = []
-
-        for (const modelName of currentlyTrainedModelsNames){
-            if (allCurrentlyTrainedModelNames.includes(modelName)){
-                updatedModelsInTrainingQueue.push(modelName)
-            } else {
-                toast.success(`New custom model "${modelName}" has finished training!`)
-            }
-        }
-
-        setCurrentlyTrainedModelsNames(updatedModelsInTrainingQueue)
-
-    }, [modelsCurrentlyTrained])
 
     return (
         <div id='models-window'>

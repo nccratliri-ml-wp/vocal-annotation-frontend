@@ -144,6 +144,9 @@ function WhisperSeg(
         return response.data.response
     }
 
+
+    /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
+
     // When user clicks on CallWhisperSeg button
     useEffect(() => {
         // Get Models immediately

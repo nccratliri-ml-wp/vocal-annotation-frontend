@@ -482,19 +482,24 @@ html, body {
   font-weight: bold;
 }
 
-.window-label-play-btn{
+.label-window-audio-btn-container{
+  display: flex;
+  margin: 7px;
+}
+
+.label-window-audio-btn{
   display: flex;
   align-items: center;
   font-size: 12px;
   width: fit-content;
-  margin: 7px;
+  margin: 4px;
   padding: 7px 12px 7px 5px;
   background-color: #082536;
   border-radius: 30px;
   cursor: pointer;
 }
 
-.window-label-play-btn:hover{
+.label-window-audio-btn:hover{
   background-color: #0a2b3f;
 }
 

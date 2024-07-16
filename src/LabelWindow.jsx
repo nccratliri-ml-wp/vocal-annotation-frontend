@@ -16,6 +16,9 @@ import {
 } from "./species.js";
 import {iconSmall} from "./styles.js";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
+import DownloadIcon from '@mui/icons-material/Download'
+import axios from "axios";
+
 
 function LabelWindow(
                         {
@@ -26,6 +29,7 @@ function LabelWindow(
                             passExpandedLabelToScalableSpec,
                             getAllIndividualIDs,
                             globalMouseCoordinates,
+                            audioId,
                             getAudio
                         }
                     )
@@ -213,6 +217,47 @@ function LabelWindow(
         })
     }
 
+    /* ++++++++++++++++++ Audio Download ++++++++++++++++++ */
+
+    const downloadAudioClip = async (newStartTime, newEndTime) => {
+
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
+        try {
+            const response = await axios.post(path, {
+                audio_id: audioId,
+                start_time: newStartTime,
+                clip_duration: newEndTime
+            })
+            const audioBase64 = response.data.wav
+
+            // Decode the base64 string to binary data
+            const binaryString = atob(audioBase64)
+            const len = binaryString.length
+            const bytes = new Uint8Array(len)
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i)
+            }
+
+            // Create a Blob from the binary data
+            const blob = new Blob([bytes], { type: 'audio/wav' })
+
+            // Create a temporary URL for the Blob
+            const url = URL.createObjectURL(blob)
+
+            // Create a temporary anchor element and trigger the download
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'audio_clip.wav' // Set the desired file name here
+            document.body.appendChild(a)
+            a.click()
+
+            // Clean up by revoking the object URL and removing the anchor element
+            URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.error("Error fetching audio clip:", error)
+        }
+    }
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
@@ -238,9 +283,15 @@ function LabelWindow(
                 <p className='window-header'>Reassign label</p>
             </div>
 
-            <div className='window-label-play-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
-                <PlayArrowIcon style={iconSmall}/>
-                Playback Section
+            <div className='label-window-audio-btn-container'>
+                <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                    <PlayArrowIcon style={iconSmall}/>
+                    Play Audio
+                </div>
+                <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                    <DownloadIcon style={iconSmall}/>
+                    Download Audio
+                </div>
             </div>
 
             <div className='label-window-content'>

@@ -1720,14 +1720,14 @@ function ScalableSpec(
                 start_time: newStartTime,
                 clip_duration: newEndTime
             })
-            handleNewAudio(response.data.wav);
+            handleNewAudio(response.data.wav)
         } catch (error) {
-            console.error("Error fetching audio clip:", error);
+            console.error("Error fetching audio clip:", error)
         }
     }
 
     const handleNewAudio = (newAudioBase64String) => {
-        const audio = new Audio(`data:audio/ogg;base64,${newAudioBase64String}`);
+        const audio = new Audio(`data:audio/ogg;base64,${newAudioBase64String}`)
         setAudioSnippet(audio)
     }
 
@@ -2390,6 +2390,7 @@ function ScalableSpec(
                                     passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
                                     getAllIndividualIDs={getAllIndividualIDs}
                                     globalMouseCoordinates={globalMouseCoordinates}
+                                    audioId={audioId}
                                     getAudio={getAudio}
                                 />,
                                 document.body

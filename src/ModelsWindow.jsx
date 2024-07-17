@@ -312,7 +312,7 @@ function ModelsWindow (
                     <table className='models-table'>
                         <thead>
                         <tr>
-                            <th className='models-table-header-1'>Model</th>
+                            <th className='models-table-header-1'>Initial Checkpoint</th>
                             <th className='models-table-header-2'>ETA</th>
                             <th className='models-table-header-3'>Status</th>
                         </tr>

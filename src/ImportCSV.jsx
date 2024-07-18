@@ -3,8 +3,9 @@ import IconButton from "@material-ui/core/IconButton"
 import Tooltip from "@material-ui/core/Tooltip"
 import UploadFileIcon from "@mui/icons-material/UploadFile"
 import {globalControlsBtn, icon} from "./styles.js"
+import {createSpeciesFromImportedLabels} from "./species.js";
 
-function ImportCSV( {passImportedLabelsToApp} ) {
+function ImportCSV( {passImportedLabelsToApp, speciesArray, createSpeciesFromImportedLabels, passSpeciesArrayToApp} ) {
 
     const [fileUploaded, setFileUploaded] = useState(false);
 
@@ -36,6 +37,10 @@ function ImportCSV( {passImportedLabelsToApp} ) {
                     })
 
                 }
+
+
+                const newSpeciesArray = createSpeciesFromImportedLabels(importedLabelsArray, speciesArray)
+                passSpeciesArrayToApp(newSpeciesArray)
 
                 passImportedLabelsToApp(importedLabelsArray)
                 setFileUploaded(event.target.files[0].name)

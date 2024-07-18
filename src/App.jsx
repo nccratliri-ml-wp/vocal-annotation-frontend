@@ -584,12 +584,14 @@ function App() {
 
     }, [location])
 
+    /*
     // When labels are imported from a local CSV file
     useEffect( () => {
         if (!importedLabels) return
         const updatedSpeciesArray = createSpeciesFromImportedLabels(importedLabels, speciesArray)
         setSpeciesArray(updatedSpeciesArray)
     }, [importedLabels])
+    */
 
     // When all the tracks have pushed their labels to allLabels state variable in App.jsx
     useEffect( () => {
@@ -683,6 +685,9 @@ function App() {
                 <div id={'settings-download-submit-container'}>
                     <ImportCSV
                         passImportedLabelsToApp={passImportedLabelsToApp}
+                        speciesArray={speciesArray}
+                        createSpeciesFromImportedLabels={createSpeciesFromImportedLabels}
+                        passSpeciesArrayToApp={passSpeciesArrayToApp}
                     />
                     <Export
                         tracks={tracks}

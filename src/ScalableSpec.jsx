@@ -1426,10 +1426,10 @@ function ScalableSpec(
     }
 
     const assignSpeciesInformationToImportedLabels = (currentSpeciesArray, genericLabelObjectsArray) => {
-        const allIndividualIDs = getAllIndividualIDs(speciesArray)
+        const allIndividualIDs = getAllIndividualIDs(currentSpeciesArray)
 
         // Iterate over the imported labels array
-        return genericLabelObjectsArray.map( label => {
+        const myarr = genericLabelObjectsArray.map( label => {
 
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
@@ -1470,6 +1470,9 @@ function ScalableSpec(
 
             return updatedLabel
         })
+
+        console.log(myarr)
+        return myarr
     }
 
 
@@ -2054,16 +2057,6 @@ function ScalableSpec(
 
     }, [activeLabel] )
 
-    // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
-    useEffect(() => {
-        if (!speciesArray) return
-
-        const updatedLabels = updateLabelsWithSpeciesArrayData()
-
-        setLabels(updatedLabels)
-
-    }, [speciesArray])
-
     // When user zoomed or scrolled
     useEffect( () => {
             if (!globalClipDuration || !trackData.audioID) return
@@ -2077,11 +2070,27 @@ function ScalableSpec(
 
     }, [currentStartTime, globalClipDuration, audioId])
 
+    // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
+    useEffect(() => {
+        if (!speciesArray) return
+
+        const updatedLabels = updateLabelsWithSpeciesArrayData()
+
+        setLabels(updatedLabels)
+
+    }, [speciesArray])
+
     // When a CSV File is uploaded (or labels are passed through the URL parameter)
     useEffect( () => {
         if (!importedLabels) return
 
         let newImportedLabels = importedLabels.filter( label => label.channelIndex === trackData.channelIndex && label.filename === trackData.filename)
+
+        console.log(importedLabels[0].channelIndex)
+        console.log(importedLabels[0].filename)
+
+        console.log(trackData.channelIndex)
+        console.log(trackData.filename)
 
         newImportedLabels = assignSpeciesInformationToImportedLabels(speciesArray, newImportedLabels)
         setLabels((prevLabels) => [...prevLabels, ...newImportedLabels])

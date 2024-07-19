@@ -223,7 +223,7 @@ function ModelsWindow (
     }
 
     return (
-        <div id='models-window'>
+        <div className='models-window'>
 
             <div className='models-window-header'>
                 <div className='close-btn-container'>
@@ -251,7 +251,7 @@ function ModelsWindow (
                         In Training
                     </div>
                 </div>
-                {modelsAreLoading && <Box sx={{width: '100%'}}><LinearProgress/></Box>}
+                {modelsAreLoading ? <Box sx={{width: '100%'}}><LinearProgress/></Box> : <div style={{height: '4px'}}></div>}
             </div>
 
             {showInferenceTab &&
@@ -269,7 +269,7 @@ function ModelsWindow (
                             modelsAvailableForInference && modelsAvailableForInference.map(model => {
                                 return (
                                     <tr key={nanoid()}>
-                                        <td className='models-table-cell'>
+                                        <td className='cell1'>
                                             <label>
                                                 <input
                                                     type="radio"
@@ -281,8 +281,8 @@ function ModelsWindow (
                                                 {model.model_name}
                                             </label>
                                         </td>
-                                        <td className='models-table-cell'>{model.eta === '--:--:--' ? '' : model.eta}</td>
-                                        <td className='models-table-cell'>{model.status}</td>
+                                        <td className='cell2'>{model.eta === '--:--:--' ? '' : model.eta}</td>
+                                        <td className='cell3'>{model.status}</td>
                                     </tr>
                                 )
                             })
@@ -310,19 +310,19 @@ function ModelsWindow (
             {showFinetuningTab &&
                 <div className='models-container'>
                     <table className='models-table'>
-                        <thead>
+                        <thead >
                         <tr>
                             <th className='models-table-header-1'>Initial Checkpoint</th>
                             <th className='models-table-header-2'>ETA</th>
                             <th className='models-table-header-3'>Status</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody className='models-table-body'>
                         {
                             modelsAvailableForFinetuning && modelsAvailableForFinetuning.map(model => {
                                 return (
                                     <tr key={nanoid()}>
-                                        <td>
+                                        <td className='cell1'>
                                             <label>
                                                 <input
                                                     type="radio"
@@ -333,17 +333,15 @@ function ModelsWindow (
                                                 {model.model_name}
                                             </label>
                                         </td>
-                                        <td className='models-table-cell'>{model.eta === '--:--:--' ? '' : model.eta}</td>
-                                        <td>{model.status}</td>
+                                        <td className='cell2'>{model.eta === '--:--:--' ? '' : model.eta}</td>
+                                        <td className='cell3'>{model.status}</td>
                                     </tr>
                                 )
                             })
                         }
                         </tbody>
                     </table>
-                    <form
-                        onSubmit={handleClickSubmitTrainingRequestBtn}
-                    >
+                    <form onSubmit={handleClickSubmitTrainingRequestBtn}>
                         <label className='finetuning-label'>
                             <div className='finetuning-models-inputs-container'>
                                 <div>

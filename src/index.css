@@ -566,12 +566,7 @@ html, body {
 
 /* -------------------------- WhisperSeg -------------------------- */
 
-#models-window{
-
-  height: 50vh;
-  width: 40vw;
-  transform: translate(-50%, -50%);
-  overflow-y: scroll;
+.models-window{
   border: 2px solid #ffffff;
   border-radius: 5px;
   background: #082536;
@@ -617,18 +612,24 @@ html, body {
   table-layout: fixed;
 }
 
-.models-table-header-1{
+.models-table > thead{
+  display: block;
+}
+
+.models-table > tbody{
+  display: block;
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.models-table-header-1, .cell1{
   text-align: left;
   width: 36vw;
 }
 
-.models-table-header-2, .models-table-header-3{
+.models-table-header-2, .models-table-header-3, .cell2, .cell3{
   text-align: left;
   width: 7vw;
-}
-
-.models-table-cell{
-  word-break: break-all
 }
 
 .inference-models-buttons-container{
@@ -686,6 +687,8 @@ html, body {
 
 
 
+/* Put the following in the right section at some point*/
+
 #blank-space{
   position: fixed;
   z-index: 1;
@@ -700,12 +703,10 @@ html, body {
 }
 
 
-
-
 .draggable-container{
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 30%;
+  left: 25%;
   z-index: 4;
 }
 

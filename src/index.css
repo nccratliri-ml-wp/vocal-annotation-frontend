@@ -567,13 +567,10 @@ html, body {
 /* -------------------------- WhisperSeg -------------------------- */
 
 #models-window{
-  position: fixed;
-  top: 50%;
-  left: 50%;
+
   height: 50vh;
   width: 40vw;
   transform: translate(-50%, -50%);
-  z-index: 4;
   overflow-y: scroll;
   border: 2px solid #ffffff;
   border-radius: 5px;
@@ -702,6 +699,15 @@ html, body {
   padding: 200px 0 0 0;
 }
 
+
+
+
+.draggable-container{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+}
 
 
 

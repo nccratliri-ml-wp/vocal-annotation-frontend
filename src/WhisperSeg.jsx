@@ -6,6 +6,7 @@ import React, {useEffect, useState} from "react";
 import ModelsWindow from "./ModelsWindow.jsx";
 import axios from "axios";
 import {toast} from "react-toastify";
+import Draggable from 'react-draggable';
 
 function WhisperSeg(
         {
@@ -194,25 +195,28 @@ function WhisperSeg(
             </Tooltip>
 
             {showModelsWindow &&
-                <ModelsWindow
-                    modelsAreLoading={modelsAreLoading}
-                    modelsAvailableForInference={modelsAvailableForInference}
-                    modelsAvailableForFinetuning={modelsAvailableForFinetuning}
-                    modelsCurrentlyTrained={modelsCurrentlyTrained}
-                    passShowModelsWindowToWhisperSeg={passShowModelsWindowToWhisperSeg}
-                    audioId={audioId}
-                    minFreq={minFreq}
-                    labels={labels}
-                    speciesArray={speciesArray}
-                    passLabelsToScalableSpec={passLabelsToScalableSpec}
-                    passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
-                    passSpeciesArrayToApp={passSpeciesArrayToApp}
-                    assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
-                    currentlyTrainedModelsNames={currentlyTrainedModelsNames}
-                    passCurrentlyTrainedModelsNamesToWhisperSeg={passCurrentlyTrainedModelsNamesToWhisperSeg}
-                />
+                <Draggable>
+                    <div className="draggable-container">
+                        <ModelsWindow
+                            modelsAreLoading={modelsAreLoading}
+                            modelsAvailableForInference={modelsAvailableForInference}
+                            modelsAvailableForFinetuning={modelsAvailableForFinetuning}
+                            modelsCurrentlyTrained={modelsCurrentlyTrained}
+                            passShowModelsWindowToWhisperSeg={passShowModelsWindowToWhisperSeg}
+                            audioId={audioId}
+                            minFreq={minFreq}
+                            labels={labels}
+                            speciesArray={speciesArray}
+                            passLabelsToScalableSpec={passLabelsToScalableSpec}
+                            passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                            passSpeciesArrayToApp={passSpeciesArrayToApp}
+                            assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
+                            currentlyTrainedModelsNames={currentlyTrainedModelsNames}
+                            passCurrentlyTrainedModelsNamesToWhisperSeg={passCurrentlyTrainedModelsNamesToWhisperSeg}
+                        />
+                    </div>
+                </Draggable>
             }
-
         </>
     )
 }

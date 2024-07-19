@@ -619,7 +619,7 @@ html, body {
 .models-table > tbody{
   display: block;
   height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .models-table-header-1, .cell1{

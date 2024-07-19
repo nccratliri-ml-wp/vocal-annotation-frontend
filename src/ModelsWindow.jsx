@@ -205,7 +205,7 @@ function ModelsWindow (
             annotated_areas: annotatedAreas,
             human_labels: convertedLabels,
             new_model_name: newModelName,
-            inital_model_name: selectedFinetuningModel,
+            initial_model_name: selectedFinetuningModel,
             min_frequency: minFreqFinetuneInput
         }
 
@@ -388,9 +388,9 @@ function ModelsWindow (
                         <tbody>
                         {modelsCurrentlyTrained && modelsCurrentlyTrained.map(model => (
                             <tr key={nanoid()}>
-                                <td>{model.model_name}</td>
-                                <td>{model.eta}</td>
-                                <td>{model.status}</td>
+                                <td className='cell1'>{model.model_name}</td>
+                                <td className='cell2'>{model.eta}</td>
+                                <td className='cell3'>{model.status}</td>
                             </tr>
                         ))}
                         </tbody>

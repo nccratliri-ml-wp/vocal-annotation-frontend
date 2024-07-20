@@ -1429,7 +1429,7 @@ function ScalableSpec(
         const allIndividualIDs = getAllIndividualIDs(currentSpeciesArray)
 
         // Iterate over the imported labels array
-        const myarr = genericLabelObjectsArray.map( label => {
+        return genericLabelObjectsArray.map( label => {
 
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
@@ -1470,9 +1470,6 @@ function ScalableSpec(
 
             return updatedLabel
         })
-
-        console.log(myarr)
-        return myarr
     }
 
 
@@ -2085,12 +2082,6 @@ function ScalableSpec(
         if (!importedLabels) return
 
         let newImportedLabels = importedLabels.filter( label => label.channelIndex === trackData.channelIndex && label.filename === trackData.filename)
-
-        console.log(importedLabels[0].channelIndex)
-        console.log(importedLabels[0].filename)
-
-        console.log(trackData.channelIndex)
-        console.log(trackData.filename)
 
         newImportedLabels = assignSpeciesInformationToImportedLabels(speciesArray, newImportedLabels)
         setLabels((prevLabels) => [...prevLabels, ...newImportedLabels])

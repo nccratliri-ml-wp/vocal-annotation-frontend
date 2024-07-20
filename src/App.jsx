@@ -360,10 +360,6 @@ function App() {
 
     }
 
-    /* ++++++++++++++++++ Helper Methods ++++++++++++++++++ */
-
-
-
     /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
 
     const uploadFileByURL = async (audioPayload) => {
@@ -390,6 +386,7 @@ function App() {
     }
 
     const processAudioFilesSequentially = async (audioFilesArray) => {
+        console.log('processAudioFilesSequentially')
         const loadingProgressStep = 100 / audioFilesArray.length;
 
         setFilesUploading(true)
@@ -539,34 +536,27 @@ function App() {
         let ignore = false
 
         const queryParams = new URLSearchParams(location.search)
-        const hashID = queryParams?.get('hash-id')
         const strictMode = queryParams?.get('strict-mode')
-
-        if (!hashID) return
+        const hashID = queryParams?.get('hash-id')
+        const metaData = queryParams?.get('metadata')
 
         if (strictMode?.toLowerCase() === 'true'){
             setStrictMode(true)
         }
 
-        const path = `/api/metadata/${hashID}`
+        const getMetaDataFromHashID = async () => {
+            const path = `/api/metadata/${hashID}`
 
-        const getMetaData = async () => {
             const response = await axios.get(path)
             const audioFilesArray = response.data.response
             //const audioFilesArray = dummyData.response // For testing purposes
 
-            // Create Species, Individuals and clustername buttons deriving from the imported labels. Extract labels for the tracks.
-            const allLabels = []
-            for (let audioFile of audioFilesArray){
-                for (const channelIndex in audioFile.labels.channels){
-                    let labels = audioFile.labels.channels[channelIndex]
-                    labels = labels.map( label => ( {...label, filename: audioFile.filename, channelIndex: Number(channelIndex)} ) )
-                    allLabels.push(...labels)
-                }
-            }
-
             if (!ignore) return
 
+            // Extract labels
+            const allLabels = extractLabels(audioFilesArray)
+
+            // Create Species, Individuals and clustername buttons deriving from the imported labels.
             const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)
             setSpeciesArray(updatedSpeciesArray)
             setImportedLabels(allLabels)
@@ -576,13 +566,51 @@ function App() {
             processAudioFilesSequentially(audioFilesArray)
         }
 
-        getMetaData()
+        const processMetadataFromBase64String = async () => {
+            const decodedMetaData = await JSON.parse(atob(decodeURIComponent(metaData)))
+            const audioFilesArray = decodedMetaData.response
+
+            if (!ignore) return
+
+            // Extract labels
+            const allLabels = extractLabels(audioFilesArray)
+
+            // Create Species, Individuals and clustername buttons deriving from the imported labels.
+            const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)
+            setSpeciesArray(updatedSpeciesArray)
+            setImportedLabels(allLabels)
+            setAnnotationInstance(audioFilesArray[0].annotation_instance)
+
+            // Prepare for upload
+            processAudioFilesSequentially(audioFilesArray)
+        }
+
+        if (hashID) {
+            getMetaDataFromHashID()
+        }
+
+        if (metaData) {
+            processMetadataFromBase64String()
+        }
 
         return () => {
             ignore = true
         }
 
     }, [location])
+
+    const extractLabels = (audioFilesArray) => {
+        const allLabels = []
+        for (let audioFile of audioFilesArray){
+            for (const channelIndex in audioFile.labels.channels){
+                let labels = audioFile.labels.channels[channelIndex]
+                labels = labels.map( label => ( {...label, filename: audioFile.filename, channelIndex: Number(channelIndex)} ) )
+                allLabels.push(...labels)
+            }
+        }
+
+        return allLabels
+    }
 
     /*
     // When labels are imported from a local CSV file

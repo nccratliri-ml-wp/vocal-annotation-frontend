@@ -2287,7 +2287,7 @@ function ScalableSpec(
                                 </Tooltip>
                                 <Tooltip title="Delete Track">
                                     <IconButton
-                                        style={{...activeIconBtnStyle, ...(strictMode || showOverviewBarAndTimeAxis && iconBtnDisabled)}}
+                                        style={{...activeIconBtnStyle, ...((strictMode || showOverviewBarAndTimeAxis) && iconBtnDisabled)}}
                                         disabled={strictMode || showOverviewBarAndTimeAxis}
                                         onClick={handleRemoveTrack}
                                     >

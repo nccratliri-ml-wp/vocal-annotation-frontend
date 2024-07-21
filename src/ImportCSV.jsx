@@ -5,7 +5,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile"
 import {globalControlsBtn, icon} from "./styles.js"
 import {createSpeciesFromImportedLabels} from "./species.js";
 
-function ImportCSV( {passImportedLabelsToApp, speciesArray, createSpeciesFromImportedLabels, passSpeciesArrayToApp} ) {
+function ImportCSV( {passImportedLabelsToApp, speciesArray, passSpeciesArrayToApp} ) {
 
     const [fileUploaded, setFileUploaded] = useState(false);
 

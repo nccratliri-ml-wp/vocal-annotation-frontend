@@ -1482,6 +1482,7 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
+        const overviewTimeAxisContainer = document.getElementById('overview-time-axis-container')
 
         // Deal with click on Start Frame
         if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
@@ -1509,6 +1510,8 @@ function ScalableSpec(
     }
 
     const stopDragViewport = () => {
+        console.log('stop drag viewoport run')
+        //const overviewTimeAxisContainer = document.getElementById('overview-time-axis-container')
         overviewRef.current.removeEventListener('mousemove', dragStartFrame)
         overviewRef.current.removeEventListener('mousemove', dragEndFrame)
         overviewRef.current.removeEventListener('mousemove', dragViewport)
@@ -2148,7 +2151,7 @@ function ScalableSpec(
     return (
         <>
             {showOverviewBarAndTimeAxis && trackData &&
-                <div className='overview-time-axis-container'>
+                <div id='overview-time-axis-container'>
                     <canvas
                         className='overview-canvas'
                         ref={overviewRef}

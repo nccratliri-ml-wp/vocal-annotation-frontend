@@ -5,6 +5,28 @@ const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
 const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
+const CLUSTERNAME_COLOR_ARRAY = [
+    "#ff3333", // Tomato
+    "#33FF57", // Light Green
+    "#3357FF", // Blue
+    "#FF33A1", // Pink
+    "#FFB533", // Orange
+    "#33FFF5", // Cyan
+    "#8D33FF", // Purple
+    "#F0FF33", // Yellow
+    "#f3c455", // Beige
+    "#33FFD7", // Aqua
+    "#FF8C33", // Coral
+    "#fff", // White
+    "#33A1FF", // Sky Blue
+    "#cc77c1", // Pale Pink
+    "#114b6e", // Dark Blue
+    "#B8E986", // Grasshoper
+    "#33FF8C", // Spring Green
+    "#8B572A", // Brown
+    "#FA8072", // Salmon
+    "#9B9B9B", // Gray
+]
 const INACTIVE_BUTTON_COLOR = '#626262'
 const ANNOTATED_AREA = 'Annotated Area'
 const ANNOTATED_AREA_INDIVIDUAL = '🔒'
@@ -90,9 +112,14 @@ const checkIfEveryObjectIsInactive = (objects) => {
     return objects.every(object => !object.isActive)
 }
 
+const goToNextColor = (currentIndex) => {
+    return currentIndex === CLUSTERNAME_COLOR_ARRAY.length ? 0 : currentIndex++
+}
+
 const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) => {
     let updatedSpeciesArray = [...currentSpeciesArray]
     const allExistingSpeciesNames = currentSpeciesArray.map(speciesObj => speciesObj.name)
+    let clusternameColorIndex = 0
 
     for (let label of importedLabels){
 
@@ -109,9 +136,10 @@ const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) =>
 
                 const allClusternamesNames = speciesObj.clusternames.map(clustername => clustername.name)
                 if ( !allClusternamesNames.includes(label.clustername) ){
-                    const newClustername = new Clustername(nanoid(), label.clustername)
+                    const newClustername = new Clustername(nanoid(), label.clustername, CLUSTERNAME_COLOR_ARRAY[clusternameColorIndex])
                     newClustername.isActive = false
                     speciesObj.clusternames = [...speciesObj.clusternames, newClustername]
+                    clusternameColorIndex = goToNextColor(clusternameColorIndex)
                 }
             }
         }
@@ -141,9 +169,10 @@ const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) =>
 
             // If that label's clustername is not Unknown, create that clustername for this species
             if (label.clustername !== UNKNOWN_CLUSTERNAME) {
-                const newClustername = new Clustername(nanoid(), label.clustername)
+                const newClustername = new Clustername(nanoid(), label.clustername, CLUSTERNAME_COLOR_ARRAY[clusternameColorIndex])
                 newClustername.isActive = false
                 newClusternamesArray.push(newClustername)
+                clusternameColorIndex = goToNextColor(clusternameColorIndex)
             }
 
             const newSpecies = new Species(

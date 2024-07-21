@@ -42,7 +42,7 @@ html, body {
   user-select: none;
 }
 
-.overview-time-axis-container{
+#overview-time-axis-container{
   position: fixed;
   top: 100px;
   z-index: 2;

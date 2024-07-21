@@ -262,7 +262,6 @@ function App() {
         })
 
         setTracks(updatedTracks)
-
     }
 
 
@@ -521,6 +520,22 @@ function App() {
     }
 
 
+    /* ++++++++++++++++++ Helper methods ++++++++++++++++++ */
+
+    const extractLabels = (audioFilesArray) => {
+        const allLabels = []
+        for (let audioFile of audioFilesArray){
+            for (const channelIndex in audioFile.labels.channels){
+                let labels = audioFile.labels.channels[channelIndex]
+                labels = labels.map( label => ( {...label, filename: audioFile.filename, channelIndex: Number(channelIndex)} ) )
+                allLabels.push(...labels)
+            }
+        }
+
+        return allLabels
+    }
+
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     // When tracks are being changed, recalculate currently longest track and set that as global audio duration
@@ -598,19 +613,6 @@ function App() {
         }
 
     }, [location])
-
-    const extractLabels = (audioFilesArray) => {
-        const allLabels = []
-        for (let audioFile of audioFilesArray){
-            for (const channelIndex in audioFile.labels.channels){
-                let labels = audioFile.labels.channels[channelIndex]
-                labels = labels.map( label => ( {...label, filename: audioFile.filename, channelIndex: Number(channelIndex)} ) )
-                allLabels.push(...labels)
-            }
-        }
-
-        return allLabels
-    }
 
     /*
     // When labels are imported from a local CSV file
@@ -714,7 +716,6 @@ function App() {
                     <ImportCSV
                         passImportedLabelsToApp={passImportedLabelsToApp}
                         speciesArray={speciesArray}
-                        createSpeciesFromImportedLabels={createSpeciesFromImportedLabels}
                         passSpeciesArrayToApp={passSpeciesArrayToApp}
                     />
                     <Export

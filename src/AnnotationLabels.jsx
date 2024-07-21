@@ -805,7 +805,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                 </div>
 
                                 <div className='clustername-btn-container'>
-                                    Classes:
+                                    Vocalizations:
                                     {
                                         species.clusternames.map(clustername =>
                                             <div

@@ -1,14 +1,21 @@
 import React, { useState } from 'react'
 import Sketch from '@uiw/react-color-sketch'
 
-function Colorwheel( { toggleColorwheel, passChosenColorToAnnotationLabels, selectedID, selectedClustername } ) {
+function Colorwheel( { closeColorwheel, passChosenColorToAnnotationLabels, selectedID, selectedClustername, globalMouseCoordinates } ) {
+
     const [hex, setHex] = useState(selectedClustername.color)
     const [disableAlpha, setDisableAlpha] = useState(false)
 
     return (
-        <div className='colorwheel' >
+        <div
+            className='colorwheel'
+            style={{
+                top: globalMouseCoordinates.y + 10,
+                left: globalMouseCoordinates.x + 10
+            }}
+        >
             <div className='close-btn-container'>
-                <button className='close-btn' onClick={() => toggleColorwheel(selectedID, selectedClustername)}>
+                <button className='close-btn' onClick={() => closeColorwheel(selectedID, selectedClustername)}>
                     ✖
                 </button>
             </div>

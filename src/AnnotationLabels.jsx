@@ -45,6 +45,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
     const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
+    const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -527,15 +528,73 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const toggleColorwheel = (selectedID, selectedClustername) => {
+    const openColorwheel = (event, selectedID, selectedClustername) => {
+        // Set Global Mouse Coordinates to place the Colorwheel Window at the correct location on the screen
+        setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
+
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
+                // Open Colorwheel of the clicked clustername
                 const updatedClusternames = speciesObject.clusternames.map( clustername => {
                     if (clustername === selectedClustername){
                         const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
                         updatedClustername.isActive = clustername.isActive
-                        updatedClustername.showColorwheel = !clustername.showColorwheel
+                        updatedClustername.showColorwheel = true
+                        return updatedClustername
+                    // Close Colorwheels of all other clusternames to not clutter the user's screen
+                    } else {
+                        const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
+                        updatedClustername.isActive = clustername.isActive
+                        updatedClustername.showColorwheel = false
+                        return updatedClustername
+                    }
+                })
+
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
+                )
+
+            } else {
+
+                // Close Colorwheels of all other species
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
+                    updatedClustername.isActive = clustername.isActive
+                    updatedClustername.showColorwheel = false
+                    return updatedClustername
+                })
+
+                return new Species(
+                    speciesObject.id,
+                    speciesObject.name,
+                    speciesObject.individuals,
+                    [...updatedClusternames],
+                    speciesObject.minFreq,
+                    speciesObject.maxFreq
+                )
+            }
+        })
+
+        passSpeciesArrayToApp(modifiedSpeciesArray)
+    }
+
+    const closeColorwheel = (selectedID, selectedClustername) => {
+
+        const modifiedSpeciesArray = speciesArray.map(speciesObject => {
+            if (speciesObject.id === selectedID) {
+
+                // Close Colorwheel of the clicked clustername
+                const updatedClusternames = speciesObject.clusternames.map( clustername => {
+                    if (clustername === selectedClustername){
+                        const updatedClustername = new Clustername(clustername.id, clustername.name, clustername.color)
+                        updatedClustername.isActive = clustername.isActive
+                        updatedClustername.showColorwheel = false
                         return updatedClustername
                     } else {
                         return clustername
@@ -827,7 +886,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                 </div>
                                                 <button
                                                     className='colorwheel-btn'
-                                                    onClick={() => toggleColorwheel(species.id, clustername)}
+                                                    onClick={(event) => openColorwheel(event,species.id, clustername)}
                                                     onContextMenu={(event) => event.preventDefault()}
                                                 >
                                                     🎨️
@@ -835,10 +894,12 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                 {
                                                     clustername.showColorwheel &&
                                                         <Colorwheel
-                                                            toggleColorwheel={toggleColorwheel}
+                                                            closeColorwheel={closeColorwheel}
                                                             passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
                                                             selectedID={species.id}
-                                                            selectedClustername={clustername}/>
+                                                            selectedClustername={clustername}
+                                                            globalMouseCoordinates={globalMouseCoordinates}
+                                                        />
                                                 }
                                                 {
                                                     !strictMode &&

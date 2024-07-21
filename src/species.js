@@ -113,7 +113,7 @@ const checkIfEveryObjectIsInactive = (objects) => {
 }
 
 const goToNextColor = (currentIndex) => {
-    return currentIndex === CLUSTERNAME_COLOR_ARRAY.length ? 0 : currentIndex++
+    return currentIndex === CLUSTERNAME_COLOR_ARRAY.length -1 ? 0 : currentIndex + 1
 }
 
 const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) => {

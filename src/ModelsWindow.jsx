@@ -35,9 +35,11 @@ function ModelsWindow (
     const [selectedInferenceModel, setSelectedInferenceModel] = useState('whisperseg-base')
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
-    const [minFreqInput, setMinFreqInput] = useState(minFreq)
-    const [minFreqFinetuneInput, setMinFreqFinetuneInput] = useState(minFreq)
+    const [minFreqInference, setMinFreqInference] = useState(minFreq)
+    const [minFreqFinetune, setMinFreqFinetune] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
+    const [tokenInference, setTokenInference] = useState('')
+    const [tokenFinetune, setTokenFinetune] = useState('')
 
 
     const handleClickInferenceTab = () => {
@@ -94,7 +96,9 @@ function ModelsWindow (
         }, [])
     }
 
-    const callWhisperSeg = async() => {
+    const callWhisperSeg = async (event) => {
+        event.preventDefault()
+
         passWhisperSegIsLoadingToScalableSpec(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
 
@@ -106,7 +110,8 @@ function ModelsWindow (
             annotated_areas: annotatedAreas,
             human_labels: convertedLabels,
             model_name: selectedInferenceModel,
-            min_frequency: minFreqInput
+            min_frequency: minFreqInference,
+            token: tokenInference
         }
 
         try {
@@ -172,8 +177,12 @@ function ModelsWindow (
             passLabelsToScalableSpec(combinedLabels)
             passShowModelsWindowToWhisperSeg(false)
         } catch (error){
-            toast.error('Something went wrong with your request. Check the console to view the error.')
-            console.error(error)
+            if (error.response.status === 403){
+                toast.error('Access to WhisperSeg denied due to incorrect access token.')
+            } else {
+                toast.error('Something went wrong with your request. Check the console to view the error.')
+                console.error(error)
+            }
         } finally {
             passWhisperSegIsLoadingToScalableSpec(false)
         }
@@ -196,6 +205,7 @@ function ModelsWindow (
 
         if (!annotatedAreas.length || !convertedLabels.length){
             toast.error('Provide at least one annotated Area and one label to train the new model on.')
+            return
         }
 
         const path= import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'finetune-whisperseg'
@@ -206,7 +216,8 @@ function ModelsWindow (
             human_labels: convertedLabels,
             new_model_name: newModelName,
             initial_model_name: selectedFinetuningModel,
-            min_frequency: minFreqFinetuneInput
+            min_frequency: minFreqFinetune,
+            token: tokenFinetune
         }
 
         try {
@@ -217,8 +228,12 @@ function ModelsWindow (
             setNewModelName('')
 
         } catch (error){
-            toast.error('Something went wrong with your request. Check the console to view the error.')
-            console.error(error)
+            if (error.response.status === 403){
+                toast.error('Access to WhisperSeg denied due to incorrect access token.')
+            } else {
+                toast.error('Something went wrong with your request. Check the console to view the error.')
+                console.error(error)
+            }
         }
     }
 
@@ -289,21 +304,32 @@ function ModelsWindow (
                         }
                         </tbody>
                     </table>
-                    <div className='inference-models-buttons-container'>
-                        <label>
-                            Min Freq:
-                            <input
-                                type="number"
-                                value={minFreqInput}
-                                min={0}
-                                onChange={(event) => setMinFreqInput(event.target.value)}
-                                onKeyPress={excludeNonDigits}
-                                onFocus={(event) => event.target.select()}
-                                onPaste={(event) => event.preventDefault()}
-                            />
-                        </label>
-                        <button onClick={callWhisperSeg}>Call WhisperSeg</button>
-                    </div>
+                    <form className='models-form' onSubmit={callWhisperSeg}>
+                        <div className='models-form-input-fields'>
+                            <label>
+                                <div>Min Freq:</div>
+                                <input
+                                    type="number"
+                                    value={minFreqInference}
+                                    min={0}
+                                    onChange={(event) => setMinFreqInference(event.target.value)}
+                                    onKeyPress={excludeNonDigits}
+                                    onFocus={(event) => event.target.select()}
+                                    onPaste={(event) => event.preventDefault()}
+                                />
+                            </label>
+                            <label>
+                                <div>Access Token:</div>
+                                <input
+                                    type="text"
+                                    value={tokenInference}
+                                    onChange={(event) => setTokenInference(event.target.value)}
+                                    onFocus={(event) => event.target.select()}
+                                />
+                            </label>
+                        </div>
+                        <button disabled={!modelsAvailableForInference}>Call WhisperSeg</button>
+                    </form>
                 </div>
             }
 
@@ -341,37 +367,46 @@ function ModelsWindow (
                         }
                         </tbody>
                     </table>
-                    <form onSubmit={handleClickSubmitTrainingRequestBtn}>
-                        <label className='finetuning-label'>
-                            <div className='finetuning-models-inputs-container'>
-                                <div>
-                                    New Model Name:
-                                    <input
-                                        type="text"
-                                        value={newModelName}
-                                        required='required'
-                                        pattern='^[a-zA-Z0-9\-_\.]+$'
-                                        title='Model name has to be composed of the following charcters: A-Z a-z 0-9 _ - .'
-                                        onChange={(event) => setNewModelName(event.target.value)}
-                                        onFocus={(event) => event.target.select()}
-                                    />
-                                </div>
-                                <div>
-                                    Min Freq:
-                                    <input
-                                        type="number"
-                                        value={minFreqFinetuneInput}
-                                        min={0}
-                                        onChange={(event) => setMinFreqFinetuneInput(event.target.value)}
-                                        onKeyPress={excludeNonDigits}
-                                        onFocus={(event) => event.target.select()}
-                                        onPaste={(event) => event.preventDefault()}
-                                    />
-                                </div>
-                            </div>
-                            <button>Submit Training Request</button>
-                        </label>
+
+                    <form className='models-form' onSubmit={handleClickSubmitTrainingRequestBtn}>
+                        <div className='models-form-input-fields'>
+                            <label>
+                                <div>New Model Name:</div>
+                                <input
+                                    type="text"
+                                    value={newModelName}
+                                    required='required'
+                                    pattern='^[a-zA-Z0-9\-_\.]+$'
+                                    title='Model name has to be composed of the following characters: A-Z a-z 0-9 _ - .'
+                                    onChange={(event) => setNewModelName(event.target.value)}
+                                    onFocus={(event) => event.target.select()}
+                                />
+                            </label>
+                            <label>
+                                <div>Min Freq:</div>
+                                <input
+                                    type="number"
+                                    value={minFreqFinetune}
+                                    min={0}
+                                    onChange={(event) => setMinFreqFinetune(event.target.value)}
+                                    onKeyPress={excludeNonDigits}
+                                    onFocus={(event) => event.target.select()}
+                                    onPaste={(event) => event.preventDefault()}
+                                />
+                            </label>
+                            <label>
+                                <div>Access Token:</div>
+                                <input
+                                    type="text"
+                                    value={tokenFinetune}
+                                    onChange={(event) => setTokenFinetune(event.target.value)}
+                                    onFocus={(event) => event.target.select()}
+                                />
+                            </label>
+                        </div>
+                        <button disabled={!modelsAvailableForFinetuning}>Submit Training Request</button>
                     </form>
+
                 </div>
             }
 

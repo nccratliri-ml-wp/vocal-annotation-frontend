@@ -632,32 +632,19 @@ html, body {
   width: 7vw;
 }
 
-.inference-models-buttons-container{
+.models-form{
   display: flex;
-  justify-content: space-between;
-  padding: 5px 5px;
-  background: #082536;
-}
-
-.finetuning-label{
-  display: flex;
+  padding: 10px 5px;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 5px 5px;
-  background: #082536;
 }
 
-.finetuning-label > button{
-  height: fit-content;
-}
-
-.finetuning-models-inputs-container{
+.models-form-input-fields{
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
-.finetuning-models-inputs-container > div {
+.models-form-input-fields > label{
   display: flex;
   justify-content: space-between;
 }

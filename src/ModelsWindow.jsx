@@ -23,7 +23,11 @@ function ModelsWindow (
             passSpeciesArrayToApp,
             assignSpeciesInformationToImportedLabels,
             currentlyTrainedModelsNames,
-            passCurrentlyTrainedModelsNamesToWhisperSeg
+            passCurrentlyTrainedModelsNamesToWhisperSeg,
+            tokenInference,
+            tokenFinetune,
+            passTokenInferenceToWhisperSeg,
+            passTokenFinetuneToWhisperSeg
         }
     )
 {
@@ -38,9 +42,6 @@ function ModelsWindow (
     const [minFreqInference, setMinFreqInference] = useState(minFreq)
     const [minFreqFinetune, setMinFreqFinetune] = useState(minFreq)
     const [newModelName, setNewModelName] = useState('')
-    const [tokenInference, setTokenInference] = useState('')
-    const [tokenFinetune, setTokenFinetune] = useState('')
-
 
     const handleClickInferenceTab = () => {
         setShowInferenceTab(true)
@@ -325,7 +326,7 @@ function ModelsWindow (
                                     className='models-window-input-field'
                                     type="text"
                                     value={tokenInference}
-                                    onChange={(event) => setTokenInference(event.target.value)}
+                                    onChange={(event) => passTokenInferenceToWhisperSeg(event.target.value)}
                                     onFocus={(event) => event.target.select()}
                                 />
                             </label>
@@ -404,7 +405,7 @@ function ModelsWindow (
                                     className='models-window-input-field'
                                     type="text"
                                     value={tokenFinetune}
-                                    onChange={(event) => setTokenFinetune(event.target.value)}
+                                    onChange={(event) => passTokenFinetuneToWhisperSeg(event.target.value)}
                                     onFocus={(event) => event.target.select()}
                                 />
                             </label>

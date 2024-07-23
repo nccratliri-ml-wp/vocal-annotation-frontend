@@ -97,6 +97,9 @@ function App() {
     const [filesUploading, setFilesUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
+    const [tokenInference, setTokenInference] = useState('')
+    const [tokenFinetune, setTokenFinetune] = useState('')
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passClipDurationToApp( newClipDuration ){
@@ -161,6 +164,14 @@ function App() {
 
     function passFilesUploadingToApp( boolean ){
         setFilesUploading( boolean )
+    }
+
+    const passTokenInferenceToWhisperSeg = (newToken) => {
+        setTokenInference( newToken )
+    }
+
+    const passTokenFinetuneToWhisperSeg = (newToken) => {
+        setTokenFinetune( newToken )
     }
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
@@ -809,6 +820,10 @@ function App() {
                                 moveTrackDown={moveTrackDown}
                                 lastTrackIndex={tracks[tracks.length - 1].trackIndex}
                                 passSpeciesArrayToApp={passSpeciesArrayToApp}
+                                tokenInference={tokenInference}
+                                tokenFinetune={tokenFinetune}
+                                passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
+                                passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
                             />
                         )
                     })

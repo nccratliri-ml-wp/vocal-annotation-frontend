@@ -20,7 +20,11 @@ function WhisperSeg(
             activeIcon,
             strictMode,
             passSpeciesArrayToApp,
-            assignSpeciesInformationToImportedLabels
+            assignSpeciesInformationToImportedLabels,
+            tokenInference,
+            tokenFinetune,
+            passTokenInferenceToWhisperSeg,
+            passTokenFinetuneToWhisperSeg
         }
     )
 {
@@ -210,6 +214,10 @@ function WhisperSeg(
                             assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
                             currentlyTrainedModelsNames={currentlyTrainedModelsNames}
                             passCurrentlyTrainedModelsNamesToWhisperSeg={passCurrentlyTrainedModelsNamesToWhisperSeg}
+                            tokenInference={tokenInference}
+                            tokenFinetune={tokenFinetune}
+                            passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
+                            passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
                         />
                     </div>
                 </Draggable>

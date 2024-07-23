@@ -80,7 +80,11 @@ function ScalableSpec(
                             moveTrackUp,
                             moveTrackDown,
                             lastTrackIndex,
-                            passSpeciesArrayToApp
+                            passSpeciesArrayToApp,
+                            tokenInference,
+                            tokenFinetune,
+                            passTokenInferenceToWhisperSeg,
+                            passTokenFinetuneToWhisperSeg
                         }
                     )
                 {
@@ -2251,6 +2255,10 @@ function ScalableSpec(
                                     strictMode={strictMode}
                                     passSpeciesArrayToApp={passSpeciesArrayToApp}
                                     assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
+                                    tokenInference={tokenInference}
+                                    tokenFinetune={tokenFinetune}
+                                    passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
+                                    passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
                                 />
                                 <Tooltip title="Frequency Range">
                                     <IconButton

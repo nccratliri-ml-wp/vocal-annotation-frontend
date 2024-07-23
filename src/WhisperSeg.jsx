@@ -192,7 +192,7 @@ function WhisperSeg(
             </Tooltip>
 
             {showModelsWindow &&
-                <Draggable>
+                <Draggable cancel='.models-window-input-field'>
                     <div className="draggable-container">
                         <ModelsWindow
                             modelsAreLoading={modelsAreLoading}

@@ -309,6 +309,7 @@ function ModelsWindow (
                             <label>
                                 <div>Min Freq:</div>
                                 <input
+                                    className='models-window-input-field'
                                     type="number"
                                     value={minFreqInference}
                                     min={0}
@@ -321,6 +322,7 @@ function ModelsWindow (
                             <label>
                                 <div>Access Token:</div>
                                 <input
+                                    className='models-window-input-field'
                                     type="text"
                                     value={tokenInference}
                                     onChange={(event) => setTokenInference(event.target.value)}
@@ -373,6 +375,7 @@ function ModelsWindow (
                             <label>
                                 <div>New Model Name:</div>
                                 <input
+                                    className='models-window-input-field'
                                     type="text"
                                     value={newModelName}
                                     required='required'
@@ -385,6 +388,7 @@ function ModelsWindow (
                             <label>
                                 <div>Min Freq:</div>
                                 <input
+                                    className='models-window-input-field'
                                     type="number"
                                     value={minFreqFinetune}
                                     min={0}
@@ -397,6 +401,7 @@ function ModelsWindow (
                             <label>
                                 <div>Access Token:</div>
                                 <input
+                                    className='models-window-input-field'
                                     type="text"
                                     value={tokenFinetune}
                                     onChange={(event) => setTokenFinetune(event.target.value)}

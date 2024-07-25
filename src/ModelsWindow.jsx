@@ -36,7 +36,7 @@ function ModelsWindow (
     const [showFinetuningTab, setShowFinetuningTab] = useState(false)
     const [showTrainingTab, setShowTrainingTab] = useState(false)
 
-    const [selectedInferenceModel, setSelectedInferenceModel] = useState('whisperseg-base')
+    const [selectedInferenceModel, setSelectedInferenceModel] = useState('')
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
     const [minFreqInference, setMinFreqInference] = useState(minFreq)

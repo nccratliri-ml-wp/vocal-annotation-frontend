@@ -935,7 +935,11 @@ function ScalableSpec(
 
         const xOnset = calculateXPosition(label.onset)
         const xOffset = calculateXPosition(label.offset)
-        const y = calculateYPosition(label)
+        let y = calculateYPosition(label)
+        // Position annotate area labels onen pixel higher, so they don't get cut in half at the canvas edge
+        if (label.species === ANNOTATED_AREA){
+            y--
+        }
 
         const lineColor = label.color
 
@@ -992,7 +996,7 @@ function ScalableSpec(
         const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
 
         let xs = []
-        for (let i = 0; i < cvs.width; i += 0.1){
+        for (let i = 0; i < cvs.width; i += 0.01){
             xs.push(i)
         }
         xs = xs.filter(x => x >= curve_top_pos + offset_para - curve_width && x <= curve_top_pos)
@@ -1134,7 +1138,11 @@ function ScalableSpec(
         for (let i = 1; i <= numberOfIndividuals; i++){
             const x1 = 0
             const x2 = cvs.width
-            const y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            let y = i * HEIGHT_BETWEEN_INDIVIDUAL_LINES
+            // Position last line one pixel higher, so they don't get cut in half at the canvas edge
+            if (i === numberOfIndividuals){
+                y--
+            }
 
             ctx.beginPath()
             ctx.setLineDash([1, 3])

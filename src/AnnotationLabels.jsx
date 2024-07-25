@@ -781,14 +781,15 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                             >
                                 <legend>
                                     {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
-                                    {species.name !== UNKNOWN_SPECIES &&
+                                    {/*
+                                    species.name !== UNKNOWN_SPECIES &&
                                         <IconButton
                                             style={iconBtnSmallest}
                                             onClick={() => setShowSpeciesFrequencyRangeWindow(species.id)}
                                         >
                                             <BarChartIcon style={iconSmall}/>
                                         </IconButton>
-                                    }
+                                    */}
                                     {
                                         showSpeciesFrequencyRangeWindow === species.id &&
                                         <FrequencyRangeWindow

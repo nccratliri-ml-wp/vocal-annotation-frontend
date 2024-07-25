@@ -9,7 +9,6 @@ const CLUSTERNAME_COLOR_ARRAY = [
     "#ff3333", // Tomato
     "#33FF57", // Light Green
     "#3357FF", // Blue
-    "#FF33A1", // Pink
     "#FFB533", // Orange
     "#33FFF5", // Cyan
     "#8D33FF", // Purple
@@ -22,6 +21,7 @@ const CLUSTERNAME_COLOR_ARRAY = [
     "#cc77c1", // Pale Pink
     "#114b6e", // Dark Blue
     "#B8E986", // Grasshoper
+    "#FF33A1", // Pink
     "#33FF8C", // Spring Green
     "#8B572A", // Brown
     "#FA8072", // Salmon
@@ -31,7 +31,7 @@ const INACTIVE_BUTTON_COLOR = '#626262'
 const ANNOTATED_AREA = 'Annotated Area'
 const ANNOTATED_AREA_INDIVIDUAL = '🔒'
 const ANNOTATED_AREA_CLUSTERNAME = 'Annotated Area'
-const ANNOTATED_AREA_COLOR = '#296c16'
+const ANNOTATED_AREA_COLOR = '#33c220'
 
 class Species {
     constructor(id, name, individuals, clusternames, minFreq=null, maxFreq=null ) {

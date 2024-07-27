@@ -97,54 +97,17 @@ function WhisperSeg(
             }
         })
 
-        const placeholder = {'response': [{'eta': '00:23:32',
-                'model_name': 'whisperseg-base',
-                'status': 'In progress'},
-                {'eta': '--:--:--', 'model_name': 'whisperseg-large', 'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg_base',
-                    'status': 'progress'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg-base-v2.0',
-                    'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg-large',
-                    'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'new-whisperseg-bengalese-finch',
-                    'status': 'ready'}]}
-
         return response.data.response
-        //return placeholder.response
     }
 
     const getModelsAvailableForFinetuning = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-finetuning'
-
 
         const response = await axios.post(path, {}, {
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-
-
-        const placeholder = {'response': [{'eta': '--:--:--',
-                'model_name': 'whisperseg-base',
-                'status': 'ready'},
-                {'eta': '--:--:--', 'model_name': 'whisperseg-large', 'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg_base',
-                    'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg-base-v2.0',
-                    'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'r3428-99dph-whisperseg-large',
-                    'status': 'ready'},
-                {'eta': '--:--:--',
-                    'model_name': 'new-whisperseg-bengalese-finch',
-                    'status': 'ready'}]}
 
         return response.data.response
     }

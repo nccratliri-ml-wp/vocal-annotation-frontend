@@ -120,53 +120,6 @@ function ModelsWindow (
             const response = await axios.post(path, requestParameters)
             const whisperObjects = response.data.labels
 
-            /*
-            const whisperObjects = [
-                {
-                    clustername: 'Unknown',
-                    individual: 'Unknown',
-                    species: 'Unknown',
-                    onset: 1.2,
-                    offset: 3.4,
-                },
-                {
-                    clustername: 'Hungry call',
-                    individual: 'Bob',
-                    species: 'Unknown',
-                    onset: 5.2,
-                    offset: 6.0,
-                },
-                {
-                    clustername: 'Hungry call',
-                    individual: 'Bob',
-                    species: 'Hamster',
-                    onset: 4.2,
-                    offset: 4.8,
-                },
-                {
-                    clustername: 'Hungry call',
-                    individual: 'Bob',
-                    species: 'Hamster',
-                    onset: 0.2,
-                    offset: 0.4,
-                },
-                {
-                    clustername: 'Mating call',
-                    individual: 'Jim',
-                    species: 'Hamster',
-                    onset: 4.9,
-                    offset: 5.1,
-                },
-                {
-                    clustername: 'Hello',
-                    individual: 'Suzie',
-                    species: 'Cat',
-                    onset: 7.2,
-                    offset: 7.8,
-                },
-            ]
-            */
-
             // Create new species, Individuals and Clusternames in the Species panel from the whisper labels
             const updatedSpeciesArray = createSpeciesFromImportedLabels(whisperObjects, speciesArray)
             passSpeciesArrayToApp(updatedSpeciesArray)

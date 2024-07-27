@@ -24,6 +24,9 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
             }
         })
 
+        // Get filename of the first track to use as CSV filename
+        const firstTrackFilename = tracks.find(track => track.trackIndex === 0).filename.slice(0, -4)
+
         // Sort the labels ascending by onset
         //newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
 
@@ -32,7 +35,8 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
         csvData.unshift('onset,offset,species,individual,clustername,filename,channelIndex')
         csvData = csvData.join('\n')
 
-        const newCSVFileName = annotationInstance ? `${annotationInstance}.csv` : 'annotations.csv'
+        // In strict mode use annotationInstance as csv filename
+        const newCSVFileName = annotationInstance ? `${annotationInstance}.csv` : `${firstTrackFilename}.csv`
 
         const element = document.createElement('a')
         element.setAttribute('href', `data:text/csv;charset=utf-8,${csvData}`)

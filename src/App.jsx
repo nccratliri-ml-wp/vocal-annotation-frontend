@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -99,6 +99,9 @@ function App() {
 
     const [tokenInference, setTokenInference] = useState('')
     const [tokenFinetune, setTokenFinetune] = useState('')
+
+    const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
+    const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -297,6 +300,7 @@ function App() {
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime , newEndTime)
     }
 
+    /*
     function leftScroll() {
         setCurrentStartTime(
             prevStartTime => Math.max(prevStartTime - scrollStep, 0)
@@ -304,16 +308,21 @@ function App() {
         setCurrentEndTime(
             prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration)
         )
-    }
+    }*/
 
-    function rightScroll() {
+    const leftScroll = useCallback(() => {
+        setCurrentStartTime(prevStartTime => Math.max(prevStartTime - scrollStep, 0));
+        setCurrentEndTime(prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration));
+    }, [scrollStep, globalClipDuration]);
+
+    const rightScroll = useCallback(() => {
         setCurrentStartTime(
             prevStartTime => Math.min(prevStartTime + scrollStep, maxScrollTime)
         )
         setCurrentEndTime(
             prevEndTime => Math.min(prevEndTime + scrollStep, globalAudioDuration)
         )
-    }
+    }, [scrollStep, maxScrollTime, globalAudioDuration])
 
     function updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime, newEndTime){
         setGlobalHopLength(newHopLength)
@@ -696,6 +705,37 @@ function App() {
             window.removeEventListener('unload', handleUnload);
         }
     }, [])
+
+    // Set up arrow key event handlers
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === 'ArrowLeft' && !leftArrowKeyPressed) {
+                setLeftArrowKeyPressed(true);
+            }
+            if (event.key === 'ArrowRight' && !rightArrowKeyPressed) {
+                setRightArrowKeyPressed(true);
+            }
+        }
+
+        function handleKeyUp(event) {
+            if (event.key === 'ArrowLeft' && leftArrowKeyPressed) {
+                setLeftArrowKeyPressed(false);
+                leftScroll();
+            }
+            if (event.key === 'ArrowRight' && rightArrowKeyPressed) {
+                setRightArrowKeyPressed(false);
+                rightScroll();
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [leftArrowKeyPressed, rightArrowKeyPressed, leftScroll, rightScroll]);
 
     return (
         <>

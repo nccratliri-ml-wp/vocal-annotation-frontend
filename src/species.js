@@ -8,13 +8,13 @@ const CLUSTERNAME_COLOR_ARRAY = [
     "#36ff00", // Light Green
     "#ff3333", // Tomato
     "#3357FF", // Blue
-    "#FFB533", // Orange
-    "#33FFF5", // Cyan
+    "#fda000", // Orange
+    "#25aba4", // Cyan
     "#8D33FF", // Purple
-    "#F0FF33", // Yellow
+    "#a6b02e", // Yellow
     "#eeb962", // Beige
-    "#33FFD7", // Aqua
-    "#FF8C33", // Coral
+    "#d3b0ff", // Light Purple
+    "#d26c1d", // Dark Orange
     "#913c3c", // Crimson
     "#33A1FF", // Sky Blue
     "#cc77c1", // Pale Pink

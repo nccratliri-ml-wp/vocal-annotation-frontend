@@ -12,6 +12,10 @@ function ModelsWindow (
             modelsAreLoading,
             modelsAvailableForInference,
             modelsAvailableForFinetuning,
+            selectedInferenceModel,
+            selectedFinetuningModel,
+            passSelectedInferenceModelToWhisperSeg,
+            passSelectedFinetuningModelModelToWhisperSeg,
             modelsCurrentlyTrained,
             passShowModelsWindowToWhisperSeg,
             audioId,
@@ -35,9 +39,6 @@ function ModelsWindow (
     const [showInferenceTab, setShowInferenceTab] = useState(true)
     const [showFinetuningTab, setShowFinetuningTab] = useState(false)
     const [showTrainingTab, setShowTrainingTab] = useState(false)
-
-    const [selectedInferenceModel, setSelectedInferenceModel] = useState('')
-    const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('whisperseg-base')
 
     const [minFreqInference, setMinFreqInference] = useState(minFreq)
     const [minFreqFinetune, setMinFreqFinetune] = useState(minFreq)
@@ -292,7 +293,7 @@ function ModelsWindow (
                                                     name="inferenceModel"
                                                     disabled={model.status !== 'ready'}
                                                     checked={selectedInferenceModel === model.model_name}
-                                                    onChange={() => setSelectedInferenceModel(model.model_name)}
+                                                    onChange={() => passSelectedInferenceModelToWhisperSeg(model.model_name)}
                                                 />
                                                 {model.model_name}
                                             </label>
@@ -357,7 +358,7 @@ function ModelsWindow (
                                                     type="radio"
                                                     name="finetuningModel"
                                                     checked={selectedFinetuningModel === model.model_name}
-                                                    onChange={() => setSelectedFinetuningModel(model.model_name)}
+                                                    onChange={() => passSelectedFinetuningModelModelToWhisperSeg(model.model_name)}
                                                 />
                                                 {model.model_name}
                                             </label>

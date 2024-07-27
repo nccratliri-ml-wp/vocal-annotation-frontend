@@ -36,12 +36,24 @@ function WhisperSeg(
     const [modelsCurrentlyTrained, setModelsCurrentlyTrained] = useState()
     const [currentlyTrainedModelsNames, setCurrentlyTrainedModelsNames] = useState([])
 
+    const [selectedInferenceModel, setSelectedInferenceModel] = useState('')
+    const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('')
+
+
     const passShowModelsWindowToWhisperSeg = ( boolean) => {
         setShowModelsWindow( boolean )
     }
 
     const passCurrentlyTrainedModelsNamesToWhisperSeg = ( updatedArray ) => {
         setCurrentlyTrainedModelsNames( updatedArray )
+    }
+
+    const passSelectedInferenceModelToWhisperSeg = ( selectedModel ) => {
+        setSelectedInferenceModel( selectedModel )
+    }
+
+    const passSelectedFinetuningModelModelToWhisperSeg = ( selectedModel ) => {
+        setSelectedFinetuningModel( selectedModel )
     }
 
     const handleClickWhisperSeg = () => {
@@ -64,6 +76,9 @@ function WhisperSeg(
             setModelsAvailableForInference(inferenceModels)
             setModelsAvailableForFinetuning(finetuneModels)
             setModelsCurrentlyTrained(currentlyTrainedModels)
+
+            setSelectedInferenceModel(inferenceModels[0].model_name)
+            setSelectedFinetuningModel(finetuneModels[0].model_name)
 
         } catch (error) {
             toast.error('An error occurred trying to access the WhisperSeg API. Check the console for more information')
@@ -202,6 +217,10 @@ function WhisperSeg(
                             modelsAreLoading={modelsAreLoading}
                             modelsAvailableForInference={modelsAvailableForInference}
                             modelsAvailableForFinetuning={modelsAvailableForFinetuning}
+                            selectedInferenceModel={selectedInferenceModel}
+                            selectedFinetuningModel={selectedFinetuningModel}
+                            passSelectedInferenceModelToWhisperSeg={passSelectedInferenceModelToWhisperSeg}
+                            passSelectedFinetuningModelModelToWhisperSeg={passSelectedFinetuningModelModelToWhisperSeg}
                             modelsCurrentlyTrained={modelsCurrentlyTrained}
                             passShowModelsWindowToWhisperSeg={passShowModelsWindowToWhisperSeg}
                             audioId={audioId}

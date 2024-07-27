@@ -3,20 +3,19 @@ import {nanoid} from "nanoid";
 const UNKNOWN_SPECIES = 'Unknown'
 const UNKNOWN_INDIVIDUAL = 'Unknown'
 const UNKNOWN_CLUSTERNAME = 'Unknown'
-const DEFAULT_CLUSTERNAME_COLOR = '#36ff00'
 const DEFAULT_UNKNOWN_CLUSTERNAME_COLOR = '#00EEFF'
 const CLUSTERNAME_COLOR_ARRAY = [
+    "#36ff00", // Light Green
     "#ff3333", // Tomato
-    "#33FF57", // Light Green
     "#3357FF", // Blue
     "#FFB533", // Orange
     "#33FFF5", // Cyan
     "#8D33FF", // Purple
     "#F0FF33", // Yellow
-    "#f3c455", // Beige
+    "#eeb962", // Beige
     "#33FFD7", // Aqua
     "#FF8C33", // Coral
-    "#fff", // White
+    "#913c3c", // Crimson
     "#33A1FF", // Sky Blue
     "#cc77c1", // Pale Pink
     "#114b6e", // Dark Blue
@@ -25,7 +24,7 @@ const CLUSTERNAME_COLOR_ARRAY = [
     "#33FF8C", // Spring Green
     "#8B572A", // Brown
     "#FA8072", // Salmon
-    "#9B9B9B", // Gray
+    "#3a7528", // Wood Green
 ]
 const INACTIVE_BUTTON_COLOR = '#626262'
 const ANNOTATED_AREA = 'Annotated Area'
@@ -55,7 +54,7 @@ class Individual {
 }
 
 class Clustername {
-    constructor(id, name, color=DEFAULT_CLUSTERNAME_COLOR) {
+    constructor(id, name, color) {
         this.id = id
         this.name = name
         this.isActive = true
@@ -305,8 +304,8 @@ export {
     UNKNOWN_SPECIES,
     UNKNOWN_INDIVIDUAL,
     UNKNOWN_CLUSTERNAME,
-    DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    CLUSTERNAME_COLOR_ARRAY,
     INACTIVE_BUTTON_COLOR,
     ANNOTATED_AREA,
     ANNOTATED_AREA_INDIVIDUAL,

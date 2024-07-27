@@ -13,8 +13,8 @@ import {
     Clustername,
     deactivateExistingClusternames,
     deactivateExistingIndividuals,
-    DEFAULT_CLUSTERNAME_COLOR,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    CLUSTERNAME_COLOR_ARRAY,
     INACTIVE_BUTTON_COLOR,
     Individual,
     Species,
@@ -25,7 +25,6 @@ import {
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -366,7 +365,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(newClusternameName, allClusternameNames)
                 if ( alreadyExistingObjectName ) {
                     const updatedClusternames = activateClustername(speciesObject.clusternames, alreadyExistingObjectName)
-                    toast.error(`Class '${alreadyExistingObjectName}' already exists. Add a different one.`)
+                    toast.error(`Vocalization '${alreadyExistingObjectName}' already exists. Add a different one.`)
 
                     return new Species(
                         speciesObject.id,
@@ -381,11 +380,14 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 // Deactivate existing clusternames of the current species
                 const updatedClusternames = deactivateExistingClusternames(speciesObject.clusternames)
 
+                // Get random color for the new clustername
+                const randomColor = CLUSTERNAME_COLOR_ARRAY[Math.floor(Math.random() * 20)]
+
                 return new Species(
                     speciesObject.id,
                     speciesObject.name,
                     [...updatedIndividuals],
-                    [...updatedClusternames, new Clustername(nanoid(), newClusternameName, DEFAULT_CLUSTERNAME_COLOR)],
+                    [...updatedClusternames, new Clustername(nanoid(), newClusternameName, randomColor)],
                     speciesObject.minFreq,
                     speciesObject.maxFreq
                 )
@@ -413,7 +415,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
         const clusternamesArray = speciesArray.find(speciesObj => speciesObj.id === selectedSpeciesID).clusternames
         if (clusternamesArray.length <= 1){
-            toast.error("At least one class per species needed.")
+            toast.error("At least one vocalization per species needed.")
             return
         }
 
@@ -448,11 +450,11 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const editClustername = (selectedID, selectedClustername) => {
-        let editedClustername = prompt('Change class: ')
+        let editedClustername = prompt('Edit vocalization: ')
         if (!editedClustername) return
 
         if (editedClustername.includes(',') || editedClustername.length > 45) {
-            toast.error('Invalid input. Please provide a valid class without commas and no longer than 45 characters.')
+            toast.error('Invalid input. Please provide a valid vocalization without commas and no longer than 45 characters.')
             return
         }
 
@@ -462,7 +464,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                 const allClusternameNames = speciesObject.clusternames.map( clustername => clustername.name)
                 const alreadyExistingObjectName = checkIfObjectNameAlreadyExists(editedClustername, allClusternameNames)
                 if ( alreadyExistingObjectName) {
-                    toast.error(`Class '${alreadyExistingObjectName}' already exists. Add a different one.`)
+                    toast.error(`Vocalization '${alreadyExistingObjectName}' already exists. Add a different one.`)
                     return speciesObject
                 }
 
@@ -916,7 +918,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                         )
                                     }
 
-                                    <Tooltip title='Add New Class'>
+                                    <Tooltip title='Add New Vocalization'>
                                         <IconButton style={{padding: 0}} onClick={ (event) => toggleClusternameInputWindow(event, species.id) }>
                                             <AddBoxIcon style={icon}/>
                                         </IconButton>
@@ -925,7 +927,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                         species.showClusternameInputWindow &&
                                             <InputWindow
                                                 handleCancel={toggleClusternameInputWindow}
-                                                objectType='Class'
+                                                objectType='Vocalization'
                                                 speciesID={species.id}
                                                 addNewObject={addNewClustername}
                                             />

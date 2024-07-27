@@ -18,7 +18,7 @@ const CLUSTERNAME_COLOR_ARRAY = [
     "#913c3c", // Crimson
     "#33A1FF", // Sky Blue
     "#cc77c1", // Pale Pink
-    "#114b6e", // Dark Blue
+    "#86a9ce", // Pale Blue
     "#B8E986", // Grasshoper
     "#FF33A1", // Pink
     "#33FF8C", // Spring Green

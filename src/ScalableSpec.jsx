@@ -1588,7 +1588,7 @@ function ScalableSpec(
     }
 
     const dragViewport = (event) => {
-        const mouseX = getMouseX(event)
+        const mouseX = getMouseXInOverviewTimeAxisContainer(event)
         const viewportWidth = widthBetween_xStartTime_mouseX + widthBetween_xEndTime_mouseX
         newViewportStartFrame = calculateViewportTimestamp(mouseX - widthBetween_xStartTime_mouseX)
         newViewportEndFrame = calculateViewportTimestamp(mouseX + widthBetween_xEndTime_mouseX)

@@ -112,6 +112,9 @@ function ScalableSpec(
     const numberOfIndividuals = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
     const [showLabelAndIndividualsCanvas, setShowLabelAndIndividualsCanvas] = useState(true)
 
+    // Time Axis and Overview Container
+    const overviewTimeAxisContainerRef = useRef(null)
+
     // Time Axis
     const timeAxisRef = useRef(null);
 
@@ -1494,19 +1497,18 @@ function ScalableSpec(
         const mouseX = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
-        const overviewTimeAxisContainer = document.getElementById('overview-time-axis-container')
 
         // Deal with click on Start Frame
         if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
-            overviewRef.current.addEventListener('mousemove', dragStartFrame)
-            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
+            overviewTimeAxisContainerRef.current.addEventListener('mousemove', dragStartFrame)
+            overviewTimeAxisContainerRef.current.addEventListener('mouseleave', stopDragViewport)
             return
         }
 
         // Deal with click on End Frame
         if (!strictMode && mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
-            overviewRef.current.addEventListener('mousemove', dragEndFrame)
-            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
+            overviewTimeAxisContainerRef.current.addEventListener('mousemove', dragEndFrame)
+            overviewTimeAxisContainerRef.current.addEventListener('mouseleave', stopDragViewport)
             return
         }
 
@@ -1516,18 +1518,16 @@ function ScalableSpec(
             const xCurrentEndTime = calculateViewportFrameX(currentEndTime)
             widthBetween_xStartTime_mouseX = mouseX - xStartTime
             widthBetween_xEndTime_mouseX = xCurrentEndTime - mouseX
-            overviewRef.current.addEventListener('mousemove', dragViewport)
-            overviewRef.current.addEventListener('mouseleave', stopDragViewport)
+            overviewTimeAxisContainerRef.current.addEventListener('mousemove', dragViewport)
+            overviewTimeAxisContainerRef.current.addEventListener('mouseleave', stopDragViewport)
         }
     }
 
     const stopDragViewport = () => {
-        console.log('stop drag viewoport run')
-        //const overviewTimeAxisContainer = document.getElementById('overview-time-axis-container')
-        overviewRef.current.removeEventListener('mousemove', dragStartFrame)
-        overviewRef.current.removeEventListener('mousemove', dragEndFrame)
-        overviewRef.current.removeEventListener('mousemove', dragViewport)
-        overviewRef.current.removeEventListener('mouseleave', stopDragViewport)
+        overviewTimeAxisContainerRef.current.removeEventListener('mousemove', dragStartFrame)
+        overviewTimeAxisContainerRef.current.removeEventListener('mousemove', dragEndFrame)
+        overviewTimeAxisContainerRef.current.removeEventListener('mousemove', dragViewport)
+        overviewTimeAxisContainerRef.current.removeEventListener('mouseleave', stopDragViewport)
 
         // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar
         if (widthBetween_xStartTime_mouseX && (newViewportStartFrame || newViewportEndFrame)){
@@ -1564,7 +1564,7 @@ function ScalableSpec(
     }
 
     const dragStartFrame = (event) => {
-        const mouseX = getMouseX(event)
+        const mouseX = getMouseXInOverviewTimeAxisContainer(event)
         newViewportStartFrame = calculateViewportTimestamp(mouseX)
 
         // Prevent the user from setting the viewport too small or the start Frame to go beyond the end Frame
@@ -1576,7 +1576,7 @@ function ScalableSpec(
     }
 
     const dragEndFrame = (event) => {
-        const mouseX = getMouseX(event)
+        const mouseX = getMouseXInOverviewTimeAxisContainer(event)
         newViewportEndFrame = calculateViewportTimestamp(mouseX)
 
         // Prevent the user from setting the viewport too small or the end Frame to go before the start Frame
@@ -1605,6 +1605,13 @@ function ScalableSpec(
             return
         }
         drawViewport(newViewportStartFrame, newViewportEndFrame, 'white', 4)
+    }
+
+    const getMouseXInOverviewTimeAxisContainer = (event) => {
+        const container = overviewTimeAxisContainerRef.current;
+        const rect = container.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        return x
     }
 
     const calculateViewportTimestamp = (mouseX) => {
@@ -1674,10 +1681,6 @@ function ScalableSpec(
 
         // Update Scroll Button positions
         updateViewportScrollButtons(startFrame, endFrame)
-    }
-
-    const handleMouseMoveOverview = (event) => {
-        hoverViewportFrame(event)
     }
 
     const hoverViewportFrame = (event) => {
@@ -2163,16 +2166,19 @@ function ScalableSpec(
     return (
         <>
             {showOverviewBarAndTimeAxis && trackData &&
-                <div id='overview-time-axis-container'>
+                <div
+                    id='overview-time-axis-container'
+                    ref={overviewTimeAxisContainerRef}
+                    onMouseUp={handleMouseUpOverview}
+                    onContextMenu={(event) => event.preventDefault()}
+                >
                     <canvas
                         className='overview-canvas'
                         ref={overviewRef}
                         width={parent.innerWidth - 200}
                         height={40}
                         onMouseDown={handleLMBDownOverview}
-                        onMouseUp={handleMouseUpOverview}
-                        onContextMenu={(event) => event.preventDefault()}
-                        onMouseMove={handleMouseMoveOverview}
+                        onMouseMove={hoverViewportFrame}
                     />
                     <button
                         id='left-scroll-overview-btn'

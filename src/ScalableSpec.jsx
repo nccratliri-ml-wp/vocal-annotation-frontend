@@ -1530,7 +1530,7 @@ function ScalableSpec(
         overviewRef.current.removeEventListener('mouseleave', stopDragViewport)
 
         // Set new Viewport (Start & Endframe). This happens when the user drags the overview scroll bar
-        if (widthBetween_xStartTime_mouseX){
+        if (widthBetween_xStartTime_mouseX && (newViewportStartFrame || newViewportEndFrame)){
             const newDuration = newViewportEndFrame - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             passCurrentStartTimeToApp( newViewportStartFrame )

@@ -49,7 +49,6 @@ function ScalableSpec(
                             trackID,
                             speciesArray,
                             deletedItemID,
-                            showOverviewBarAndTimeAxis,
                             globalAudioDuration,
                             globalClipDuration,
                             passClipDurationToApp,
@@ -91,6 +90,7 @@ function ScalableSpec(
 
     // General
     const [audioId, setAudioId] = useState(trackData.audioID)
+    const [showOverviewBarAndTimeAxis, setShowOverviewBarAndTimeAxis] = useState(trackData.trackIndex === 0)
 
     // Spectrogram
     const specCanvasRef = useRef(null)

@@ -61,7 +61,6 @@ function App() {
             trackIndex: 0,
             channelIndex: null,
             visible: true,
-            showOverviewBarAndTimeAxis: true,
             audioID: null,
             filename: null,
             audioDuration: null,
@@ -188,7 +187,6 @@ function App() {
                 trackIndex: newIndex,
                 channelIndex: null,
                 visible: true,
-                showOverviewBarAndTimeAxis: false,
                 audioID: null,
                 filename: null,
                 audioDuration: null,
@@ -245,7 +243,6 @@ function App() {
             return {
                 ...track,
                 trackIndex: index,
-                showOverviewBarAndTimeAxis: index === 0
             }
         })
 
@@ -271,7 +268,6 @@ function App() {
             return {
                 ...track,
                 trackIndex: index,
-                showOverviewBarAndTimeAxis: index === 0
             }
         })
 
@@ -455,7 +451,6 @@ function App() {
                     trackIndex: null,
                     channelIndex: channelIndex,
                     visible: true,
-                    showOverviewBarAndTimeAxis: false,
                     audioID: newChannels[channelIndex].audio_id,
                     filename: filename,
                     audioDuration: newChannels[channelIndex].audio_duration,
@@ -473,7 +468,6 @@ function App() {
             return {
                 ...track,
                 trackIndex: index,
-                showOverviewBarAndTimeAxis: index === 0
             }
         })
 
@@ -499,7 +493,6 @@ function App() {
                     trackIndex: i,
                     channelIndex: channelIndex,
                     visible: true,
-                    showOverviewBarAndTimeAxis: i === 0,
                     audioID: channel.audio_id,
                     filename: response.filename,
                     audioDuration: channel.audio_duration,
@@ -828,7 +821,6 @@ function App() {
                                 trackID={track.trackID}
                                 speciesArray={speciesArray}
                                 deletedItemID={deletedItemID}
-                                showOverviewBarAndTimeAxis={track.showOverviewBarAndTimeAxis}
                                 globalAudioDuration={globalAudioDuration}
                                 globalClipDuration={globalClipDuration}
                                 currentStartTime={currentStartTime}

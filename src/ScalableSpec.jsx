@@ -2117,10 +2117,10 @@ function ScalableSpec(
             // Close Label Window
             setExpandedLabel(null)
 
-            // If imported labels exist don't delete them
-            if (importedLabels) return
+            // In strict mode, if imported labels exist don't delete the labels of this track
+            if (strictMode && importedLabels) return
 
-            // If there's no URL imported labels nor CSV imported labels delete all existing labels on this track
+            // In free mode delete all existing labels of this track
             setLabels([])
 
     }, [trackData.audioID])

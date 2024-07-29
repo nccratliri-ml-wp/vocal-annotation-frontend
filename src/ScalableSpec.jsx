@@ -71,6 +71,7 @@ function ScalableSpec(
                             importedLabels,
                             handleUploadResponse,
                             trackData,
+                            showOverviewBarAndTimeAxis,
                             passFilesUploadingToApp,
                             addLabelsToApp,
                             exportRequest,
@@ -90,7 +91,6 @@ function ScalableSpec(
 
     // General
     const [audioId, setAudioId] = useState(trackData.audioID)
-    const [showOverviewBarAndTimeAxis, setShowOverviewBarAndTimeAxis] = useState(trackData.trackIndex === 0)
 
     // Spectrogram
     const specCanvasRef = useRef(null)
@@ -2309,8 +2309,8 @@ function ScalableSpec(
                                 </Tooltip>
                                 <Tooltip title="Delete Track">
                                     <IconButton
-                                        style={{...activeIconBtnStyle, ...((strictMode || showOverviewBarAndTimeAxis) && iconBtnDisabled)}}
-                                        disabled={strictMode || showOverviewBarAndTimeAxis}
+                                        style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
+                                        disabled={strictMode}
                                         onClick={handleRemoveTrack}
                                     >
                                         <DeleteIcon style={activeIcon}/>

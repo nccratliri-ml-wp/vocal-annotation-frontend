@@ -274,6 +274,67 @@ function App() {
         setTracks(updatedTracks)
     }
 
+    const renderTracks = () => {
+        let firstTrackWithFileUploaded = false
+
+        return tracks.map((track) => {
+
+            // Only display Overview Bar and Time Axis for the first track that has a file in it
+            let showOverviewBarAndTimeAxis = false
+            if (track.spectrogram) {
+                if (!firstTrackWithFileUploaded) {
+                    showOverviewBarAndTimeAxis = true
+                    firstTrackWithFileUploaded = true
+                }
+            }
+
+            return (
+                <ScalableSpec
+                    key={track.trackID}
+                    trackID={track.trackID}
+                    speciesArray={speciesArray}
+                    deletedItemID={deletedItemID}
+                    globalAudioDuration={globalAudioDuration}
+                    globalClipDuration={globalClipDuration}
+                    currentStartTime={currentStartTime}
+                    currentEndTime={currentEndTime}
+                    maxScrollTime={maxScrollTime}
+                    SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
+                    passScrollStepToApp={passScrollStepToApp}
+                    passMaxScrollTimeToApp={passMaxScrollTimeToApp}
+                    passCurrentEndTimeToApp={passCurrentEndTimeToApp}
+                    passClipDurationToApp={passClipDurationToApp}
+                    passCurrentStartTimeToApp={passCurrentStartTimeToApp}
+                    removeTrackInApp={removeTrackInApp}
+                    globalHopLength={globalHopLength}
+                    globalNumSpecColumns={globalNumSpecColumns}
+                    globalSamplingRate={globalSamplingRate}
+                    updateClipDurationAndTimes={updateClipDurationAndTimes}
+                    activeLabel={activeLabel}
+                    passActiveLabelToApp={passActiveLabelToApp}
+                    strictMode={strictMode}
+                    importedLabels={importedLabels}
+                    handleUploadResponse={handleUploadResponse}
+                    trackData={track}
+                    showOverviewBarAndTimeAxis={showOverviewBarAndTimeAxis}
+                    passFilesUploadingToApp={passFilesUploadingToApp}
+                    addLabelsToApp={addLabelsToApp}
+                    exportRequest={exportRequest}
+                    submitRequest={submitRequest}
+                    toggleTrackVisibility={toggleTrackVisibility}
+                    moveTrackUp={moveTrackUp}
+                    moveTrackDown={moveTrackDown}
+                    lastTrackIndex={tracks[tracks.length - 1].trackIndex}
+                    passSpeciesArrayToApp={passSpeciesArrayToApp}
+                    tokenInference={tokenInference}
+                    tokenFinetune={tokenFinetune}
+                    passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
+                    passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                />
+            );
+        });
+    };
+
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */
 
@@ -813,53 +874,7 @@ function App() {
                     />
                 }
 
-                {
-                    tracks.map(track => {
-                        return (
-                            <ScalableSpec
-                                key={track.trackID}
-                                trackID={track.trackID}
-                                speciesArray={speciesArray}
-                                deletedItemID={deletedItemID}
-                                globalAudioDuration={globalAudioDuration}
-                                globalClipDuration={globalClipDuration}
-                                currentStartTime={currentStartTime}
-                                currentEndTime={currentEndTime}
-                                maxScrollTime={maxScrollTime}
-                                SCROLL_STEP_RATIO={SCROLL_STEP_RATIO}
-                                passScrollStepToApp={passScrollStepToApp}
-                                passMaxScrollTimeToApp={passMaxScrollTimeToApp}
-                                passCurrentEndTimeToApp={passCurrentEndTimeToApp}
-                                passClipDurationToApp={passClipDurationToApp}
-                                passCurrentStartTimeToApp={passCurrentStartTimeToApp}
-                                removeTrackInApp={removeTrackInApp}
-                                globalHopLength={globalHopLength}
-                                globalNumSpecColumns={globalNumSpecColumns}
-                                globalSamplingRate={globalSamplingRate}
-                                updateClipDurationAndTimes={updateClipDurationAndTimes}
-                                activeLabel={activeLabel}
-                                passActiveLabelToApp={passActiveLabelToApp}
-                                strictMode={strictMode}
-                                importedLabels={importedLabels}
-                                handleUploadResponse={handleUploadResponse}
-                                trackData={track}
-                                passFilesUploadingToApp={passFilesUploadingToApp}
-                                addLabelsToApp={addLabelsToApp}
-                                exportRequest={exportRequest}
-                                submitRequest={submitRequest}
-                                toggleTrackVisibility={toggleTrackVisibility}
-                                moveTrackUp={moveTrackUp}
-                                moveTrackDown={moveTrackDown}
-                                lastTrackIndex={tracks[tracks.length - 1].trackIndex}
-                                passSpeciesArrayToApp={passSpeciesArrayToApp}
-                                tokenInference={tokenInference}
-                                tokenFinetune={tokenFinetune}
-                                passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
-                                passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
-                            />
-                        )
-                    })
-                }
+                {renderTracks()}
 
                 {filesUploading && <LoadingCircle progress={uploadProgress} />}
 

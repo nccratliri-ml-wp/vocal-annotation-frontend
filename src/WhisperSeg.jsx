@@ -175,7 +175,7 @@ function WhisperSeg(
 
             {showModelsWindow &&
                 <Draggable cancel='.models-container'>
-                    <div className="draggable-container">
+                    <div className="draggable-container-models-window">
                         <ModelsWindow
                             modelsAreLoading={modelsAreLoading}
                             modelsAvailableForInference={modelsAvailableForInference}

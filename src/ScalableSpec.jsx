@@ -2244,7 +2244,6 @@ function ScalableSpec(
                             </div>
 
                             <div>
-                                <button onClick={() => console.log(expandedLabel)}>c</button>
                                 <Tooltip title="Move Track Up">
                                     <IconButton
                                         style={{...activeIconBtnStyle, ...(trackData.trackIndex === 0 && iconBtnDisabled)}}

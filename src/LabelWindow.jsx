@@ -18,6 +18,7 @@ import {iconSmall} from "./styles.js";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
 import DownloadIcon from '@mui/icons-material/Download'
 import axios from "axios";
+import Draggable from "react-draggable";
 
 
 function LabelWindow(
@@ -221,10 +222,6 @@ function LabelWindow(
 
     const downloadAudioClip = async (newStartTime, newClipDuration) => {
 
-        console.log(newStartTime)
-        console.log(newClipDuration)
-        console.log('++ ++ ++')
-
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
@@ -272,96 +269,96 @@ function LabelWindow(
         setLocalSpeciesArray(updatedLocalSpeciesArray)
     }, [speciesArray, expandedLabel])
 
-
     return (
-        <div
-            className='label-window'
-            onContextMenu={ (event) => event.preventDefault()}
-            style={{
-                top: globalMouseCoordinates.y + 20,
-                left: globalMouseCoordinates.x + 20
-            }}
-        >
-            <div className='close-btn-container'>
-                <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
-                <p className='window-header'>Reassign label</p>
-            </div>
-
-            <div className='label-window-audio-btn-container'>
-                <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
-                    <PlayArrowIcon style={iconSmall}/>
-                    Play Audio
+        <Draggable cancel='.label-window-audio-btn-container, .label-window-content'>
+            <div
+                className='label-window'
+                onContextMenu={ (event) => event.preventDefault()}
+                style={{
+                    top: globalMouseCoordinates.y + 20,
+                    left: globalMouseCoordinates.x + 20
+                }}
+            >
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
+                    <p className='window-header'>Reassign label</p>
                 </div>
-                <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
-                    <DownloadIcon style={iconSmall}/>
-                    Download Audio
+
+                <div className='label-window-audio-btn-container'>
+                    <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                        <PlayArrowIcon style={iconSmall}/>
+                        Play Audio
+                    </div>
+                    <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                        <DownloadIcon style={iconSmall}/>
+                        Download Audio
+                    </div>
+                </div>
+
+                <div className='label-window-content'>
+
+                    {
+                        localSpeciesArray.map( (species) => {
+
+                            // Don't render Annotated Area "species" in the label window
+                            if (species.name === ANNOTATED_AREA) return
+
+                            // Render all other species
+                            return (
+                                <fieldset
+                                    key={species.id}
+                                    className='label-window-species'
+                                >
+
+                                    <legend>
+                                        {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
+                                    </legend>
+
+                                    <div className='label-window-individual-btn-container'>
+                                        Individuals:
+                                        {
+                                            species.individuals.map( individual =>
+                                                <div
+                                                    key={individual.id}
+                                                    isactive={individual.isActive.toString()}
+                                                    className='label-window-individual-btn'
+                                                    onClick={ () => handleClickOnIndividual(species, individual) }
+                                                >
+                                                    {individual.name}
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+
+                                    <div className='label-window-clustername-btn-container'>
+                                        Clusternames:
+                                        {
+                                            species.clusternames.map( clustername =>
+                                                <div
+                                                    key={clustername.id}
+                                                    className='label-window-clustername-btn'
+                                                    isactive={clustername.isActive.toString()}
+                                                    onClick={ () => handleClickOnClustername(species, clustername) }
+                                                    style={{
+                                                        borderLeft: `2px solid ${clustername.color}`,
+                                                        backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
+                                                    }}
+                                                >
+                                                    {clustername.name}
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+
+                                </fieldset>
+                                )
+                            }
+                        )
+                    }
+
                 </div>
             </div>
-
-            <div className='label-window-content'>
-
-                {
-                    localSpeciesArray.map( (species) => {
-
-                        // Don't render Annotated Area "species" in the label window
-                        if (species.name === ANNOTATED_AREA) return
-
-                        // Render all other species
-                        return (
-                            <fieldset
-                                key={species.id}
-                                className='label-window-species'
-                            >
-
-                                <legend>
-                                    {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
-                                </legend>
-
-                                <div className='label-window-individual-btn-container'>
-                                    Individuals:
-                                    {
-                                        species.individuals.map( individual =>
-                                            <div
-                                                key={individual.id}
-                                                isactive={individual.isActive.toString()}
-                                                className='label-window-individual-btn'
-                                                onClick={ () => handleClickOnIndividual(species, individual) }
-                                            >
-                                                {individual.name}
-                                            </div>
-                                        )
-                                    }
-                                </div>
-
-                                <div className='label-window-clustername-btn-container'>
-                                    Clusternames:
-                                    {
-                                        species.clusternames.map( clustername =>
-                                            <div
-                                                key={clustername.id}
-                                                className='label-window-clustername-btn'
-                                                isactive={clustername.isActive.toString()}
-                                                onClick={ () => handleClickOnClustername(species, clustername) }
-                                                style={{
-                                                    borderLeft: `2px solid ${clustername.color}`,
-                                                    backgroundColor: clustername.isActive? clustername.color : INACTIVE_BUTTON_COLOR
-                                                }}
-                                            >
-                                                {clustername.name}
-                                            </div>
-                                        )
-                                    }
-                                </div>
-
-                            </fieldset>
-                            )
-                        }
-                    )
-                }
-
-            </div>
-
-        </div>
+        </Draggable>
     )
 }
 

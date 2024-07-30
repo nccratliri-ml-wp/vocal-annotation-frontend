@@ -12,7 +12,7 @@ import {
     deactivateExistingClusternames,
     checkIfEveryObjectIsInactive,
     UNKNOWN_INDIVIDUAL,
-    ANNOTATED_AREA
+    ANNOTATED_AREA, UNKNOWN_SPECIES
 } from "./species.js";
 import {iconSmall} from "./styles.js";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
@@ -219,14 +219,18 @@ function LabelWindow(
 
     /* ++++++++++++++++++ Audio Download ++++++++++++++++++ */
 
-    const downloadAudioClip = async (newStartTime, newEndTime) => {
+    const downloadAudioClip = async (newStartTime, newClipDuration) => {
+
+        console.log(newStartTime)
+        console.log(newClipDuration)
+        console.log('++ ++ ++')
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: newStartTime,
-                clip_duration: newEndTime
+                clip_duration: newClipDuration
             })
             const audioBase64 = response.data.wav
 
@@ -310,7 +314,7 @@ function LabelWindow(
                             >
 
                                 <legend>
-                                    {species.name}
+                                    {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
                                 </legend>
 
                                 <div className='label-window-individual-btn-container'>

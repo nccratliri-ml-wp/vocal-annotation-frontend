@@ -134,7 +134,7 @@ function ScalableSpec(
     // Audio
     const playheadRef = useRef(new Playhead(0))
     const [audioSnippet, setAudioSnippet] = useState(null)
-    const [playWindowStartTime, setPlayWindowStartTime] = useState(null)
+    const [playWindowTimes, setPlayWindowTimes] = useState(null)
 
     // Waveform
     const waveformCanvasRef = useRef(null)
@@ -351,7 +351,7 @@ function ScalableSpec(
         }
 
         // Deal with click inside an existing label
-        const labelToBeExpanded = checkIfClickedOnLabel (event, mouseX, mouseY)
+        const labelToBeExpanded = checkIfClickedOnLabel(event, mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
             passActiveLabelToApp({
@@ -421,6 +421,9 @@ function ScalableSpec(
             clickedLabel.offset = magnet(clickedLabel.offset)
 
             passLabelsToScalableSpec(labels)
+            if (clickedLabel.id === expandedLabel?.id){
+                setExpandedLabel(clickedLabel)
+            }
             passActiveLabelToApp({
                 onset: clickedLabel.onset,
                 offset: clickedLabel.offset,
@@ -1717,26 +1720,27 @@ function ScalableSpec(
     }
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
-    const getAudio = async (newStartTime, newEndTime) => {
+    const getAudio = async (newStartTime, newClipDuration) => {
         // Prevent user from clicking the play button twice in a row and playing the audio twice at the same time
         if (audioSnippet && !audioSnippet.paused) return
 
-        // If the requested play start time hasn't changed and the current audio time is unequal to the start time, resume playback and return
-        if (newStartTime === playWindowStartTime && audioSnippet && audioSnippet.currentTime !== newStartTime){
+        // If the user plays the same audio clip multiple times without changing start or end time, just play the
+        // existing audio clip and don't request new audio clip from the backend each time
+        if (newStartTime === playWindowTimes?.startTime && newClipDuration === playWindowTimes?.clipDuration){
             playAudio()
             return
         }
 
         // Else, start process to get a new audio snippet
         setAudioSnippet(null)
-        setPlayWindowStartTime(newStartTime)
+        setPlayWindowTimes( {startTime: newStartTime, clipDuration: newClipDuration} )
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {
                 audio_id: audioId,
                 start_time: newStartTime,
-                clip_duration: newEndTime
+                clip_duration: newClipDuration
             })
             handleNewAudio(response.data.wav)
         } catch (error) {
@@ -1758,7 +1762,7 @@ function ScalableSpec(
         if (audioSnippet.paused) return
 
         clearAndRedrawCanvases()
-        drawPlayhead(playWindowStartTime + audioSnippet.currentTime)
+        drawPlayhead(playWindowTimes?.startTime + audioSnippet.currentTime)
 
         window.requestAnimationFrame(() => loop() )
     }
@@ -1766,15 +1770,15 @@ function ScalableSpec(
     const pauseAudio = () => {
         if (!audioSnippet) return
         audioSnippet.pause()
-        updatePlayhead(playWindowStartTime + audioSnippet.currentTime)
+        updatePlayhead(playWindowTimes?.startTime + audioSnippet.currentTime)
     }
 
     const stopAudio = () => {
         if (!audioSnippet) return
 
         audioSnippet.pause()
-        audioSnippet.currentTime = playWindowStartTime
-        updatePlayhead(playWindowStartTime)
+        audioSnippet.currentTime = playWindowTimes?.startTime
+        updatePlayhead(playWindowTimes?.startTime)
 
         clearAndRedrawCanvases()
     }
@@ -2240,6 +2244,7 @@ function ScalableSpec(
                             </div>
 
                             <div>
+                                <button onClick={() => console.log(expandedLabel)}>c</button>
                                 <Tooltip title="Move Track Up">
                                     <IconButton
                                         style={{...activeIconBtnStyle, ...(trackData.trackIndex === 0 && iconBtnDisabled)}}

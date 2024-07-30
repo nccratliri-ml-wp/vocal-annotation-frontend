@@ -331,9 +331,9 @@ function App() {
                     passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
                     passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
                 />
-            );
-        });
-    };
+            )
+        })
+    }
 
 
     /* ++++++++++++++++++ Controls ++++++++++++++++++ */

@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {toast} from "react-toastify";
+import Draggable from "react-draggable";
 
 function GlobalConfig (
             {
@@ -88,73 +89,74 @@ function GlobalConfig (
 
 
     return (
-        <div id='global-config-window'>
+        <Draggable cancel='#global-config-window-content'>
+            <div id='global-config-window'>
 
-            <div className='close-btn-container'>
-                <button className='close-btn' onClick={ () => passShowGlobalConfigWindowToApp(false) }>✖</button>
-                <p className='window-header'>Global Configurations</p>
-            </div>
+                <div className='close-btn-container'>
+                    <button className='close-btn' onClick={ () => passShowGlobalConfigWindowToApp(false) }>✖</button>
+                    <p className='window-header'>Global Configurations</p>
+                </div>
 
-            <div id='global-config-window-content'>
+                <div id='global-config-window-content'>
 
-                <div>
-                    <label className='global-config-window-label'>
-                        Hop Length
-                        <input
-                            type="number"
-                            value={hopLengthInputValue}
-                            min={0}
-                            disabled={strictMode}
-                            onKeyPress={excludeNonDigits}
-                            onChange={() => setHopLengthInputValue(event.target.value)}
-                            onFocus={(event) => event.target.select()}
-                            onPaste={(event) => event.preventDefault()}
-                        />
-                    </label>
+                    <div>
+                        <label className='global-config-window-label'>
+                            Hop Length
+                            <input
+                                type="number"
+                                value={hopLengthInputValue}
+                                min={0}
+                                disabled={strictMode}
+                                onKeyPress={excludeNonDigits}
+                                onChange={() => setHopLengthInputValue(event.target.value)}
+                                onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
+                            />
+                        </label>
 
-                    <label className='global-config-window-label'>
-                        Num Spec Columns
-                        <input
-                            type="number"
-                            value={numSpecColumnsInputValue}
-                            min={0}
-                            disabled={strictMode}
-                            onChange={(event) => setColumnsInputValue(event.target.value)}
-                            onKeyPress={excludeNonDigits}
-                            onFocus={(event) => event.target.select()}
-                            onPaste={(event) => event.preventDefault()}
-                        />
-                    </label>
+                        <label className='global-config-window-label'>
+                            Num Spec Columns
+                            <input
+                                type="number"
+                                value={numSpecColumnsInputValue}
+                                min={0}
+                                disabled={strictMode}
+                                onChange={(event) => setColumnsInputValue(event.target.value)}
+                                onKeyPress={excludeNonDigits}
+                                onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
+                            />
+                        </label>
 
-                    <label className='global-config-window-label'>
-                        Sampling Rate
-                        <input
-                            type="number"
-                            value={samplingRateInputValue}
-                            min={0}
-                            disabled={strictMode}
-                            onChange={(event) => setSamplingRateInputValue(event.target.value)}
-                            onKeyPress={excludeNonDigits}
-                            onFocus={(event) => event.target.select()}
-                            onPaste={(event) => event.preventDefault()}
-                        />
-                    </label>
+                        <label className='global-config-window-label'>
+                            Sampling Rate
+                            <input
+                                type="number"
+                                value={samplingRateInputValue}
+                                min={0}
+                                disabled={strictMode}
+                                onChange={(event) => setSamplingRateInputValue(event.target.value)}
+                                onKeyPress={excludeNonDigits}
+                                onFocus={(event) => event.target.select()}
+                                onPaste={(event) => event.preventDefault()}
+                            />
+                        </label>
 
-                    <div id='global-config-default-values-btn-container' >
-                        <div></div>
-                        <button id='global-config-default-values-btn' disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</button>
+                        <div id='global-config-default-values-btn-container' >
+                            <div></div>
+                            <button id='global-config-default-values-btn' disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</button>
+                        </div>
+
+                    </div>
+
+                    <div id='global-config-window-buttons-container'>
+                        <button onClick={() => passShowGlobalConfigWindowToApp(false)}>Cancel</button>
+                        <button id='global-config-submit-btn' disabled={strictMode} onClick={submitGlobalParameters}>Submit</button>
                     </div>
 
                 </div>
-
-                <div id='global-config-window-buttons-container'>
-                    <button onClick={() => passShowGlobalConfigWindowToApp(false)}>Cancel</button>
-                    <button id='global-config-submit-btn' disabled={strictMode} onClick={submitGlobalParameters}>Submit</button>
-                </div>
-
             </div>
-
-        </div>
+        </Draggable>
     )
 }
 

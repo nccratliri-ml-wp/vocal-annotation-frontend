@@ -268,11 +268,10 @@ html, body {
 /* -------------------------- Global Config Window -------------------------- */
 
 #global-config-window{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
+  position: fixed;
+  top: 40%;
+  left: 40%;
+  z-index: 4;
   width: 400px;
   height: 220px;
   border: 2px solid #ffffff;

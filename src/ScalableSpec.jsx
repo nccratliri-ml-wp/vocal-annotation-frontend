@@ -2335,22 +2335,23 @@ function ScalableSpec(
                                     <StopIcon style={activeIcon}/>
                                 </IconButton>
                             </div>
-                            <Parameters
-                                showLocalConfigWindow={showLocalConfigWindow}
-                                specCalMethod={specCalMethod}
-                                nfft={nfft}
-                                binsPerOctave={binsPerOctave}
-                                minFreq={minFreq}
-                                maxFreq={maxFreq}
-                                passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
-                                passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
-                                passNfftToScalableSpec={passNfftToScalableSpec}
-                                passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
-                                passMinFreqToScalableSpec={passMinFreqToScalableSpec}
-                                passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
-                                submitLocalParameters={submitLocalParameters}
-                                strictMode={strictMode}
-                            />
+                            {showLocalConfigWindow &&
+                                <Parameters
+                                    specCalMethod={specCalMethod}
+                                    nfft={nfft}
+                                    binsPerOctave={binsPerOctave}
+                                    minFreq={minFreq}
+                                    maxFreq={maxFreq}
+                                    passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
+                                    passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
+                                    passNfftToScalableSpec={passNfftToScalableSpec}
+                                    passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
+                                    passMinFreqToScalableSpec={passMinFreqToScalableSpec}
+                                    passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
+                                    submitLocalParameters={submitLocalParameters}
+                                    strictMode={strictMode}
+                                />
+                            }
                         </div>
                         <div className='waveform-buttons-frequencies-canvas-container'>
                             <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>

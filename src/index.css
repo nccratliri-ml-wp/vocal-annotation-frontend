@@ -325,9 +325,8 @@ html, body {
 
 .local-parameters-config-panel{
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 40%;
+  left: 40%;
   z-index: 3;
   width: 300px;
   height: 220px;
@@ -349,7 +348,7 @@ html, body {
   margin: 20px 0 20px 0;
 }
 
-.local-parameters-config-panel > div > label > input{
+.local-parameters-window-content > div > label > input{
   max-width: 60px;
 }
 

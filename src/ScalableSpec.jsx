@@ -2280,7 +2280,8 @@ function ScalableSpec(
                                 />
                                 <Tooltip title="Frequency Range">
                                     <IconButton
-                                        style={activeIconBtnStyle}
+                                        style={{...activeIconBtnStyle, ...(!audioId && iconBtnDisabled)}}
+                                        disabled={!audioId}
                                         onClick={handleClickFrequencyLinesBtn}
                                     >
                                         <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>

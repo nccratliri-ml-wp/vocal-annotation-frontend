@@ -1306,7 +1306,7 @@ function ScalableSpec(
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
 
-        if (labelToBeDeleted === expandedLabel){
+        if (labelToBeDeleted?.id === expandedLabel?.id){
             setExpandedLabel(null)
             setGlobalMouseCoordinates(null)
         }

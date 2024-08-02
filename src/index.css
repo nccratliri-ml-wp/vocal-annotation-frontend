@@ -423,9 +423,8 @@ html, body {
 
 .input-window{
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 40%;
+  left: 40%;
   z-index: 3;
   width: 300px;
   height: 160px;
@@ -547,6 +546,7 @@ html, body {
   background: #ffffff;
   padding: 0 5px;
   border: none;
+  color: black;
 }
 
 .window-header{

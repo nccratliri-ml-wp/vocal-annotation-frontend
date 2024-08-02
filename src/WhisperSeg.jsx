@@ -91,37 +91,37 @@ function WhisperSeg(
     const getModelsAvailableForInference = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-inference'
 
-        const response = await axios.post(path, {}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-
-        return response.data.response
+        try{
+            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            return response.data.response
+        } catch(error){
+            toast.error('Something went wrong with your request. Check the console to view the error.')
+            console.error(error)
+        }
     }
 
     const getModelsAvailableForFinetuning = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-finetuning'
 
-        const response = await axios.post(path, {}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-
-        return response.data.response
+        try{
+            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            return response.data.response
+        } catch(error){
+            toast.error('Something went wrong with your request. Check the console to view the error.')
+            console.error(error)
+        }
     }
 
     const getModelsCurrentlyTrained = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-training-in-progress'
 
-        const response = await axios.post(path, {}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-
-        return response.data.response
+        try{
+            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            return response.data.response
+        } catch(error){
+            toast.error('Something went wrong with your request. Check the console to view the error.')
+            console.error(error)
+        }
     }
 
 

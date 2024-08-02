@@ -231,21 +231,27 @@ function ScalableSpec(
             max_frequency: Number(maxFreq)
         }
 
-        const response = await axios.post(path, requestParameters)
+        try {
+            const response = await axios.post(path, requestParameters)
 
-        // Update potentially by the backend corrected values in the input fields (e.g. when the user requests nfft < 5)
-        const newSpecCalMethod = response.data.configurations.spec_cal_method
-        const newNfft = response.data.configurations.n_fft
-        const newBinsPerOctave = response.data.configurations.bins_per_octave
-        const newMinFreq = response.data.configurations.min_frequency
-        const newMaxFreq = response.data.configurations.max_frequency
-        setSpecCalMethod(newSpecCalMethod)
-        setNfft(newNfft ? newNfft : 512)
-        setBinsPerOctave(newBinsPerOctave ? newBinsPerOctave : 0)
-        setMinFreq(newMinFreq ? newMinFreq : 0)
-        setMaxFreq(newMaxFreq ? newMaxFreq : 16000)
+            // Update potentially by the backend corrected values in the input fields (e.g. when the user requests nfft < 5)
+            const newSpecCalMethod = response.data.configurations.spec_cal_method
+            const newNfft = response.data.configurations.n_fft
+            const newBinsPerOctave = response.data.configurations.bins_per_octave
+            const newMinFreq = response.data.configurations.min_frequency
+            const newMaxFreq = response.data.configurations.max_frequency
+            setSpecCalMethod(newSpecCalMethod)
+            setNfft(newNfft ? newNfft : 512)
+            setBinsPerOctave(newBinsPerOctave ? newBinsPerOctave : 0)
+            setMinFreq(newMinFreq ? newMinFreq : 0)
+            setMaxFreq(newMaxFreq ? newMaxFreq : 16000)
 
-        return response.data
+            return response.data
+
+        } catch (error) {
+            toast.error('Something went wrong trying compute the spectrogram. Check the console for more information.')
+            console.log(error)
+        }
     }
 
     const getSpecAndAudioArray = async () => {
@@ -283,8 +289,9 @@ function ScalableSpec(
 
     const handleUploadError = (error) => {
         setSpectrogramIsLoading( false )
-        console.error("Error uploading file:", error)
         toast.error('Error while uploading. Check the console for more information.')
+        console.error("Error uploading file:", error)
+
     }
 
     /* ++++++++++++++++++ Mouse Interaction methods ++++++++++++++++++ */
@@ -1744,6 +1751,7 @@ function ScalableSpec(
             })
             handleNewAudio(response.data.wav)
         } catch (error) {
+            toast.error('Something went wrong trying to play back the audio. Check the console for more information.')
             console.error("Error fetching audio clip:", error)
         }
     }
@@ -1834,9 +1842,13 @@ function ScalableSpec(
             target_length: 100000
         }
 
-        const response = await axios.post(path, requestParameters);
-
-        return response.data.wav_array
+        try {
+            const response = await axios.post(path, requestParameters);
+            return response.data.wav_array
+        } catch(error) {
+            toast.error('Something went wrong trying to get the audio waveform. Check the console for more information.')
+            console.error("Error fetching audio array for waveform:", error)
+        }
     }
 
     const drawWaveform = (newAudioArray) => {

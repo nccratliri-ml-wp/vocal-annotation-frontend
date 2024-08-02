@@ -19,6 +19,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
 import DownloadIcon from '@mui/icons-material/Download'
 import axios from "axios";
 import Draggable from "react-draggable";
+import {toast} from "react-toastify";
 
 
 function LabelWindow(
@@ -256,6 +257,7 @@ function LabelWindow(
             URL.revokeObjectURL(url)
             document.body.removeChild(a)
         } catch (error) {
+            toast.error('Something went wrong trying to download the audio clip. Check the console for more information.')
             console.error("Error fetching audio clip:", error)
         }
     }

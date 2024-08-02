@@ -357,20 +357,14 @@ function App() {
         updateClipDurationAndTimes(newHopLength, newDuration, newMaxScrollTime, newStartTime , newEndTime)
     }
 
-    /*
-    function leftScroll() {
+    const leftScroll = useCallback(() => {
         setCurrentStartTime(
             prevStartTime => Math.max(prevStartTime - scrollStep, 0)
         )
         setCurrentEndTime(
             prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration)
         )
-    }*/
-
-    const leftScroll = useCallback(() => {
-        setCurrentStartTime(prevStartTime => Math.max(prevStartTime - scrollStep, 0));
-        setCurrentEndTime(prevEndTime => Math.max(prevEndTime - scrollStep, globalClipDuration));
-    }, [scrollStep, globalClipDuration]);
+    }, [scrollStep, globalClipDuration])
 
     const rightScroll = useCallback(() => {
         setCurrentStartTime(
@@ -636,23 +630,28 @@ function App() {
         const getMetaDataFromHashID = async () => {
             const path = `/api/metadata/${hashID}`
 
-            const response = await axios.get(path)
-            const audioFilesArray = response.data.response
-            //const audioFilesArray = dummyData.response // For testing purposes
+            try {
+                const response = await axios.get(path)
+                const audioFilesArray = response.data.response
+                //const audioFilesArray = dummyData.response // For testing purposes
 
-            if (!ignore) return
+                if (!ignore) return
 
-            // Extract labels
-            const allLabels = extractLabels(audioFilesArray)
+                // Extract labels
+                const allLabels = extractLabels(audioFilesArray)
 
-            // Create Species, Individuals and clustername buttons deriving from the imported labels.
-            const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)
-            setSpeciesArray(updatedSpeciesArray)
-            setImportedLabels(allLabels)
-            setAnnotationInstance(audioFilesArray[0].annotation_instance)
+                // Create Species, Individuals and clustername buttons deriving from the imported labels.
+                const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)
+                setSpeciesArray(updatedSpeciesArray)
+                setImportedLabels(allLabels)
+                setAnnotationInstance(audioFilesArray[0].annotation_instance)
 
-            // Prepare for upload
-            processAudioFilesSequentially(audioFilesArray)
+                // Prepare for upload
+                processAudioFilesSequentially(audioFilesArray)
+            } catch (error){
+                console.error("Error trying to access metadata through Hash ID:", error)
+                toast.error('Error while trying to access the database. Check the console for more information.')
+            }
         }
 
         const processMetadataFromBase64String = async () => {
@@ -688,15 +687,6 @@ function App() {
 
     }, [location])
 
-    /*
-    // When labels are imported from a local CSV file
-    useEffect( () => {
-        if (!importedLabels) return
-        const updatedSpeciesArray = createSpeciesFromImportedLabels(importedLabels, speciesArray)
-        setSpeciesArray(updatedSpeciesArray)
-    }, [importedLabels])
-    */
-
     // When all the tracks have pushed their labels to allLabels state variable in App.jsx
     useEffect( () => {
         if (!allLabels || !submitRequest) return
@@ -713,10 +703,10 @@ function App() {
     // Set Up Before Unload Event Handler upon mount
     useEffect(() => {
         const releaseAudioIDs = async () => {
-            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'release-audio-given-ids';
-            const audioIds = tracksRef.current.map(track => track.audioID);
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'release-audio-given-ids'
+            const audioIds = tracksRef.current.map(track => track.audioID)
 
-            const requestParameters = { audio_id_list: audioIds };
+            const requestParameters = { audio_id_list: audioIds }
 
             try {
                 const response = await fetch(path, {
@@ -726,14 +716,14 @@ function App() {
                     },
                     body: JSON.stringify(requestParameters),
                     keepalive: true
-                });
+                })
 
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error('Network response was not ok')
                 }
-                console.log('Request sent successfully with keepalive');
+                console.log('Request sent successfully with keepalive')
             } catch (error) {
-                console.error('An error occurred:', error);
+                console.error('An error occurred:', error)
             }
         }
 
@@ -743,20 +733,20 @@ function App() {
                 event.preventDefault()
                 event.returnValue = confirmationMessage
 
-                return confirmationMessage;
+                return confirmationMessage
         }
 
         const handleUnload = () => {
             releaseAudioIDs()
         }
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        window.addEventListener('unload', handleUnload);
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        window.addEventListener('unload', handleUnload)
 
         // Cleanup the event listeners on component unmount
         return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-            window.removeEventListener('unload', handleUnload);
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+            window.removeEventListener('unload', handleUnload)
         }
     }, [])
 

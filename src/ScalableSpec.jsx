@@ -1306,7 +1306,7 @@ function ScalableSpec(
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
 
-        if (labelToBeDeleted === expandedLabel){
+        if (labelToBeDeleted?.id === expandedLabel?.id){
             setExpandedLabel(null)
             setGlobalMouseCoordinates(null)
         }
@@ -2280,7 +2280,8 @@ function ScalableSpec(
                                 />
                                 <Tooltip title="Frequency Range">
                                     <IconButton
-                                        style={activeIconBtnStyle}
+                                        style={{...activeIconBtnStyle, ...(!audioId && iconBtnDisabled)}}
+                                        disabled={!audioId}
                                         onClick={handleClickFrequencyLinesBtn}
                                     >
                                         <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>

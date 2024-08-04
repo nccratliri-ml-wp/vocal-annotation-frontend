@@ -91,6 +91,8 @@ function ScalableSpec(
 
     // General
     const [audioId, setAudioId] = useState(trackData.audioID)
+    const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200)
+    const resizeTimeoutRef = useRef(null)
 
     // Spectrogram
     const specCanvasRef = useRef(null)
@@ -171,8 +173,7 @@ function ScalableSpec(
     const activeIcon = showWaveform ? icon : iconSmall
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
 
-                    const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200);
-                    const resizeTimeoutRef = useRef(null);
+
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -1285,6 +1286,7 @@ function ScalableSpec(
         specCTX.putImageData(specImgData.current, 0, 0);
         waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
+
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
@@ -1788,7 +1790,9 @@ function ScalableSpec(
     function loop(){
         if (audioSnippet.paused) return
 
-        clearAndRedrawCanvases()
+        clearAndRedrawSpecAndWaveformCanvases()
+        drawAllLabels()
+        drawFrequencyLines()
         drawPlayhead(playWindowTimes?.startTime + audioSnippet.currentTime)
 
         window.requestAnimationFrame(() => loop() )
@@ -1807,18 +1811,7 @@ function ScalableSpec(
         audioSnippet.currentTime = playWindowTimes?.startTime
         updatePlayhead(playWindowTimes?.startTime)
 
-        clearAndRedrawCanvases()
-    }
-
-    const clearAndRedrawCanvases = () => {
-        const specCVS = specCanvasRef.current
-        const specCTX = specCVS.getContext('2d', { willReadFrequently: true });
-        const waveformCVS = waveformCanvasRef.current
-        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true });
-        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
-        specCTX.putImageData(specImgData.current, 0, 0);
-        waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
-        waveformCTX.putImageData(waveformImgData.current, 0, 0)
+        clearAndRedrawSpecAndWaveformCanvases()
         drawAllLabels()
         drawFrequencyLines()
     }

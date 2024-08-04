@@ -2292,7 +2292,8 @@ function ScalableSpec(
                                 </Tooltip>
                                 <Tooltip title="Change Track Parameters">
                                     <IconButton
-                                        style={activeIconBtnStyle}
+                                        style={{...activeIconBtnStyle, ...(spectrogramIsLoading && iconBtnDisabled)}}
+                                        disabled={spectrogramIsLoading}
                                         onClick={() => setShowLocalConfigWindow(true)}
                                     >
                                         <TuneIcon style={activeIcon}/>
@@ -2373,7 +2374,7 @@ function ScalableSpec(
                                     <StopIcon style={activeIcon}/>
                                 </IconButton>
                             </div>
-                            {showLocalConfigWindow &&
+                            {showLocalConfigWindow && !spectrogramIsLoading &&
                                 <Parameters
                                     specCalMethod={specCalMethod}
                                     nfft={nfft}

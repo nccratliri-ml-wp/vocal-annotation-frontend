@@ -171,6 +171,9 @@ function ScalableSpec(
     const activeIcon = showWaveform ? icon : iconSmall
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
 
+                    const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200);
+                    const resizeTimeoutRef = useRef(null);
+
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
     const passSpectrogramIsLoadingToScalableSpec = ( boolean ) => {
@@ -721,6 +724,20 @@ function ScalableSpec(
         })
     }
 
+    const updateCanvasWidth = () => {
+        if (!specCanvasRef.current) return
+        setCanvasWidth(window.innerWidth - 200)
+    }
+
+    const handleWindowResize = () => {
+        if (resizeTimeoutRef.current) {
+            clearTimeout(resizeTimeoutRef.current)
+        }
+        resizeTimeoutRef.current = setTimeout(() => {
+            updateCanvasWidth()
+        }, 200)
+    }
+
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
@@ -731,6 +748,8 @@ function ScalableSpec(
         }
 
         if (!specCanvasRef.current) return
+
+        console.log('draw ediotr cavnass')
 
         const specCVS = specCanvasRef.current;
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
@@ -2049,7 +2068,7 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawEditorCanvases(spectrogram, frequencies,audioArray)
-    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis] )
+    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
@@ -2178,6 +2197,19 @@ function ScalableSpec(
         if (!exportRequest && !submitRequest) return
         addLabelsToApp(labels)
     }, [exportRequest, submitRequest])
+
+    // Set up Resize event handler to update Canvas Dimensions when user resizes the browser window
+    useEffect(() => {
+        window.addEventListener('resize', handleWindowResize)
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleWindowResize)
+            if (resizeTimeoutRef.current) {
+                clearTimeout(resizeTimeoutRef.current)
+            }
+        }
+    }, [])
 
     return (
         <>
@@ -2395,7 +2427,7 @@ function ScalableSpec(
                         <canvas
                             className={showWaveform ? 'waveform-canvas' : 'hidden'}
                             ref={waveformCanvasRef}
-                            width={parent.innerWidth - 200}
+                            width={canvasWidth}
                             height={60}
                             onMouseDown={handleLMBDown}
                             onMouseUp={handleMouseUp}
@@ -2405,7 +2437,7 @@ function ScalableSpec(
                         <canvas
                             className='spec-canvas'
                             ref={specCanvasRef}
-                            width={parent.innerWidth - 200}
+                            width={canvasWidth}
                             height={120}
                             onMouseDown={handleLMBDown}
                             onMouseUp={handleMouseUp}
@@ -2415,7 +2447,7 @@ function ScalableSpec(
                         <canvas
                             className={showLabelAndIndividualsCanvas ? 'label-canvas' : 'hidden'}
                             ref={labelCanvasRef}
-                            width={parent.innerWidth - 200}
+                            width={canvasWidth}
                             height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                             onMouseDown={handleLMBDown}
                             onMouseUp={handleMouseUp}

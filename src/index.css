@@ -47,6 +47,10 @@ html, body {
   top: 100px;
   z-index: 2;
   margin: 0 0 0 200px;
+  height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 /* -------------------------- Track -------------------------- */

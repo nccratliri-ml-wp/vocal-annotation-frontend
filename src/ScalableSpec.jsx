@@ -1187,6 +1187,14 @@ function ScalableSpec(
             ctx.setLineDash([])
         }
 
+        // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
+        const allLabelIDs = labels.map(label => label.id)
+        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
+            //if (activeLabel.trackID !== trackID) {
+            drawLine(activeLabel, activeLabel?.onset)
+            drawLine(activeLabel, activeLabel?.offset)
+        }
+
         if (!labels.length) return
 
         for (let label of labels) {
@@ -1219,14 +1227,6 @@ function ScalableSpec(
             else {
                 drawLineBetween(label)
             }
-        }
-
-        // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
-        const allLabelIDs = labels.map(label => label.id)
-        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
-        //if (activeLabel.trackID !== trackID) {
-            drawLine(activeLabel, activeLabel?.onset)
-            drawLine(activeLabel, activeLabel?.offset)
         }
     }
 

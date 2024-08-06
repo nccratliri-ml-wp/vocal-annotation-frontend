@@ -750,8 +750,6 @@ function ScalableSpec(
 
         if (!specCanvasRef.current) return
 
-        console.log('draw ediotr cavnass')
-
         const specCVS = specCanvasRef.current;
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
         const image = new Image();
@@ -1198,6 +1196,10 @@ function ScalableSpec(
         if (!labels.length) return
 
         for (let label of labels) {
+            // If label is outside the viewport, don't draw it to save computing resource
+            if ( (label.onset < currentStartTime && label.offset < currentStartTime) || (label.onset > currentEndTime && label.offset > currentEndTime)){
+                continue
+            }
 
             // If a user sets an onset without offset, the onset line will be drawn until he sets an offset, so he doesn't forget about it:
             if (!label.offset){
@@ -1333,6 +1335,7 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
+        console.log('delete label')
 
         if (labelToBeDeleted?.id === expandedLabel?.id){
             setExpandedLabel(null)

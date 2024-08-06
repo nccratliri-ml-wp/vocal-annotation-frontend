@@ -29,6 +29,7 @@ import LabelWindow from "./LabelWindow.jsx";
 import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
 import {toast} from "react-toastify";
 import WhisperSeg from "./WhisperSeg.jsx"
+import emitter from './eventEmitter';
 
 // Classes
 class Playhead{
@@ -65,8 +66,6 @@ function ScalableSpec(
                             globalNumSpecColumns,
                             globalSamplingRate,
                             updateClipDurationAndTimes,
-                            activeLabel,
-                            passActiveLabelToApp,
                             strictMode,
                             importedLabels,
                             handleUploadResponse,
@@ -174,6 +173,7 @@ function ScalableSpec(
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
 
 
+    const [activeLabel, setActiveLabel] = useState(null)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -365,13 +365,14 @@ function ScalableSpec(
         const labelToBeExpanded = checkIfClickedOnLabel(event, mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
+            /*
             passActiveLabelToApp({
                 onset: labelToBeExpanded.onset,
                 offset: labelToBeExpanded.offset,
                 id: labelToBeExpanded.id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })
+            })*/
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
@@ -395,13 +396,14 @@ function ScalableSpec(
             }
 
             setLabels(labelsCopy)
+            /*
             passActiveLabelToApp({
                 onset: labelsCopy[labels.length-1].onset,
                 offset: labelsCopy[labels.length-1].offset,
                 id: labelsCopy[labels.length-1].id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })
+            })*/
             drawLineBetween(newestLabel)
             drawClustername(newestLabel)
             drawLine(newestLabel, newestLabel.onset)
@@ -435,13 +437,14 @@ function ScalableSpec(
             if (clickedLabel.id === expandedLabel?.id){
                 setExpandedLabel(clickedLabel)
             }
+            /*
             passActiveLabelToApp({
                 onset: clickedLabel.onset,
                 offset: clickedLabel.offset,
                 id: clickedLabel.id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })
+            })*/
         }
 
         // Only do this when mouse up event stems from dragging the active label (equivalent to draggedActiveLabel being true)
@@ -454,12 +457,12 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             draggedActiveLabel.onset = magnet(draggedActiveLabel.onset)
             draggedActiveLabel.offset = magnet(draggedActiveLabel.offset)
-
+            /*
             passActiveLabelToApp({
                 ...activeLabel,
                 onset: draggedActiveLabel.onset,
                 offset: draggedActiveLabel.offset,
-            })
+            })*/
         }
 
         clickedLabel = undefined
@@ -500,6 +503,7 @@ function ScalableSpec(
 
         deleteLabel(labelToBeDeleted)
 
+        /*
         if (labelToBeDeleted.id === activeLabel?.id){
             passActiveLabelToApp({
                 onset: undefined,
@@ -508,7 +512,7 @@ function ScalableSpec(
                 trackID: undefined,
                 color: undefined
             })
-        }
+        }*/
     }
 
     const handleMouseMove = (event) => {
@@ -772,8 +776,8 @@ function ScalableSpec(
         image.src = `data:image/png;base64,${spectrogram}`;
     }
 
-    const drawActiveLabel = (newAudioArray) => {
-        if (!specCanvasRef.current || !activeLabel) return
+    const drawActiveLabel = (newAudioArray, newActiveLabel) => {
+        if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
@@ -790,8 +794,8 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawFrequencyLines()
-            //drawLine(activeLabel, activeLabel?.onset)
-            //drawLine(activeLabel, activeLabel?.offset)
+            drawLine(newActiveLabel, newActiveLabel?.onset)
+            drawLine(newActiveLabel, newActiveLabel?.offset)
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -921,7 +925,7 @@ function ScalableSpec(
         const x = calculateXPosition(timestamp)
         const y = calculateYPosition(label)
 
-        const lineColor = label.color //? label.color :
+        const lineColor = label.color
 
         if (specCalMethod === 'constant-q'){
             if (timestamp === label.onset){
@@ -1186,11 +1190,11 @@ function ScalableSpec(
         }
 
         // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
-
+        /*
         if (activeLabel && activeLabel?.trackID !== trackID) {
             drawLine(activeLabel, activeLabel?.onset)
             drawLine(activeLabel, activeLabel?.offset)
-        }
+        }*/
         /*
         const allLabelIDs = labels.map(label => label.id)
         if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
@@ -1294,7 +1298,6 @@ function ScalableSpec(
         specCTX.putImageData(specImgData.current, 0, 0);
         waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
-
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
@@ -1332,15 +1335,53 @@ function ScalableSpec(
         // When active label state is updated, it causes the onset to be drawn witha noticeable delay.
         // Probably react first executes the active label state update, then the new labels state update, which causes the delay.
         // But I still don't know why this happens only on zoom level 70
-
-        passActiveLabelToApp({
+        emitter.emit('dataChange', {
             onset: newLabel.onset,
             offset: newLabel.offset,
             id: newLabel.id,
             trackID: trackID,
             color: ACTIVE_LABEL_COLOR,
         })
+
+        /*
+        passActiveLabelToApp({
+            onset: newLabel.onset,
+            offset: newLabel.offset,
+            id: newLabel.id,
+            trackID: trackID,
+            color: ACTIVE_LABEL_COLOR,
+        })*/
     }
+
+                    useEffect(() => {
+
+                        // Make sure clear and redraw properly works
+                        // see if having labels in depedency array will cause any problems. ChatGPT thinks no so proably all fine
+                        // finish implementation of emitter
+                        // make active label draggable (for this i will need to setActiveLabel)
+
+                        const handler = (newActiveLabel) => {
+                            //setActiveLabel(newActiveLabel);
+
+                            //drawLine(newActiveLabel, newActiveLabel.offset)
+                            if (newActiveLabel?.trackID !== trackID){
+                                //drawActiveLabel(audioArray, newActiveLabel)
+                                clearAndRedrawSpecAndWaveformCanvases()
+                                drawAllLabels()
+                                drawFrequencyLines()
+                                drawLine(newActiveLabel, newActiveLabel.onset)
+                            }
+                        }
+                        emitter.on('dataChange', handler);
+
+                        // Clean up the event listener on unmount
+                        return () => {
+                            console.log('cleaning up')
+                            emitter.off('dataChange', handler);
+                        };
+                    }, [globalClipDuration, /*label*/]);
+
+
 
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
@@ -1932,13 +1973,14 @@ function ScalableSpec(
         const newestLabel = labels[labels.length -1]
         if (newestLabel && !newestLabel.offset){
             deleteLabel(newestLabel)
+            /*
             passActiveLabelToApp({
                 onset: undefined,
                 offset: undefined,
                 id: undefined,
                 trackID: undefined,
                 color: undefined
-            })
+            })*/
         }
     }
 
@@ -2106,7 +2148,7 @@ function ScalableSpec(
             setLabels(updatedLabels)
         }
 
-        drawActiveLabel(audioArray)
+        //drawActiveLabel(audioArray)
 
     }, [activeLabel] )
 
@@ -2213,6 +2255,7 @@ function ScalableSpec(
             }
         }
     }, [])
+
 
     return (
         <>

@@ -86,8 +86,6 @@ function App() {
 
     const [strictMode, setStrictMode] = useState(false)
 
-    const [activeLabel, setActiveLabel] = useState(null)
-
     const [allLabels, setAllLabels] = useState([])
     const [exportRequest, setExportRequest] = useState(false)
     const [submitRequest, setSubmitRequest] = useState(false)
@@ -142,10 +140,6 @@ function App() {
 
     function passDeletedItemIDToApp( newDeletedItemID ){
         setDeletedItemID( newDeletedItemID )
-    }
-
-    function passActiveLabelToApp( newActiveLabel ){
-        setActiveLabel( newActiveLabel )
     }
 
     function addLabelsToApp( newLabels ) {
@@ -310,8 +304,6 @@ function App() {
                     globalNumSpecColumns={globalNumSpecColumns}
                     globalSamplingRate={globalSamplingRate}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
-                    activeLabel={activeLabel}
-                    passActiveLabelToApp={passActiveLabelToApp}
                     strictMode={strictMode}
                     importedLabels={importedLabels}
                     handleUploadResponse={handleUploadResponse}

@@ -790,8 +790,8 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawFrequencyLines()
-            drawLine(activeLabel, activeLabel?.onset)
-            drawLine(activeLabel, activeLabel?.offset)
+            //drawLine(activeLabel, activeLabel?.onset)
+            //drawLine(activeLabel, activeLabel?.offset)
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -921,7 +921,7 @@ function ScalableSpec(
         const x = calculateXPosition(timestamp)
         const y = calculateYPosition(label)
 
-        const lineColor = label.color
+        const lineColor = label.color //? label.color :
 
         if (specCalMethod === 'constant-q'){
             if (timestamp === label.onset){
@@ -1186,12 +1186,18 @@ function ScalableSpec(
         }
 
         // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
-        const allLabelIDs = labels.map(label => label.id)
-        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
-            //if (activeLabel.trackID !== trackID) {
+
+        if (activeLabel && activeLabel?.trackID !== trackID) {
             drawLine(activeLabel, activeLabel?.onset)
             drawLine(activeLabel, activeLabel?.offset)
         }
+        /*
+        const allLabelIDs = labels.map(label => label.id)
+        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
+            //if (activeLabel?.trackID !== trackID) {
+            drawLine(activeLabel, activeLabel?.onset)
+            drawLine(activeLabel, activeLabel?.offset)
+        }*/
 
         if (!labels.length) return
 
@@ -1323,6 +1329,10 @@ function ScalableSpec(
 
         setLabels( current => [...current, newLabel] )
 
+        // When active label state is updated, it causes the onset to be drawn witha noticeable delay.
+        // Probably react first executes the active label state update, then the new labels state update, which causes the delay.
+        // But I still don't know why this happens only on zoom level 70
+
         passActiveLabelToApp({
             onset: newLabel.onset,
             offset: newLabel.offset,
@@ -1335,7 +1345,6 @@ function ScalableSpec(
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
         setLabels(filteredLabels)
-        console.log('delete label')
 
         if (labelToBeDeleted?.id === expandedLabel?.id){
             setExpandedLabel(null)
@@ -2070,9 +2079,9 @@ function ScalableSpec(
     useEffect( () => {
         if (!spectrogram || trackID === activeLabel?.trackID || activeSpecies.name === ANNOTATED_AREA) {
             // Updating the original label with the new onset or offset from the dragged active label
-            const updatedLabels = labels.map( label => {
+            const updatedLabels = labels.map(label => {
 
-                if (label.id === activeLabel.id){
+                if (label.id === activeLabel.id) {
                     return new Label(
                         label.id,
                         label.trackID,
@@ -2094,9 +2103,7 @@ function ScalableSpec(
                     return label
                 }
             })
-
             setLabels(updatedLabels)
-            return
         }
 
         drawActiveLabel(audioArray)

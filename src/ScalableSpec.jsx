@@ -771,37 +771,6 @@ function ScalableSpec(
         image.src = `data:image/png;base64,${spectrogram}`;
     }
 
-    const drawActiveLabel = (newActiveLabel) => {
-        drawLine(newActiveLabel, newActiveLabel.onset)
-        drawLine(newActiveLabel, newActiveLabel.offset)
-
-        /*
-        if (!specCanvasRef.current) return
-
-        const specCVS = specCanvasRef.current;
-        const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
-        const image = new Image();
-
-        const labelCVS = labelCanvasRef.current
-        const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true, alpha: true });
-
-        // Draw Spectrogram, Waveform and labels
-        image.addEventListener('load', () => {
-            specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
-            specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
-            drawWaveform(newAudioArray)
-            labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
-            drawAllLabels()
-            drawFrequencyLines()
-            drawLine(newActiveLabel, newActiveLabel?.onset)
-            drawLine(newActiveLabel, newActiveLabel?.offset)
-            //drawPlayhead(playheadRef.current.timeframe)
-        })
-        image.src = `data:image/png;base64,${spectrogram}`;
-
-         */
-    }
-
     const drawTimeAxis = () => {
         const canvas = timeAxisRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true })
@@ -1240,6 +1209,11 @@ function ScalableSpec(
         drawLine(label, label.offset)
         drawLineBetween(label)
         drawClustername(label)
+    }
+
+    const drawActiveLabel = (newActiveLabel) => {
+        drawLine(newActiveLabel, newActiveLabel.onset)
+        drawLine(newActiveLabel, newActiveLabel.offset)
     }
 
     const drawIndividualsCanvas = () => {
@@ -2053,7 +2027,8 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram || !audioArray) return
-        drawEditorCanvases(spectrogram, frequencies,audioArray)
+        //drawEditorCanvases(spectrogram, frequencies,audioArray)
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks

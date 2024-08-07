@@ -365,14 +365,13 @@ function ScalableSpec(
         const labelToBeExpanded = checkIfClickedOnLabel(event, mouseX, mouseY)
         if ( labelToBeExpanded ) {
             setExpandedLabel( labelToBeExpanded )
-            /*
-            passActiveLabelToApp({
+            emitter.emit('dataChange', {
                 onset: labelToBeExpanded.onset,
                 offset: labelToBeExpanded.offset,
                 id: labelToBeExpanded.id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })*/
+            })
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
@@ -396,14 +395,14 @@ function ScalableSpec(
             }
 
             setLabels(labelsCopy)
-            /*
-            passActiveLabelToApp({
+            emitter.emit('dataChange', {
                 onset: labelsCopy[labels.length-1].onset,
                 offset: labelsCopy[labels.length-1].offset,
                 id: labelsCopy[labels.length-1].id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })*/
+            })
+
             drawLineBetween(newestLabel)
             drawClustername(newestLabel)
             drawLine(newestLabel, newestLabel.onset)
@@ -437,14 +436,13 @@ function ScalableSpec(
             if (clickedLabel.id === expandedLabel?.id){
                 setExpandedLabel(clickedLabel)
             }
-            /*
-            passActiveLabelToApp({
+            emitter.emit('dataChange', {
                 onset: clickedLabel.onset,
                 offset: clickedLabel.offset,
                 id: clickedLabel.id,
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
-            })*/
+            })
         }
 
         // Only do this when mouse up event stems from dragging the active label (equivalent to draggedActiveLabel being true)
@@ -457,12 +455,12 @@ function ScalableSpec(
             // Create zero gap labels if necessary
             draggedActiveLabel.onset = magnet(draggedActiveLabel.onset)
             draggedActiveLabel.offset = magnet(draggedActiveLabel.offset)
-            /*
-            passActiveLabelToApp({
+
+            emitter.emit('dataChange', {
                 ...activeLabel,
                 onset: draggedActiveLabel.onset,
                 offset: draggedActiveLabel.offset,
-            })*/
+            })
         }
 
         clickedLabel = undefined
@@ -503,16 +501,16 @@ function ScalableSpec(
 
         deleteLabel(labelToBeDeleted)
 
-        /*
+        // Remove active label from other tracks, if the deleted label was the active one
         if (labelToBeDeleted.id === activeLabel?.id){
-            passActiveLabelToApp({
+            emitter.emit('dataChange', {
                 onset: undefined,
                 offset: undefined,
                 id: undefined,
                 trackID: undefined,
-                color: undefined
+                color: undefined,
             })
-        }*/
+        }
     }
 
     const handleMouseMove = (event) => {
@@ -544,10 +542,7 @@ function ScalableSpec(
     // this isn't very neat or resourceful, but it works well enough for now. possible candidate for re-factoring in the future
     const hoverLabel = (event) => {
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted) {
-            clearAndRedrawSpecAndWaveformCanvases()
-            drawAllLabels()
-            drawFrequencyLines()
-            //drawPlayhead(playheadRef.current.timeframe)
+            clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
             //console.log('drawing green')
         }
@@ -771,12 +766,16 @@ function ScalableSpec(
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
             drawFrequencyLines()
-            //drawPlayhead(playheadRef.current.timeframe)
+            drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
     }
 
-    const drawActiveLabel = (newAudioArray, newActiveLabel) => {
+    const drawActiveLabel = (newActiveLabel) => {
+        drawLine(newActiveLabel, newActiveLabel.onset)
+        drawLine(newActiveLabel, newActiveLabel.offset)
+
+        /*
         if (!specCanvasRef.current) return
 
         const specCVS = specCanvasRef.current;
@@ -799,6 +798,8 @@ function ScalableSpec(
             //drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
+
+         */
     }
 
     const drawTimeAxis = () => {
@@ -1190,18 +1191,10 @@ function ScalableSpec(
         }
 
         // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
-        /*
-        if (activeLabel && activeLabel?.trackID !== trackID) {
-            drawLine(activeLabel, activeLabel?.onset)
-            drawLine(activeLabel, activeLabel?.offset)
-        }*/
-        /*
-        const allLabelIDs = labels.map(label => label.id)
-        if ( activeLabel && !allLabelIDs.includes(activeLabel.id) ){
-            //if (activeLabel?.trackID !== trackID) {
-            drawLine(activeLabel, activeLabel?.onset)
-            drawLine(activeLabel, activeLabel?.offset)
-        }*/
+        // Don't draw it if active label is being dragged, to avoid drawing the outdated active label
+        if (activeLabel && activeLabel?.trackID !== trackID && !draggedActiveLabel) {
+            drawActiveLabel(activeLabel)
+        }
 
         if (!labels.length) return
 
@@ -1289,20 +1282,25 @@ function ScalableSpec(
         }
     }
 
-    const clearAndRedrawSpecAndWaveformCanvases = () => {
-        const specCVS = specCanvasRef.current;
-        const specCTX = specCVS.getContext('2d',{ willReadFrequently: true });
+    const clearAndRedrawSpecAndWaveformCanvases = (currentPlayheadTime) => {
+        if (!specCanvasRef.current || !waveformCanvasRef.current || !specImgData.current || !waveformImgData.current) return
+
+        const specCVS = specCanvasRef.current
+        const specCTX = specCVS.getContext('2d',{ willReadFrequently: true })
         const waveformCVS = waveformCanvasRef.current
         const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
-        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
-        specCTX.putImageData(specImgData.current, 0, 0);
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height)
+        specCTX.putImageData(specImgData.current, 0, 0)
         waveformCTX.clearRect(0, 0, waveformCVS.width, waveformCVS.height)
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
+
+        drawAllLabels()
+        drawFrequencyLines()
+        drawPlayhead(currentPlayheadTime)
     }
 
     /* ++++++++++++++++++ Label manipulation methods ++++++++++++++++++ */
-        const addNewLabel = (onset) => {
-
+    const addNewLabel = (onset) => {
         if (!activeSpecies){
             toast.error('Add at least one species before annotating.')
             return
@@ -1332,9 +1330,6 @@ function ScalableSpec(
 
         setLabels( current => [...current, newLabel] )
 
-        // When active label state is updated, it causes the onset to be drawn witha noticeable delay.
-        // Probably react first executes the active label state update, then the new labels state update, which causes the delay.
-        // But I still don't know why this happens only on zoom level 70
         emitter.emit('dataChange', {
             onset: newLabel.onset,
             offset: newLabel.offset,
@@ -1342,46 +1337,7 @@ function ScalableSpec(
             trackID: trackID,
             color: ACTIVE_LABEL_COLOR,
         })
-
-        /*
-        passActiveLabelToApp({
-            onset: newLabel.onset,
-            offset: newLabel.offset,
-            id: newLabel.id,
-            trackID: trackID,
-            color: ACTIVE_LABEL_COLOR,
-        })*/
     }
-
-                    useEffect(() => {
-
-                        // Make sure clear and redraw properly works
-                        // see if having labels in depedency array will cause any problems. ChatGPT thinks no so proably all fine
-                        // finish implementation of emitter
-                        // make active label draggable (for this i will need to setActiveLabel)
-
-                        const handler = (newActiveLabel) => {
-                            //setActiveLabel(newActiveLabel);
-
-                            //drawLine(newActiveLabel, newActiveLabel.offset)
-                            if (newActiveLabel?.trackID !== trackID){
-                                //drawActiveLabel(audioArray, newActiveLabel)
-                                clearAndRedrawSpecAndWaveformCanvases()
-                                drawAllLabels()
-                                drawFrequencyLines()
-                                drawLine(newActiveLabel, newActiveLabel.onset)
-                            }
-                        }
-                        emitter.on('dataChange', handler);
-
-                        // Clean up the event listener on unmount
-                        return () => {
-                            console.log('cleaning up')
-                            emitter.off('dataChange', handler);
-                        };
-                    }, [globalClipDuration, /*label*/]);
-
-
 
     const deleteLabel = (labelToBeDeleted) => {
         const filteredLabels = labels.filter(label => label !== labelToBeDeleted)
@@ -1404,45 +1360,35 @@ function ScalableSpec(
     }
 
     const dragOnset = (event) => {
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         clickedLabel.onset = calculateTimestamp(event)
-        drawAllLabels()
-        drawFrequencyLines()
-        //drawPlayhead(playheadRef.current.timeframe)
     }
 
     const dragOffset = (event) => {
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         clickedLabel.offset = calculateTimestamp(event)
-        drawAllLabels()
-        drawFrequencyLines()
-        //drawPlayhead(playheadRef.current.timeframe)
     }
 
     const dragActiveLabelOnset = (event) => {
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         draggedActiveLabel.onset = calculateTimestamp(event)
         drawLine(draggedActiveLabel, draggedActiveLabel.onset)
         drawLine(draggedActiveLabel, draggedActiveLabel.offset)
-        drawFrequencyLines()
     }
 
     const dragActiveLabelOffset = (event) => {
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         draggedActiveLabel.offset = calculateTimestamp(event)
         drawLine(draggedActiveLabel, draggedActiveLabel.onset)
         drawLine(draggedActiveLabel, draggedActiveLabel.offset)
-        drawFrequencyLines()
     }
 
     const dragMaxFreqLine = (event) => {
         const newMaxFreqY = getMouseY(event)
         if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
 
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
-        drawAllLabels()
-        drawFrequencyLines()
     }
 
     const dragMinFreqLine = (event) => {
@@ -1454,10 +1400,8 @@ function ScalableSpec(
             newMinFreqY = specCanvasRef.current.height + 1
         }
 
-        clearAndRedrawSpecAndWaveformCanvases()
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
-        drawAllLabels()
-        drawFrequencyLines()
     }
 
     const magnet = (timestamp) => {
@@ -1843,11 +1787,7 @@ function ScalableSpec(
     function loop(){
         if (audioSnippet.paused) return
 
-        clearAndRedrawSpecAndWaveformCanvases()
-        drawAllLabels()
-        drawFrequencyLines()
-        drawPlayhead(playWindowTimes?.startTime + audioSnippet.currentTime)
-
+        clearAndRedrawSpecAndWaveformCanvases(playWindowTimes?.startTime + audioSnippet.currentTime)
         window.requestAnimationFrame(() => loop() )
     }
 
@@ -1864,12 +1804,12 @@ function ScalableSpec(
         audioSnippet.currentTime = playWindowTimes?.startTime
         updatePlayhead(playWindowTimes?.startTime)
 
-        clearAndRedrawSpecAndWaveformCanvases()
-        drawAllLabels()
-        drawFrequencyLines()
+        clearAndRedrawSpecAndWaveformCanvases(null)
     }
 
     const drawPlayhead = (timeframe) => {
+        if (!timeframe) return
+
         const specCVS = specCanvasRef.current
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true });
         const waveformCVS = waveformCanvasRef.current
@@ -1969,18 +1909,17 @@ function ScalableSpec(
     }
 
     /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
-    const handleMouseLeave = () => {
+    const handleMouseLeaveTrackContainer = () => {
         const newestLabel = labels[labels.length -1]
         if (newestLabel && !newestLabel.offset){
             deleteLabel(newestLabel)
-            /*
-            passActiveLabelToApp({
+            emitter.emit('dataChange', {
                 onset: undefined,
                 offset: undefined,
                 id: undefined,
                 trackID: undefined,
-                color: undefined
-            })*/
+                color: undefined,
+            })
         }
     }
 
@@ -2119,8 +2058,11 @@ function ScalableSpec(
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
-        if (!spectrogram || trackID === activeLabel?.trackID || activeSpecies.name === ANNOTATED_AREA) {
-            // Updating the original label with the new onset or offset from the dragged active label
+        if (!spectrogram) return
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
+
+        // Update the original label with the new onset or offset from the dragged active label
+        if (trackID === activeLabel?.trackID || activeSpecies.name === ANNOTATED_AREA) {
             const updatedLabels = labels.map(label => {
 
                 if (label.id === activeLabel.id) {
@@ -2147,9 +2089,6 @@ function ScalableSpec(
             })
             setLabels(updatedLabels)
         }
-
-        //drawActiveLabel(audioArray)
-
     }, [activeLabel] )
 
     // When user zoomed or scrolled
@@ -2256,6 +2195,18 @@ function ScalableSpec(
         }
     }, [])
 
+    // Set up emitter event handler to pass new active label between sibling ScalableSpec.jsx components
+    useEffect(() => {
+        const handler = (newActiveLabel) => {
+            setActiveLabel(newActiveLabel)
+        }
+        emitter.on('dataChange', handler)
+
+        // Clean up the event listener on unmount
+        return () => {
+            emitter.off('dataChange', handler)
+        }
+    }, [])
 
     return (
         <>
@@ -2305,7 +2256,7 @@ function ScalableSpec(
                 :
                 <div
                     className='track-container'
-                    onMouseLeave={handleMouseLeave}
+                    onMouseLeave={handleMouseLeaveTrackContainer}
                 >
                     <div className={showWaveform ? 'side-window' : 'side-window-small'}>
                         <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>

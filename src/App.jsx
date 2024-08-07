@@ -595,6 +595,14 @@ function App() {
         return allLabels
     }
 
+    const checkIfAtLeastOneAudioFileWasUploaded = () => {
+        for (const track of tracks){
+            if (track.filename){
+                return true
+            }
+        }
+    }
+
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
@@ -804,6 +812,7 @@ function App() {
                         passImportedLabelsToApp={passImportedLabelsToApp}
                         speciesArray={speciesArray}
                         passSpeciesArrayToApp={passSpeciesArrayToApp}
+                        atLeastOneAudioFileUploaded={checkIfAtLeastOneAudioFileWasUploaded()}
                     />
                     <Export
                         tracks={tracks}

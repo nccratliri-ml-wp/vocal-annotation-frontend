@@ -2027,8 +2027,8 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram || !audioArray) return
-        //drawEditorCanvases(spectrogram, frequencies,audioArray)
-        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
+        drawEditorCanvases(spectrogram, frequencies,audioArray)
+        //clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
@@ -2338,6 +2338,7 @@ function ScalableSpec(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
+                                {canvasWidth}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

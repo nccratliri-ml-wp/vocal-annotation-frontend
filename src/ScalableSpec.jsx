@@ -1541,7 +1541,8 @@ function ScalableSpec(
             passMaxScrollTimeToApp( newMaxScrollTime )
             passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
             // Set new Start Frame only
-        } else if (newViewportStartFrame){
+        } else if (newViewportStartFrame || newViewportStartFrame === 0){
+            console.log('got here')
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )
@@ -2338,7 +2339,6 @@ function ScalableSpec(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
-                                {canvasWidth}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

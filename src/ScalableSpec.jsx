@@ -379,7 +379,7 @@ function ScalableSpec(
         // Add offset to existing label if necessary
         const newestLabel = labels[labels.length-1]
         if (labels.length > 0 && newestLabel.offset === undefined){
-            let newOffset = calculateTimestamp(event)
+            let newOffset = calculateTimestampAtMouseX(event)
             newOffset = magnet(newOffset)
             /*
             if (!checkIfNewOffsetIsValid(newestLabel.onset, newOffset) ){
@@ -411,7 +411,7 @@ function ScalableSpec(
         }
 
         // Add onset
-        let clickedTimestamp = calculateTimestamp(event)
+        let clickedTimestamp = calculateTimestampAtMouseX(event)
         clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
     }
@@ -604,7 +604,7 @@ function ScalableSpec(
         return (label?.individualIndex + 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
-    const calculateTimestamp = (event) => {
+    const calculateTimestampAtMouseX = (event) => {
         const mouseX = getMouseX(event)
         const ratio = (mouseX / specCanvasRef.current.width)
         return globalClipDuration * ratio + currentStartTime
@@ -743,7 +743,7 @@ function ScalableSpec(
     const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
         // Draw Time Axis, Viewport
         if (showOverviewBarAndTimeAxis){
-            drawTimeAxis()
+            drawTimeAxis(currentStartTime, currentEndTime)
             drawViewport(currentStartTime, currentEndTime, 'white', 2)
         }
 
@@ -771,97 +771,110 @@ function ScalableSpec(
         image.src = `data:image/png;base64,${spectrogram}`;
     }
 
-    const drawTimeAxis = () => {
-        const canvas = timeAxisRef.current
-        const ctx = canvas.getContext('2d', { willReadFrequently: true })
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
+                    const drawTimeAxis = () => {
+                        const cvs = timeAxisRef.current;
+                        const ctx = cvs.getContext('2d', { willReadFrequently: true });
+                        ctx.clearRect(0, 0, cvs.width, cvs.height);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = '#9db4c0';
 
-        // Drawing horizontal timeline
-        ctx.beginPath()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(canvas.width, 0)
-        ctx.stroke()
+                        // Drawing horizontal timeline
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(cvs.width, 0);
+                        ctx.stroke();
 
-        // Drawing first timestamp
-        ctx.beginPath()
-        ctx.moveTo(1, 0)
-        ctx.lineTo(1, canvas.height)
-        ctx.stroke()
+                        // Drawing first timestamp
+                        ctx.beginPath();
+                        ctx.moveTo(1, 0);
+                        ctx.lineTo(1, cvs.height);
+                        ctx.stroke();
 
-        // Drawing last timestamp
-        ctx.beginPath()
-        ctx.moveTo(canvas.width - 1, 0)
-        ctx.lineTo(canvas.width - 1, canvas.height)
-        ctx.stroke()
+                        // Drawing last timestamp
+                        ctx.beginPath();
+                        ctx.moveTo(cvs.width - 1, 0);
+                        ctx.lineTo(cvs.width - 1, cvs.height);
+                        ctx.stroke();
 
-        // Drawing timestamps in between
-        const convertMethod = globalClipDuration > 3600 ? convertSecondsToHours : convertSecondsToMinutes
-        let withText = globalClipDuration < globalAudioDuration * 0.25
+                        const totalDuration = globalClipDuration; // Total duration of the audio
+                        let unit = 'seconds'; // Default unit
+                        let unitDuration = 1; // Default duration between timestamps in seconds
 
-        let step = Math.floor(globalAudioDuration / 10 / 10) * 10
-        if (step < 1){
-            step = 1
-        }
+                        // Determine the best time unit and duration
+                        if (totalDuration > 3600) {
+                            unit = 'hours';
+                            unitDuration = 3600;
+                        } else if (totalDuration > 60) {
+                            unit = 'minutes';
+                            unitDuration = 60;
+                        }
 
-        // Draw 1st level
-        for (let i=step; i < globalAudioDuration; i+=step){
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText, 27, 14,true)
-        }
+                        // Determine the number of timestamps to draw
+                        const numberOfTimestamps = Math.floor(totalDuration / unitDuration);
+                        const widthBetweenTimestamps = cvs.width / numberOfTimestamps;
 
-        // Draw 2nd level
-        step = step / 10
-        let count = 0
-        for (let i=step; i < globalAudioDuration; i+=step){
-            //i = Math.round(i * 10) / 10
-            count++
-            if (count % 10 === 0 ) continue // This prevents the 2nd level timestamp from drawing over the already existing 1st level timestamp
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText,15, 10,withText)
-        }
+                        ctx.font = '12px Arial';
+                        ctx.fillStyle = '#9db4c0';
 
-        //Draw 3rd level
-        if (globalClipDuration > globalAudioDuration * 0.025) return
-        withText = globalClipDuration < globalAudioDuration * 0.01
+                        for (let i = 0; i <= numberOfTimestamps; i++) {
+                            const currentTime = i * unitDuration;
 
-        step = step / 10
-        count = 0
-        for (let i=step; i<globalAudioDuration; i+=step){
-            //i = parseFloat(i.toFixed(0))
-            i = (i * 10) / 10
-            count++
-            if (count % 10 === 0 ) continue
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText,5, 8,withText)
-        }
+                            // Calculate position on canvas
+                            const xPos = (currentTime / totalDuration) * cvs.width;
 
-    }
+                            // Draw timestamp line
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, 0);
+                            ctx.lineTo(xPos, 20);
+                            ctx.stroke();
 
-    const drawTimestamp = (timestamp, timestampText, lineHeight, fontSize, withText) => {
-        const canvas = timeAxisRef.current
-        const ctx = timeAxisRef.current.getContext('2d', { willReadFrequently: true })
-        const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
+                            // Format timestamp based on unit
+                            let timestampLabel;
+                            if (unit === 'hours') {
+                                const hours = Math.floor(currentTime / 3600);
+                                timestampLabel = `${hours}h`;
+                            } else if (unit === 'minutes') {
+                                const minutes = Math.floor(currentTime / 60);
+                                timestampLabel = `${minutes}m`;
+                            } else {
+                                timestampLabel = `${currentTime}s`;
+                            }
 
-        // Draw line under Timestamp text
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, lineHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
+                            // Draw timestamp text
+                            const textWidth = ctx.measureText(timestampLabel).width;
+                            ctx.fillText(timestampLabel, xPos - textWidth / 2, 32);
+                        }
+                    };
 
-        // Draw timestamp text
-        ctx.font = `${fontSize}px Arial`
-        ctx.fillStyle = '#9db4c0'
 
-        const textWidth = ctx.measureText(timestampText).width
 
-        if (withText) {
-            ctx.fillText(timestampText, x - textWidth / 2, lineHeight+12)
-        }
-    }
+
+                    /*
+                    const drawTimestamp = (timestamp, timestampText, lineHeight, fontSize, withText) => {
+                        const canvas = timeAxisRef.current
+                        const ctx = timeAxisRef.current.getContext('2d', { willReadFrequently: true })
+                        const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
+
+                        // Draw line under Timestamp text
+                        ctx.beginPath()
+                        ctx.moveTo(x, 0)
+                        ctx.lineTo(x, lineHeight)
+                        ctx.lineWidth = 2
+                        ctx.strokeStyle = '#9db4c0'
+                        ctx.stroke()
+
+                        // Draw timestamp text
+                        ctx.font = `${fontSize}px Arial`
+                        ctx.fillStyle = '#9db4c0'
+
+                        const textWidth = ctx.measureText(timestampText).width
+
+                        if (withText) {
+                            ctx.fillText(timestampText, x - textWidth / 2, lineHeight+12)
+                        }
+                    }
+
+                     */
 
     const convertSecondsToMinutes = (seconds) => {
         const minutes = Math.floor(seconds / 60)
@@ -1335,24 +1348,24 @@ function ScalableSpec(
 
     const dragOnset = (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-        clickedLabel.onset = calculateTimestamp(event)
+        clickedLabel.onset = calculateTimestampAtMouseX(event)
     }
 
     const dragOffset = (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-        clickedLabel.offset = calculateTimestamp(event)
+        clickedLabel.offset = calculateTimestampAtMouseX(event)
     }
 
     const dragActiveLabelOnset = (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-        draggedActiveLabel.onset = calculateTimestamp(event)
+        draggedActiveLabel.onset = calculateTimestampAtMouseX(event)
         drawLine(draggedActiveLabel, draggedActiveLabel.onset)
         drawLine(draggedActiveLabel, draggedActiveLabel.offset)
     }
 
     const dragActiveLabelOffset = (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-        draggedActiveLabel.offset = calculateTimestamp(event)
+        draggedActiveLabel.offset = calculateTimestampAtMouseX(event)
         drawLine(draggedActiveLabel, draggedActiveLabel.onset)
         drawLine(draggedActiveLabel, draggedActiveLabel.offset)
     }
@@ -1542,7 +1555,6 @@ function ScalableSpec(
             passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
             // Set new Start Frame only
         } else if (newViewportStartFrame || newViewportStartFrame === 0){
-            console.log('got here')
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )

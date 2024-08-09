@@ -772,119 +772,170 @@ function ScalableSpec(
     }
 
     const drawTimeAxis = () => {
-        const canvas = timeAxisRef.current
-        const ctx = canvas.getContext('2d', { willReadFrequently: true })
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        const cvs = timeAxisRef.current
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
+        ctx.clearRect(0, 0, cvs.width, cvs.height)
         ctx.lineWidth = 2
         ctx.strokeStyle = '#9db4c0'
 
         // Drawing horizontal timeline
         ctx.beginPath()
         ctx.moveTo(0, 0)
-        ctx.lineTo(canvas.width, 0)
+        ctx.lineTo(cvs.width, 0)
         ctx.stroke()
 
         // Drawing first timestamp
         ctx.beginPath()
         ctx.moveTo(1, 0)
-        ctx.lineTo(1, canvas.height)
+        ctx.lineTo(1, cvs.height)
         ctx.stroke()
 
         // Drawing last timestamp
         ctx.beginPath()
-        ctx.moveTo(canvas.width - 1, 0)
-        ctx.lineTo(canvas.width - 1, canvas.height)
+        ctx.moveTo(cvs.width - 1, 0)
+        ctx.lineTo(cvs.width - 1, cvs.height)
         ctx.stroke()
 
-        // Drawing timestamps in between
-        const convertMethod = globalClipDuration > 3600 ? convertSecondsToHours : convertSecondsToMinutes
-        let withText = globalClipDuration < globalAudioDuration * 0.25
-
-        let step = Math.floor(globalAudioDuration / 10 / 10) * 10
-        if (step < 1){
-            step = 1
-        }
-
-        // Draw 1st level
-        for (let i=step; i < globalAudioDuration; i+=step){
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText, 27, 14,true)
-        }
-
-        // Draw 2nd level
-        step = step / 10
-        let count = 0
-        for (let i=step; i < globalAudioDuration; i+=step){
-            //i = Math.round(i * 10) / 10
-            count++
-            if (count % 10 === 0 ) continue // This prevents the 2nd level timestamp from drawing over the already existing 1st level timestamp
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText,15, 10,withText)
-        }
-
-        //Draw 3rd level
-        if (globalClipDuration > globalAudioDuration * 0.025) return
-        withText = globalClipDuration < globalAudioDuration * 0.01
-
-        step = step / 10
-        count = 0
-        for (let i=step; i<globalAudioDuration; i+=step){
-            //i = parseFloat(i.toFixed(0))
-            i = (i * 10) / 10
-            count++
-            if (count % 10 === 0 ) continue
-            const timestampText = convertMethod(i)
-            drawTimestamp(i, timestampText,5, 8,withText)
-        }
-
-    }
-
-    const drawTimestamp = (timestamp, timestampText, lineHeight, fontSize, withText) => {
-        const canvas = timeAxisRef.current
-        const ctx = timeAxisRef.current.getContext('2d', { willReadFrequently: true })
-        const x = (timestamp * canvas.width / globalClipDuration) - ( currentStartTime * canvas.width / globalClipDuration )
-
-        // Draw line under Timestamp text
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, lineHeight)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
-        ctx.stroke()
-
-        // Draw timestamp text
-        ctx.font = `${fontSize}px Arial`
+        ctx.font = `${12}px Arial`
         ctx.fillStyle = '#9db4c0'
 
-        const textWidth = ctx.measureText(timestampText).width
+        // Set time formats depending on the total audio duration
+        let timeConvertMethod
+        let millisecondFormatMethod
+        if (globalAudioDuration > 3600){
+            timeConvertMethod = secondsTo_HH_MM_SS
+            millisecondFormatMethod = secondsTo_HH_MM_SS_MMM
+        } else {
+            timeConvertMethod = secondsTo_MM_SS_M
+            millisecondFormatMethod = secondsTo_MM_SS_MMM
+        }
 
-        if (withText) {
-            ctx.fillText(timestampText, x - textWidth / 2, lineHeight+12)
+        // Calculate how many timestamps we can fit in the current viewport without them overlapping
+        const minWidthBetweenTimestamps = 70
+        let timestampIncrement = 1
+        let numberOfTimestampsThatHaveSpaceInsideCanvas = cvs.width / minWidthBetweenTimestamps
+
+        while (globalClipDuration > numberOfTimestampsThatHaveSpaceInsideCanvas * timestampIncrement){
+            timestampIncrement = timestampIncrement * 2
+        }
+
+        // Draw First level (HH:MM:SS.m for audio longer than one hour, MM:SS.m for audio shorter than that)
+        const lineHeight = 20
+        const textY = lineHeight + 12
+        for (let timestamp = currentStartTime; timestamp <= currentEndTime; timestamp += timestampIncrement){
+            // Always skip drawing the first timeframe, as half of it will always be cut off
+            if (timestamp === currentStartTime) continue
+
+            const x = (timestamp * cvs.width / globalClipDuration) - ( currentStartTime * cvs.width / globalClipDuration )
+            ctx.beginPath()
+            ctx.moveTo(x, 0)
+            ctx.lineTo(x, lineHeight)
+            ctx.stroke()
+            const text = timeConvertMethod(timestamp)
+            const textWidth = ctx.measureText(text).width
+            ctx.fillText(text, x - textWidth / 2, textY)
+        }
+
+        // Draw second level (Milliseconds)
+        if (globalClipDuration < 10 ){
+
+            let i = 0
+            const lineHeight = 10
+            const textY = lineHeight + 12
+            for (let millisecond = currentStartTime; millisecond <= currentEndTime; millisecond += timestampIncrement*0.1){
+                // Don't draw lines on 0 and 10, because we already have seconds timestamps there
+                if (i % 10 !== 0){
+                    // Draw Millisecond lines
+                    const x = (millisecond * cvs.width / globalClipDuration) - ( currentStartTime * cvs.width / globalClipDuration )
+                    ctx.beginPath()
+                    ctx.moveTo(x, 0)
+                    ctx.lineTo(x, lineHeight)
+                    ctx.stroke()
+
+                    const text = millisecondFormatMethod(millisecond)
+                    const textWidth = ctx.measureText(text).width
+
+                    // Draw every millisecond number if clip duration is less than 1 second
+                    if (globalClipDuration < 1){
+                        ctx.fillText(text, x - textWidth / 2, textY)
+                        // Draw every fifth millisecond number if clip duration is less than 2 seconds
+                    } else if (globalClipDuration < 2){
+                        if (i % 5 === 0 && i % 10 !== 0){
+                            ctx.fillText(text, x - textWidth / 2, textY)
+                        }
+                    }
+                }
+                i++
+            }
+        }
+
+        // Draw third level (Deciseconds)
+        if (globalClipDuration < 1){
+
+            let i = 0
+            const lineHeight = 5
+            for (let decisecond = currentStartTime; decisecond <= currentEndTime; decisecond += timestampIncrement*0.01){
+                // Don't draw lines on 0 and 10, because we already have millisecond timestamps there
+                if (i % 10 !== 0) {
+                    const x = (decisecond * cvs.width / globalClipDuration) - (currentStartTime * cvs.width / globalClipDuration)
+                    ctx.beginPath()
+                    ctx.moveTo(x, 0)
+                    ctx.lineTo(x, lineHeight)
+                    ctx.stroke()
+                }
+                i++
+            }
         }
     }
 
-    const convertSecondsToMinutes = (seconds) => {
+    const secondsTo_MM_SS_M = (seconds) => {
         const minutes = Math.floor(seconds / 60)
         const remainingSeconds = seconds % 60
         const milliseconds = Math.round((seconds - Math.floor(seconds)) * 1000)
 
-        const timeString = minutes.toString().padStart(2, '0') + ':' +
-            Math.floor(remainingSeconds).toString().padStart(2, '0') + '.' +
-            milliseconds.toString().padStart(1, '0')
-
-        return timeString
+        return `${minutes.toString().padStart(2, '0')}:${Math.floor(remainingSeconds).toString().padStart(2, '0')}.${milliseconds.toString().padStart(1, '0')}`
     }
 
-    const convertSecondsToHours = (seconds) => {
+    const secondsTo_HH_MM_SS = (seconds) => {
         const hours = Math.floor(seconds / 3600)
         let remainingSeconds = seconds % 3600
         const minutes = Math.floor(remainingSeconds / 60)
         remainingSeconds %= 60
         const secondsStr = remainingSeconds.toFixed(0).padStart(2, '0')
 
-        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secondsStr}`
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secondsStr}`
+    }
 
-        return timeString
+    const secondsTo_HH_MM_SS_MMM = (seconds) => {
+        // Get the hours, minutes, and seconds
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let secs = Math.floor(seconds % 60);
+        let milliseconds = Math.floor((seconds % 1) * 1000);
+
+        // Format the time components to be two digits (e.g., 01, 09) and three digits for milliseconds
+        let formattedHours = String(hours).padStart(2, '0');
+        let formattedMinutes = String(minutes).padStart(2, '0');
+        let formattedSeconds = String(secs).padStart(2, '0');
+        let formattedMilliseconds = String(milliseconds).padStart(3, '0');
+
+        // Combine them into the desired format
+        return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
+    }
+
+    const secondsTo_MM_SS_MMM = (seconds) => {
+        // Get the minutes, seconds, and milliseconds
+        let minutes = Math.floor(seconds / 60);
+        let secs = Math.floor(seconds % 60);
+        let milliseconds = Math.floor((seconds % 1) * 1000);
+
+        // Format the time components to be two digits (e.g., 01, 09) and three digits for milliseconds
+        let formattedMinutes = String(minutes).padStart(2, '0');
+        let formattedSeconds = String(secs).padStart(2, '0');
+        let formattedMilliseconds = String(milliseconds).padStart(3, '0');
+
+        // Combine them into the desired format
+        return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
     }
 
     const drawLine = (label, timestamp) => {
@@ -1542,7 +1593,6 @@ function ScalableSpec(
             passScrollStepToApp(newDuration * SCROLL_STEP_RATIO)
             // Set new Start Frame only
         } else if (newViewportStartFrame || newViewportStartFrame === 0){
-            console.log('got here')
             const newDuration = currentEndTime - newViewportStartFrame
             const newMaxScrollTime = Math.max(globalAudioDuration - newDuration, 0)
             const newHopLength = Math.floor( (newDuration * globalSamplingRate) / globalNumSpecColumns )

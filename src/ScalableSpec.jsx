@@ -1831,7 +1831,6 @@ function ScalableSpec(
         audioSnippet.pause()
         audioSnippet.currentTime = playWindowTimes?.startTime
         updatePlayhead(playWindowTimes?.startTime)
-        console.log(playWindowTimes?.startTime)
 
         clearAndRedrawSpecAndWaveformCanvases(null)
     }

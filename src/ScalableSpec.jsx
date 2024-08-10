@@ -304,6 +304,9 @@ function ScalableSpec(
         // Ignore clicks from other mouse buttons
         if (event.button !== 0) return
 
+        // Don't proceed if no spectrogram is present in the track
+        if (!spectrogram) return
+
         // Don't proceed if audio is currently playing
         if (audioSnippet && !audioSnippet.paused) return
 
@@ -1771,6 +1774,9 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Audio methods ++++++++++++++++++ */
     const getAudio = async (newStartTime, newClipDuration) => {
+        // Don't try to retrieve audio if there's no file uploaded, it will cause an error
+        if (!spectrogram) return
+
         // Prevent user from clicking the play button twice in a row and playing the audio twice at the same time
         if (audioSnippet && !audioSnippet.paused) return
 
@@ -2422,6 +2428,7 @@ function ScalableSpec(
                                     passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
                                     submitLocalParameters={submitLocalParameters}
                                     strictMode={strictMode}
+                                    spectrogram={spectrogram}
                                 />
                             }
                         </div>

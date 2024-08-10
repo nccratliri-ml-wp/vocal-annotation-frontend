@@ -16,7 +16,8 @@ function Parameters(
             passMinFreqToScalableSpec,
             passMaxFreqToScalableSpec,
             submitLocalParameters,
-            strictMode
+            strictMode,
+            spectrogram
         }
     )
 {
@@ -168,7 +169,7 @@ function Parameters(
 
                     <div className={'local-config-window-label'}>
                         <button onClick={() => passShowLocalConfigWindowToScalableSpec(false)}>Cancel</button>
-                        <button disabled={strictMode} onClick={handleSubmit}>Submit</button>
+                        <button disabled={(strictMode || !spectrogram)} onClick={handleSubmit}>Submit</button>
                     </div>
 
                 </div>

@@ -1810,7 +1810,10 @@ function ScalableSpec(
     }
 
     function loop(){
-        if (audioSnippet.paused) return
+        if (audioSnippet.paused){
+            pauseAudio()
+            return
+        }
 
         clearAndRedrawSpecAndWaveformCanvases(playWindowTimes?.startTime + audioSnippet.currentTime)
         window.requestAnimationFrame(() => loop() )
@@ -1828,8 +1831,13 @@ function ScalableSpec(
         audioSnippet.pause()
         audioSnippet.currentTime = playWindowTimes?.startTime
         updatePlayhead(playWindowTimes?.startTime)
+        console.log(playWindowTimes?.startTime)
 
         clearAndRedrawSpecAndWaveformCanvases(null)
+    }
+
+    const updatePlayhead = (newTimeframe) => {
+        playheadRef.current.timeframe = newTimeframe
     }
 
     const drawPlayhead = (timeframe) => {
@@ -1856,11 +1864,6 @@ function ScalableSpec(
         waveformCTX.strokeStyle = "red"
         waveformCTX.stroke()
     }
-
-    const updatePlayhead = (newTimeframe) => {
-        playheadRef.current.timeframe = newTimeframe
-    }
-
 
     /* ++++++++++++++++++ Waveform ++++++++++++++++++ */
     const getAudioArray = async () => {

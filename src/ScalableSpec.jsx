@@ -1930,6 +1930,7 @@ function ScalableSpec(
     const handleRemoveTrack = () => {
         if (!confirm('Removing this track will delete any annotations you have made in it.')) return
 
+        stopAudio()
         removeTrackInApp(trackID)
     }
 

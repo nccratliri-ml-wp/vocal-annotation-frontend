@@ -851,10 +851,8 @@ function App() {
                     </Tooltip>
                 </div>
             </div>
-            <div
-                id='blank-space'
-            >
-            </div>
+
+            <div id='blank-space'></div>
 
             <div
                 id='all-tracks'

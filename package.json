@@ -19,19 +19,14 @@
     "@mui/material": "^5.14.5",
     "@uiw/react-color": "^2.1.0",
     "@uiw/react-color-sketch": "^2.1.0",
-    "alert": "^6.0.1",
     "axios": "^1.4.0",
-    "exceljs": "^4.4.0",
     "mitt": "^3.0.1",
     "nanoid": "^5.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
-    "react-resizable": "^3.0.5",
     "react-router-dom": "^6.22.2",
-    "react-search-autocomplete": "^8.5.2",
-    "react-toastify": "^10.0.5",
-    "wavesurfer.js": "^7.4.2"
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",

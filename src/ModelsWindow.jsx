@@ -1,10 +1,15 @@
+// React
 import React, {useState} from "react";
-import {toast} from "react-toastify";
-import {ANNOTATED_AREA, createSpeciesFromImportedLabels} from "./species.js";
+
+// External dependencies
 import axios from "axios";
 import {nanoid} from "nanoid";
+import {toast} from "react-toastify";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
+
+// Internal dependencies
+import {createSpeciesFromImportedLabels, ANNOTATED_AREA} from "./species.js";
 import {excludeNonDigits} from "./utils.js";
 
 function ModelsWindow (

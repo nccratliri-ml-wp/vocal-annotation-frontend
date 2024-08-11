@@ -1,4 +1,7 @@
+// React
 import React, {useState, useEffect} from "react";
+
+// External dependencies
 import {toast} from "react-toastify";
 import Draggable from "react-draggable";
 

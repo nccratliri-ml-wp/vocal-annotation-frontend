@@ -1,4 +1,7 @@
+// React
 import React, { useState } from 'react'
+
+// External dependencies
 import Sketch from '@uiw/react-color-sketch'
 
 function Colorwheel( { closeColorwheel, passChosenColorToAnnotationLabels, selectedID, selectedClustername, globalMouseCoordinates } ) {

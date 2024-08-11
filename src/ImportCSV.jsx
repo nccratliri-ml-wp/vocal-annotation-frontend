@@ -1,9 +1,14 @@
-import React, {useState} from "react"
-import IconButton from "@material-ui/core/IconButton"
-import Tooltip from "@material-ui/core/Tooltip"
-import UploadFileIcon from "@mui/icons-material/UploadFile"
-import {globalControlsBtn, icon, iconBtnDisabled} from "./styles.js"
+// React
+import React, {useState} from "react";
+
+// External dependencies
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+
+// Internal dependencies
 import {createSpeciesFromImportedLabels} from "./species.js";
+import {globalControlsBtn, icon, iconBtnDisabled} from "./styles.js";
 
 function ImportCSV( {passImportedLabelsToApp, speciesArray, passSpeciesArrayToApp, atLeastOneAudioFileUploaded} ) {
 

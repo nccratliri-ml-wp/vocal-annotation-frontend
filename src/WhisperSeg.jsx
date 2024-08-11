@@ -1,5 +1,5 @@
 import IconButton from "@material-ui/core/IconButton";
-import {iconBtnDisabled} from "./styles.js";
+import {iconBtnDisabled} from "./buttonStyles.js";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
 import Tooltip from "@material-ui/core/Tooltip";
 import React, {useEffect, useState} from "react";

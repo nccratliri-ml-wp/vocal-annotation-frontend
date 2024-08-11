@@ -8,7 +8,7 @@ import DownloadIcon from '@mui/icons-material/Download'
 
 // Internal dependencies
 import {ANNOTATED_AREA} from "./species.js";
-import {icon, globalControlsBtn} from "./styles.js"
+import {icon, globalControlsBtn} from "./buttonStyles.js"
 
 function Export( { tracks, allLabels, annotationInstance, exportRequest, passExportRequestToApp, deleteAllLabelsInApp } ){
 

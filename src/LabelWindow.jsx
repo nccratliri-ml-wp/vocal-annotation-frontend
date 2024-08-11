@@ -24,7 +24,7 @@ import {
     UNKNOWN_INDIVIDUAL,
     ANNOTATED_AREA, UNKNOWN_SPECIES
 } from "./species.js";
-import {iconSmall} from "./styles.js";
+import {iconSmall} from "./buttonStyles.js";
 
 function LabelWindow(
                         {

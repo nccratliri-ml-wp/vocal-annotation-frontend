@@ -22,7 +22,7 @@ import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import {nanoid} from "nanoid";
 import {Label} from "./label.js"
-import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./styles.js"
+import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./buttonStyles.js"
 import LocalFileUpload from "./LocalFileUpload.jsx";
 import Parameters from "./Parameters.jsx"
 import LabelWindow from "./LabelWindow.jsx";

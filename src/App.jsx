@@ -41,7 +41,7 @@ import {
     icon,
     iconBtn,
     iconBtnDisabled
-} from "./styles.js"
+} from "./buttonStyles.js"
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1

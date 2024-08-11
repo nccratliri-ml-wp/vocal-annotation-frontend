@@ -42,7 +42,7 @@ import {
     iconBig,
     iconBtnSmallest,
     iconSmall
-} from "./styles.js";
+} from "./buttonStyles.js";
 
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {

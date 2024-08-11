@@ -14,11 +14,6 @@ const iconBtnSmallest = {
     padding: 0,
 }
 
-const iconBtnSmallDisabled = {
-    padding: 8,
-    opacity: 0.5
-}
-
 const globalControlsBtn = {
     padding: '0 4px'
 }
@@ -62,7 +57,6 @@ export {
     iconBtnDisabled,
     iconBtnSmall,
     iconBtnSmallest,
-    iconBtnSmallDisabled,
     globalControlsBtn,
     globalControlsBtnDisabled,
     freqBtn,

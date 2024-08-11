@@ -8,7 +8,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 // Internal dependencies
 import {createSpeciesFromImportedLabels} from "./species.js";
-import {globalControlsBtn, icon, iconBtnDisabled} from "./styles.js";
+import {globalControlsBtn, icon, iconBtnDisabled} from "./buttonStyles.js";
 
 function ImportCSV( {passImportedLabelsToApp, speciesArray, passSpeciesArrayToApp, atLeastOneAudioFileUploaded} ) {
 

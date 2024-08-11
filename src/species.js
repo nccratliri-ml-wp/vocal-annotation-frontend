@@ -1,4 +1,7 @@
+// External dependencies
 import {nanoid} from "nanoid";
+
+/* ++++++++++++++++++ Global variables ++++++++++++++++++ */
 
 const UNKNOWN_SPECIES = 'Unknown'
 const UNKNOWN_INDIVIDUAL = 'Unknown'
@@ -32,6 +35,9 @@ const ANNOTATED_AREA_INDIVIDUAL = '🔒'
 const ANNOTATED_AREA_CLUSTERNAME = 'Annotated Area'
 const ANNOTATED_AREA_COLOR = '#33c220'
 
+
+/* ++++++++++++++++++ Class definitions ++++++++++++++++++ */
+
 class Species {
     constructor(id, name, individuals, clusternames, minFreq=null, maxFreq=null ) {
         this.id = id
@@ -62,6 +68,9 @@ class Clustername {
         this.showColorwheel = false
     }
 }
+
+
+/* ++++++++++++++++++ Species array manipulations methods ++++++++++++++++++ */
 
 const activateIndividual = (individuals, selectedIndividualName) => {
     return individuals.map( individual => {
@@ -105,14 +114,6 @@ const deactivateExistingClusternames = (clusternames) => {
         deactivatedClustername.isActive = false
         return deactivatedClustername
     })
-}
-
-const checkIfEveryObjectIsInactive = (objects) => {
-    return objects.every(object => !object.isActive)
-}
-
-const goToNextColor = (currentIndex) => {
-    return currentIndex === CLUSTERNAME_COLOR_ARRAY.length -1 ? 0 : currentIndex + 1
 }
 
 const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) => {
@@ -190,117 +191,27 @@ const createSpeciesFromImportedLabels = (importedLabels, currentSpeciesArray) =>
     return updatedSpeciesArray
 }
 
-const dummyData = {
-    "response": [
-        {
-            "url": "https://www2.iis.fraunhofer.de/AAC/ChID-BLITS-EBU-Narration441-16b.wav",
-            "id": "64bec7e26642cadf5dc0eb01",
-            "filename": "6 channel test.wav",
-            "annotation_instance": "XC785219_fd453602-a4a9-4f57-95f2-fd9084e9a161",
-            "time": "2024-03-27 20:01:43",
-            "hop_length": 500,
-            "num_spec_columns": 900,
-            "sampling_rate": 44200,
-            "nfft": 40,
-            "f_high": 8000,
-            "f_low": 6000,
-            "spec_cal_method": "constant-q",
-            "labels": {
-                "channels": {
-                    "0": [
-                        {
-                            "onset": 1.2,
-                            "offset": 1.7,
-                            "species": "Unknown",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 2.4,
-                            "offset": 2.6,
-                            "species": "Unknown",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        }
-                    ],
-                    "1": [
-                        {
-                            "onset": 1.5,
-                            "offset": 1.8,
-                            "species": "Unknown",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 2.7,
-                            "offset": 2.9,
-                            "species": "Unknown",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        }
-                    ],
-                    "2": [
-                        {
-                            "onset": 1.9,
-                            "offset": 2,
-                            "species": "Unknown",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 3,
-                            "offset": 3.2,
-                            "species": "Unknown",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        }
-                    ]
-                }
-            }
-        },
-        {
-            "url": "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
-            "id": "64bec7e26642cadf5dc0eb01",
-            "filename": "BabyElephantWalk60.wav",
-            "annotation_instance": "XC785219_fd453602-a4a9-4f57-95f2-fd9084e9a161",
-            "time": "2024-03-27 20:01:43",
-            "hop_length": 900,
-            "nfft": 500,
-            "f_high": 8000,
-            "f_low": 0,
-            "spec_cal_method": "log-mel",
-            "labels": {
-                "channels": {
-                    "0": [
-                        {
-                            "onset": 1.2,
-                            "offset": 1.7,
-                            "species": "Unknown",
-                            "individual": "Unknown",
-                            "clustername": "Unknown"
-                        },
-                        {
-                            "onset": 2.4,
-                            "offset": 2.6,
-                            "species": "Unknown",
-                            "individual": "Ind4",
-                            "clustername": "call 3"
-                        },
-                        {
-                            "onset": 4.4,
-                            "offset": 4.9,
-                            "species": "Hamster",
-                            "individual": "Bobby",
-                            "clustername": "i am hungry"
-                        }
-                    ]
-                }
-            }
-        },
-    ]
+/* ++++++++++++++++++ Helper methods ++++++++++++++++++ */
+
+const checkIfEveryObjectIsInactive = (objects) => {
+    return objects.every(object => !object.isActive)
 }
 
+const goToNextColor = (currentIndex) => {
+    return currentIndex === CLUSTERNAME_COLOR_ARRAY.length -1 ? 0 : currentIndex + 1
+}
+
+
 export {
+    Species,
+    Individual,
+    Clustername,
+    activateIndividual,
+    activateClustername,
+    deactivateExistingIndividuals,
+    deactivateExistingClusternames,
+    checkIfEveryObjectIsInactive,
+    createSpeciesFromImportedLabels,
     UNKNOWN_SPECIES,
     UNKNOWN_INDIVIDUAL,
     UNKNOWN_CLUSTERNAME,
@@ -311,14 +222,4 @@ export {
     ANNOTATED_AREA_INDIVIDUAL,
     ANNOTATED_AREA_CLUSTERNAME,
     ANNOTATED_AREA_COLOR,
-    Species,
-    Individual,
-    Clustername,
-    activateIndividual,
-    activateClustername,
-    deactivateExistingIndividuals,
-    deactivateExistingClusternames,
-    checkIfEveryObjectIsInactive,
-    createSpeciesFromImportedLabels,
-    dummyData
 }

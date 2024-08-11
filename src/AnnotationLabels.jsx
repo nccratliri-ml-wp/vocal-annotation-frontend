@@ -1,32 +1,40 @@
+// React
 import React, {useState} from "react";
-import {nanoid} from 'nanoid'
-import Colorwheel from "./Colorwheel.jsx";
-import InputWindow from "./InputWindow.jsx";
-import {
-    activateClustername,
-    activateIndividual,
-    ANNOTATED_AREA,
-    ANNOTATED_AREA_CLUSTERNAME,
-    ANNOTATED_AREA_COLOR,
-    ANNOTATED_AREA_INDIVIDUAL,
-    checkIfEveryObjectIsInactive,
-    Clustername,
-    deactivateExistingClusternames,
-    deactivateExistingIndividuals,
-    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
-    CLUSTERNAME_COLOR_ARRAY,
-    INACTIVE_BUTTON_COLOR,
-    Individual,
-    Species,
-    UNKNOWN_CLUSTERNAME,
-    UNKNOWN_INDIVIDUAL,
-    UNKNOWN_SPECIES
-} from './species.js'
+
+// External dependencies
+import {nanoid} from 'nanoid';
+import {toast} from "react-toastify";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddBoxIcon from "@mui/icons-material/AddBox.js";
+
+// Internal dependencies
+import Colorwheel from "./Colorwheel.jsx";
+import InputWindow from "./InputWindow.jsx";
+import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
+import {
+    Species,
+    Individual,
+    Clustername,
+    activateClustername,
+    activateIndividual,
+    checkIfEveryObjectIsInactive,
+    deactivateExistingClusternames,
+    deactivateExistingIndividuals,
+    ANNOTATED_AREA,
+    ANNOTATED_AREA_CLUSTERNAME,
+    ANNOTATED_AREA_COLOR,
+    ANNOTATED_AREA_INDIVIDUAL,
+    DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
+    CLUSTERNAME_COLOR_ARRAY,
+    INACTIVE_BUTTON_COLOR,
+    UNKNOWN_CLUSTERNAME,
+    UNKNOWN_INDIVIDUAL,
+    UNKNOWN_SPECIES
+} from './species.js'
 import {
     globalControlsBtn,
     globalControlsBtnDisabled,
@@ -35,9 +43,6 @@ import {
     iconBtnSmallest,
     iconSmall
 } from "./styles.js";
-import AddBoxIcon from "@mui/icons-material/AddBox.js";
-import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
-import {toast} from "react-toastify";
 
 
 function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
@@ -45,6 +50,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
     const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
     const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
+
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -587,7 +593,6 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     }
 
     const closeColorwheel = (selectedID, selectedClustername) => {
-
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 

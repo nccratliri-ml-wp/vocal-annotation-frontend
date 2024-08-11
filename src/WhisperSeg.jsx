@@ -1,12 +1,18 @@
-import IconButton from "@material-ui/core/IconButton";
-import {iconBtnDisabled} from "./buttonStyles.js";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
-import Tooltip from "@material-ui/core/Tooltip";
+// React
 import React, {useEffect, useState} from "react";
-import ModelsWindow from "./ModelsWindow.jsx";
+
+// External dependencies
 import axios from "axios";
 import {toast} from "react-toastify";
 import Draggable from 'react-draggable';
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import {iconBtnDisabled} from "./buttonStyles.js";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
+
+// Internal dependencies
+import ModelsWindow from "./ModelsWindow.jsx";
+
 
 function WhisperSeg(
         {

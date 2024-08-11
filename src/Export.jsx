@@ -1,9 +1,14 @@
+// React
 import React, {useEffect} from "react"
+
+// External dependencies
+import Tooltip from "@material-ui/core/Tooltip"
 import { IconButton } from "@material-ui/core"
 import DownloadIcon from '@mui/icons-material/Download'
-import Tooltip from "@material-ui/core/Tooltip"
-import {icon, globalControlsBtn} from "./styles.js"
+
+// Internal dependencies
 import {ANNOTATED_AREA} from "./species.js";
+import {icon, globalControlsBtn} from "./styles.js"
 
 function Export( { tracks, allLabels, annotationInstance, exportRequest, passExportRequestToApp, deleteAllLabelsInApp } ){
 
@@ -26,9 +31,6 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
 
         // Get filename of the first track to use as CSV filename
         const firstTrackFilename = tracks.find(track => track.trackIndex === 0).filename.slice(0, -4)
-
-        // Sort the labels ascending by onset
-        //newLabelsArray = newLabelsArray.sort( (firstLabel, secondLabel ) => firstLabel.onset - secondLabel.onset )
 
         // Transform to CSV data
         let csvData = newLabelsArray.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.channelIndex}`)

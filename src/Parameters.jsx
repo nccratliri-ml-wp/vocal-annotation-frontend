@@ -1,6 +1,12 @@
+// React
 import React, {useEffect, useState} from 'react';
-import {excludeNonDigits} from "./utils.js";
+
+// External dependencies
 import Draggable from "react-draggable";
+
+// Internal dependencies
+import {excludeNonDigits} from "./utils.js";
+
 
 function Parameters(
         {

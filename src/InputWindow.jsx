@@ -1,4 +1,7 @@
+// React
 import React, { useState } from 'react'
+
+// External dependencies
 import Draggable from "react-draggable";
 
 function InputWindow ( {handleCancel, objectType, speciesID, addNewObject} ) {
@@ -37,7 +40,6 @@ function InputWindow ( {handleCancel, objectType, speciesID, addNewObject} ) {
             </div>
         </Draggable>
     )
-
 }
 
 export default InputWindow

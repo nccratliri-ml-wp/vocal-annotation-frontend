@@ -43,7 +43,6 @@ function ImportCSV( {passImportedLabelsToApp, speciesArray, passSpeciesArrayToAp
 
                 }
 
-
                 const newSpeciesArray = createSpeciesFromImportedLabels(importedLabelsArray, speciesArray)
                 passSpeciesArrayToApp(newSpeciesArray)
 

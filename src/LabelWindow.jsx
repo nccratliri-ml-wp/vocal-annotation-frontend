@@ -1,26 +1,30 @@
+// React
 import React, {useEffect, useState} from "react";
+
+// External dependencies
+import axios from "axios";
+import {toast} from "react-toastify";
+import Draggable from "react-draggable";
+import DownloadIcon from '@mui/icons-material/Download'
+import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
+
+// Internal dependencies
 import {Label} from "./label.js"
 import {
-    INACTIVE_BUTTON_COLOR,
     Species,
     Individual,
     Clustername,
-    UNKNOWN_CLUSTERNAME,
     activateIndividual,
     activateClustername,
     deactivateExistingIndividuals,
     deactivateExistingClusternames,
     checkIfEveryObjectIsInactive,
+    INACTIVE_BUTTON_COLOR,
+    UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
     ANNOTATED_AREA, UNKNOWN_SPECIES
 } from "./species.js";
 import {iconSmall} from "./styles.js";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
-import DownloadIcon from '@mui/icons-material/Download'
-import axios from "axios";
-import Draggable from "react-draggable";
-import {toast} from "react-toastify";
-
 
 function LabelWindow(
                         {
@@ -222,7 +226,6 @@ function LabelWindow(
     /* ++++++++++++++++++ Audio Download ++++++++++++++++++ */
 
     const downloadAudioClip = async (newStartTime, newClipDuration) => {
-
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {
             const response = await axios.post(path, {

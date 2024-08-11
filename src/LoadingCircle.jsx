@@ -1,7 +1,10 @@
+// React
 import React from 'react';
+
+// External dependencies
 import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 const LoadingCircle = ({ progress }) => {
     return (

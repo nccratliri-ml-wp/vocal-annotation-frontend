@@ -1,44 +1,63 @@
+// React
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import IconButton from "@material-ui/core/IconButton";
+
+// External dependencies
+import axios from "axios";
+import {nanoid} from "nanoid";
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Tooltip from "@material-ui/core/Tooltip";
-import SettingsIcon from '@mui/icons-material/Settings';
+import IconButton from "@material-ui/core/IconButton";
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+// Internal dependencies
+import Export from "./Export.jsx";
+import ImportCSV from "./ImportCSV.jsx";
 import ScalableSpec from "./ScalableSpec.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
+import LoadingCircle from './LoadingCircle.jsx';
 import {
+    Species,
+    Individual,
+    Clustername,
+    createSpeciesFromImportedLabels,
     ANNOTATED_AREA,
     ANNOTATED_AREA_CLUSTERNAME,
     ANNOTATED_AREA_COLOR,
     ANNOTATED_AREA_INDIVIDUAL,
-    Clustername,
     DEFAULT_UNKNOWN_CLUSTERNAME_COLOR,
-    dummyData,
-    Individual,
-    Species,
     UNKNOWN_CLUSTERNAME,
     UNKNOWN_INDIVIDUAL,
     UNKNOWN_SPECIES,
-    createSpeciesFromImportedLabels
 } from './species.js'
-import {globalControlsBtn, globalControlsBtnDisabled, icon, iconBtn, iconBtnDisabled} from "./styles.js"
-import {nanoid} from "nanoid";
-import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import axios from "axios";
-import Export from "./Export.jsx";
-import ImportCSV from "./ImportCSV.jsx";
-import LoadingCircle from './LoadingCircle.jsx';
-import {toast, ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {
+    globalControlsBtn,
+    globalControlsBtnDisabled,
+    icon,
+    iconBtn,
+    iconBtnDisabled
+} from "./styles.js"
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.1
 
 function App() {
+    // Labels import/export
     const [importedLabels, setImportedLabels] = useState(null)
+    const [allLabels, setAllLabels] = useState([])
+    const [exportRequest, setExportRequest] = useState(false)
+    const [submitRequest, setSubmitRequest] = useState(false)
 
+    // Strict Mode
+    const [strictMode, setStrictMode] = useState(false)
+    const [annotationInstance, setAnnotationInstance] = useState(null)
+
+    // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
         const annotatedAreaClustername = new Clustername(nanoid(), ANNOTATED_AREA_CLUSTERNAME, ANNOTATED_AREA_COLOR)
@@ -52,9 +71,9 @@ function App() {
 
         return [newSpecies, annotatedAreaLabel]
     })
-
     const [deletedItemID, setDeletedItemID] = useState(null)
-    
+
+    // Tracks
     const [tracks, setTracks] = useState([
         {
             trackID: nanoid(),
@@ -70,33 +89,30 @@ function App() {
     ])
     const tracksRef = useRef(tracks);
 
-    // General
+    // Audio Sync
     const [globalAudioDuration, setGlobalAudioDuration] = useState(null)
     const [globalClipDuration, setGlobalClipDuration] = useState(null)
     const [currentStartTime, setCurrentStartTime] = useState(0)
     const [currentEndTime, setCurrentEndTime] = useState(0)
     const [maxScrollTime, setMaxScrollTime] = useState(0)
     const [scrollStep, setScrollStep] = useState(0)
-
     const [globalHopLength, setGlobalHopLength] = useState('')
     const [globalNumSpecColumns, setGlobalNumSpecColumns] = useState('')
     const [globalSamplingRate, setGlobalSamplingRate] = useState('')
+
+    // Global Configurations
     const [defaultConfig, setDefaultConfig] = useState(null)
     const [showGlobalConfigWindow, setShowGlobalConfigWindow] = useState(false)
 
-    const [strictMode, setStrictMode] = useState(false)
-
-    const [allLabels, setAllLabels] = useState([])
-    const [exportRequest, setExportRequest] = useState(false)
-    const [submitRequest, setSubmitRequest] = useState(false)
-    const [annotationInstance, setAnnotationInstance] = useState(null)
-
+    // Audio upload
     const [filesUploading, setFilesUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
+    // WhisperSeg
     const [tokenInference, setTokenInference] = useState('')
     const [tokenFinetune, setTokenFinetune] = useState('')
 
+    // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
     const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
 
@@ -202,7 +218,7 @@ function App() {
         })
         setTracks(updatedTracks)
 
-        setDefaultConfig(null) // This is not great, but it prevents stale Default config from prevailing after a track is deleted. Ideally this would be replaced by the config of another
+        setDefaultConfig(null)
     }
 
     function toggleTrackVisibility( trackID ){
@@ -268,7 +284,7 @@ function App() {
         setTracks(updatedTracks)
     }
 
-    const renderTracks = () => {
+    function renderTracks() {
         let firstTrackWithFileUploaded = false
 
         return tracks.map((track) => {
@@ -405,8 +421,6 @@ function App() {
             annotations: modifiedLabels
         }
 
-        console.log(requestParameters)
-
         const headers = {
             'Content-Type': 'application/json',
             'accept': 'application/json'
@@ -422,9 +436,9 @@ function App() {
 
     }
 
-    /* ++++++++++++++++++ File Upload ++++++++++++++++++ */
+    /* ++++++++++++++++++ Audio File Upload ++++++++++++++++++ */
 
-    const uploadFileByURL = async (audioPayload) => {
+    async function uploadFileByURL(audioPayload) {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'upload-by-url'
         const requestParameters = {
             audio_url: audioPayload.url,
@@ -447,8 +461,7 @@ function App() {
         }
     }
 
-    const processAudioFilesSequentially = async (audioFilesArray) => {
-        console.log('processAudioFilesSequentially')
+    async function processAudioFilesSequentially(audioFilesArray){
         const loadingProgressStep = 100 / audioFilesArray.length;
 
         setFilesUploading(true)
@@ -533,7 +546,6 @@ function App() {
             const newChannels = response.data.channels
             const config = response.data.configurations
             let channelIndex = 0
-            console.log(config)
             for (const channel of newChannels){
                 allNewTracks.push({
                     trackID: nanoid(),
@@ -591,7 +603,6 @@ function App() {
                 allLabels.push(...labels)
             }
         }
-
         return allLabels
     }
 
@@ -633,7 +644,6 @@ function App() {
             try {
                 const response = await axios.get(path)
                 const audioFilesArray = response.data.response
-                //const audioFilesArray = dummyData.response // For testing purposes
 
                 if (!ignore) return
 

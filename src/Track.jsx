@@ -1,37 +1,43 @@
+// React
 import React, {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
+
+// External dependencies
 import axios from 'axios';
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
+import {nanoid} from "nanoid";
+import {toast} from "react-toastify";
+import emitter from './eventEmitter';
 import Tooltip from '@material-ui/core/Tooltip';
+import LinearProgress from "@mui/material/LinearProgress";
+import Box from "@mui/material/Box";
 import IconButton from '@material-ui/core/IconButton';
+import TuneIcon from '@mui/icons-material/Tune';
+import StopIcon from '@mui/icons-material/Stop';
+import PauseIcon from '@mui/icons-material/Pause';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import StopIcon from '@mui/icons-material/Stop';
-import TuneIcon from '@mui/icons-material/Tune';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
-import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
-import {nanoid} from "nanoid";
-import {Label} from "./label.js"
-import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./buttonStyles.js"
-import LocalFileUpload from "./LocalFileUpload.jsx";
-import Parameters from "./Parameters.jsx"
-import LabelWindow from "./LabelWindow.jsx";
-import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
-import {toast} from "react-toastify";
-import WhisperSeg from "./WhisperSeg.jsx"
-import emitter from './eventEmitter';
 
-// Classes
+// Internal dependencies
+import Parameters from "./Parameters.jsx"
+import WhisperSeg from "./WhisperSeg.jsx"
+import LabelWindow from "./LabelWindow.jsx";
+import LocalFileUpload from "./LocalFileUpload.jsx";
+import {Label} from "./label.js"
+import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
+import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./buttonStyles.js"
+
+
+// Classes Definitions
 class Playhead{
     constructor(timeframe) {
         this.timeframe = timeframe
@@ -43,9 +49,10 @@ const HEIGHT_BETWEEN_INDIVIDUAL_LINES = 15
 const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 const FREQUENCY_LINES_COLOR = '#47ff14'
 const ACTIVE_LABEL_COLOR = '#ffffff'
+const TIME_AXIS_COLOR = '#9db4c0'
 
 
-function ScalableSpec(
+function Track(
                         {
                             trackID,
                             speciesArray,
@@ -128,8 +135,9 @@ function ScalableSpec(
 
     // Labels
     const [labels, setLabels] = useState([])
-    let clickedLabel = undefined
+    const [activeLabel, setActiveLabel] = useState(null)
     let draggedActiveLabel = null
+    let clickedLabel = undefined
     let lastHoveredLabel = {labelObject: null, isHighlighted: false}
 
     // Audio
@@ -151,8 +159,7 @@ function ScalableSpec(
     const [showLocalConfigWindow, setShowLocalConfigWindow] = useState(false)
     const [specCalMethod, setSpecCalMethod] = useState(trackData.specCalMethod ? trackData.specCalMethod : 'log-mel')
     const [nfft, setNfft] = useState(trackData.nfft ? trackData.nfft : '')
-    //const [binsPerOctave, setBinsPerOctave] = useState(trackData.binsPerOctave ? trackData.binsPerOctave: '')
-    const [binsPerOctave, setBinsPerOctave] = useState('')
+    const [binsPerOctave, setBinsPerOctave] = useState(trackData.binsPerOctave ? trackData.binsPerOctave: '')
     const [minFreq, setMinFreq] = useState(trackData.minFreq ? trackData.minFreq : '')
     const [maxFreq, setMaxFreq] = useState(trackData.maxFreq ? trackData.maxFreq : '')
 
@@ -173,47 +180,45 @@ function ScalableSpec(
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
 
 
-    const [activeLabel, setActiveLabel] = useState(null)
-
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
-    const passSpectrogramIsLoadingToScalableSpec = ( boolean ) => {
+    const passSpectrogramIsLoadingToTrack = ( boolean ) => {
         setSpectrogramIsLoading( boolean )
     }
 
-    const passShowLocalConfigWindowToScalableSpec = ( boolean ) => {
+    const passShowLocalConfigWindowToTrack = ( boolean ) => {
         setShowLocalConfigWindow( boolean )
     }
 
-    const passSpecCalMethodToScalableSpec = ( newSpecCalMethod ) => {
+    const passSpecCalMethodToTrack = ( newSpecCalMethod ) => {
         setSpecCalMethod( newSpecCalMethod )
     }
 
-    const passNfftToScalableSpec = ( newNfft ) => {
+    const passNfftToTrack = ( newNfft ) => {
         setNfft( newNfft )
     }
 
-    const passBinsPerOctaveToScalableSpec = ( newBinsPerOctave ) => {
+    const passBinsPerOctaveToTrack = ( newBinsPerOctave ) => {
         setBinsPerOctave( newBinsPerOctave )
     }
 
-    const passMinFreqToScalableSpec = ( newMinFreq ) => {
+    const passMinFreqToTrack = ( newMinFreq ) => {
         setMinFreq( newMinFreq )
     }
 
-    const passMaxFreqToScalableSpec = ( newMaxFreq ) => {
+    const passMaxFreqToTrack = ( newMaxFreq ) => {
         setMaxFreq( newMaxFreq )
     }
 
-    const passLabelsToScalableSpec = ( newLabelsArray ) => {
+    const passLabelsToTrack = ( newLabelsArray ) => {
         setLabels( newLabelsArray )
     }
 
-    const passExpandedLabelToScalableSpec = ( newExpandedLabel ) => {
+    const passExpandedLabelToTrack = ( newExpandedLabel ) => {
         setExpandedLabel( newExpandedLabel )
     }
 
-    const passWhisperSegIsLoadingToScalableSpec = ( boolean ) => {
+    const passWhisperSegIsLoadingToTrack = ( boolean ) => {
         setWhisperSegIsLoading( boolean )
     }
 
@@ -267,7 +272,7 @@ function ScalableSpec(
                 ]
             )
 
-            drawEditorCanvases(data.spec, data.freqs, newAudioArray)
+            drawAllCanvases(data.spec, data.freqs, newAudioArray)
             setSpectrogramIsLoading(false)
             passFilesUploadingToApp(false)
             setSpectrogram(data.spec)
@@ -423,7 +428,6 @@ function ScalableSpec(
         if (event.button !== 0) return
 
         removeDragEventListeners()
-        //specCanvasRef.current.removeEventListener('mousemove', dragPlayhead)
 
         // Only do this when mouse up event stems from dragging a label (equivalent to clickedLabel being true)
         if (clickedLabel){
@@ -435,7 +439,7 @@ function ScalableSpec(
             clickedLabel.onset = magnet(clickedLabel.onset)
             clickedLabel.offset = magnet(clickedLabel.offset)
 
-            passLabelsToScalableSpec(labels)
+            passLabelsToTrack(labels)
             if (clickedLabel.id === expandedLabel?.id){
                 setExpandedLabel(clickedLabel)
             }
@@ -542,12 +546,10 @@ function ScalableSpec(
         }
     }
 
-    // this isn't very neat or resourceful, but it works well enough for now. possible candidate for re-factoring in the future
     const hoverLabel = (event) => {
         if (lastHoveredLabel.labelObject && lastHoveredLabel.isHighlighted) {
             clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
             lastHoveredLabel.isHighlighted = false
-            //console.log('drawing green')
         }
 
         const mouseX = getMouseX(event)
@@ -559,13 +561,9 @@ function ScalableSpec(
             const bottomY = calculateYPosition(label)
             const topY = calculateYPosition(label) - HEIGHT_BETWEEN_INDIVIDUAL_LINES
             if (mouseX >= onsetX && mouseX <= offsetX && mouseY >= topY && mouseY <= bottomY && !lastHoveredLabel.isHighlighted && event.target.className === 'label-canvas' ){
-                //drawLineBetween(label)
                 drawClustername(label)
-                //drawLine(label, label.onset)
-                //drawLine(label, label.offset)
                 lastHoveredLabel.labelObject = label
                 lastHoveredLabel.isHighlighted = true
-                //console.log('drawing yellow')
                 break;
             }
         }
@@ -589,21 +587,6 @@ function ScalableSpec(
     }
 
     const calculateYPosition = (label) => {
-        /*
-        let individualCount = 0
-
-        outerLoop:
-            for (let speciesObj of speciesArray) {
-                for (let individual of speciesObj.individuals) {
-                    individualCount++
-                    if (speciesObj.name === label.species && individual.name === label.individual) {
-                        break outerLoop
-                    }
-                }
-            }
-
-        return label.clustername === 'Protected Area🔒' ? labelCanvasRef.current.height - 1 : individualCount * HEIGHT_BETWEEN_INDIVIDUAL_LINES;
-         */
         return (label?.individualIndex + 1) * HEIGHT_BETWEEN_INDIVIDUAL_LINES
     }
 
@@ -743,7 +726,7 @@ function ScalableSpec(
 
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
-    const drawEditorCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
+    const drawAllCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
         // Draw Time Axis, Viewport
         if (showOverviewBarAndTimeAxis){
             drawTimeAxis()
@@ -778,29 +761,29 @@ function ScalableSpec(
         const cvs = timeAxisRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true })
         ctx.clearRect(0, 0, cvs.width, cvs.height)
-        ctx.lineWidth = 2
-        ctx.strokeStyle = '#9db4c0'
 
-        // Drawing horizontal timeline
+        ctx.lineWidth = 2
+        ctx.strokeStyle = TIME_AXIS_COLOR
+        ctx.font = `${12}px Arial`
+        ctx.fillStyle = TIME_AXIS_COLOR
+
+        // Drawing horizontal line
         ctx.beginPath()
         ctx.moveTo(0, 0)
         ctx.lineTo(cvs.width, 0)
         ctx.stroke()
 
-        // Drawing first timestamp
+        // Drawing first timestamp (second 0)
         ctx.beginPath()
         ctx.moveTo(1, 0)
         ctx.lineTo(1, cvs.height)
         ctx.stroke()
 
-        // Drawing last timestamp
+        // Drawing last timestamp (audio end)
         ctx.beginPath()
         ctx.moveTo(cvs.width - 1, 0)
         ctx.lineTo(cvs.width - 1, cvs.height)
         ctx.stroke()
-
-        ctx.font = `${12}px Arial`
-        ctx.fillStyle = '#9db4c0'
 
         // Set time formats depending on the total audio duration
         let timeConvertMethod
@@ -826,7 +809,7 @@ function ScalableSpec(
         const lineHeight = 20
         const textY = lineHeight + 12
         for (let timestamp = currentStartTime; timestamp <= currentEndTime; timestamp += timestampIncrement){
-            // Always skip drawing the first timeframe, as half of it will always be cut off
+            // Always skip drawing the first timestamp, as half of it will always be cut off
             if (timestamp === currentStartTime) continue
 
             const x = (timestamp * cvs.width / globalClipDuration) - ( currentStartTime * cvs.width / globalClipDuration )
@@ -995,7 +978,7 @@ function ScalableSpec(
         const xOnset = calculateXPosition(label.onset)
         const xOffset = calculateXPosition(label.offset)
         let y = calculateYPosition(label)
-        // Position annotate area labels onen pixel higher, so they don't get cut in half at the canvas edge
+        // Position annotate area labels one pixel higher, so they don't get cut in half at the canvas edge
         if (label.species === ANNOTATED_AREA){
             y--
         }
@@ -1049,7 +1032,6 @@ function ScalableSpec(
 
         const n_bins = cvs.height
 
-        //const curve_top_pos = (curve_time - currentStartTime) * globalSamplingRate / globalHopLength
         const curve_top_pos = calculateXPosition(curve_time)
         const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
         const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
@@ -1787,7 +1769,7 @@ function ScalableSpec(
             return
         }
 
-        // Else, start process to get a new audio snippet
+        // Else, start process to get a new audio snippet from the backend
         setAudioSnippet(null)
         setPlayWindowTimes( {startTime: newStartTime, clipDuration: newClipDuration} )
 
@@ -1870,7 +1852,9 @@ function ScalableSpec(
         waveformCTX.stroke()
     }
 
+
     /* ++++++++++++++++++ Waveform ++++++++++++++++++ */
+
     const getAudioArray = async () => {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-for-visualization'
         const requestParameters = {
@@ -1942,7 +1926,7 @@ function ScalableSpec(
         removeTrackInApp(trackID)
     }
 
-    /* ++++++++++++++++++ Editor Container ++++++++++++++++++ */
+    /* ++++++++++++++++++ Track Container ++++++++++++++++++ */
     const handleMouseLeaveTrackContainer = () => {
         const newestLabel = labels[labels.length -1]
         if (newestLabel && !newestLabel.offset){
@@ -1987,7 +1971,7 @@ function ScalableSpec(
         let i = 0
         for (let freq of selectedFrequencies){
             let textY = y
-            let freqText = `${/*Math.round*/(freq / 10) * 10}`
+            let freqText = `${(freq / 10) * 10}`
             if (!showWaveform){
                 if (i === 0){
                     freqText += ' Hz'
@@ -2087,8 +2071,7 @@ function ScalableSpec(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram || !audioArray) return
-        drawEditorCanvases(spectrogram, frequencies,audioArray)
-        //clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
+        drawAllCanvases(spectrogram, frequencies,audioArray)
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
@@ -2230,7 +2213,7 @@ function ScalableSpec(
         }
     }, [])
 
-    // Set up emitter event handler to pass new active label between sibling ScalableSpec.jsx components
+    // Set up emitter event handler to pass new active label between sibling Track.jsx components
     useEffect(() => {
         const handler = (newActiveLabel) => {
             setActiveLabel(newActiveLabel)
@@ -2312,13 +2295,12 @@ function ScalableSpec(
                                     binsPerOctave={binsPerOctave}
                                     minFreq={minFreq}
                                     maxFreq={maxFreq}
-                                    passSpectrogramIsLoadingToScalableSpec={passSpectrogramIsLoadingToScalableSpec}
+                                    passSpectrogramIsLoadingToTrack={passSpectrogramIsLoadingToTrack}
                                     handleUploadResponse={handleUploadResponse}
                                     handleUploadError={handleUploadError}
                                     strictMode={strictMode}
                                 />
                             </div>
-
                             <div>
                                 <Tooltip title="Move Track Up">
                                     <IconButton
@@ -2343,8 +2325,8 @@ function ScalableSpec(
                                     minFreq={minFreq}
                                     labels={labels}
                                     speciesArray={speciesArray}
-                                    passLabelsToScalableSpec={passLabelsToScalableSpec}
-                                    passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                                    passLabelsToTrack={passLabelsToTrack}
+                                    passWhisperSegIsLoadingToTrack={passWhisperSegIsLoadingToTrack}
                                     activeIconBtnStyle={activeIconBtnStyle}
                                     activeIcon={activeIcon}
                                     strictMode={strictMode}
@@ -2420,12 +2402,12 @@ function ScalableSpec(
                                     binsPerOctave={binsPerOctave}
                                     minFreq={minFreq}
                                     maxFreq={maxFreq}
-                                    passShowLocalConfigWindowToScalableSpec={passShowLocalConfigWindowToScalableSpec}
-                                    passSpecCalMethodToScalableSpec={passSpecCalMethodToScalableSpec}
-                                    passNfftToScalableSpec={passNfftToScalableSpec}
-                                    passBinsPerOctaveToScalableSpec={passBinsPerOctaveToScalableSpec}
-                                    passMinFreqToScalableSpec={passMinFreqToScalableSpec}
-                                    passMaxFreqToScalableSpec={passMaxFreqToScalableSpec}
+                                    passShowLocalConfigWindowToTrack={passShowLocalConfigWindowToTrack}
+                                    passSpecCalMethodToTrack={passSpecCalMethodToTrack}
+                                    passNfftToTrack={passNfftToTrack}
+                                    passBinsPerOctaveToTrack={passBinsPerOctaveToTrack}
+                                    passMinFreqToTrack={passMinFreqToTrack}
+                                    passMaxFreqToTrack={passMaxFreqToTrack}
                                     submitLocalParameters={submitLocalParameters}
                                     strictMode={strictMode}
                                     spectrogram={spectrogram}
@@ -2495,8 +2477,8 @@ function ScalableSpec(
                                     speciesArray={speciesArray}
                                     labels={labels}
                                     expandedLabel={expandedLabel}
-                                    passLabelsToScalableSpec={passLabelsToScalableSpec}
-                                    passExpandedLabelToScalableSpec={passExpandedLabelToScalableSpec}
+                                    passLabelsToTrack={passLabelsToTrack}
+                                    passExpandedLabelToTrack={passExpandedLabelToTrack}
                                     getAllIndividualIDs={getAllIndividualIDs}
                                     globalMouseCoordinates={globalMouseCoordinates}
                                     audioId={audioId}
@@ -2514,4 +2496,4 @@ function ScalableSpec(
     )
 }
 
-export default ScalableSpec;
+export default Track;

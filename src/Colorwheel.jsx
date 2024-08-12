@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 // External dependencies
 import Sketch from '@uiw/react-color-sketch'
 
-function Colorwheel( { closeColorwheel, passChosenColorToAnnotationLabels, selectedID, selectedClustername, globalMouseCoordinates } ) {
+function Colorwheel( { closeColorwheel, passChosenColorToSpeciesMenu, selectedID, selectedClustername, globalMouseCoordinates } ) {
 
     const [hex, setHex] = useState(selectedClustername.color)
     const [disableAlpha, setDisableAlpha] = useState(false)
@@ -28,7 +28,7 @@ function Colorwheel( { closeColorwheel, passChosenColorToAnnotationLabels, selec
                 disableAlpha={disableAlpha}
                 onChange={(color) => {
                     setHex(color.hex)
-                    passChosenColorToAnnotationLabels(selectedID, selectedClustername, color.hex)
+                    passChosenColorToSpeciesMenu(selectedID, selectedClustername, color.hex)
                 }}
             />
         </div>

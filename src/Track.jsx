@@ -2132,7 +2132,7 @@ function Track(
 
     }, [currentStartTime, globalClipDuration, audioId])
 
-    // When a user adds, deletes, renames or recolors species, individuals or clusternames in the Annotation Labels Component
+    // When a user adds, deletes, renames or recolors species, individuals or clusternames in the SpeciesMenu Component
     useEffect(() => {
         if (!speciesArray) return
 

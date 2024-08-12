@@ -19,7 +19,7 @@ import Export from "./Export.jsx";
 import ImportCSV from "./ImportCSV.jsx";
 import Track from "./Track.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
-import AnnotationLabels from "./AnnotationLabels.jsx";
+import SpeciesMenu from "./SpeciesMenu.jsx";
 import LoadingCircle from './LoadingCircle.jsx';
 import {
     Species,
@@ -794,7 +794,7 @@ function App() {
     return (
         <>
             <ToastContainer />
-            <AnnotationLabels
+            <SpeciesMenu
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}
                 passDeletedItemIDToApp={passDeletedItemIDToApp}

@@ -41,7 +41,7 @@ function LabelWindow(
                     )
                 {
 
-    // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from AnnotationLabels.jsx
+    // Creating a local copy of speciesArray. I do this so the user can activate species, individuals in the video separately from SpeciesMenu.jsx
     const [localSpeciesArray, setLocalSpeciesArray] = useState(updateLocalSpeciesArrayFromOriginal)
 
     let updatedLabel = new Label(
@@ -267,7 +267,7 @@ function LabelWindow(
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
-    // When the user makes changes in AnnotationLabels Component or clicks on a different label in the spectrogram, update the localSpeciesArray
+    // When the user makes changes in SpeciesMenu Component or clicks on a different label in the spectrogram, update the localSpeciesArray
     useEffect( () => {
         if (!speciesArray) return
         const updatedLocalSpeciesArray = updateLocalSpeciesArrayFromOriginal()

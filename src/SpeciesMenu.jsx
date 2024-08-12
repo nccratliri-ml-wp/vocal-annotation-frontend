@@ -45,7 +45,7 @@ import {
 } from "./buttonStyles.js";
 
 
-function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
+function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
     const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
@@ -625,7 +625,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
-    const passChosenColorToAnnotationLabels = (selectedID, selectedClustername, newColor) => {
+    const passChosenColorToSpeciesMenu = (selectedID, selectedClustername, newColor) => {
         const modifiedSpeciesArray = speciesArray.map(speciesObject => {
             if (speciesObject.id === selectedID) {
 
@@ -755,9 +755,9 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
 
 
     return (
-        <div id='annotation-labels-container'>
+        <div id="species-menu-container">
 
-            <div id='annotation-labels-menu'>
+            <div id='species-menu'>
                 {
                     speciesArray.map( (species) => {
 
@@ -903,7 +903,7 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
                                                     clustername.showColorwheel &&
                                                         <Colorwheel
                                                             closeColorwheel={closeColorwheel}
-                                                            passChosenColorToAnnotationLabels={passChosenColorToAnnotationLabels}
+                                                            passChosenColorToSpeciesMenu={passChosenColorToSpeciesMenu}
                                                             selectedID={species.id}
                                                             selectedClustername={clustername}
                                                             globalMouseCoordinates={globalMouseCoordinates}
@@ -965,4 +965,4 @@ function AnnotationLabels ({speciesArray, passSpeciesArrayToApp, passDeletedItem
     )
 }
 
-export default AnnotationLabels
+export default SpeciesMenu

@@ -20,8 +20,8 @@ function WhisperSeg(
             minFreq,
             labels,
             speciesArray,
-            passLabelsToScalableSpec,
-            passWhisperSegIsLoadingToScalableSpec,
+            passLabelsToTrack,
+            passWhisperSegIsLoadingToTrack,
             activeIconBtnStyle,
             activeIcon,
             strictMode,
@@ -196,8 +196,8 @@ function WhisperSeg(
                             minFreq={minFreq}
                             labels={labels}
                             speciesArray={speciesArray}
-                            passLabelsToScalableSpec={passLabelsToScalableSpec}
-                            passWhisperSegIsLoadingToScalableSpec={passWhisperSegIsLoadingToScalableSpec}
+                            passLabelsToTrack={passLabelsToTrack}
+                            passWhisperSegIsLoadingToTrack={passWhisperSegIsLoadingToTrack}
                             passSpeciesArrayToApp={passSpeciesArrayToApp}
                             assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
                             currentlyTrainedModelsNames={currentlyTrainedModelsNames}

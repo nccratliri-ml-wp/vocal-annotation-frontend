@@ -27,8 +27,8 @@ function ModelsWindow (
             minFreq,
             labels,
             speciesArray,
-            passLabelsToScalableSpec,
-            passWhisperSegIsLoadingToScalableSpec,
+            passLabelsToTrack,
+            passWhisperSegIsLoadingToTrack,
             passSpeciesArrayToApp,
             assignSpeciesInformationToImportedLabels,
             currentlyTrainedModelsNames,
@@ -106,7 +106,7 @@ function ModelsWindow (
     const callWhisperSeg = async (event) => {
         event.preventDefault()
 
-        passWhisperSegIsLoadingToScalableSpec(true)
+        passWhisperSegIsLoadingToTrack(true)
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-labels'
 
         const annotatedAreas = filterAndConvertAnnotatedAreasForWhisper()
@@ -134,7 +134,7 @@ function ModelsWindow (
 
             const annotatedAreaLabels = labels.filter( label => label.species === ANNOTATED_AREA)
             const combinedLabels = whisperLabels.concat(annotatedAreaLabels)
-            passLabelsToScalableSpec(combinedLabels)
+            passLabelsToTrack(combinedLabels)
             passShowModelsWindowToWhisperSeg(false)
         } catch (error){
             if (error.response.status === 403){
@@ -144,7 +144,7 @@ function ModelsWindow (
                 console.error(error)
             }
         } finally {
-            passWhisperSegIsLoadingToScalableSpec(false)
+            passWhisperSegIsLoadingToTrack(false)
         }
     }
 

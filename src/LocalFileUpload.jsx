@@ -14,7 +14,7 @@ function LocalFileUpload(
             binsPerOctave,
             minFreq,
             maxFreq,
-            passSpectrogramIsLoadingToScalableSpec,
+            passSpectrogramIsLoadingToTrack,
             handleUploadResponse,
             handleUploadError,
             strictMode
@@ -25,7 +25,7 @@ function LocalFileUpload(
     const handleFileChange = (event) => {
         const file = event.target.files[0]
         if (file && (file.type === 'audio/wav' || file.type === 'audio/mp3' || file.type === 'audio/mpeg')) {
-            passSpectrogramIsLoadingToScalableSpec(true)
+            passSpectrogramIsLoadingToTrack(true)
             createFormData(file)
         }
     }

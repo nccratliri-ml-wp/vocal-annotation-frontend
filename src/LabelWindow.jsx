@@ -31,8 +31,8 @@ function LabelWindow(
                             speciesArray,
                             labels,
                             expandedLabel,
-                            passLabelsToScalableSpec,
-                            passExpandedLabelToScalableSpec,
+                            passLabelsToTrack,
+                            passExpandedLabelToTrack,
                             getAllIndividualIDs,
                             globalMouseCoordinates,
                             audioId,
@@ -94,8 +94,8 @@ function LabelWindow(
         // Apply changes to labels
         const updatedLabels = labels.filter( label => label.id !== expandedLabel.id)
         updatedLabels.push(updatedLabel)
-        passLabelsToScalableSpec(updatedLabels)
-        passExpandedLabelToScalableSpec(updatedLabel)
+        passLabelsToTrack(updatedLabels)
+        passExpandedLabelToTrack(updatedLabel)
 
         // Update local species Array
         const updatedLocalSpeciesArray = localSpeciesArray.map(speciesObj => {
@@ -148,8 +148,8 @@ function LabelWindow(
         // Apply changes to labels
         const updatedLabels = labels.filter( label => label.id !== expandedLabel.id)
         updatedLabels.push(updatedLabel)
-        passLabelsToScalableSpec(updatedLabels)
-        passExpandedLabelToScalableSpec(updatedLabel)
+        passLabelsToTrack(updatedLabels)
+        passExpandedLabelToTrack(updatedLabel)
 
 
         const modifiedSpeciesArray = speciesArray.map(speciesObj => {
@@ -285,7 +285,7 @@ function LabelWindow(
                 }}
             >
                 <div className='close-btn-container'>
-                    <button className='close-btn' onClick={ () => passExpandedLabelToScalableSpec(null) }>✖</button>
+                    <button className='close-btn' onClick={ () => passExpandedLabelToTrack(null) }>✖</button>
                     <p className='window-header'>Reassign label</p>
                 </div>
 

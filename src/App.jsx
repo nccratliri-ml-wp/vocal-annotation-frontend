@@ -17,7 +17,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 // Internal dependencies
 import Export from "./Export.jsx";
 import ImportCSV from "./ImportCSV.jsx";
-import ScalableSpec from "./ScalableSpec.jsx";
+import Track from "./Track.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import AnnotationLabels from "./AnnotationLabels.jsx";
 import LoadingCircle from './LoadingCircle.jsx';
@@ -299,7 +299,7 @@ function App() {
             }
 
             return (
-                <ScalableSpec
+                <Track
                     key={track.trackID}
                     trackID={track.trackID}
                     speciesArray={speciesArray}

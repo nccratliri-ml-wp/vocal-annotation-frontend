@@ -15,12 +15,12 @@ function Parameters(
             binsPerOctave,
             minFreq,
             maxFreq,
-            passShowLocalConfigWindowToScalableSpec,
-            passSpecCalMethodToScalableSpec,
-            passNfftToScalableSpec,
-            passBinsPerOctaveToScalableSpec,
-            passMinFreqToScalableSpec,
-            passMaxFreqToScalableSpec,
+            passShowLocalConfigWindowToTrack,
+            passSpecCalMethodToTrack,
+            passNfftToTrack,
+            passBinsPerOctaveToTrack,
+            passMinFreqToTrack,
+            passMaxFreqToTrack,
             submitLocalParameters,
             strictMode,
             spectrogram
@@ -33,27 +33,27 @@ function Parameters(
     const [showBinsPerOctaveInput, setShowBinsPerOctaveInput] = useState(false)
 
     const handleRadioChange = (method) => {
-        passSpecCalMethodToScalableSpec( method )
+        passSpecCalMethodToTrack( method )
     }
 
     const handleNFftInputChange = (event) => {
-        passNfftToScalableSpec(event.target.value)
+        passNfftToTrack(event.target.value)
     }
 
     const handleBinsPerOctaveInputChange = (event) => {
-        passBinsPerOctaveToScalableSpec(event.target.value)
+        passBinsPerOctaveToTrack(event.target.value)
     }
 
     const handleMinFreqInputChange = (event) => {
-        passMinFreqToScalableSpec(event.target.value)
+        passMinFreqToTrack(event.target.value)
     }
 
     const handleMaxFreqInputChange = (event) => {
-        passMaxFreqToScalableSpec(event.target.value)
+        passMaxFreqToTrack(event.target.value)
     }
 
     const handleSubmit = () => {
-        passShowLocalConfigWindowToScalableSpec(false)
+        passShowLocalConfigWindowToTrack(false)
         submitLocalParameters()
     }
 
@@ -81,7 +81,7 @@ function Parameters(
                 className="local-parameters-config-panel"
             >
                 <div className='close-btn-container'>
-                    <button className='close-btn' onClick={() => passShowLocalConfigWindowToScalableSpec(false)}>✖
+                    <button className='close-btn' onClick={() => passShowLocalConfigWindowToTrack(false)}>✖
                     </button>
                     <p className='window-header'>Track Parameters</p>
                 </div>
@@ -174,7 +174,7 @@ function Parameters(
                     </div>
 
                     <div className={'local-config-window-label'}>
-                        <button onClick={() => passShowLocalConfigWindowToScalableSpec(false)}>Cancel</button>
+                        <button onClick={() => passShowLocalConfigWindowToTrack(false)}>Cancel</button>
                         <button disabled={(strictMode || !spectrogram)} onClick={handleSubmit}>Submit</button>
                     </div>
 

@@ -50,6 +50,7 @@ const ZERO_GAP_CORRECTION_MARGIN = 0.0005
 const FREQUENCY_LINES_COLOR = '#47ff14'
 const ACTIVE_LABEL_COLOR = '#ffffff'
 const TIME_AXIS_COLOR = '#9db4c0'
+const WAVEFORM_COLOR = '#ddd8ff'
 
 
 function Track(
@@ -1891,7 +1892,7 @@ function Track(
 
         const centerY = canvas.height / 2
         const ratio = Math.min((trackData.audioDuration - currentStartTime) / globalClipDuration, 1)
-        ctx.strokeStyle = '#ddd8ff'
+        ctx.strokeStyle = WAVEFORM_COLOR
 
         for (let i=0; i < newAudioArray.length; i++) {
             const datapoint = newAudioArray[i]

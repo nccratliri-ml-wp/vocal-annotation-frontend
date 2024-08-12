@@ -1836,19 +1836,28 @@ function Track(
         const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true });
 
         const x = calculateXPosition(timeframe)
+        const playHeadColor = '#ff0000'
+
+        specCTX.lineWidth = 2
+        specCTX.strokeStyle = playHeadColor
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = playHeadColor
+        waveformCTX.fillStyle = playHeadColor
 
         specCTX.beginPath()
         specCTX.moveTo(x, 0)
         specCTX.lineTo(x, specCVS.height)
-        specCTX.lineWidth = 2
-        specCTX.strokeStyle = "red"
         specCTX.stroke()
 
         waveformCTX.beginPath()
         waveformCTX.moveTo(x, 0)
         waveformCTX.lineTo(x, waveformCVS.height)
-        waveformCTX.lineWidth = 2
-        waveformCTX.strokeStyle = "red"
+        waveformCTX.moveTo(x, 1)
+        waveformCTX.lineTo(x+3, 6)
+        waveformCTX.lineTo(x, 12)
+        waveformCTX.lineTo(x-3, 6)
+        waveformCTX.lineTo(x, 1)
+        waveformCTX.fill();
         waveformCTX.stroke()
     }
 

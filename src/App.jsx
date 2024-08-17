@@ -44,35 +44,9 @@ import {
 } from "./buttonStyles.js"
 
 // Global Variables
-const SCROLL_STEP_RATIO = 0.1
+const SCROLL_STEP_RATIO = 0.2
 
 function App() {
-    // Labels import/export
-    const [importedLabels, setImportedLabels] = useState(null)
-    const [allLabels, setAllLabels] = useState([])
-    const [exportRequest, setExportRequest] = useState(false)
-    const [submitRequest, setSubmitRequest] = useState(false)
-
-    // Strict Mode
-    const [strictMode, setStrictMode] = useState(false)
-    const [annotationInstance, setAnnotationInstance] = useState(null)
-
-    // Species Array
-    const [speciesArray, setSpeciesArray] = useState(() => {
-        const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
-        const annotatedAreaClustername = new Clustername(nanoid(), ANNOTATED_AREA_CLUSTERNAME, ANNOTATED_AREA_COLOR)
-        annotatedAreaIndividual.isActive = false
-        annotatedAreaClustername.isActive = false
-        const annotatedAreaLabel = new Species(nanoid(), ANNOTATED_AREA, [annotatedAreaIndividual],  [annotatedAreaClustername])
-
-        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
-        const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
-        const newSpecies = new Species(nanoid(),UNKNOWN_SPECIES, [newIndividual], [newClustername] )
-
-        return [newSpecies, annotatedAreaLabel]
-    })
-    const [deletedItemID, setDeletedItemID] = useState(null)
-
     // Tracks
     const [tracks, setTracks] = useState([
         {
@@ -103,6 +77,32 @@ function App() {
     // Global Configurations
     const [defaultConfig, setDefaultConfig] = useState(null)
     const [showGlobalConfigWindow, setShowGlobalConfigWindow] = useState(false)
+
+    // Labels import/export
+    const [importedLabels, setImportedLabels] = useState(null)
+    const [allLabels, setAllLabels] = useState([])
+    const [exportRequest, setExportRequest] = useState(false)
+    const [submitRequest, setSubmitRequest] = useState(false)
+
+    // Strict Mode
+    const [strictMode, setStrictMode] = useState(false)
+    const [annotationInstance, setAnnotationInstance] = useState(null)
+
+    // Species Array
+    const [speciesArray, setSpeciesArray] = useState(() => {
+        const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
+        const annotatedAreaClustername = new Clustername(nanoid(), ANNOTATED_AREA_CLUSTERNAME, ANNOTATED_AREA_COLOR)
+        annotatedAreaIndividual.isActive = false
+        annotatedAreaClustername.isActive = false
+        const annotatedAreaLabel = new Species(nanoid(), ANNOTATED_AREA, [annotatedAreaIndividual],  [annotatedAreaClustername])
+
+        const newIndividual = new Individual(nanoid(), UNKNOWN_INDIVIDUAL)
+        const newClustername = new Clustername(nanoid(), UNKNOWN_CLUSTERNAME, DEFAULT_UNKNOWN_CLUSTERNAME_COLOR)
+        const newSpecies = new Species(nanoid(),UNKNOWN_SPECIES, [newIndividual], [newClustername] )
+
+        return [newSpecies, annotatedAreaLabel]
+    })
+    const [deletedItemID, setDeletedItemID] = useState(null)
 
     // Audio upload
     const [filesUploading, setFilesUploading] = useState(false);

@@ -83,7 +83,7 @@ function Parameters(
                 <div className='close-btn-container'>
                     <button className='close-btn' onClick={() => passShowLocalConfigWindowToTrack(false)}>✖
                     </button>
-                    <p className='window-header'>Track Parameters</p>
+                    <p className='window-header'>Spectrogram Parameters</p>
                 </div>
 
                 <div className='local-parameters-window-content'>

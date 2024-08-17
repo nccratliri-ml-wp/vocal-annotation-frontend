@@ -99,7 +99,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="log-mel"
-                                disabled={strictMode && specCalMethod !== 'log-mel' && originalSpecCalMethod !== 'log-mel'}
+                                disabled={strictMode && originalSpecCalMethod !== 'log-mel'}
                                 checked={specCalMethod === 'log-mel'}
                                 onChange={() => handleRadioChange('log-mel')}
                             />
@@ -127,7 +127,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="constant-q"
-                                disabled={strictMode && specCalMethod !== 'constant-q' && originalSpecCalMethod !== 'constant-q'}
+                                disabled={strictMode && originalSpecCalMethod !== 'constant-q'}
                                 checked={specCalMethod === 'constant-q'}
                                 onChange={() => handleRadioChange('constant-q')}
                             />

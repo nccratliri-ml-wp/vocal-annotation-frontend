@@ -1915,26 +1915,29 @@ function Track(
         const ratio = Math.min((trackData.audioDuration - currentStartTime) / globalClipDuration, 1)
         ctx.strokeStyle = WAVEFORM_COLOR
 
-        for (let i=0; i < newAudioArray.length; i++) {
+        for (let i = 0; i < newAudioArray.length - 1; i++) {  // Subtract 1 from length to avoid accessing out-of-bounds index
             const datapoint = newAudioArray[i]
-            const y = centerY + waveformScale * datapoint
+            const nextDatapoint = newAudioArray[i + 1] // Store next datapoint to avoid re-indexing
+
+            const y = centerY - waveformScale * datapoint // Subtract from centerY to flip the waveform
+            const nextY = centerY - waveformScale * nextDatapoint // Similarly, subtract for the next point
 
             ctx.beginPath()
             ctx.moveTo(i * canvas.width * ratio / newAudioArray.length, y)
-            ctx.lineTo((i + 1) * canvas.width * ratio / newAudioArray.length, centerY + waveformScale * newAudioArray[i + 1])
+            ctx.lineTo((i + 1) * canvas.width * ratio / newAudioArray.length, nextY)
             ctx.stroke()
         }
 
         // Draw flat line representing silence
         ctx.beginPath()
-        ctx.moveTo(canvas.width * ratio ,centerY)
+        ctx.moveTo(canvas.width * ratio, centerY)
         ctx.lineTo(canvas.width, centerY)
         ctx.stroke()
 
         waveformImgData.current = ctx.getImageData(0, 0, canvas.width, canvas.height)
     }
 
-     const waveformZoomIn = () => {
+    const waveformZoomIn = () => {
         setWaveformScale(prevState => prevState * 1.3)
      }
 

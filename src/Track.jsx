@@ -765,26 +765,9 @@ function Track(
 
         ctx.lineWidth = 2
         ctx.strokeStyle = TIME_AXIS_COLOR
-        ctx.font = `${12}px Arial`
+        ctx.font = `${10}px Arial`
         ctx.fillStyle = TIME_AXIS_COLOR
-
-        // Drawing horizontal line
-        ctx.beginPath()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(cvs.width, 0)
-        ctx.stroke()
-
-        // Drawing first timestamp (second 0)
-        ctx.beginPath()
-        ctx.moveTo(1, 0)
-        ctx.lineTo(1, cvs.height)
-        ctx.stroke()
-
-        // Drawing last timestamp (audio end)
-        ctx.beginPath()
-        ctx.moveTo(cvs.width - 1, 0)
-        ctx.lineTo(cvs.width - 1, cvs.height)
-        ctx.stroke()
+        const firstAndLastTimeStampY = 18
 
         // Set time formats depending on the total audio duration
         let timeConvertMethod
@@ -796,6 +779,30 @@ function Track(
             timeConvertMethod = secondsTo_MM_SS_M
             millisecondFormatMethod = secondsTo_MM_SS_MMM
         }
+
+        // Drawing horizontal line
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(cvs.width, 0)
+        ctx.stroke()
+
+        // Drawing first timestamp
+        ctx.beginPath()
+        ctx.moveTo(1, 0)
+        ctx.lineTo(1, cvs.height)
+        ctx.stroke()
+        const firstTimeStampText = timeConvertMethod(currentStartTime)
+        ctx.fillText(firstTimeStampText, 5, firstAndLastTimeStampY)
+
+        // Drawing last timestamp
+        ctx.beginPath()
+        ctx.moveTo(cvs.width - 1, 0)
+        ctx.lineTo(cvs.width - 1, cvs.height)
+        ctx.stroke()
+        const lastTimestampText = timeConvertMethod(currentEndTime)
+        const textWidth = ctx.measureText(lastTimestampText).width
+        //ctx.fillText(lastTimestampText, cvs.width - textWidth - 5 ,firstAndLastTimeStampY)
+
 
         // Calculate how many timestamps we can fit in the current viewport without them overlapping
         const minWidthBetweenTimestamps = 70
@@ -809,8 +816,9 @@ function Track(
         // Draw First level (HH:MM:SS.m for audio longer than one hour, MM:SS.m for audio shorter than that)
         const lineHeight = 20
         const textY = lineHeight + 12
+        ctx.font = `${12}px Arial`
         for (let timestamp = currentStartTime; timestamp <= currentEndTime; timestamp += timestampIncrement){
-            // Always skip drawing the first timestamp, as half of it will always be cut off
+            // Always skip drawing the first timestamp because we already drew it
             if (timestamp === currentStartTime) continue
 
             const x = (timestamp * cvs.width / globalClipDuration) - ( currentStartTime * cvs.width / globalClipDuration )

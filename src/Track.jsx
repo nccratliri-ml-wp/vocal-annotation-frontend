@@ -1649,8 +1649,7 @@ function Track(
     const getMouseXInOverviewTimeAxisContainer = (event) => {
         const container = overviewTimeAxisContainerRef.current;
         const rect = container.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        return x
+        return event.clientX - rect.left
     }
 
     const calculateViewportTimestamp = (mouseX) => {
@@ -1715,8 +1714,22 @@ function Track(
         // Draw Viewport Timestamps
         ctx.font = `10px Arial`;
         ctx.fillStyle = hexColorCode
-        const timestampText = (Math.round(startFrame * 100) / 100).toString()
-        ctx.fillText(timestampText, x1 + 5, overviewCanvas.height-5)
+        const viewportWidth = x2 - x1
+        const startFrameText = (Math.round(startFrame * 100) / 100).toString()
+        const endFrameText = (Math.round(endFrame * 100) / 100).toString()
+        const startFrameTextWidth = ctx.measureText(startFrameText).width
+        const endFrameTextWidth = ctx.measureText(endFrameText).width
+        const xPadding = 5
+
+        // Place startFrame and endFrame timestamps on the outside of the viewport if the space is too small
+        const isWideEnough = viewportWidth > startFrameTextWidth + endFrameTextWidth + xPadding * 3
+
+        const startFrameX = isWideEnough ? x1 + xPadding : x1 - startFrameTextWidth - xPadding
+        const endFrameX = isWideEnough ? x2 - endFrameTextWidth - xPadding : x2 + xPadding
+        const yPadding = isWideEnough ? 5 : 2
+
+        ctx.fillText(startFrameText, startFrameX, overviewCanvas.height - yPadding)
+        ctx.fillText(endFrameText, endFrameX, overviewCanvas.height - yPadding)
 
         // Update Scroll Button positions
         updateViewportScrollButtons(startFrame, endFrame)

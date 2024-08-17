@@ -10,6 +10,7 @@ import {excludeNonDigits} from "./utils.js";
 
 function Parameters(
         {
+            originalSpecCalMethod,
             specCalMethod,
             nfft,
             binsPerOctave,
@@ -73,6 +74,11 @@ function Parameters(
             setShowBinsPerOctaveInput(true)
         }
 
+        if (specCalMethod === 'dummy'){
+            setShowNFftInput(false)
+            setShowBinsPerOctaveInput(false)
+        }
+
     }, [specCalMethod])
 
     return (
@@ -93,7 +99,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="log-mel"
-                                disabled={strictMode && specCalMethod !== 'log-mel'}
+                                disabled={strictMode && specCalMethod !== 'log-mel' && originalSpecCalMethod !== 'log-mel'}
                                 checked={specCalMethod === 'log-mel'}
                                 onChange={() => handleRadioChange('log-mel')}
                             />
@@ -121,7 +127,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="constant-q"
-                                disabled={strictMode && specCalMethod !== 'constant-q'}
+                                disabled={strictMode && specCalMethod !== 'constant-q' && originalSpecCalMethod !== 'constant-q'}
                                 checked={specCalMethod === 'constant-q'}
                                 onChange={() => handleRadioChange('constant-q')}
                             />
@@ -143,6 +149,20 @@ function Parameters(
                             </label>
                         )}
                     </div>
+
+                    {strictMode &&
+                        <div className={'local-config-window-label'}>
+                            <label>
+                                <input
+                                    type="radio"
+                                    value="dummy"
+                                    checked={specCalMethod === 'dummy'}
+                                    onChange={() => handleRadioChange('dummy')}
+                                />
+                                Dummy
+                            </label>
+                        </div>
+                    }
 
                     <div className='frequencies-labels-container'>
                         <label className={'local-config-window-label'}>
@@ -175,7 +195,7 @@ function Parameters(
 
                     <div className={'local-config-window-label'}>
                         <button onClick={() => passShowLocalConfigWindowToTrack(false)}>Cancel</button>
-                        <button disabled={(strictMode || !spectrogram)} onClick={handleSubmit}>Submit</button>
+                        <button disabled={!spectrogram} onClick={handleSubmit}>Submit</button>
                     </div>
 
                 </div>

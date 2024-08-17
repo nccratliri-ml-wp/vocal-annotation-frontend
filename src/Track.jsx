@@ -2431,6 +2431,7 @@ function Track(
                             </div>
                             {showLocalConfigWindow && !spectrogramIsLoading &&
                                 <Parameters
+                                    originalSpecCalMethod={trackData.specCalMethod}
                                     specCalMethod={specCalMethod}
                                     nfft={nfft}
                                     binsPerOctave={binsPerOctave}

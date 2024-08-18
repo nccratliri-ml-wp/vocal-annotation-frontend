@@ -409,6 +409,8 @@ function App() {
             return {
                 onset: labelObj.onset,
                 offset: labelObj.offset,
+                min_freq: labelObj.minFreq,
+                max_freq: labelObj.maxFreq,
                 species: labelObj.species,
                 individual: labelObj.individual,
                 clustername: labelObj.clustername,

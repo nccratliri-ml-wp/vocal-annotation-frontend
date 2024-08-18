@@ -52,7 +52,6 @@ const ACTIVE_LABEL_COLOR = '#ffffff'
 const TIME_AXIS_COLOR = '#9db4c0'
 const WAVEFORM_COLOR = '#ddd8ff'
 
-
 function Track(
                         {
                             trackID,
@@ -359,6 +358,7 @@ function Track(
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             clickedFrequencyLinesObject = frequencyLines
+            //clickedFrequencyLinesObject = JSON.parse(JSON.stringify(frequencyLines))
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
             return
         }
@@ -1331,12 +1331,17 @@ function Track(
         const allIndividualIDs = getAllIndividualIDs(speciesArray)
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
+        const newMinFreq = getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
+        const newMaxFreq = getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+
         const newLabel = new Label(
             nanoid(),
             trackID,
             trackData.filename,
             onset,
             undefined,
+            newMinFreq,
+            newMaxFreq,
             activeSpecies.name,
             individual.name,
             clustername.name,
@@ -1407,6 +1412,7 @@ function Track(
         if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
 
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
+
         clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
     }
 
@@ -1447,6 +1453,8 @@ function Track(
                 trackData.filename,
                 label.onset,
                 label.offset,
+                label.minFreq,
+                label.maxFreq,
                 label.species,
                 label.individual,
                 label.clustername,
@@ -1500,6 +1508,8 @@ function Track(
                 trackData.filename,
                 label.onset,
                 label.offset,
+                label.minFreq,
+                label.maxFreq,
                 label.species,
                 label.individual,
                 label.clustername,
@@ -1840,7 +1850,7 @@ function Track(
 
         audioSnippet.pause()
         audioSnippet.currentTime = playWindowTimes?.startTime
-        updatePlayhead(playWindowTimes?.startTime)
+        updatePlayhead(0)
 
         clearAndRedrawSpecAndWaveformCanvases(null)
     }
@@ -2079,7 +2089,7 @@ function Track(
         // Draw Min Frequency
         x1 = 0
         x2 = cvs.width
-        y = frequencyLines.minFreqY - 1
+        y = frequencyLines.minFreqY //-1
         const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
@@ -2124,6 +2134,8 @@ function Track(
                         label.filename,
                         activeLabel.onset,
                         activeLabel.offset,
+                        label.minFreq,
+                        label.maxFreq,
                         label.species,
                         label.individual,
                         label.clustername,
@@ -2414,6 +2426,8 @@ function Track(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
+                                <button onClick={() => console.log(labels)}>c</button>
+                                {JSON.stringify(frequencyLines)}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

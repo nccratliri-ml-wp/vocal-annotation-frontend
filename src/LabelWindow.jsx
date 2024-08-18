@@ -25,6 +25,7 @@ import {
     ANNOTATED_AREA, UNKNOWN_SPECIES
 } from "./species.js";
 import {iconSmall} from "./buttonStyles.js";
+import {excludeNonDigits} from "./utils.js";
 
 function LabelWindow(
                         {
@@ -50,6 +51,8 @@ function LabelWindow(
         expandedLabel.filename,
         expandedLabel.onset,
         expandedLabel.offset,
+        expandedLabel.minFreq,
+        expandedLabel.maxFreq,
         expandedLabel.species,
         expandedLabel.individual,
         expandedLabel.clustername,
@@ -60,6 +63,9 @@ function LabelWindow(
         expandedLabel.annotator,
         expandedLabel.color
     )
+
+    const [minFreqInput, setMinFreqInput] = useState(expandedLabel.minFreq)
+    const [maxFreqInput, setMaxFreqInput] = useState(expandedLabel.maxFreq)
 
     const changeSpecies = (clickedSpecies) => {
         updatedLabel.species = clickedSpecies.name
@@ -265,6 +271,27 @@ function LabelWindow(
         }
     }
 
+    /* ++++++++++++++++++ Frequencies ++++++++++++++++++ */
+
+    const handleMinFreqInputChange = (event) => {
+        setMinFreqInput(event.target.value)
+    }
+
+    const handleMaxFreqInputChange = (event) => {
+        setMaxFreqInput(event.target.value)
+    }
+
+    const saveFreqChanges = () => {
+        updatedLabel.minFreq = Number(minFreqInput)
+        updatedLabel.maxFreq = Number(maxFreqInput)
+
+        // Apply changes to labels
+        const updatedLabels = labels.filter( label => label.id !== expandedLabel.id)
+        updatedLabels.push(updatedLabel)
+        passLabelsToTrack(updatedLabels)
+        passExpandedLabelToTrack(null)
+    }
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     // When the user makes changes in SpeciesMenu Component or clicks on a different label in the spectrogram, update the localSpeciesArray
@@ -275,7 +302,7 @@ function LabelWindow(
     }, [speciesArray, expandedLabel])
 
     return (
-        <Draggable cancel='.label-window-audio-btn-container, .label-window-content'>
+        <Draggable cancel='.label-window-audio-btn-container, .label-window-content, .label-window-frequencies-container'>
             <div
                 className='label-window'
                 onContextMenu={ (event) => event.preventDefault()}
@@ -289,7 +316,7 @@ function LabelWindow(
                     <p className='window-header'>Reassign label</p>
                 </div>
 
-                <div className='label-window-audio-btn-container'>
+                <div className='label-window-controls-container'>
                     <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
                         <PlayArrowIcon style={iconSmall}/>
                         Play Audio
@@ -297,6 +324,35 @@ function LabelWindow(
                     <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
                         <DownloadIcon style={iconSmall}/>
                         Download Audio
+                    </div>
+                    <div className='label-window-frequencies-container'>
+                        <div className='label-window-frequencies-labels-container'>
+                            <label className='label-window-frequencies-label'>
+                                Min Freq
+                                <input
+                                    type="number"
+                                    value={minFreqInput}
+                                    min={0}
+                                    onChange={handleMinFreqInputChange}
+                                    onKeyPress={excludeNonDigits}
+                                    onFocus={(event) => event.target.select()}
+                                    onPaste={(event) => event.preventDefault()}
+                                />
+                            </label>
+                            <label className='label-window-frequencies-label'>
+                                Max Freq
+                                <input
+                                    type="number"
+                                    value={maxFreqInput}
+                                    min={0}
+                                    onChange={handleMaxFreqInputChange}
+                                    onKeyPress={excludeNonDigits}
+                                    onFocus={(event) => event.target.select()}
+                                    onPaste={(event) => event.preventDefault()}
+                                />
+                            </label>
+                        </div>
+                        <button className='label-window-frequencies-save-btn' onClick={saveFreqChanges}>Save</button>
                     </div>
                 </div>
 

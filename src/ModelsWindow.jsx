@@ -76,6 +76,8 @@ function ModelsWindow (
                 return {
                     onset: label.onset,
                     offset: label.offset,
+                    minFreq: label.minFreq,
+                    maxFreq: label.maxFreq,
                     species: label.species,
                     individual: label.individual,
                     clustername: label.clustername,

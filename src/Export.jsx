@@ -33,8 +33,8 @@ function Export( { tracks, allLabels, annotationInstance, exportRequest, passExp
         const firstTrackFilename = tracks.find(track => track.trackIndex === 0).filename.slice(0, -4)
 
         // Transform to CSV data
-        let csvData = newLabelsArray.map(label => `${label.onset},${label.offset},${label.species},${label.individual},${label.clustername},${label.filename},${label.channelIndex}`)
-        csvData.unshift('onset,offset,species,individual,clustername,filename,channelIndex')
+        let csvData = newLabelsArray.map(label => `${label.onset},${label.offset},${label.minFreq},${label.maxFreq},${label.species},${label.individual},${label.clustername},${label.filename},${label.channelIndex}`)
+        csvData.unshift('onset,offset,minFrequency,maxFrequency,species,individual,clustername,filename,channelIndex')
         csvData = csvData.join('\n')
 
         // In strict mode use annotationInstance as csv filename

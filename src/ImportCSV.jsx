@@ -29,11 +29,13 @@ function ImportCSV( {passImportedLabelsToApp, speciesArray, passSpeciesArrayToAp
                     // Skip empty rows
                     if (line === '') continue
 
-                    const [onset, offset, species, individual, clustername, filename, channelIndex] = line.trim().split(',')
+                    const [onset, offset, minFrequency, maxFrequency, species, individual, clustername, filename, channelIndex] = line.trim().split(',')
 
                     importedLabelsArray.push({
                         onset: parseFloat(onset),
                         offset: parseFloat(offset),
+                        minFreq: parseFloat(minFrequency),
+                        maxFreq: parseFloat(maxFrequency),
                         species: species.trim(),
                         individual: individual.trim(),
                         clustername: clustername.trim(),

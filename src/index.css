@@ -497,8 +497,9 @@ html, body {
   font-weight: bold;
 }
 
-.label-window-audio-btn-container{
+.label-window-controls-container{
   display: flex;
+  align-items: center;
   margin: 7px;
 }
 
@@ -506,6 +507,7 @@ html, body {
   display: flex;
   align-items: center;
   font-size: 12px;
+  height: 20px;
   width: fit-content;
   margin: 4px;
   padding: 7px 12px 7px 5px;
@@ -546,6 +548,33 @@ html, body {
 
 .label-window-individual-btn[isactive='true']{
   background-image: linear-gradient(to bottom right, #0095ff, #ff00f2, yellow);
+}
+
+.label-window-frequencies-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 5px;
+  padding: 7px 12px 7px 5px;
+  background-color: #082536;
+  border-radius: 10px;
+}
+
+.label-window-frequencies-labels-container{
+  display: flex;
+  flex-direction: column;
+  margin: 0 4px 0 0;
+}
+
+.label-window-frequencies-label{
+  display: flex;
+  justify-content: space-between;
+  width: 140px;
+}
+
+.label-window-frequencies-label > input{
+  max-width: 60px;
 }
 
 

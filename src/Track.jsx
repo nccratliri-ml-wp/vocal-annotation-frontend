@@ -358,7 +358,6 @@ function Track(
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             clickedFrequencyLinesObject = frequencyLines
-            //clickedFrequencyLinesObject = JSON.parse(JSON.stringify(frequencyLines))
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
             return
         }
@@ -1421,8 +1420,11 @@ function Track(
 
         // Adjust the minFreq line manually to allow it to be dragged to the very bottom of the canvas
         if (newMinFreqY >= specCanvasRef.current.height - 1) {
-            newMinFreqY = specCanvasRef.current.height + 1
+            newMinFreqY = specCanvasRef.current.height
+            console.log('got here')
         }
+
+        console.log(newMinFreqY)
 
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
@@ -2067,9 +2069,6 @@ function Track(
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
         const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
-        console.log(y)
-        //console.log(currentMaxFreq)
-        //console.log('+++ +++ +++')
 
         ctx.beginPath()
         ctx.moveTo(x1, y)
@@ -2092,7 +2091,7 @@ function Track(
         // Draw Min Frequency
         x1 = 0
         x2 = cvs.width
-        y = frequencyLines.minFreqY //-1
+        y = frequencyLines.minFreqY
         const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)

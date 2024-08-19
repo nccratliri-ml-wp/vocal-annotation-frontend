@@ -109,7 +109,7 @@ function Track(
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
-    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 121})
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 120})
     let clickedFrequencyLinesObject = null
 
     // Label Canvas
@@ -1411,9 +1411,8 @@ function Track(
         const newMaxFreqY = getMouseY(event)
         if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
 
-        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-
         clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }
 
     const dragMinFreqLine = (event) => {
@@ -1425,8 +1424,8 @@ function Track(
             newMinFreqY = specCanvasRef.current.height + 1
         }
 
-        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }
 
     const magnet = (timestamp) => {
@@ -2068,6 +2067,10 @@ function Track(
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
         const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
+        console.log(y)
+        //console.log(currentMaxFreq)
+        //console.log('+++ +++ +++')
+
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)

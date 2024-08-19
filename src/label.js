@@ -20,15 +20,3 @@ class Label {
 }
 
 export { Label }
-
-
-/*
-1. add new porperty to label object,
-2. adapt all instances of new label
-2.1 Find out if there's other places I need to update
-3. fill with dummy data for now
-4. adapt import and export, submit
-5. replace dummy data with frequency lines values
-6. display the label frequency somewhere
-7. Fix/refactor frequency drag methods
- */

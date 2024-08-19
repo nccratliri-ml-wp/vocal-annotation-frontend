@@ -1421,10 +1421,7 @@ function Track(
         // Adjust the minFreq line manually to allow it to be dragged to the very bottom of the canvas
         if (newMinFreqY >= specCanvasRef.current.height - 1) {
             newMinFreqY = specCanvasRef.current.height
-            console.log('got here')
         }
-
-        console.log(newMinFreqY)
 
         clickedFrequencyLinesObject.minFreqY = newMinFreqY
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
@@ -2428,8 +2425,6 @@ function Track(
                                         <DeleteIcon style={activeIcon}/>
                                     </IconButton>
                                 </Tooltip>
-                                <button onClick={() => console.log(labels)}>c</button>
-                                {JSON.stringify(frequencyLines)}
                             </div>
                             <div className='audio-controls'>
                                 <IconButton

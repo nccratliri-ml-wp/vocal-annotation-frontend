@@ -299,6 +299,9 @@ function LabelWindow(
         if (!speciesArray) return
         const updatedLocalSpeciesArray = updateLocalSpeciesArrayFromOriginal()
         setLocalSpeciesArray(updatedLocalSpeciesArray)
+
+        setMinFreqInput(expandedLabel.minFreq)
+        setMaxFreqInput(expandedLabel.maxFreq)
     }, [speciesArray, expandedLabel])
 
     return (

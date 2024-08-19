@@ -2,8 +2,8 @@
 import React, {useEffect} from "react"
 
 // External dependencies
-import Tooltip from "@material-ui/core/Tooltip"
-import { IconButton } from "@material-ui/core"
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download'
 
 // Internal dependencies

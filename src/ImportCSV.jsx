@@ -2,8 +2,8 @@
 import React, {useState} from "react";
 
 // External dependencies
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 // Internal dependencies

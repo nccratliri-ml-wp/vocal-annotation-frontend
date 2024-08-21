@@ -1504,6 +1504,10 @@ function Track(
         // Iterate over the imported labels array
         return genericLabelObjectsArray.map( label => {
 
+            // WhisperSeg currently doesn't support Frequency Annotation, so if the imported label has no frequency, assign the current min and max frequency line to it
+            const newMinFreq = label.minFreq ? label.minFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
+            const newMaxFreq = label.maxFreq ? label.maxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
                 nanoid(),
@@ -1511,8 +1515,8 @@ function Track(
                 trackData.filename,
                 label.onset,
                 label.offset,
-                label.minFreq,
-                label.maxFreq,
+                newMinFreq,
+                newMaxFreq,
                 label.species,
                 label.individual,
                 label.clustername,

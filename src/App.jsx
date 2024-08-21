@@ -115,6 +115,7 @@ function App() {
     // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
     const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
+    const [numberOfOpenWindows, setNumberOfOpenWindows] = useState(0)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -185,6 +186,15 @@ function App() {
     const passTokenFinetuneToWhisperSeg = (newToken) => {
         setTokenFinetune( newToken )
     }
+
+    const addOneNewOpenWindow = () => {
+        setNumberOfOpenWindows(prevState => prevState + 1);
+    }
+
+    const substractOneNewOpenWindow = () => {
+        setNumberOfOpenWindows(prevState => prevState - 1);
+    }
+
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
     
@@ -594,6 +604,14 @@ function App() {
     }
 
 
+    /* ++++++++++++++++++ Global Config Window ++++++++++++++++++ */
+
+    function openGlobalConfigWindow(){
+        setShowGlobalConfigWindow(true)
+        addOneNewOpenWindow()
+    }
+
+
     /* ++++++++++++++++++ Helper methods ++++++++++++++++++ */
 
     const extractLabels = (audioFilesArray) => {
@@ -767,21 +785,23 @@ function App() {
     useEffect(() => {
         function handleKeyDown(event) {
             if (event.key === 'ArrowLeft' && !leftArrowKeyPressed) {
-                setLeftArrowKeyPressed(true);
+                setLeftArrowKeyPressed(true)
             }
             if (event.key === 'ArrowRight' && !rightArrowKeyPressed) {
-                setRightArrowKeyPressed(true);
+                setRightArrowKeyPressed(true)
             }
         }
 
         function handleKeyUp(event) {
             if (event.key === 'ArrowLeft' && leftArrowKeyPressed) {
-                setLeftArrowKeyPressed(false);
+                setLeftArrowKeyPressed(false)
+                if (numberOfOpenWindows > 0) return // Prevent scrolling when an input window is open
                 leftScroll();
             }
             if (event.key === 'ArrowRight' && rightArrowKeyPressed) {
-                setRightArrowKeyPressed(false);
-                rightScroll();
+                setRightArrowKeyPressed(false)
+                if (numberOfOpenWindows > 0) return // Prevent scrolling when an input window is open
+                rightScroll()
             }
         }
 
@@ -792,15 +812,18 @@ function App() {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [leftArrowKeyPressed, rightArrowKeyPressed, leftScroll, rightScroll]);
+    }, [leftArrowKeyPressed, rightArrowKeyPressed, leftScroll, rightScroll, numberOfOpenWindows]);
 
     return (
         <>
             <ToastContainer />
+            {numberOfOpenWindows}
             <SpeciesMenu
                 speciesArray={speciesArray}
                 passSpeciesArrayToApp={passSpeciesArrayToApp}
                 passDeletedItemIDToApp={passDeletedItemIDToApp}
+                addOneNewOpenWindow={addOneNewOpenWindow}
+                substractOneNewOpenWindow={substractOneNewOpenWindow}
                 strictMode={strictMode}
             />
             <div id='controls-container'>
@@ -839,7 +862,6 @@ function App() {
                         <IconButton
                             style={{...globalControlsBtn, ...(!strictMode && iconBtnDisabled)}}
                             disabled={!strictMode}
-                            //onClick={submitAllAnnotations}
                             onClick={handleClickSubmitBtn}
                         >
                             <DoneAllIcon style={icon} />
@@ -848,7 +870,7 @@ function App() {
                     <Tooltip title='Open Global Configurations'>
                         <IconButton
                             style={globalControlsBtn}
-                            onClick={ () => setShowGlobalConfigWindow(true)}>
+                            onClick={openGlobalConfigWindow}>
                             <SettingsIcon style={icon} />
                         </IconButton>
                     </Tooltip>
@@ -872,6 +894,7 @@ function App() {
                         passGlobalSamplingRateToApp={passGlobalSamplingRateToApp}
                         defaultConfig={defaultConfig}
                         passShowGlobalConfigWindowToApp={passShowGlobalConfigWindowToApp}
+                        substractOneNewOpenWindow={substractOneNewOpenWindow}
                         strictMode={strictMode}
                     />
                 }

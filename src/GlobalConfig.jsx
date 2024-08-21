@@ -17,7 +17,8 @@ function GlobalConfig (
                 passGlobalSamplingRateToApp,
                 defaultConfig,
                 passShowGlobalConfigWindowToApp,
-                strictMode
+                substractOneNewOpenWindow,
+                strictMode,
             }
         )
     {
@@ -75,6 +76,11 @@ function GlobalConfig (
         }
     }
 
+    const closeWindow = () => {
+        passShowGlobalConfigWindowToApp(false)
+        substractOneNewOpenWindow()
+    }
+
     // Update the input field values with the values returned from the backend (maybe not necessary?)
     useEffect( () => {
         setHopLengthInputValue(globalHopLength)
@@ -96,7 +102,7 @@ function GlobalConfig (
             <div id='global-config-window'>
 
                 <div className='close-btn-container'>
-                    <button className='close-btn' onClick={ () => passShowGlobalConfigWindowToApp(false) }>✖</button>
+                    <button className='close-btn' onClick={closeWindow}>✖</button>
                     <p className='window-header'>Global Configurations</p>
                 </div>
 

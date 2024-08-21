@@ -45,7 +45,7 @@ import {
 } from "./buttonStyles.js";
 
 
-function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
+function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, addOneNewOpenWindow, substractOneNewOpenWindow, strictMode }) {
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
     const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
@@ -53,6 +53,11 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
 
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
+
+    const openSpeciesInputWindow = () => {
+        setShowSpeciesInputWindow(true)
+        addOneNewOpenWindow()
+    }
 
     const addNewSpecies = (event, inputFieldContent) => {
         event.preventDefault()
@@ -671,6 +676,7 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
         event.preventDefault()
         setShowSpeciesInputWindow(false)
         setShowSpeciesFrequencyRangeWindow(false)
+        substractOneNewOpenWindow()
     }
 
     const toggleClusternameInputWindow = (event, selectedID) => {
@@ -946,7 +952,7 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                 }
 
                 <Tooltip title='Add New Species'>
-                    <IconButton style={{padding: 0}} onClick={() => setShowSpeciesInputWindow(true)}>
+                    <IconButton style={{padding: 0}} onClick={openSpeciesInputWindow}>
                         <AddBoxIcon style={iconBig}/>
                     </IconButton>
                 </Tooltip>

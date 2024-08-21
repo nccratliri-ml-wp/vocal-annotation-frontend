@@ -660,6 +660,7 @@ function App() {
 
                 // Prepare for upload
                 processAudioFilesSequentially(audioFilesArray)
+
             } catch (error){
                 console.error("Error trying to access metadata through Hash ID:", error)
                 toast.error('Error while trying to access the database. Check the console for more information.')

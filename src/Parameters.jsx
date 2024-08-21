@@ -10,7 +10,6 @@ import {excludeNonDigits} from "./utils.js";
 
 function Parameters(
         {
-            originalSpecCalMethod,
             specCalMethod,
             nfft,
             binsPerOctave,
@@ -99,7 +98,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="log-mel"
-                                disabled={strictMode && originalSpecCalMethod !== 'log-mel'}
+                                disabled={strictMode && specCalMethod !== 'log-mel'}
                                 checked={specCalMethod === 'log-mel'}
                                 onChange={() => handleRadioChange('log-mel')}
                             />
@@ -127,7 +126,7 @@ function Parameters(
                             <input
                                 type="radio"
                                 value="constant-q"
-                                disabled={strictMode && originalSpecCalMethod !== 'constant-q'}
+                                disabled={strictMode && specCalMethod !== 'constant-q'}
                                 checked={specCalMethod === 'constant-q'}
                                 onChange={() => handleRadioChange('constant-q')}
                             />
@@ -156,6 +155,7 @@ function Parameters(
                                 <input
                                     type="radio"
                                     value="dummy"
+                                    disabled={specCalMethod !== 'dummy'}
                                     checked={specCalMethod === 'dummy'}
                                     onChange={() => handleRadioChange('dummy')}
                                 />

@@ -2290,7 +2290,7 @@ function Track(
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
-    }, [spectrogram, frequencies, audioArray, labels, activeLabel, frequencyLines])
+    }, [spectrogram, frequencies, audioArray, labels, activeLabel, frequencyLines, showFrequencyLines])
 
     return (
         <>

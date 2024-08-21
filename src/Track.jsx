@@ -110,7 +110,7 @@ function Track(
     const frequenciesCanvasRef = useRef(null)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
     const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 120})
-    let clickedFrequencyLinesObject = null
+    let draggedFrequencyLinesObject = null
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -357,14 +357,14 @@ function Track(
 
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
-            clickedFrequencyLinesObject = frequencyLines
+            draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
             return
         }
 
         // Deal with click on Min Frequency Line
         if (checkIfOccupiedByMinFreqLine(mouseY) && event.target.className === 'spec-canvas'){
-            clickedFrequencyLinesObject = frequencyLines
+            draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMinFreqLine)
             return
         }
@@ -470,9 +470,14 @@ function Track(
             })
         }
 
+        // Only do this when mouse up event stems from dragging the frequency lines
+        if (draggedFrequencyLinesObject){
+            setFrequencyLines(draggedFrequencyLinesObject)
+        }
+
         clickedLabel = undefined
         draggedActiveLabel = null
-        clickedFrequencyLinesObject = null
+        draggedFrequencyLinesObject = null
     }
 
     const removeDragEventListeners = () => {
@@ -1408,22 +1413,22 @@ function Track(
 
     const dragMaxFreqLine = (event) => {
         const newMaxFreqY = getMouseY(event)
-        if (newMaxFreqY >= clickedFrequencyLinesObject.minFreqY - 5 ) return
+        if (newMaxFreqY >= draggedFrequencyLinesObject.minFreqY - 5 ) return
 
-        clickedFrequencyLinesObject.maxFreqY = newMaxFreqY
+        draggedFrequencyLinesObject.maxFreqY = newMaxFreqY
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }
 
     const dragMinFreqLine = (event) => {
         let newMinFreqY = getMouseY(event)
-        if (newMinFreqY <= clickedFrequencyLinesObject.maxFreqY + 5 ) return
+        if (newMinFreqY <= draggedFrequencyLinesObject.maxFreqY + 5 ) return
 
         // Adjust the minFreq line manually to allow it to be dragged to the very bottom of the canvas
         if (newMinFreqY >= specCanvasRef.current.height - 1) {
             newMinFreqY = specCanvasRef.current.height
         }
 
-        clickedFrequencyLinesObject.minFreqY = newMinFreqY
+        draggedFrequencyLinesObject.minFreqY = newMinFreqY
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
     }
 
@@ -2114,7 +2119,7 @@ function Track(
     // When labels or the Waveform Scale value are manipulated
     useEffect( () => {
         if (!spectrogram || !audioArray) return
-        drawAllCanvases(spectrogram, frequencies,audioArray)
+        drawAllCanvases(spectrogram, frequencies, audioArray)
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks
@@ -2270,6 +2275,22 @@ function Track(
             emitter.off('dataChange', handler)
         }
     }, [])
+
+    // Set up visibility change handler, to refresh canvases when user switches to another tab
+    // I found this is only necessary when using Chrome on macOS
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                drawAllCanvases(spectrogram, frequencies, audioArray)
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+    }, [spectrogram, frequencies, audioArray, labels, activeLabel, frequencyLines])
 
     return (
         <>

@@ -12,6 +12,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
 
 // Internal dependencies
 import ModelsWindow from "./ModelsWindow.jsx";
+import {useScroll} from "./ScrollContext.jsx";
 
 
 function WhisperSeg(
@@ -44,6 +45,9 @@ function WhisperSeg(
 
     const [selectedInferenceModel, setSelectedInferenceModel] = useState('')
     const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('')
+
+    // Scroll Context
+    const { setScrollEnabled } = useScroll()
 
 
     const passShowModelsWindowToWhisperSeg = ( boolean) => {
@@ -166,6 +170,15 @@ function WhisperSeg(
         passCurrentlyTrainedModelsNamesToWhisperSeg(updatedModelsInTrainingQueue)
 
     }, [modelsCurrentlyTrained])
+
+    // When input window is open, disable scrolling, so users can use the arrow keys inside the input fields
+    useEffect(() => {
+        if (showModelsWindow) {
+            setScrollEnabled(false);
+        } else {
+            setScrollEnabled(true);
+        }
+    }, [showModelsWindow]);
 
     return (
         <>

@@ -1,5 +1,5 @@
 // React
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 // External dependencies
 import {nanoid} from 'nanoid';
@@ -15,6 +15,7 @@ import AddBoxIcon from "@mui/icons-material/AddBox.js";
 import Colorwheel from "./Colorwheel.jsx";
 import InputWindow from "./InputWindow.jsx";
 import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
+import {useScroll} from "./ScrollContext.jsx";
 import {
     Species,
     Individual,
@@ -51,6 +52,8 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
     const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
     const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
 
+    // Scroll Context
+    const { setScrollEnabled } = useScroll()
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -753,6 +756,17 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
 
+
+    /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
+
+    // When input window is open, disable scrolling, so users can use the arrow keys inside the input fields
+    useEffect(() => {
+        if (showSpeciesInputWindow) {
+            setScrollEnabled(false);
+        } else {
+            setScrollEnabled(true);
+        }
+    }, [showSpeciesInputWindow]);
 
     return (
         <div id="species-menu-container">

@@ -7,15 +7,15 @@ import {BrowserRouter} from "react-router-dom";
 
 // Internal dependencies
 import App from './App.jsx'
-import { ScrollProvider } from './ScrollContext.jsx'
+import { OpenWindowsProvider } from './OpenWindowsContext.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
       <BrowserRouter>
-          <ScrollProvider>
+          <OpenWindowsProvider>
             <App />
-          </ScrollProvider>
+          </OpenWindowsProvider>
       </BrowserRouter>
   </React.StrictMode>,
 )

@@ -21,7 +21,7 @@ import Track from "./Track.jsx";
 import GlobalConfig from "./GlobalConfig.jsx";
 import SpeciesMenu from "./SpeciesMenu.jsx";
 import LoadingCircle from './LoadingCircle.jsx';
-import { useScroll } from './ScrollContext.jsx';
+import { useOpenWindowsContext } from './OpenWindowsContext.jsx';
 import {
     Species,
     Individual,
@@ -116,7 +116,7 @@ function App() {
     // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
     const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
-    const { scrollEnabled } = useScroll(); // Get the scroll state from context
+    const { anyWindowsOpen } = useOpenWindowsContext(); // Get the scroll state from context
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -768,34 +768,29 @@ function App() {
     const checkIfAnyWindowIsOpen = () => {
         const individualOrClusternameWindowOpen = speciesArray.find(speciesObj => {
             if (speciesObj.showClusternameInputWindow || speciesObj.showIndividualInputWindow){
-                console.log(speciesObj)
                 return true
             }
         })
-        return individualOrClusternameWindowOpen
+        return individualOrClusternameWindowOpen || showGlobalConfigWindow || anyWindowsOpen
     }
-
-    // 1. Make all checks inside checkIfAnyWindowIsOpen
-    // Split toggle function into 2 seperate functions
-    // Remofe species frequencies
 
     // Set up arrow key event handlers
     useEffect(() => {
         function handleKeyDown(event) {
-            if (event.key === 'ArrowLeft' && !leftArrowKeyPressed && !showGlobalConfigWindow && scrollEnabled && !checkIfAnyWindowIsOpen()) {
+            if (event.key === 'ArrowLeft' && !leftArrowKeyPressed && !checkIfAnyWindowIsOpen()) {
                 setLeftArrowKeyPressed(true);
             }
-            if (event.key === 'ArrowRight' && !rightArrowKeyPressed && !showGlobalConfigWindow && scrollEnabled && !checkIfAnyWindowIsOpen()) {
+            if (event.key === 'ArrowRight' && !rightArrowKeyPressed && !checkIfAnyWindowIsOpen()) {
                 setRightArrowKeyPressed(true);
             }
         }
 
         function handleKeyUp(event) {
-            if (event.key === 'ArrowLeft' && leftArrowKeyPressed && !showGlobalConfigWindow && scrollEnabled && !checkIfAnyWindowIsOpen()) {
+            if (event.key === 'ArrowLeft' && leftArrowKeyPressed && !checkIfAnyWindowIsOpen()) {
                 setLeftArrowKeyPressed(false);
                 leftScroll();
             }
-            if (event.key === 'ArrowRight' && rightArrowKeyPressed && !showGlobalConfigWindow && scrollEnabled && !checkIfAnyWindowIsOpen()) {
+            if (event.key === 'ArrowRight' && rightArrowKeyPressed && !checkIfAnyWindowIsOpen()) {
                 setRightArrowKeyPressed(false);
                 rightScroll();
             }
@@ -808,11 +803,11 @@ function App() {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [leftArrowKeyPressed, rightArrowKeyPressed, leftScroll, rightScroll, scrollEnabled]);
+    }, [leftArrowKeyPressed, rightArrowKeyPressed, leftScroll, rightScroll, anyWindowsOpen, showGlobalConfigWindow, speciesArray]);
 
     return (
         <>
-            Hey: {scrollEnabled.toString()}
+            Hey: {anyWindowsOpen.toString()}
             <ToastContainer />
             <SpeciesMenu
                 speciesArray={speciesArray}

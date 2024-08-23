@@ -32,7 +32,7 @@ import Parameters from "./Parameters.jsx"
 import WhisperSeg from "./WhisperSeg.jsx"
 import LabelWindow from "./LabelWindow.jsx";
 import LocalFileUpload from "./LocalFileUpload.jsx";
-import { useScroll } from './ScrollContext.jsx'; // Adjust path as necessary
+import { useOpenWindowsContext } from './OpenWindowsContext.jsx'; // Adjust path as necessary
 import {Label} from "./label.js"
 import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
 import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./buttonStyles.js"
@@ -181,7 +181,7 @@ function Track(
     const activeIconBtnStyle = showWaveform ? iconBtn : iconBtnSmall
 
     // Scroll Context
-    const { setScrollEnabled } = useScroll();
+    const { setAnyWindowsOpen } = useOpenWindowsContext();
 
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
@@ -2303,9 +2303,9 @@ function Track(
     // When input window is open, disable scrolling, so users can use the arrow keys inside the input fields
     useEffect(() => {
         if (showLocalConfigWindow || expandedLabel) {
-            setScrollEnabled(false);
+            setAnyWindowsOpen(true);
         } else {
-            setScrollEnabled(true);
+            setAnyWindowsOpen(false);
         }
     }, [showLocalConfigWindow, expandedLabel]);
 

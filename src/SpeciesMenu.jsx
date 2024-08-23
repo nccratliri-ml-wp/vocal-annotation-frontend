@@ -15,7 +15,7 @@ import AddBoxIcon from "@mui/icons-material/AddBox.js";
 import Colorwheel from "./Colorwheel.jsx";
 import InputWindow from "./InputWindow.jsx";
 import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
-import {useScroll} from "./ScrollContext.jsx";
+import {useOpenWindowsContext} from "./OpenWindowsContext.jsx";
 import {
     Species,
     Individual,
@@ -53,7 +53,7 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
     const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
 
     // Scroll Context
-    const { setScrollEnabled } = useScroll()
+    const { setAnyWindowsOpen } = useOpenWindowsContext()
 
     /* ++++++++++++++++++++ Species ++++++++++++++++++++ */
 
@@ -762,9 +762,9 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
     // When input window is open, disable scrolling, so users can use the arrow keys inside the input fields
     useEffect(() => {
         if (showSpeciesInputWindow) {
-            setScrollEnabled(false);
+            setAnyWindowsOpen(true);
         } else {
-            setScrollEnabled(true);
+            setAnyWindowsOpen(false);
         }
     }, [showSpeciesInputWindow]);
 

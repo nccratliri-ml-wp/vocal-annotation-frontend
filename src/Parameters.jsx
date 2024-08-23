@@ -82,9 +82,7 @@ function Parameters(
 
     return (
         <Draggable cancel='.local-parameters-window-content'>
-            <div
-                className="local-parameters-config-panel"
-            >
+            <div className="local-parameters-config-panel">
                 <div className='close-btn-container'>
                     <button className='close-btn' onClick={() => passShowLocalConfigWindowToTrack(false)}>✖
                     </button>
@@ -193,9 +191,9 @@ function Parameters(
                         </label>
                     </div>
 
-                    <div className={'local-config-window-label'}>
+                    <div className={'local-config-window-buttons-container'}>
                         <button onClick={() => passShowLocalConfigWindowToTrack(false)}>Cancel</button>
-                        <button disabled={!spectrogram} onClick={handleSubmit}>Submit</button>
+                        <button disabled={!spectrogram || strictMode} onClick={handleSubmit}>Submit</button>
                     </div>
 
                 </div>

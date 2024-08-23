@@ -347,7 +347,7 @@ html, body {
   left: 40%;
   z-index: 4;
   width: 300px;
-  height: 245px;
+  height: auto;
   border: 2px solid #ffffff;
   border-radius: 5px;
   background: #082536;
@@ -364,6 +364,12 @@ html, body {
   flex-direction: column;
   align-items: flex-end;
   margin: 20px 0 20px 0;
+}
+
+.local-config-window-buttons-container{
+  display: flex;
+  justify-content: space-between;
+  margin: 7px 7px 7px;
 }
 
 .local-parameters-window-content > div > label > input{

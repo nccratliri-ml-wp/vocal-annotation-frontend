@@ -807,7 +807,6 @@ function App() {
 
     return (
         <>
-            Hey: {anyWindowsOpen.toString()}
             <ToastContainer />
             <SpeciesMenu
                 speciesArray={speciesArray}

@@ -39,13 +39,11 @@ const ANNOTATED_AREA_COLOR = '#33c220'
 /* ++++++++++++++++++ Class definitions ++++++++++++++++++ */
 
 class Species {
-    constructor(id, name, individuals, clusternames, minFreq=null, maxFreq=null ) {
+    constructor(id, name, individuals, clusternames) {
         this.id = id
         this.name = name
         this.individuals = individuals
         this.clusternames = clusternames
-        this.minFreq = minFreq
-        this.maxFreq = maxFreq
         this.showIndividualInputWindow = false
         this.showClusternameInputWindow = false
     }

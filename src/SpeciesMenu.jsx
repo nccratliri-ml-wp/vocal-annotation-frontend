@@ -14,7 +14,6 @@ import AddBoxIcon from "@mui/icons-material/AddBox.js";
 // Internal dependencies
 import Colorwheel from "./Colorwheel.jsx";
 import InputWindow from "./InputWindow.jsx";
-import FrequencyRangeWindow from "./FrequencyRangeWindow.jsx";
 import {useOpenWindowsContext} from "./OpenWindowsContext.jsx";
 import {
     Species,
@@ -49,7 +48,6 @@ import {
 function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToApp, strictMode }) {
 
     const [showSpeciesInputWindow, setShowSpeciesInputWindow] = useState(false)
-    const [showSpeciesFrequencyRangeWindow, setShowSpeciesFrequencyRangeWindow] = useState(false)
     const [globalMouseCoordinates, setGlobalMouseCoordinates] = useState(null)
 
     // Scroll Context
@@ -78,8 +76,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                 speciesObject.name,
                 [...updatedIndividuals],
                 [...updatedClusternames],
-                speciesObject.minFreq,
-                speciesObject.maxFreq
             )
         })
 
@@ -135,8 +131,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     editedSpeciesName,
                     speciesObject.individuals,
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -145,29 +139,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
 
         passSpeciesArrayToApp(modifiedSpeciesArray)
     }
-
-    const assignFrequencyRange = (event, newMinFreq, newMaxFreq, selectedSpeciesID) => {
-        event.preventDefault()
-
-        const modifiedSpeciesArray = speciesArray.map( speciesObj => {
-            if (speciesObj.id === selectedSpeciesID){
-                return new Species(
-                    speciesObj.id,
-                    speciesObj.name,
-                    speciesObj.individuals,
-                    speciesObj.clusternames,
-                    newMinFreq,
-                    newMaxFreq
-                )
-            } else {
-                return speciesObj
-            }
-        })
-
-        passSpeciesArrayToApp(modifiedSpeciesArray)
-        setShowSpeciesFrequencyRangeWindow(false)
-    }
-
 
     /* ++++++++++++++++++++ Individuals ++++++++++++++++++++ */
 
@@ -196,8 +167,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                         speciesObject.name,
                         [...updatedIndividuals],
                         [...updatedClusternames],
-                        speciesObject.minFreq,
-                        speciesObject.maxFreq
                     )
                 }
 
@@ -209,8 +178,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals, new Individual(nanoid(),newIndividualName)],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -222,8 +189,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             }
         })
@@ -260,8 +225,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -301,8 +264,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
 
             } else {
@@ -331,8 +292,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -343,8 +302,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             }
         })
@@ -381,8 +338,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                         speciesObject.name,
                         [...updatedIndividuals],
                         [...updatedClusternames],
-                        speciesObject.minFreq,
-                        speciesObject.maxFreq
                     )
                 }
 
@@ -397,8 +352,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames, new Clustername(nanoid(), newClusternameName, randomColor)],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -409,8 +362,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             }
         })
@@ -447,8 +398,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -488,8 +437,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
 
             } else {
@@ -518,8 +465,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 //Deactivate existing clusternames and individuals of all other species
@@ -530,8 +475,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     [...updatedIndividuals],
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             }
         })
@@ -567,8 +510,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
 
             } else {
@@ -586,8 +527,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             }
         })
@@ -616,8 +555,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
 
             } else {
@@ -648,8 +585,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     [...updatedClusternames],
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
             } else {
                 return speciesObject
@@ -673,7 +608,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
     const handleCancel = (event) => {
         event.preventDefault()
         setShowSpeciesInputWindow(false)
-        setShowSpeciesFrequencyRangeWindow(false)
     }
 
     const toggleClusternameInputWindow = (event, selectedID) => {
@@ -690,8 +624,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = !speciesObject.showClusternameInputWindow
@@ -704,8 +636,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -730,8 +660,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = !speciesObject.showIndividualInputWindow
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -744,8 +672,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                     speciesObject.name,
                     speciesObject.individuals,
                     speciesObject.clusternames,
-                    speciesObject.minFreq,
-                    speciesObject.maxFreq
                 )
                 updatedSpeciesObject.showIndividualInputWindow = false
                 updatedSpeciesObject.showClusternameInputWindow = false
@@ -802,25 +728,6 @@ function SpeciesMenu ({speciesArray, passSpeciesArrayToApp, passDeletedItemIDToA
                             >
                                 <legend>
                                     {species.name === UNKNOWN_SPECIES ? `${UNKNOWN_SPECIES} Species` : species.name}
-                                    {/*
-                                    species.name !== UNKNOWN_SPECIES &&
-                                        <IconButton
-                                            style={iconBtnSmallest}
-                                            onClick={() => setShowSpeciesFrequencyRangeWindow(species.id)}
-                                        >
-                                            <BarChartIcon style={iconSmall}/>
-                                        </IconButton>
-                                    */}
-                                    {
-                                        showSpeciesFrequencyRangeWindow === species.id &&
-                                        <FrequencyRangeWindow
-                                            handleCancel={handleCancel}
-                                            speciesID={species.id}
-                                            minFreq={species.minFreq}
-                                            maxFreq={species.maxFreq}
-                                            assignFrequencyRange={assignFrequencyRange}
-                                        />
-                                    }
                                     {!strictMode &&
                                         <IconButton
                                             style={iconBtnSmallest}

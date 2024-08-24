@@ -2071,7 +2071,7 @@ function Track(
 
         ctx.strokeStyle = FREQUENCY_LINES_COLOR
         ctx.fillStyle = FREQUENCY_LINES_COLOR
-        ctx.lineWidth = 2
+        ctx.lineWidth = 1.5
         const triangleHeight = 7
 
         // Draw Max Frequency

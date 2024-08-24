@@ -88,6 +88,10 @@ function App() {
     const [strictMode, setStrictMode] = useState(false)
     const [annotationInstance, setAnnotationInstance] = useState(null)
 
+    // Audio upload
+    const [filesUploading, setFilesUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
@@ -103,10 +107,6 @@ function App() {
         return [newSpecies, annotatedAreaLabel]
     })
     const [deletedItemID, setDeletedItemID] = useState(null)
-
-    // Audio upload
-    const [filesUploading, setFilesUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
 
     // WhisperSeg
     const [tokenInference, setTokenInference] = useState('')

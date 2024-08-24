@@ -126,7 +126,7 @@ function Track(
     // Time Axis
     const timeAxisRef = useRef(null);
 
-    // Overview Window
+    // Overview Bar
     const overviewRef = useRef(null)
     let newViewportStartFrame = null
     let newViewportEndFrame = null

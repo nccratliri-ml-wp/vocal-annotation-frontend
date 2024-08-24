@@ -1339,8 +1339,8 @@ function Track(
         const allIndividualIDs = getAllIndividualIDs(speciesArray)
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
-        const newMinFreq = getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
-        const newMaxFreq = getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+        const newMinFreq = showFrequencyLines ? getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies) : ''
+        const newMaxFreq = showFrequencyLines ? getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies) : ''
 
         const newLabel = new Label(
             nanoid(),
@@ -1509,8 +1509,11 @@ function Track(
         return genericLabelObjectsArray.map( label => {
 
             // WhisperSeg currently doesn't support Frequency Annotation, so if the imported label has no frequency, assign the current min and max frequency line to it
-            const newMinFreq = label.minFreq ? label.minFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
-            const newMaxFreq = label.maxFreq ? label.maxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+            //const newMinFreq = label.minFreq ? label.minFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
+            //const newMaxFreq = label.maxFreq ? label.maxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+            const newMinFreq = label.minFreq ? label.minFreq : ''
+            const newMaxFreq = label.maxFreq ? label.maxFreq : ''
+
 
             // Create a new Label object with the imported values
             const updatedLabel = new Label(
@@ -2128,7 +2131,6 @@ function Track(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawAllCanvases(spectrogram, frequencies, audioArray)
-        console.log('ran this')
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks

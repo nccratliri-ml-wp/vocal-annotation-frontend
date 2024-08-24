@@ -87,8 +87,13 @@ function WhisperSeg(
             setModelsAvailableForFinetuning(finetuneModels)
             setModelsCurrentlyTrained(currentlyTrainedModels)
 
-            setSelectedInferenceModel(inferenceModels[0].model_name)
-            setSelectedFinetuningModel(finetuneModels[0].model_name)
+            // Set first model in list as default model
+            if (selectedInferenceModel === ''){
+                setSelectedInferenceModel(inferenceModels[0]?.model_name)
+            }
+            if (selectedFinetuningModel === ''){
+                setSelectedFinetuningModel(finetuneModels[0]?.model_name)
+            }
 
         } catch (error) {
             toast.error('An error occurred trying to access the WhisperSeg API. Check the console for more information')

@@ -760,7 +760,7 @@ function Track(
             drawIndividualsCanvas()
             labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
             drawAllLabels()
-            drawFrequencyLines()
+            drawFrequencyLines(frequenciesArray)
             drawPlayhead(playheadRef.current.timeframe)
         })
         image.src = `data:image/png;base64,${spectrogram}`;
@@ -1322,7 +1322,7 @@ function Track(
         waveformCTX.putImageData(waveformImgData.current, 0, 0)
 
         drawAllLabels()
-        drawFrequencyLines()
+        drawFrequencyLines(frequencies)
         drawPlayhead(currentPlayheadTime)
     }
 
@@ -2063,7 +2063,7 @@ function Track(
         return Math.round(frequenciesArray[index])
     }
 
-    const drawFrequencyLines = () => {
+    const drawFrequencyLines = (frequenciesArray) => {
         if (!showFrequencyLines) return
 
         const cvs = specCanvasRef.current
@@ -2078,7 +2078,7 @@ function Track(
         let x1 = 0
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
-        const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
+        const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequenciesArray)} Hz`
 
         ctx.beginPath()
         ctx.moveTo(x1, y)
@@ -2102,7 +2102,7 @@ function Track(
         x1 = 0
         x2 = cvs.width
         y = frequencyLines.minFreqY
-        const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequencies)} Hz`
+        const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequenciesArray)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
@@ -2128,6 +2128,7 @@ function Track(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawAllCanvases(spectrogram, frequencies, audioArray)
+        console.log('ran this')
     }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
 
     // When a user adds a new label, thus creating a new active label in the other tracks

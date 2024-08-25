@@ -6,6 +6,8 @@
 
 ![](src/assets/demo.png)
 
+## 🦜[Live Demo](http://annotation.evolvinglanguage.ch/)🐒
+
 ## About this App
 
 This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. It is the frontend of a full-stack application ([view its sister repo with the backend here](https://github.com/nianlonggu/human-in-the-loop-annotation-backend)).

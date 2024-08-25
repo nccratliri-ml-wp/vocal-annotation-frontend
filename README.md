@@ -1,7 +1,6 @@
 # Audio Annotation Web Interface
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Contributors](https://img.shields.io/github/contributors/AlonCohen96/react-annotation-interface)
 ![React](https://shields.io/badge/react-black?logo=react&style=for-the-badge)
 
 ![](src/assets/demo.png)
@@ -10,7 +9,9 @@
 
 ## About this App
 
-This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. It is the frontend of a full-stack application ([view its sister repo with the backend here](https://github.com/nianlonggu/human-in-the-loop-annotation-backend)).
+This audio annotation web interface offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations.
+It is the frontend part of a full-stack application which was created as part of a [NCCR](https://www.liri.uzh.ch/en/services/collab/nccr.html) research project. 
+It was written by [Alon Cohen](https://github.com/AlonCohen96/) and [Nianlong Gu](https://github.com/nianlonggu).
 Below are some core features:
 
 **Rich Annotation:** Annotate onset, offset, species, individual and vocalization type as well as frequency range of a vocalization.

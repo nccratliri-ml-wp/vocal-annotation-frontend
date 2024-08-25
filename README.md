@@ -53,7 +53,7 @@ npm run dev
 npm run build
 ```
 ## Set up the backend
-Go over to [backend repo](https://github.com/nianlonggu/human-in-the-loop-annotation-backend) and follow the installation guide there.  
+Go over to the [backend repo](https://github.com/nianlonggu/human-in-the-loop-annotation-backend) and follow the installation guide there.  
 Back in the frontend folder, navigate to or create your .env file, and add the following line:
 ```
 VITE_BACKEND_SERVICE_ADDRESS=http://localhost:8050/

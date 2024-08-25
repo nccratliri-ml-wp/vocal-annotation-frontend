@@ -13,8 +13,6 @@ This audio annotation web interface offers an interactive user interface to simp
 It is the frontend part of a full-stack application which was created as part of a [NCCR](https://www.liri.uzh.ch/en/services/collab/nccr.html) research project. 
 It was written by [Alon Cohen](https://github.com/AlonCohen96/) and [Nianlong Gu](https://github.com/nianlonggu).
 
----
-
 ## Features
 
 **Rich Annotation:** Annotate onset, offset, species, individual and vocalization type as well as frequency range of a vocalization.

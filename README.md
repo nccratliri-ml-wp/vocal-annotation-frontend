@@ -1,12 +1,19 @@
-# React Web Annotation Interface
+# Audio Annotation Web Interface
+
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Contributors](https://img.shields.io/github/contributors/AlonCohen96/react-annotation-interface)
+![React](https://shields.io/badge/react-black?logo=react&style=for-the-badge)
 
 ![](src/assets/demo.png)
 
 ## About this App
 
-This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. Below are some of the core features:
+This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. It is the frontend of a full-stack application ([view its sister repo with the backend here](https://github.com/nianlonggu/human-in-the-loop-annotation-backend)).
+Below are some core features:
 
-**Multiple Audio Tracks:** Handle and analyze multiple audio tracks simultaneously.
+**Rich Annotation:** Annotate onset, offset, species, individual and vocalization type as well as frequency range of a vocalization.
+
+**Multichannel support:** Handle and analyze multiple audio tracks simultaneously. Arrange or hide tracks freely. Multichannel audio will be split into separate tracks automatically.
 
 **Spectrogram, Waveform, and Frequency Display:** Visualize audio data through spectrogram, waveform, and frequency displays.
 
@@ -22,13 +29,13 @@ This repository was created as part of an ongoing NCCR research project and offe
 
 **Import and Export Data as CSV File:** Easily import and export annotation data in CSV format for compatibility with other tools and analysis.
 
-**AI Annotation Support with WhisperSeg:** Utilize the WhisperSeg AI tool to automate annotation tasks.
+**AI Annotation Support with WhisperSeg:** Utilize the WhisperSeg AI tool to automate annotation tasks, train and finetune custom models.
 
 ## Installation
 
 1. Fork the repository to your local machine.
 2. Navigate to the project directory react-annotation-interface.
-3. run the following command in the terminal to install dependencies:
+3. Run the following command in the terminal to install dependencies:
 ```
 npm install
 ```

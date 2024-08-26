@@ -116,7 +116,9 @@ function App() {
     // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
     const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
-    const { anyWindowsOpen } = useOpenWindowsContext(); // Get the scroll state from context
+
+    // Keep track of Open Windows
+    const { anyWindowsOpen } = useOpenWindowsContext()
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 

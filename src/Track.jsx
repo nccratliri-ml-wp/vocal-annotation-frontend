@@ -53,6 +53,14 @@ const ACTIVE_LABEL_COLOR = '#ffffff'
 const TIME_AXIS_COLOR = '#9db4c0'
 const WAVEFORM_COLOR = '#ddd8ff'
 
+const OVERVIEW_CVS_HEIGHT = 40
+const TIMEAXIS_CVS_HEIGHT = 40
+const WAVEFORM_CVS_HEIGHT = 60
+const SPEC_CVS_HEIGHT = 120
+const FREQ_CVS_HEIGHT = 140
+const TRACK_SIDEBAR_WIDTH = 200
+const FREQ_CVS_WIDTH = 40
+
 function Track(
                         {
                             trackID,
@@ -98,7 +106,7 @@ function Track(
 
     // General
     const [audioId, setAudioId] = useState(trackData.audioID)
-    const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200)
+    const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - TRACK_SIDEBAR_WIDTH)
     const resizeTimeoutRef = useRef(null)
 
     // Spectrogram
@@ -107,11 +115,14 @@ function Track(
     const [spectrogram, setSpectrogram] = useState(trackData.spectrogram)
 
     // Frequency
-    const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const frequenciesCanvasRef = useRef(null)
+    const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
-    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: 120})
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: SPEC_CVS_HEIGHT})
     let draggedFrequencyLinesObject = null
+
+    // Labels and Individuals Canvases
+    const [showLabelAndIndividualsCanvas, setShowLabelAndIndividualsCanvas] = useState(true)
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
@@ -119,13 +130,12 @@ function Track(
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
     const numberOfIndividuals = speciesArray.reduce((total, speciesObj) => total + speciesObj.individuals.length, 0)
-    const [showLabelAndIndividualsCanvas, setShowLabelAndIndividualsCanvas] = useState(true)
 
     // Time Axis and Overview Container
     const overviewTimeAxisContainerRef = useRef(null)
 
     // Time Axis
-    const timeAxisRef = useRef(null);
+    const timeAxisRef = useRef(null)
 
     // Overview Window
     const overviewRef = useRef(null)
@@ -721,7 +731,7 @@ function Track(
 
     const updateCanvasWidth = () => {
         if (!specCanvasRef.current) return
-        setCanvasWidth(window.innerWidth - 200)
+        setCanvasWidth(window.innerWidth - TRACK_SIDEBAR_WIDTH)
     }
 
     const handleWindowResize = () => {
@@ -1933,7 +1943,7 @@ function Track(
 
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
-        canvas.width = parent.innerWidth - 200
+        canvas.width = parent.innerWidth - TRACK_SIDEBAR_WIDTH
 
         const centerY = canvas.height / 2
         const ratio = Math.min((trackData.audioDuration - currentStartTime) / globalClipDuration, 1)
@@ -2324,8 +2334,8 @@ function Track(
                     <canvas
                         className='overview-canvas'
                         ref={overviewRef}
-                        width={parent.innerWidth - 200}
-                        height={40}
+                        width={parent.innerWidth - TRACK_SIDEBAR_WIDTH}
+                        height={OVERVIEW_CVS_HEIGHT}
                         onMouseDown={handleLMBDownOverview}
                         onMouseMove={hoverViewportFrame}
                     />
@@ -2340,8 +2350,8 @@ function Track(
                     <canvas
                         className='time-axis-canvas'
                         ref={timeAxisRef}
-                        width={parent.innerWidth - 200}
-                        height={40}
+                        width={parent.innerWidth - TRACK_SIDEBAR_WIDTH}
+                        height={TIMEAXIS_CVS_HEIGHT}
                         onContextMenu={(event) => event.preventDefault()}
                     />
                 </div>
@@ -2512,14 +2522,14 @@ function Track(
                             <canvas
                                 className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
                                 ref={frequenciesCanvasRef}
-                                width={40}
-                                height={showWaveform ? 140 : 120}
+                                width={FREQ_CVS_WIDTH}
+                                height={showWaveform ? FREQ_CVS_HEIGHT : SPEC_CVS_HEIGHT}
                             />
                         </div>
                         <canvas
                             className={showLabelAndIndividualsCanvas ? 'individuals-canvas' : 'hidden'}
                             ref={individualsCanvasRef}
-                            width={200}
+                            width={TRACK_SIDEBAR_WIDTH}
                             height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
                         />
                     </div>
@@ -2530,7 +2540,7 @@ function Track(
                             className={showWaveform ? 'waveform-canvas' : 'hidden'}
                             ref={waveformCanvasRef}
                             width={canvasWidth}
-                            height={60}
+                            height={WAVEFORM_CVS_HEIGHT}
                             onMouseDown={handleLMBDown}
                             onMouseUp={handleMouseUp}
                             onContextMenu={handleRightClick}
@@ -2540,7 +2550,7 @@ function Track(
                             className='spec-canvas'
                             ref={specCanvasRef}
                             width={canvasWidth}
-                            height={120}
+                            height={SPEC_CVS_HEIGHT}
                             onMouseDown={handleLMBDown}
                             onMouseUp={handleMouseUp}
                             onContextMenu={handleRightClick}

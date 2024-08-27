@@ -116,7 +116,9 @@ function App() {
     // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
     const [rightArrowKeyPressed, setRightArrowKeyPressed] = useState(false)
-    const { anyWindowsOpen } = useOpenWindowsContext(); // Get the scroll state from context
+
+    // Keep track of Open Windows
+    const { anyWindowsOpen } = useOpenWindowsContext()
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -643,7 +645,8 @@ function App() {
         }
 
         const getMetaDataFromHashID = async () => {
-            const path = `/api/metadata/${hashID}`
+            //const path = `/api/metadata/${hashID}`
+            const path = 'http://localhost:8050/metadata/hash_id'
 
             try {
                 const response = await axios.get(path)

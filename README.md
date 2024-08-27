@@ -1,12 +1,23 @@
-# React Web Annotation Interface
+# Audio Annotation Web Interface
+
+![License](https://img.shields.io/badge/license-MIT-blue)
+![React](https://shields.io/badge/react-black?logo=react&style=for-the-badge)
 
 ![](src/assets/demo.png)
 
+## 🦜[Live Demo](http://annotation.evolvinglanguage.ch/)🐒
+
 ## About this App
 
-This repository was created as part of an ongoing NCCR research project and offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations. Below are some of the core features:
+This audio annotation web interface offers an interactive user interface to simplify the annotation process for both human speech and animal vocalizations.
+It is the frontend part of a full-stack application which was created as part of a [NCCR](https://www.liri.uzh.ch/en/services/collab/nccr.html) research project. 
+It was written by [Alon Cohen](https://github.com/AlonCohen96/) and [Nianlong Gu](https://github.com/nianlonggu).
 
-**Multiple Audio Tracks:** Handle and analyze multiple audio tracks simultaneously.
+## Features
+
+**Rich Annotation:** Annotate onset, offset, species, individual and vocalization type as well as frequency range of a vocalization.
+
+**Multichannel support:** Handle and analyze multiple audio tracks simultaneously. Arrange or hide tracks freely. Multichannel audio will be split into separate tracks automatically.
 
 **Spectrogram, Waveform, and Frequency Display:** Visualize audio data through spectrogram, waveform, and frequency displays.
 
@@ -22,13 +33,13 @@ This repository was created as part of an ongoing NCCR research project and offe
 
 **Import and Export Data as CSV File:** Easily import and export annotation data in CSV format for compatibility with other tools and analysis.
 
-**AI Annotation Support with WhisperSeg:** Utilize the WhisperSeg AI tool to automate annotation tasks.
+**AI Annotation Support with WhisperSeg:** Utilize the WhisperSeg AI tool to automate annotation tasks, train and finetune custom models.
 
 ## Installation
 
 1. Fork the repository to your local machine.
 2. Navigate to the project directory react-annotation-interface.
-3. run the following command in the terminal to install dependencies:
+3. Run the following command in the terminal to install dependencies:
 ```
 npm install
 ```
@@ -43,3 +54,11 @@ npm run dev
 ```
 npm run build
 ```
+## Set up the backend
+Go over to the [backend repo](https://github.com/nianlonggu/human-in-the-loop-annotation-backend) and follow the installation guide there.  
+Back in the frontend folder, navigate to or create your .env file, and add the following line:
+```
+VITE_BACKEND_SERVICE_ADDRESS=http://localhost:8050/
+```
+
+If necessary, replace 8050 with the port in which you are running the backend on your local machine.

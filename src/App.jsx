@@ -470,7 +470,6 @@ function App() {
     async function processAudioFilesSequentially(audioFilesArray){
         const loadingProgressStep = 100 / audioFilesArray.length;
 
-        //setFilesUploading(true)
         setUploadProgress(0)
 
         const allResponses = []
@@ -646,8 +645,6 @@ function App() {
         }
 
         const getMetaDataFromHashID = async () => {
-            //const path = `/api/metadata/${hashID}`
-            //const path = 'http://localhost:8050/metadata/hash_id'
             const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/metadata/${hashID}`
 
             try {

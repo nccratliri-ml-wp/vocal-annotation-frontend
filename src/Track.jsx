@@ -312,7 +312,7 @@ function Track(
 
     const handleUploadError = (error) => {
         setSpectrogramIsLoading( false )
-        toast.error('Error while uploading. Check the console for more information.')
+        toast.error('Error while uploading. Check the console for more information.', {autoClose: false})
         console.error("Error uploading file:", error)
 
     }

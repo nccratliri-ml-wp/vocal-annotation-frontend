@@ -646,7 +646,8 @@ function App() {
 
         const getMetaDataFromHashID = async () => {
             //const path = `/api/metadata/${hashID}`
-            const path = 'http://localhost:8050/metadata/hash_id'
+            //const path = 'http://localhost:8050/metadata/hash_id'
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'metadata/hash_id'
 
             try {
                 const response = await axios.get(path)

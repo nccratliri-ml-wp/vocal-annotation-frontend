@@ -470,7 +470,7 @@ function App() {
     async function processAudioFilesSequentially(audioFilesArray){
         const loadingProgressStep = 100 / audioFilesArray.length;
 
-        setFilesUploading(true)
+        //setFilesUploading(true)
         setUploadProgress(0)
 
         const allResponses = []
@@ -642,12 +642,13 @@ function App() {
 
         if (strictMode?.toLowerCase() === 'true'){
             setStrictMode(true)
+            setFilesUploading(true)
         }
 
         const getMetaDataFromHashID = async () => {
             //const path = `/api/metadata/${hashID}`
             //const path = 'http://localhost:8050/metadata/hash_id'
-            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'metadata/hash_id'
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/metadata/${hashID}`
 
             try {
                 const response = await axios.get(path)
@@ -669,7 +670,8 @@ function App() {
 
             } catch (error){
                 console.error("Error trying to access metadata through Hash ID:", error)
-                toast.error('Error while trying to access the database. Check the console for more information.')
+                toast.error('Error while trying to access the database. Check the console for more information.', {autoClose: false})
+                setFilesUploading(false)
             }
         }
 

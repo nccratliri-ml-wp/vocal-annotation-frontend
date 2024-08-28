@@ -1518,9 +1518,7 @@ function Track(
         // Iterate over the imported labels array
         return genericLabelObjectsArray.map( label => {
 
-            // WhisperSeg currently doesn't support Frequency Annotation, so if the imported label has no frequency, assign the current min and max frequency line to it
-            //const newMinFreq = label.minFreq ? label.minFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies)
-            //const newMaxFreq = label.maxFreq ? label.maxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+            // WhisperSeg currently doesn't support Frequency Annotation, so if the imported label has no frequency, assign empty string
             const newMinFreq = label.minFreq ? label.minFreq : ''
             const newMaxFreq = label.maxFreq ? label.maxFreq : ''
 
@@ -2084,7 +2082,7 @@ function Track(
 
         ctx.strokeStyle = FREQUENCY_LINES_COLOR
         ctx.fillStyle = FREQUENCY_LINES_COLOR
-        ctx.lineWidth = 1.5
+        ctx.lineWidth = 1
         const triangleHeight = 7
 
         // Draw Max Frequency

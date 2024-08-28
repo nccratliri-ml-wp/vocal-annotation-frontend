@@ -1,5 +1,5 @@
 // React
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 // External dependencies
 import axios from "axios";
@@ -43,8 +43,10 @@ function WhisperSeg(
     const [modelsCurrentlyTrained, setModelsCurrentlyTrained] = useState()
     const [currentlyTrainedModelsNames, setCurrentlyTrainedModelsNames] = useState([])
 
-    const [selectedInferenceModel, setSelectedInferenceModel] = useState('')
-    const [selectedFinetuningModel, setSelectedFinetuningModel] = useState('')
+    const [selectedInferenceModel, setSelectedInferenceModel] = useState(null)
+    const [selectedFinetuningModel, setSelectedFinetuningModel] = useState(null)
+    const selectedInferenceModelRef = useRef(null)
+    const selectedFinetuningModelRef = useRef(null)
 
     // Scroll Context
     const { setAnyWindowsOpen } = useOpenWindowsContext()
@@ -88,10 +90,10 @@ function WhisperSeg(
             setModelsCurrentlyTrained(currentlyTrainedModels)
 
             // Set first model in list as default model
-            if (selectedInferenceModel === ''){
+            if (!selectedInferenceModelRef.current){
                 setSelectedInferenceModel(inferenceModels[0]?.model_name)
             }
-            if (selectedFinetuningModel === ''){
+            if (!selectedFinetuningModelRef.current){
                 setSelectedFinetuningModel(finetuneModels[0]?.model_name)
             }
 
@@ -142,7 +144,7 @@ function WhisperSeg(
 
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
-    // When user clicks on CallWhisperSeg button
+    // When user clicks on CallWhisperSeg icon
     useEffect(() => {
         // Get Models immediately
         getAllModels()
@@ -155,6 +157,12 @@ function WhisperSeg(
         // Clean up the interval on component unmount
         return () => clearInterval(interval)
     }, [showModelsWindow])
+
+    // Keep Ref values up-to-date
+    useEffect( () => {
+        selectedInferenceModelRef.current = selectedInferenceModel
+        selectedFinetuningModelRef.current = selectedFinetuningModel
+    }, [selectedInferenceModel, selectedFinetuningModel])
 
     // When currently trained models change, check if a new model has finished training and display a pop-up
     useEffect( () => {

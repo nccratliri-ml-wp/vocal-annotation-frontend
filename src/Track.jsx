@@ -2083,20 +2083,23 @@ function Track(
 
         ctx.strokeStyle = FREQUENCY_LINES_COLOR
         ctx.fillStyle = FREQUENCY_LINES_COLOR
-        ctx.lineWidth = 1
+        ctx.lineWidth = 1.5
         const triangleHeight = 7
+
+        // Determine if there is enough space between the frequency lines to display the frequencies as the correct position
+        const enoughSpaceBetweenLines = frequencyLines.minFreqY - frequencyLines.maxFreqY > 22
 
         // Draw Max Frequency
         let x1 = 0
         let x2 = cvs.width
         let y = frequencyLines.maxFreqY
+        let textY = enoughSpaceBetweenLines ? y + 10 : y - 10
         const currentMaxFreq = `${getFrequencyAtYPosition(y, cvs.height, frequenciesArray)} Hz`
-
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
         ctx.stroke()
-        ctx.fillText(currentMaxFreq, 0, frequencyLines.maxFreqY + 10)
+        ctx.fillText(currentMaxFreq, 0, textY)
 
         // Draw Top Triangle
         x1 = 5
@@ -2114,12 +2117,13 @@ function Track(
         x1 = 0
         x2 = cvs.width
         y = frequencyLines.minFreqY
+        textY = enoughSpaceBetweenLines ? y - 4 : y + 17
         const currentMinFreq = `${getFrequencyAtYPosition(y, cvs.height, frequenciesArray)} Hz`
         ctx.beginPath()
         ctx.moveTo(x1, y)
         ctx.lineTo(x2, y)
         ctx.stroke()
-        ctx.fillText(currentMinFreq, 0, frequencyLines.minFreqY - 4)
+        ctx.fillText(currentMinFreq, 0, textY)
 
         // Draw Bottom Triangle
         x1 = 5

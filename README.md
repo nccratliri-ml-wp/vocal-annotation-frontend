@@ -21,11 +21,9 @@ It was written by [Alon Cohen](https://github.com/AlonCohen96/) and [Nianlong Gu
 
 **Spectrogram, Waveform, and Frequency Display:** Visualize audio data through spectrogram, waveform, and frequency displays.
 
-**Customizable Spectrogram Options:** Choose between log-mel or constant-q spectrogram display options. Customize N-FFT and Bits Per Octave values for tailored spectrogram displays.
+**Fully customizable:** Choose between log-mel or constant-q spectrogram display options. Customize N-FFT and Bits Per Octave values for tailored spectrogram displays.
 
 **Zoom to Millisecond Level:** Precisely analyze audio data by zooming in to the millisecond level.
-
-**Fully Customizable:** Tailor the interface to your specific annotation needs, for multiple individuals and cluster names.
 
 **Audio Playback:** Listen to audio samples directly within the interface for efficient annotation.
 

@@ -52,6 +52,7 @@ const FREQUENCY_LINES_COLOR = '#47ff14'
 const ACTIVE_LABEL_COLOR = '#ffffff'
 const TIME_AXIS_COLOR = '#9db4c0'
 const WAVEFORM_COLOR = '#ddd8ff'
+const VIEWPORT_COLOR = 'white'
 
 const OVERVIEW_CVS_HEIGHT = 40
 const TIMEAXIS_CVS_HEIGHT = 40
@@ -749,7 +750,7 @@ function Track(
         // Draw Time Axis, Viewport
         if (showOverviewBarAndTimeAxis){
             drawTimeAxis()
-            drawViewport(currentStartTime, currentEndTime, 'white', 2)
+            drawViewport(currentStartTime, currentEndTime, VIEWPORT_COLOR, 2)
         }
 
         if (!specCanvasRef.current) return
@@ -1651,7 +1652,7 @@ function Track(
             newViewportStartFrame = currentEndTime - 0.05
         }
 
-        drawViewport(newViewportStartFrame, currentEndTime, 'white', 2)
+        drawViewport(newViewportStartFrame, currentEndTime, VIEWPORT_COLOR, 2)
     }
 
     const dragEndFrame = (event) => {
@@ -1663,7 +1664,7 @@ function Track(
             newViewportEndFrame = currentStartTime + 0.05
         }
 
-        drawViewport(currentStartTime, newViewportEndFrame, 'white', 2)
+        drawViewport(currentStartTime, newViewportEndFrame, VIEWPORT_COLOR, 2)
     }
 
     const dragViewport = (event) => {
@@ -1683,7 +1684,7 @@ function Track(
             newViewportEndFrame = globalAudioDuration
             return
         }
-        drawViewport(newViewportStartFrame, newViewportEndFrame, 'white', 4)
+        drawViewport(newViewportStartFrame, newViewportEndFrame, VIEWPORT_COLOR, 4)
     }
 
     const getMouseXInOverviewTimeAxisContainer = (event) => {

@@ -651,7 +651,7 @@ function App() {
                 const response = await axios.get(path)
                 const audioFilesArray = response.data.response
 
-                if (!ignore) return
+                if (ignore) return
 
                 // Extract labels
                 const allLabels = extractLabels(audioFilesArray)
@@ -676,7 +676,7 @@ function App() {
             const decodedMetaData = await JSON.parse(atob(decodeURIComponent(metaData)))
             const audioFilesArray = decodedMetaData.response
 
-            if (!ignore) return
+            if (ignore) return
 
             // Extract labels
             const allLabels = extractLabels(audioFilesArray)

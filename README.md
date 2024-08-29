@@ -52,6 +52,14 @@ npm run dev
 ```
 npm run build
 ```
+
+## Deploy the Production Build
+```
+serve -s dist -l 5050
+```
+
+If necessary, replace 5050 with the port you want to serve the production build from.
+
 ## Set up the backend
 Go over to the [backend repo](https://github.com/nianlonggu/human-in-the-loop-annotation-backend) and follow the installation guide there.  
 Back in the frontend folder, navigate to or create your .env file, and add the following line:

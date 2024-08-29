@@ -51,6 +51,7 @@ function WhisperSeg(
     // Scroll Context
     const { setAnyWindowsOpen } = useOpenWindowsContext()
 
+    /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
     const passShowModelsWindowToWhisperSeg = ( boolean) => {
         setShowModelsWindow( boolean )
@@ -71,6 +72,9 @@ function WhisperSeg(
     const handleClickWhisperSeg = () => {
         setShowModelsWindow(true)
     }
+
+
+    /* ++++++++++++++++++++ Models ++++++++++++++++++++ */
 
     const getAllModels = async () => {
         if (!showModelsWindow && currentlyTrainedModelsNames.length === 0) return
@@ -180,7 +184,7 @@ function WhisperSeg(
             }
         }
 
-        passCurrentlyTrainedModelsNamesToWhisperSeg(updatedModelsInTrainingQueue)
+        setCurrentlyTrainedModelsNames(updatedModelsInTrainingQueue)
 
     }, [modelsCurrentlyTrained])
 

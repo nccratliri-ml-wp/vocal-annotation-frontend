@@ -2348,7 +2348,9 @@ function Track(
     // When the user clicks the Export button in Export.jsx or Submit button in App.jsx
     useEffect( () => {
         if (!exportRequest && !submitRequest) return
-        addLabelsToApp(labels)
+        // sort the labels in ascending order of the onset before passing them to the App
+        const sortedLabels = [...labels].sort( (a,b)=> a.onset - b.onset )
+        addLabelsToApp(sortedLabels)
     }, [exportRequest, submitRequest])
 
     // Set up Resize event handler to update Canvas Dimensions when user resizes the browser window

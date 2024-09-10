@@ -9,6 +9,7 @@ import DownloadIcon from '@mui/icons-material/Download'
 import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
 import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import Tooltip from '@mui/material/Tooltip';
+import Badge from '@mui/material/Badge';
 import IconButton from '@mui/material/IconButton';
 import Box from "@mui/material/Box";
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -51,8 +52,7 @@ function LabelWindow(
                             getAudio,
                             handleClickFrequencyLinesBtn,
                             handleClickRemoveAnnotatedFreqBtn,
-                            showFrequencyLines,
-                            frequencyRanges
+                            numFreqLinesToAnnotate
                         }
                     )
                 {
@@ -343,6 +343,10 @@ function LabelWindow(
                     </div> */}
                     <div className='label-window-icon-btn'>
                         <Tooltip title="Annotate Frequency">
+                            <Badge badgeContent={numFreqLinesToAnnotate} color="primary" anchorOrigin={{
+                                   vertical: 'top',
+                                   horizontal: 'right'
+                                }}>
                                     <IconButton
                                         style={{...iconSmall, ...({ paddingTop: '20px', paddingBottom: '20px', paddingLeft: '8px', paddingRight: '8px' }), ...(expandedLabel.minFreq!=='' && iconBtnDisabled) }}
                                         onClick={()=>{handleClickFrequencyLinesBtn()}}
@@ -350,6 +354,7 @@ function LabelWindow(
                                     >
                                         <DensityLargeIcon  />
                                     </IconButton>
+                            </Badge>
                         </Tooltip>
                     </div>
                     <div className='label-window-icon-btn' 

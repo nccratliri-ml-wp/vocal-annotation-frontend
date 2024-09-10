@@ -119,7 +119,7 @@ function Track(
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
 
-    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: 0, minFreqY: SPEC_CVS_HEIGHT})
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: -10, minFreqY: SPEC_CVS_HEIGHT+10})
     const [frequencyRanges, setfrequencyRanges] = useState( null )
 
     let draggedFrequencyLinesObject = null
@@ -197,8 +197,10 @@ function Track(
     const { setAnyWindowsOpen } = useOpenWindowsContext();
 
     // Frequency Lines
-    const isMinFreqLineDragged = useRef( false );
-    const isMaxFreqLineDragged = useRef( false );
+    const allowUpdateMinFreqGivenLineY = useRef( false );
+    const allowUpdateMaxFreqGivenLineY = useRef( false );
+
+    const [numFreqLinesToAnnotate, setNumFreqLinesToAnnotate] = useState(0)
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -327,15 +329,14 @@ function Track(
 
     const handleLMBDown = (event) => {
 
-
         // Don't proceed if no spectrogram is present in the track
         if (!spectrogram) return
 
         // Don't proceed if audio is currently playing
         if (audioSnippet && !audioSnippet.paused) return
 
-        isMaxFreqLineDragged.current = false
-        isMinFreqLineDragged.current = false
+        allowUpdateMaxFreqGivenLineY.current = false
+        allowUpdateMinFreqGivenLineY.current = false
 
         // Ignore clicks from other mouse buttons
         if (event.button !== 0) return   
@@ -364,6 +365,8 @@ function Track(
             }
         }
 
+        console.log("Clicking at existing onset")
+
         // Deal with click on Active Label onset
         if (checkIfClickedOnActiveLabelOnset(mouseX)) {
             draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
@@ -371,6 +374,8 @@ function Track(
             waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
             return
         }
+
+        console.log("Clicking at existing offset")
 
         // Deal with click on Active Label offset
         if (checkIfClickedOnActiveLabelOffset(mouseX)) {
@@ -380,21 +385,27 @@ function Track(
             return
         }
 
+        console.log("Clicking Max frequency line")
+
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
-            isMaxFreqLineDragged.current = true // User is going to drag the frequency line
+            allowUpdateMaxFreqGivenLineY.current = true // User is going to drag the frequency line
             return
         }
+    
+        console.log("Clicking Max frequency line")
 
         // Deal with click on Min Frequency Line
         if (checkIfOccupiedByMinFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMinFreqLine)
-            isMinFreqLineDragged.current = true
+            allowUpdateMinFreqGivenLineY.current = true
             return
         }
+
+        console.log("Clicking at existing label")
 
         // Deal with click inside an existing label
         const labelToBeExpanded = checkIfClickedOnLabel(event, mouseX, mouseY)
@@ -410,6 +421,8 @@ function Track(
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
+
+        console.log("Adding on offset!")
 
         // Add offset to existing label if necessary
         const newestLabel = labels[labels.length-1]
@@ -444,6 +457,23 @@ function Track(
             drawLine(newestLabel, newestLabel.offset)
             return
         }
+
+        // In this case, we are in the state of adding frequency lines
+        if (numFreqLinesToAnnotate > 0 ){
+            if (numFreqLinesToAnnotate == 2){
+                setFrequencyLines( {...frequencyLines, minFreqY:mouseY } )
+                allowUpdateMinFreqGivenLineY.current = true
+            }else{
+                const newMinFreqY = Math.max( frequencyLines.minFreqY, mouseY )
+                const newMaxFreqY = Math.min( frequencyLines.minFreqY, mouseY )
+                setFrequencyLines( { minFreqY:newMinFreqY, maxFreqY:newMaxFreqY } )
+                allowUpdateMinFreqGivenLineY.current = true
+                allowUpdateMaxFreqGivenLineY.current = true
+            }
+            setNumFreqLinesToAnnotate( numFreqLinesToAnnotate - 1 )
+            return 
+        }
+
 
         // after excluding all the other possiblities, the only case is to add new onset
         // at this moment, close the previously opened Label Window, since we are swicthing to a new label
@@ -571,7 +601,7 @@ function Track(
             specCanvasRef.current.style.cursor = 'col-resize'
             waveformCanvasRef.current.style.cursor = 'col-resize'
             labelCanvasRef.current.style.cursor = 'col-resize'
-        } else if ( showFrequencyLines && ( checkIfOccupiedByMaxFreqLine(mouseY) || checkIfOccupiedByMinFreqLine(mouseY) )){
+        } else if ( checkIfOccupiedByMaxFreqLine(mouseY) || checkIfOccupiedByMinFreqLine(mouseY) ){
             specCanvasRef.current.style.cursor = 'row-resize'
         } else if ( checkIfOccupiedByActiveLabel(mouseX) ) {
             specCanvasRef.current.style.cursor = 'col-resize'
@@ -698,10 +728,12 @@ function Track(
     }
 
     const checkIfOccupiedByMaxFreqLine = (mouseY) => {
+        if (!showFrequencyLines) return false
         return mouseY < frequencyLines.maxFreqY + 5 && mouseY > frequencyLines.maxFreqY - 5
     }
         
     const checkIfOccupiedByMinFreqLine = (mouseY) => {
+        if (!showFrequencyLines) return false
         return mouseY < frequencyLines.minFreqY + 5 && mouseY > frequencyLines.minFreqY - 5
     }
 
@@ -1383,8 +1415,8 @@ function Track(
         const allIndividualIDs = getAllIndividualIDs(speciesArray)
         const individualIndex = allIndividualIDs.indexOf(individual.id)
 
-        const newMinFreq = ''; // showFrequencyLines ? getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies) : ''
-        const newMaxFreq = ''; // showFrequencyLines ? getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies) : ''
+        const newMinFreq = ''; 
+        const newMaxFreq = ''; 
 
         const newLabel = new Label(
             nanoid(),
@@ -2104,18 +2136,26 @@ function Track(
     }
 
     const handleClickFrequencyLinesBtn = () => {
+        // setShowFrequencyLines(true)
+        // // setFrequencyLines({...frequencyLines})
+        // setFrequencyLines({maxFreqY: 0, minFreqY: SPEC_CVS_HEIGHT})
+        // allowUpdateMinFreqGivenLineY.current = true
+        // allowUpdateMaxFreqGivenLineY.current = true
+
         setShowFrequencyLines(true)
-        // setFrequencyLines({...frequencyLines})
-        setFrequencyLines({maxFreqY: 0, minFreqY: SPEC_CVS_HEIGHT})
-        isMinFreqLineDragged.current = true
-        isMaxFreqLineDragged.current = true
+        setFrequencyLines({maxFreqY: -10, minFreqY: SPEC_CVS_HEIGHT + 10})
+        allowUpdateMinFreqGivenLineY.current = false
+        allowUpdateMaxFreqGivenLineY.current = false
+        setNumFreqLinesToAnnotate(2)
+
         
     }
 
     const handleClickRemoveAnnotatedFreqBtn = ()=>{
+        setNumFreqLinesToAnnotate(0)
         passExpandedLabelToTrack( {...expandedLabel, minFreq:'', maxFreq:''} )
-        isMinFreqLineDragged.current = false
-        isMaxFreqLineDragged.current = false
+        allowUpdateMinFreqGivenLineY.current = false
+        allowUpdateMaxFreqGivenLineY.current = false
     }
 
     const getFrequencyAtYPosition = (y, canvasHeight, frequenciesArray ) => {
@@ -2127,6 +2167,7 @@ function Track(
     const getYPositionAtFrequency = (frequency, canvasHeight, frequenciesArray) => {
         // Find the index of the closest frequency in the frequenciesArray
 
+        if ( frequency === '' ) return -20
         if ( frequency < frequenciesArray[0] - 1 ) return canvasHeight + 10  // -1 to make sure frequency is really small enough
         if ( frequency > frequenciesArray[frequenciesArray.length - 1] + 1 ) return -10 // +1 to make sure frequency is really large enough
 
@@ -2404,19 +2445,6 @@ function Track(
         }
     }, [showLocalConfigWindow, expandedLabel]);
 
-    // when the label window is closed, hide the frequency range lines
-    useEffect(() => {
-        if (!expandedLabel||expandedLabel.minFreq==="") {
-            // This block will run when expandedLabel becomes null (when the window closes)
-            setShowFrequencyLines(false);
-            // Add any other logic you want to execute on window close here
-            isMinFreqLineDragged.current = false
-            isMaxFreqLineDragged.current = false
-        }else{
-            setShowFrequencyLines(true);
-        }
-    }, [expandedLabel]);
-
     useEffect(() => {
         if (specCanvasRef!==null && frequencyLines!==null && frequencies!==null){
             if (frequencyLines.minFreqY > specCanvasRef.current.height && frequencyLines.maxFreqY < 0 ) return
@@ -2427,8 +2455,8 @@ function Track(
             const currentMaxFreq = expandedLabel.maxFreq
 
             const newFrequencyRanges = {
-                minFreq: !isMinFreqLineDragged.current ? currentMinFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies) ,
-                maxFreq: !isMaxFreqLineDragged.current ? currentMaxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
+                minFreq: !allowUpdateMinFreqGivenLineY.current ? currentMinFreq : getFrequencyAtYPosition(frequencyLines.minFreqY, specCanvasRef.current.height, frequencies) ,
+                maxFreq: !allowUpdateMaxFreqGivenLineY.current ? currentMaxFreq : getFrequencyAtYPosition(frequencyLines.maxFreqY, specCanvasRef.current.height, frequencies)
             }
             setfrequencyRanges(newFrequencyRanges)
             }
@@ -2440,12 +2468,31 @@ function Track(
     },[ frequencyRanges ]);
 
     useEffect(() => {
-        if (specCanvasRef!==null && frequencyLines!==null && frequencies!==null && expandedLabel!==null
-            && frequencyLines.minFreqY !== "" && expandedLabel.minFreq !== ""
-         ){
+
+        if (!expandedLabel){
+            setNumFreqLinesToAnnotate(0)
+        }
+
+        if (!expandedLabel){
+            setShowFrequencyLines(false);
+            allowUpdateMinFreqGivenLineY.current = false
+            allowUpdateMaxFreqGivenLineY.current = false
+        }else{
+            setShowFrequencyLines(true);
+            // note: do not add the else logic here no purpose, one cannot trigger allowUpdateMinFreqGivenLineY based on the value of minFreq automatically.
+            if (expandedLabel.minFreq===""){
+                allowUpdateMinFreqGivenLineY.current = false
+            }
+            if (expandedLabel.maxFreq===''){
+                allowUpdateMaxFreqGivenLineY.current = false
+            }
+        }
+
+        // update the frequencyLines based on the updated expandedLabel
+        if (specCanvasRef!==null && frequencyLines!==null && frequencies!==null && expandedLabel!==null){
             const newMinFreqY = getYPositionAtFrequency(expandedLabel.minFreq, specCanvasRef.current.height, frequencies)
             const newMaxFreqY = getYPositionAtFrequency(expandedLabel.maxFreq, specCanvasRef.current.height, frequencies)
-            
+            // This is needed for updating the frequency lines when clicking a annotated segment
             if ( newMinFreqY!==frequencyLines.minFreqY || newMaxFreqY!==frequencyLines.maxFreqY ){
                 setFrequencyLines( { minFreqY:newMinFreqY, maxFreqY:newMaxFreqY } )
             }
@@ -2737,8 +2784,7 @@ function Track(
                                     getAudio={getAudio}
                                     handleClickFrequencyLinesBtn={handleClickFrequencyLinesBtn}
                                     handleClickRemoveAnnotatedFreqBtn={handleClickRemoveAnnotatedFreqBtn}
-                                    showFrequencyLines={showFrequencyLines}
-                                    frequencyRanges={frequencyRanges}
+                                    numFreqLinesToAnnotate={numFreqLinesToAnnotate}
                                 />,
                                 document.body
                             )

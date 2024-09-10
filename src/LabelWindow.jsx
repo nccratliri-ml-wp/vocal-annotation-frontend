@@ -7,6 +7,16 @@ import {toast} from "react-toastify";
 import Draggable from "react-draggable";
 import DownloadIcon from '@mui/icons-material/Download'
 import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
+import DensityLargeIcon from '@mui/icons-material/DensityLarge';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import Box from "@mui/material/Box";
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import StarIcon from '@mui/icons-material/Star';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import ClearIcon from '@mui/icons-material/Clear';
+const FREQUENCY_LINES_COLOR = '#47ff14'
 
 // Internal dependencies
 import {Label} from "./label.js"
@@ -24,8 +34,9 @@ import {
     UNKNOWN_INDIVIDUAL,
     ANNOTATED_AREA, UNKNOWN_SPECIES
 } from "./species.js";
-import {iconSmall} from "./buttonStyles.js";
+import {iconSmall, iconBtnDisabled} from "./buttonStyles.js";
 import {excludeNonDigits} from "./utils.js";
+import { Margin } from "@mui/icons-material";
 
 function LabelWindow(
                         {
@@ -37,7 +48,11 @@ function LabelWindow(
                             getAllIndividualIDs,
                             globalMouseCoordinates,
                             audioId,
-                            getAudio
+                            getAudio,
+                            handleClickFrequencyLinesBtn,
+                            handleClickRemoveAnnotatedFreqBtn,
+                            showFrequencyLines,
+                            frequencyRanges
                         }
                     )
                 {
@@ -292,6 +307,7 @@ function LabelWindow(
         passExpandedLabelToTrack(null)
     }
 
+
     /* ++++++++++++++++++ useEffect Hooks ++++++++++++++++++ */
 
     // When the user makes changes in SpeciesMenu Component or clicks on a different label in the spectrogram, update the localSpeciesArray
@@ -303,6 +319,7 @@ function LabelWindow(
         setMinFreqInput(expandedLabel.minFreq)
         setMaxFreqInput(expandedLabel.maxFreq)
     }, [speciesArray, expandedLabel])
+
 
     return (
         <Draggable cancel='.label-window-audio-btn-container, .label-window-content, .label-window-frequencies-container'>
@@ -320,19 +337,40 @@ function LabelWindow(
                 </div>
 
                 <div className='label-window-controls-container'>
-                    <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
-                        <PlayArrowIcon style={iconSmall}/>
-                        Play Audio
+                    {/* <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                        <DensityLargeIcon style={iconSmall}/>
+                        Annotate Frequency
+                    </div> */}
+                    <div className='label-window-icon-btn'>
+                        <Tooltip title="Annotate Frequency">
+                                    <IconButton
+                                        style={{...iconSmall, ...({ paddingTop: '20px', paddingBottom: '20px', paddingLeft: '8px', paddingRight: '8px' }), ...(expandedLabel.minFreq!=='' && iconBtnDisabled) }}
+                                        onClick={()=>{handleClickFrequencyLinesBtn()}}
+                                        disabled={expandedLabel.minFreq!==''}
+                                    >
+                                        <DensityLargeIcon  />
+                                    </IconButton>
+                        </Tooltip>
                     </div>
-                    <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
-                        <DownloadIcon style={iconSmall}/>
-                        Download Audio
+                    <div className='label-window-icon-btn' 
+                         style={{ marginLeft: '5px' }}
+                    >
+                        <Tooltip title="Remove Annotated Frequency">
+                                    <IconButton
+                                        style={{...iconSmall, ...({ paddingTop: '20px', paddingBottom: '20px', paddingLeft: '8px', paddingRight: '8px' }), ...(expandedLabel.minFreq==='' && iconBtnDisabled) }}
+                                        onClick={()=>{handleClickRemoveAnnotatedFreqBtn()}}
+                                        disabled={expandedLabel.minFreq===''}
+                                    >
+                                        <DeleteSweepIcon  />
+                                    </IconButton>
+                        </Tooltip>
                     </div>
-                    <div className='label-window-frequencies-container'>
-                        <div className='label-window-frequencies-labels-container'>
+                    <div className='label-window-frequencies-container'>                        
+                        <div className='label-window-frequencies-labels-container'
+                            style={{ fontSize: '12px' }}>
                             <label className='label-window-frequencies-label'>
-                                Min Freq
-                                <input
+                                Min Freq:  { expandedLabel.minFreq} { expandedLabel.minFreq!=='' && "Hz"}
+                                {/* <input
                                     type="number"
                                     value={minFreqInput}
                                     min={0}
@@ -340,11 +378,11 @@ function LabelWindow(
                                     onKeyPress={excludeNonDigits}
                                     onFocus={(event) => event.target.select()}
                                     onPaste={(event) => event.preventDefault()}
-                                />
+                                /> */}
                             </label>
                             <label className='label-window-frequencies-label'>
-                                Max Freq
-                                <input
+                                Max Freq: { expandedLabel.maxFreq} { expandedLabel.maxFreq!=='' && "Hz"}
+                                {/* <input
                                     type="number"
                                     value={maxFreqInput}
                                     min={0}
@@ -352,10 +390,21 @@ function LabelWindow(
                                     onKeyPress={excludeNonDigits}
                                     onFocus={(event) => event.target.select()}
                                     onPaste={(event) => event.preventDefault()}
-                                />
+                                /> */}
                             </label>
                         </div>
-                        <button className='label-window-frequencies-save-btn' onClick={saveFreqChanges}>Save</button>
+                        {/* <button className='label-window-frequencies-save-btn' onClick={saveFreqChanges}>Save</button> */}
+                    </div>
+                </div>
+
+                <div className='label-window-controls-container'>
+                    <div className='label-window-audio-btn' onClick={ () => getAudio(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                        <PlayArrowIcon style={iconSmall}/>
+                        Play Audio
+                    </div>
+                    <div className='label-window-audio-btn' onClick={ () => downloadAudioClip(expandedLabel.onset, expandedLabel.offset - expandedLabel.onset) }>
+                        <DownloadIcon style={iconSmall}/>
+                        Download Audio
                     </div>
                 </div>
 

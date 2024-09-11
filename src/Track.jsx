@@ -365,8 +365,6 @@ function Track(
             }
         }
 
-        console.log("Clicking at existing onset")
-
         // Deal with click on Active Label onset
         if (checkIfClickedOnActiveLabelOnset(mouseX)) {
             draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
@@ -374,8 +372,6 @@ function Track(
             waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
             return
         }
-
-        console.log("Clicking at existing offset")
 
         // Deal with click on Active Label offset
         if (checkIfClickedOnActiveLabelOffset(mouseX)) {
@@ -385,8 +381,6 @@ function Track(
             return
         }
 
-        console.log("Clicking Max frequency line")
-
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             draggedFrequencyLinesObject = frequencyLines
@@ -395,8 +389,6 @@ function Track(
             return
         }
     
-        console.log("Clicking Max frequency line")
-
         // Deal with click on Min Frequency Line
         if (checkIfOccupiedByMinFreqLine(mouseY) && event.target.className === 'spec-canvas'){
             draggedFrequencyLinesObject = frequencyLines
@@ -404,8 +396,6 @@ function Track(
             allowUpdateMinFreqGivenLineY.current = true
             return
         }
-
-        console.log("Clicking at existing label")
 
         // Deal with click inside an existing label
         const labelToBeExpanded = checkIfClickedOnLabel(event, mouseX, mouseY)
@@ -422,7 +412,6 @@ function Track(
             return
         }
 
-        console.log("Adding on offset!")
 
         // Add offset to existing label if necessary
         const newestLabel = labels[labels.length-1]
@@ -460,17 +449,19 @@ function Track(
 
         // In this case, we are in the state of adding frequency lines
         if (numFreqLinesToAnnotate > 0 ){
-            if (numFreqLinesToAnnotate == 2){
-                setFrequencyLines( {...frequencyLines, minFreqY:mouseY } )
-                allowUpdateMinFreqGivenLineY.current = true
-            }else{
-                const newMinFreqY = Math.max( frequencyLines.minFreqY, mouseY )
-                const newMaxFreqY = Math.min( frequencyLines.minFreqY, mouseY )
-                setFrequencyLines( { minFreqY:newMinFreqY, maxFreqY:newMaxFreqY } )
-                allowUpdateMinFreqGivenLineY.current = true
-                allowUpdateMaxFreqGivenLineY.current = true
+            if( event.target.className === 'spec-canvas' ){
+                if (numFreqLinesToAnnotate == 2){
+                    setFrequencyLines( {...frequencyLines, minFreqY:mouseY } )
+                    allowUpdateMinFreqGivenLineY.current = true
+                }else{
+                    const newMinFreqY = Math.max( frequencyLines.minFreqY, mouseY )
+                    const newMaxFreqY = Math.min( frequencyLines.minFreqY, mouseY )
+                    setFrequencyLines( { minFreqY:newMinFreqY, maxFreqY:newMaxFreqY } )
+                    allowUpdateMinFreqGivenLineY.current = true
+                    allowUpdateMaxFreqGivenLineY.current = true
+                }
+                setNumFreqLinesToAnnotate( numFreqLinesToAnnotate - 1 )
             }
-            setNumFreqLinesToAnnotate( numFreqLinesToAnnotate - 1 )
             return 
         }
 

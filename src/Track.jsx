@@ -26,7 +26,7 @@ import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
-
+ 
 // Internal dependencies
 import Parameters from "./Parameters.jsx"
 import WhisperSeg from "./WhisperSeg.jsx"

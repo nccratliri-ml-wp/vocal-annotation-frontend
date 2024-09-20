@@ -408,17 +408,29 @@ function App() {
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
 
+        // Remove the Annotated Area labels because they are only necessary for WhisperSeg
+        let newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
+        // Assign each label it's correct trackIndex
+        newLabelsArray = newLabelsArray.map( label => {
+            const correctChannelIndex = tracks.find( track => track.trackID === label.trackID).channelIndex
+            return {
+                ...label,
+                channelIndex: correctChannelIndex
+            }
+        })
+
         // Only keep properties that are relevant for the backend
-        const modifiedLabels = allLabels.map(labelObj => {
+        const modifiedLabels = newLabelsArray.map(labelObj => {
             return {
                 onset: labelObj.onset,
                 offset: labelObj.offset,
-                min_freq: labelObj.minFreq,
-                max_freq: labelObj.maxFreq,
+                minFrequency: labelObj.minFreq !== ""? labelObj.minFreq : -1 ,
+                maxFrequency: labelObj.maxFreq !== ""? labelObj.maxFreq : -1 ,
                 species: labelObj.species,
                 individual: labelObj.individual,
                 clustername: labelObj.clustername,
                 filename: labelObj.filename,
+                channelIndex: labelObj.channelIndex,
                 annotation_instance: annotationInstance
             }
         })

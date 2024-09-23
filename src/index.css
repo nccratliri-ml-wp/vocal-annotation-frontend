@@ -526,6 +526,19 @@ html, body {
   background-color: #0a2b3f;
 }
 
+.label-window-icon-btn{
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  /* height: 20px; */
+  width: fit-content;
+  /* margin: 4px; */
+  /* padding: 7px; */
+  background-color: #082536;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
 .label-window-species{
   background-color: #082536;
   padding: 7px;

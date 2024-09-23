@@ -408,17 +408,29 @@ function App() {
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
 
+        // Remove the Annotated Area labels because they are only necessary for WhisperSeg
+        let newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
+        // Assign each label it's correct trackIndex
+        newLabelsArray = newLabelsArray.map( label => {
+            const correctChannelIndex = tracks.find( track => track.trackID === label.trackID).channelIndex
+            return {
+                ...label,
+                channelIndex: correctChannelIndex
+            }
+        })
+
         // Only keep properties that are relevant for the backend
-        const modifiedLabels = allLabels.map(labelObj => {
+        const modifiedLabels = newLabelsArray.map(labelObj => {
             return {
                 onset: labelObj.onset,
                 offset: labelObj.offset,
-                min_freq: labelObj.minFreq,
-                max_freq: labelObj.maxFreq,
+                minFrequency: labelObj.minFreq !== ""? labelObj.minFreq : -1 ,
+                maxFrequency: labelObj.maxFreq !== ""? labelObj.maxFreq : -1 ,
                 species: labelObj.species,
                 individual: labelObj.individual,
                 clustername: labelObj.clustername,
                 filename: labelObj.filename,
+                channelIndex: labelObj.channelIndex,
                 annotation_instance: annotationInstance
             }
         })
@@ -611,6 +623,43 @@ function App() {
         return allLabels
     }
 
+    const getAnnotationFromFileName = async (fileName) =>{
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + `/annotations/${fileName}`
+        try{
+            const response = await axios.get(path)
+            const annotationVersions = response.data
+            if (annotationVersions.length > 0){
+                return [...annotationVersions].sort( (a,b) => new Date(b.version) - new Date(a.version) )[0].annotations
+            }else{
+                return []
+            }
+        } catch (error){
+            return []
+        }
+    }
+
+    const extractLabelsUsingFileNames = async (audioFilesArray) => {
+        const allLabels = []
+        for (let audioFile of audioFilesArray){
+            const annotations = await getAnnotationFromFileName( audioFile.filename )
+            const labels = annotations.map( anno => ({ 
+                                channelIndex:Number(anno.channelIndex), 
+                                filename:anno.filename,
+                                onset:anno.onset,
+                                offset:anno.offset,
+                                minFreq:anno.minFrequency,
+                                maxFreq:anno.maxFrequency,
+                                species:anno.species,
+                                individual:anno.individual,
+                                clustername:anno.clustername
+             }) )
+            allLabels.push(...labels)
+        }
+        return allLabels
+    }
+
+
+
     const checkIfAtLeastOneAudioFileWasUploaded = () => {
         for (const track of tracks){
             if (track.filename){
@@ -654,7 +703,8 @@ function App() {
                 if (ignore) return
 
                 // Extract labels
-                const allLabels = extractLabels(audioFilesArray)
+                // const allLabels = extractLabels(audioFilesArray)
+                const allLabels = await extractLabelsUsingFileNames( audioFilesArray )
 
                 // Create Species, Individuals and clustername buttons deriving from the imported labels.
                 const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)

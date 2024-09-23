@@ -1581,9 +1581,10 @@ function Track(
         return genericLabelObjectsArray.map( label => {
 
             // WhisperSeg currently doesn't support Frequency Annotation, so if the imported label has no frequency, assign empty string
-            const newMinFreq = (label.minFreq || label.minFreq===0 )? label.minFreq : ''
-            const newMaxFreq = (label.maxFreq || label.maxFreq===0 )? label.maxFreq : ''
-
+            // const newMinFreq = (label.minFreq || label.minFreq===0 )? label.minFreq : ''
+            // const newMaxFreq = (label.maxFreq || label.maxFreq===0 )? label.maxFreq : ''
+            const newMinFreq = ( (label.minFreq || label.minFreq===0) && label.minFreq !== -1 )? label.minFreq : ''
+            const newMaxFreq = ( (label.maxFreq || label.maxFreq===0) && label.maxFreq !== -1 )? label.maxFreq : ''
 
             // Create a new Label object with the imported values
             const updatedLabel = new Label(

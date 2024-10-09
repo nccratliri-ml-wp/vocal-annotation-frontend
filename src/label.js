@@ -1,5 +1,6 @@
 class Label {
-    constructor(id, trackID, filename, onset, offset, minFreq, maxFreq, species, individual, clustername, speciesID, individualID, clusternameID, individualIndex, annotator, color) {
+    constructor(id, trackID, filename, onset, offset, minFreq, maxFreq, species, individual, clustername, 
+                speciesID, individualID, clusternameID, individualIndex, annotator, color) {
         this.id = id
         this.trackID = trackID
         this.filename = filename

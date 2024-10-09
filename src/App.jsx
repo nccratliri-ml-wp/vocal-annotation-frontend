@@ -88,6 +88,9 @@ function App() {
     // Strict Mode
     const [strictMode, setStrictMode] = useState(false)
     const [annotationInstance, setAnnotationInstance] = useState(null)
+    const [userName, setUserName] = useState(null)
+    const [hashID, setHashID] = useState(null)
+
 
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
@@ -406,7 +409,7 @@ function App() {
             return
         }
 
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'post-annotations'
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/post-annotations/${hashID}`
 
         // Remove the Annotated Area labels because they are only necessary for WhisperSeg
         let newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
@@ -419,6 +422,8 @@ function App() {
             }
         })
 
+        const timeStamp =  new Date().toISOString().slice(0, 19).replace('T', ' ')
+          
         // Only keep properties that are relevant for the backend
         const modifiedLabels = newLabelsArray.map(labelObj => {
             return {
@@ -431,7 +436,8 @@ function App() {
                 clustername: labelObj.clustername,
                 filename: labelObj.filename,
                 channelIndex: labelObj.channelIndex,
-                annotation_instance: annotationInstance
+                username: userName,
+                timestamp: timeStamp
             }
         })
 
@@ -623,8 +629,8 @@ function App() {
         return allLabels
     }
 
-    const getAnnotationFromFileName = async (fileName) =>{
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + `/annotations/${fileName}`
+    const getAnnotationFromHashID = async (hashID) =>{
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + `/get-annotations/${hashID}`
         try{
             const response = await axios.get(path)
             const annotationVersions = response.data
@@ -638,10 +644,10 @@ function App() {
         }
     }
 
-    const extractLabelsUsingFileNames = async (audioFilesArray) => {
+    const extractLabelsUsingFileNames = async (audioFilesArray, hashID) => {
         const allLabels = []
         for (let audioFile of audioFilesArray){
-            const annotations = await getAnnotationFromFileName( audioFile.filename )
+            const annotations = await getAnnotationFromHashID( hashID )
             const labels = annotations.map( anno => ({ 
                                 channelIndex:Number(anno.channelIndex), 
                                 filename:anno.filename,
@@ -688,23 +694,28 @@ function App() {
         const hashID = queryParams?.get('hash-id')
         const metaData = queryParams?.get('metadata')
 
+        setHashID( hashID )
+
         if (strictMode?.toLowerCase() === 'true'){
             setStrictMode(true)
             setFilesUploading(true)
         }
-
+        
         const getMetaDataFromHashID = async () => {
-            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/metadata/${hashID}`
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/get-metadata/${hashID}`
 
             try {
                 const response = await axios.get(path)
-                const audioFilesArray = response.data.response
+                const audioFilesArray = response.data
 
                 if (ignore) return
 
+                // set the user name (in strict mode)
+                setUserName(audioFilesArray[0].username)
+
                 // Extract labels
                 // const allLabels = extractLabels(audioFilesArray)
-                const allLabels = await extractLabelsUsingFileNames( audioFilesArray )
+                const allLabels = await extractLabelsUsingFileNames( audioFilesArray, hashID )
 
                 // Create Species, Individuals and clustername buttons deriving from the imported labels.
                 const updatedSpeciesArray = createSpeciesFromImportedLabels(allLabels, speciesArray)

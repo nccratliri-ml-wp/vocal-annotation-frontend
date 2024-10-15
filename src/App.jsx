@@ -693,6 +693,8 @@ function App() {
         const strictMode = queryParams?.get('strict-mode')
         const hashID = queryParams?.get('hash-id')
         const metaData = queryParams?.get('metadata')
+        const userProfileMode = queryParams?.get('user-profile')
+
 
         setHashID( hashID )
 
@@ -700,12 +702,24 @@ function App() {
             setStrictMode(true)
             setFilesUploading(true)
         }
+
+        let userProfile = false
+        if (userProfileMode?.toLowerCase() === 'true'){
+            userProfile = true
+        }
         
         const getMetaDataFromHashID = async () => {
-            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/get-metadata/${hashID}`
+            const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'/get-metadata/'
+            const requestParameters = {
+                hash_id: hashID,
+                user_profile: userProfile
+            }
+            const headers = {
+                'Content-Type': 'application/json'
+            }
 
             try {
-                const response = await axios.get(path)
+                const response = await axios.post(path, requestParameters, {headers} )
                 const audioFilesArray = response.data
 
                 if (ignore) return

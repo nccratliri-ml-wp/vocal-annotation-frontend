@@ -84,9 +84,9 @@ function LocalFileUpload(
                 variant='contained'
                 tabIndex={-1}
                 startIcon={filename? '' : <CloudUploadIcon />}
-                style={strictMode ? disabledStyle : enabledStyle}
+                style={strictMode ? {"width":"120px", "height":"22px", ...disabledStyle} : {"width":"120px", "height":"22px",...enabledStyle}}
             >
-                <ButtonText>{filename ? filename : "UPLOAD FILE"}</ButtonText>
+                <ButtonText>{filename ? filename : "UPLOAD"}</ButtonText>
                 <VisuallyHiddenInput type='file' accept='.wav, .mp3' disabled={strictMode} onChange={handleFileChange} />
             </Button>
         </Tooltip>

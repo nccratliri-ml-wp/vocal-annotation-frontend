@@ -91,6 +91,10 @@ function App() {
     const [userName, setUserName] = useState(null)
     const [hashID, setHashID] = useState(null)
 
+    // Layout
+    const [specCanvasHeight, setSpecCanvasHeight] = useState(300);
+    const [showAllWaveforms, setShowAllWaveforms] = useState(true);
+    const [showAllLabels, setShowAllLabels] = useState(true);
 
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
@@ -345,6 +349,9 @@ function App() {
                     tokenFinetune={tokenFinetune}
                     passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
                     passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                    specCanvasHeight={specCanvasHeight}
+                    showAllWaveforms={showAllWaveforms}
+                    showAllLabels={showAllLabels}
                 />
             )
         })
@@ -961,6 +968,12 @@ function App() {
                         defaultConfig={defaultConfig}
                         passShowGlobalConfigWindowToApp={passShowGlobalConfigWindowToApp}
                         strictMode={strictMode}
+                        specCanvasHeight={specCanvasHeight}
+                        setSpecCanvasHeight={setSpecCanvasHeight}
+                        showAllWaveforms={showAllWaveforms}
+                        setShowAllWaveforms={setShowAllWaveforms}
+                        showAllLabels={showAllLabels}
+                        setShowAllLabels={setShowAllLabels}
                     />
                 }
 

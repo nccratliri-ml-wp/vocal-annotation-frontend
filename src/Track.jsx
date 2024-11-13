@@ -1,5 +1,5 @@
 // React
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {createPortal} from 'react-dom';
 
 // External dependencies
@@ -26,6 +26,8 @@ import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
+import {Button} from '@mui/material';
+import LineStyleIcon from '@mui/icons-material/LineStyle';
  
 // Internal dependencies
 import Parameters from "./Parameters.jsx"
@@ -55,10 +57,7 @@ const VIEWPORT_COLOR = 'white'
 
 const OVERVIEW_CVS_HEIGHT = 40
 const TIMEAXIS_CVS_HEIGHT = 40
-const WAVEFORM_CVS_HEIGHT = 60
-const SPEC_CVS_HEIGHT = 300
-const FREQ_CVS_HEIGHT = 320
-const TRACK_SIDEBAR_WIDTH = 200
+const TRACK_SIDEBAR_WIDTH = 220
 const FREQ_CVS_WIDTH = 40
 
 function Track(
@@ -99,7 +98,10 @@ function Track(
                             tokenInference,
                             tokenFinetune,
                             passTokenInferenceToWhisperSeg,
-                            passTokenFinetuneToWhisperSeg
+                            passTokenFinetuneToWhisperSeg,
+                            specCanvasHeight,
+                            showAllWaveforms,
+                            showAllLabels
                         }
                     )
                 {
@@ -111,6 +113,7 @@ function Track(
 
     // Spectrogram
     const specCanvasRef = useRef(null)
+    const specOverlayCanvasRef = useRef(null)
     const specImgData = useRef(null)
     const [spectrogram, setSpectrogram] = useState(trackData.spectrogram)
 
@@ -119,7 +122,7 @@ function Track(
     const [frequencies, setFrequencies] = useState(trackData.frequencies)
     const [showFrequencyLines, setShowFrequencyLines] = useState(false)
 
-    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: -10, minFreqY: SPEC_CVS_HEIGHT+10})
+    const [frequencyLines, setFrequencyLines] = useState({maxFreqY: -10, minFreqY: specCanvasHeight+10})
     const [frequencyRanges, setfrequencyRanges] = useState( null )
 
     let draggedFrequencyLinesObject = null
@@ -129,6 +132,7 @@ function Track(
 
     // Label Canvas
     const labelCanvasRef = useRef(null)
+    const labelOverlayCanvasRef = useRef(null)
 
     // Individuals Canvas
     const individualsCanvasRef = useRef(null)
@@ -161,10 +165,16 @@ function Track(
 
     // Waveform
     const waveformCanvasRef = useRef(null)
+    const waveformOverlayCanvasRef = useRef(null)
     const waveformImgData = useRef(null)
     const [audioArray, setAudioArray] = useState(null)
-    const [waveformScale, setWaveformScale] = useState(25)
-    const [showWaveform, setShowWaveform] =  useState(true)
+    const [waveformScale, setWaveformScale] = useState(3)
+    const [displayWaveform, setDisplayWaveform] = useState(true)
+    // Deprecated: NO LONGER USE showWaveform in the future, leave it untouched!
+    const [showWaveform, setShowWaveform] = useState(true)
+
+    //drag ref
+    const dragListenerRef = useRef(null);
 
     // File Upload
     const [spectrogramIsLoading, setSpectrogramIsLoading] = useState(false)
@@ -201,6 +211,18 @@ function Track(
     const allowUpdateMaxFreqGivenLineY = useRef( false );
 
     const [numFreqLinesToAnnotate, setNumFreqLinesToAnnotate] = useState(0)
+
+    // Layout (Track Height)
+    const [specHeight, setSpecHeight] = useState('300px');
+    // Experimental debug
+    // State to control the height of B and C
+    const [isHidden, setIsHidden] = useState(false);
+
+    // Calculate heights based on isHidden state
+    const WAVEFORM_CVS_HEIGHT = displayWaveform ? 60 : 0; // height of B and C
+    const specYAxisWidth = 45;
+    const controlPanelWidth = TRACK_SIDEBAR_WIDTH - specYAxisWidth;
+    
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -294,11 +316,11 @@ function Track(
                 ]
             )
 
+            setSpectrogram(data.spec)
             drawAllCanvases(data.spec, data.freqs, newAudioArray)
             setSpectrogramIsLoading(false)
             passFilesUploadingToApp(false)
-            setSpectrogram(data.spec)
-            setFrequencies(data.freqs)
+            setFrequencies(data.freqs.map( (freq) => Math.round(freq) ))
             setAudioArray(newAudioArray)
         } catch (error) {
             toast.error('An error occurred trying to generate the spectrogram. Check the console for more information')
@@ -349,9 +371,15 @@ function Track(
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(mouseX, mouseY)
             if ( clickedLabel ){
-                specCanvasRef.current.addEventListener('mousemove', dragOnset)
-                waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
-                labelCanvasRef.current.addEventListener('mousemove', dragOnset)
+
+                // specCanvasRef.current.addEventListener('mousemove', dragOnset)
+                // waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
+                // labelCanvasRef.current.addEventListener('mousemove', dragOnset)
+
+                dragListenerRef.current = dragOnset;
+                specCanvasRef.current.addEventListener('mousemove', dragListenerRef.current)
+                waveformCanvasRef.current.addEventListener('mousemove', dragListenerRef.current)
+                labelCanvasRef.current.addEventListener('mousemove', dragListenerRef.current)
                 return
             }
 
@@ -408,6 +436,7 @@ function Track(
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
             })
+
             setGlobalMouseCoordinates({x: event.clientX, y: event.clientY})
             return
         }
@@ -440,10 +469,10 @@ function Track(
                 color: ACTIVE_LABEL_COLOR,
             })
 
-            drawLineBetween(newestLabel)
-            drawClustername(newestLabel)
-            drawLine(newestLabel, newestLabel.onset)
-            drawLine(newestLabel, newestLabel.offset)
+            // drawLineBetween(newestLabel)
+            // drawClustername(newestLabel)
+            // drawLine(newestLabel, newestLabel.onset)
+            // drawLine(newestLabel, newestLabel.offset)
             return
         }
 
@@ -464,8 +493,6 @@ function Track(
             }
             return 
         }
-
-
         // after excluding all the other possiblities, the only case is to add new onset
         // at this moment, close the previously opened Label Window, since we are swicthing to a new label
         setExpandedLabel(null);
@@ -479,7 +506,6 @@ function Track(
 
     const handleMouseUp = (event) => {
         if (event.button !== 0) return
-
         removeDragEventListeners()
 
         // Only do this when mouse up event stems from dragging a label (equivalent to clickedLabel being true)
@@ -503,9 +529,11 @@ function Track(
                 trackID: trackID,
                 color: ACTIVE_LABEL_COLOR,
             })
+            
         }
 
         // Only do this when mouse up event stems from dragging the active label (equivalent to draggedActiveLabel being true)
+        // ADD: this is used to drag the label of one channel from another channel
         if (draggedActiveLabel){
 
             // Flip onset with offset if necessary
@@ -521,6 +549,7 @@ function Track(
                 onset: draggedActiveLabel.onset,
                 offset: draggedActiveLabel.offset,
             })
+
         }
 
         // Only do this when mouse up event stems from dragging the frequency lines
@@ -531,15 +560,16 @@ function Track(
         clickedLabel = undefined
         draggedActiveLabel = null
         draggedFrequencyLinesObject = null
+        
 
     }
 
     const removeDragEventListeners = () => {
-        specCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        specCanvasRef.current.removeEventListener('mousemove', dragListenerRef.current )//dragOnset)
         specCanvasRef.current.removeEventListener('mousemove', dragOffset)
-        waveformCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        waveformCanvasRef.current.removeEventListener('mousemove', dragListenerRef.current )//dragOnset)
         waveformCanvasRef.current.removeEventListener('mousemove', dragOffset)
-        labelCanvasRef.current.removeEventListener('mousemove', dragOnset)
+        labelCanvasRef.current.removeEventListener('mousemove', dragListenerRef.current )//dragOnset)
         labelCanvasRef.current.removeEventListener('mousemove', dragOffset)
         specCanvasRef.current.removeEventListener('mousemove', dragMaxFreqLine)
         specCanvasRef.current.removeEventListener('mousemove', dragMinFreqLine)
@@ -788,6 +818,7 @@ function Track(
     /* ++++++++++++++++++ Draw methods ++++++++++++++++++ */
 
     const drawAllCanvases = (spectrogram, frequenciesArray, newAudioArray) => {
+
         // Draw Time Axis, Viewport
         if (showOverviewBarAndTimeAxis){
             drawTimeAxis()
@@ -798,6 +829,7 @@ function Track(
 
         const specCVS = specCanvasRef.current;
         const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
+
         const image = new Image();
 
         const labelCVS = labelCanvasRef.current
@@ -993,6 +1025,196 @@ function Track(
         return `${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
     }
 
+    const drawCurvedOnsetNew = (specCVS, waveformCVS, curve_time, color) => {
+        const cvs = specCVS
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+
+        const n_bins = cvs.height
+
+        const curve_top_pos = calculateXPosition(curve_time)
+        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
+        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
+
+        let xs = []
+        for (let i = 0; i < cvs.width; i += 0.01){
+            xs.push(i)
+        }
+        xs = xs.filter(x => x >= curve_top_pos + offset_para - curve_width && x <= curve_top_pos)
+
+        let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((curve_top_pos + offset_para - x) / curve_width))
+
+        let i = 0
+        let previousX = null
+        let previousY = null
+        for (let x of xs){
+            const x1 = previousX ? previousX : x
+            const x2 = x
+            const y1 = previousY ? previousY : ys[i]
+            const y2 = ys[i]
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+            previousX = x
+            previousY = ys[i]
+            i++
+        }
+
+        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
+        let x1 = xs[0]
+        let x2 = xs[xs.length-1]
+        let y = cvs.height - 1
+
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw line inside the waveform
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
+
+        const x = curve_top_pos
+        const y1 = 0
+        const y2 = waveformCVS.height
+
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, y1)
+        waveformCTX.lineTo(x, y2)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = color
+        waveformCTX.stroke()
+    }
+
+    const drawCurvedOffsetNew = (specCVS, waveformCVS, curve_time, color) => {
+        const cvs = specCVS
+        const ctx = cvs.getContext('2d', { willReadFrequently: true })
+        
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+
+        const n_bins = cvs.height
+
+        const curve_top_pos = calculateXPosition(curve_time)
+        const curve_width = (0.5 * binsPerOctave / minFreq) * globalSamplingRate / globalHopLength
+        const offset_para = curve_width * Math.pow(2, -n_bins / binsPerOctave)
+
+        let xs = []
+        for (let i = 0; i < cvs.width; i += 0.1){
+            xs.push(i)
+        }
+        xs = xs.filter(x => x <= curve_top_pos - offset_para + curve_width && x >= curve_top_pos)
+
+        let ys = xs.map(x => cvs.height - -binsPerOctave * Math.log2((x - (curve_top_pos - offset_para)) / curve_width))
+
+        let i = 0
+        let previousX = null
+        let previousY = null
+        for (let x of xs){
+            const x1 = previousX ? previousX : x
+            const x2 = x
+            const y1 = previousY ? previousY : ys[i]
+            const y2 = ys[i]
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+            previousX = x
+            previousY = ys[i]
+            i++
+        }
+
+        // Draw horizontal line connecting the bottom end of the curved line with the line in the label canvas
+        let x1 = xs[0]
+        let x2 = xs[xs.length-1]
+        let y = cvs.height - 1
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw horizontal line connecting the top end of the curved line with the line in the waveform canvas
+        x1 = xs[findClosestPositiveToZeroIndex(ys)]
+        x2 = curve_top_pos
+        y = 1
+        ctx.beginPath()
+        ctx.setLineDash([1, 1])
+        ctx.moveTo(x1, y)
+        ctx.lineTo(x2, y)
+        ctx.lineWidth = 2
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        // Draw line inside the waveform
+        const waveformCTX = waveformCVS.getContext('2d', { willReadFrequently: true })
+
+        const x = curve_top_pos
+        const y1 = 0
+        const y2 = waveformCVS.height
+
+        waveformCTX.beginPath()
+        waveformCTX.moveTo(x, y1)
+        waveformCTX.lineTo(x, y2)
+        waveformCTX.lineWidth = 2
+        waveformCTX.strokeStyle = color
+        waveformCTX.stroke()
+    }
+
+    const drawTimestampLine = ( specCVS, waveformCVS, labelCVS, label, timestamp, lineColor ) => {
+        const waveformCTX = waveformCVS.getContext('2d')
+        const specCTX = specCVS.getContext('2d')
+        const labelCTX = labelCVS.getContext('2d')
+
+        const x = calculateXPosition(timestamp)
+        const y = calculateYPosition(label)
+
+        if (specCalMethod === 'constant-q'){
+            if (timestamp === label.onset){
+                drawCurvedOnsetNew(specCVS, waveformCVS, timestamp, lineColor)
+            }
+            if (timestamp === label.offset){
+                drawCurvedOffsetNew(specCVS, waveformCVS, timestamp, lineColor)
+            }
+        } else {
+            waveformCTX.beginPath()
+            waveformCTX.setLineDash([1, 1])
+            waveformCTX.moveTo(x, 0)
+            waveformCTX.lineTo(x, waveformCVS.height)
+            waveformCTX.lineWidth = 2
+            waveformCTX.strokeStyle = lineColor
+            waveformCTX.stroke()
+            waveformCTX.setLineDash([])
+
+            specCTX.beginPath()
+            specCTX.setLineDash([1, 1])
+            specCTX.moveTo(x, 0)
+            specCTX.lineTo(x, specCVS.height)
+            specCTX.lineWidth = 2
+            specCTX.strokeStyle = lineColor
+            specCTX.stroke()
+            specCTX.setLineDash([])
+        }
+
+        labelCTX.beginPath()
+        labelCTX.setLineDash([1, 1])
+        labelCTX.moveTo(x, 0)
+        labelCTX.lineTo(x, y)
+        labelCTX.lineWidth = 2
+        labelCTX.strokeStyle = lineColor
+        labelCTX.stroke()
+        labelCTX.setLineDash([])
+    }
+
     const drawLine = (label, timestamp) => {
         const waveformCTX = waveformCanvasRef.current.getContext('2d')
         const specCTX = specCanvasRef.current.getContext('2d')
@@ -1047,6 +1269,8 @@ function Track(
         const xOnset = calculateXPosition(label.onset)
         const xOffset = calculateXPosition(label.offset)
         let y = calculateYPosition(label)
+
+        
         // Position annotate area labels one pixel higher, so they don't get cut in half at the canvas edge
         if (label.species === ANNOTATED_AREA){
             y--
@@ -1178,6 +1402,7 @@ function Track(
     const drawCurvedOffset = (curve_time, color) => {
         const cvs = specCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true })
+        
         ctx.lineWidth = 2
         ctx.strokeStyle = color
 
@@ -1281,6 +1506,8 @@ function Track(
 
         // Always draw active label except for the track where it originates from (to prevent the active label from overdrawing the original label)
         // Don't draw it if active label is being dragged, to avoid drawing the outdated active label
+        
+        // UPDATE: do not draw active label at this canvas
         if (activeLabel && activeLabel?.trackID !== trackID && !draggedActiveLabel) {
             drawActiveLabel(activeLabel)
         }
@@ -1339,7 +1566,7 @@ function Track(
     const drawIndividualsCanvas = () => {
         const cvs = individualsCanvasRef.current
         const ctx = cvs.getContext('2d', { willReadFrequently: true })
-        ctx.clearRect(0, 0, cvs.width, cvs.height)
+        ctx.clearRect(0, 0, cvs.width, cvs.height )        
 
         ctx.strokeStyle = '#ffffff'
         ctx.fillStyle = '#ffffff'
@@ -1458,10 +1685,11 @@ function Track(
         return label
     }
 
-    const dragOnset = (event) => {
+    const dragOnset =  (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
-        clickedLabel.onset = calculateTimestamp(event)
+        clickedLabel.onset = calculateTimestamp(event)              
     }
+
 
     const dragOffset = (event) => {
         clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
@@ -2000,7 +2228,7 @@ function Track(
     }
 
     const drawWaveform = (newAudioArray) => {
-        if (!waveformCanvasRef.current || !newAudioArray) return
+        if (!waveformCanvasRef.current || !newAudioArray || !displayWaveform) return
 
         const canvas = waveformCanvasRef.current
         const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
@@ -2040,9 +2268,9 @@ function Track(
          setWaveformScale(prevState => Math.max(prevState * 0.7, 1))
      }
 
-    const toggleShowWaveform = () => {
+    const toggleDisplayWaveform = () => {
         if (!spectrogram) return
-        setShowWaveform(!showWaveform)
+        setDisplayWaveform(!displayWaveform)
     }
 
 
@@ -2130,12 +2358,12 @@ function Track(
     const handleClickFrequencyLinesBtn = () => {
         // setShowFrequencyLines(true)
         // // setFrequencyLines({...frequencyLines})
-        // setFrequencyLines({maxFreqY: 0, minFreqY: SPEC_CVS_HEIGHT})
+        // setFrequencyLines({maxFreqY: 0, minFreqY: specCanvasHeight})
         // allowUpdateMinFreqGivenLineY.current = true
         // allowUpdateMaxFreqGivenLineY.current = true
 
         setShowFrequencyLines(true)
-        setFrequencyLines({maxFreqY: -10, minFreqY: SPEC_CVS_HEIGHT + 10})
+        setFrequencyLines({maxFreqY: -10, minFreqY: specCanvasHeight + 10})
         allowUpdateMinFreqGivenLineY.current = false
         allowUpdateMaxFreqGivenLineY.current = false
         setNumFreqLinesToAnnotate(2)
@@ -2150,15 +2378,15 @@ function Track(
         allowUpdateMaxFreqGivenLineY.current = false
     }
 
-    const getFrequencyAtYPosition = (y, canvasHeight, frequenciesArray ) => {
-        let index = Math.floor(((canvasHeight - y) / canvasHeight) * frequenciesArray.length)
-        index = index >= frequenciesArray.length ? frequenciesArray.length - 1 : index
-        return Math.round(frequenciesArray[index])
-    }
-
+    const getFrequencyAtYPosition = (y, canvasHeight, frequenciesArray) => {
+        // Use array.length - 1 to match the inverse function
+        let index = Math.round(((canvasHeight - y) / canvasHeight) * (frequenciesArray.length - 1));
+        index = Math.min(index, frequenciesArray.length - 1);
+        index = Math.max(0, index);
+        return frequenciesArray[index];
+    };
+    
     const getYPositionAtFrequency = (frequency, canvasHeight, frequenciesArray) => {
-        // Find the index of the closest frequency in the frequenciesArray
-
         if ( frequency === '' ) return -20
         if ( frequency < frequenciesArray[0] - 1 ) return canvasHeight + 10  // -1 to make sure frequency is really small enough
         if ( frequency > frequenciesArray[frequenciesArray.length - 1] + 1 ) return -10 // +1 to make sure frequency is really large enough
@@ -2169,14 +2397,9 @@ function Track(
                 : closestIdx;
         }, 0);
     
-        // Calculate the y position based on the closest index
         let y = Math.round((1 - closestIndex / (frequenciesArray.length - 1)) * canvasHeight);
-    
-        // Ensure y is within valid range
-        y = Math.max(0, Math.min(canvasHeight, y)); // Clamp between 0 and canvasHeight
-    
-        return y;
-    }
+        return Math.max(0, Math.min(canvasHeight, y));
+    };
     
 
     const drawFrequencyLines = (frequenciesArray) => {
@@ -2254,7 +2477,9 @@ function Track(
     useEffect( () => {
         if (!spectrogram || !audioArray) return
         drawAllCanvases(spectrogram, frequencies, audioArray)
-    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, canvasWidth] )
+    }, [labels, waveformScale, showWaveform, showFrequencyLines, trackData.visible, showOverviewBarAndTimeAxis, 
+        canvasWidth, specCanvasHeight, 
+        spectrogram] )  // debugging: add spectrogram into useEffect
 
     // When a user adds a new label, thus creating a new active label in the other tracks
     useEffect( () => {
@@ -2516,6 +2741,45 @@ function Track(
         }
      },[ expandedLabel ])
 
+    useEffect(()=>{
+        if (!globalClipDuration || !trackData.audioID) return
+        clearAndRedrawSpecAndWaveformCanvases(playheadRef.current.timeframe)
+        
+        const specCVS = specCanvasRef.current;
+        const specCTX = specCVS.getContext('2d', { willReadFrequently: true, alpha: false });
+        specCTX.clearRect(0, 0, specCVS.width, specCVS.height);
+
+        drawFrequenciesAxis(frequencies);
+
+    },[ specCanvasHeight ]);
+
+    useEffect(()=>{
+        setDisplayWaveform( showAllWaveforms );
+    },[ showAllWaveforms ]);
+
+    useEffect(()=>{
+        if (!audioArray || !displayWaveform) return
+        const canvas = waveformCanvasRef.current
+        const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true })
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawWaveform( audioArray )
+        drawAllLabels()
+    },[ audioArray, displayWaveform ]);
+
+    useEffect(()=>{
+        setShowLabelAndIndividualsCanvas( showAllLabels );
+    },[ showAllLabels ]);
+
+    useEffect(()=>{
+        if (!showLabelAndIndividualsCanvas || !labelCanvasRef.current ) return
+        if (!globalClipDuration || !trackData.audioID) return
+        const labelCVS = labelCanvasRef.current
+        const labelCTX = labelCVS.getContext('2d', { willReadFrequently: true, alpha: true });
+        labelCTX.clearRect(0, 0, labelCVS.width, labelCVS.height)
+        drawIndividualsCanvas()
+        drawAllLabels()
+    },[ showLabelAndIndividualsCanvas ]);
 
     return (
         <>
@@ -2525,6 +2789,9 @@ function Track(
                     ref={overviewTimeAxisContainerRef}
                     onMouseUp={handleMouseUpOverview}
                     onContextMenu={(event) => event.preventDefault()}
+                    style={{"paddingLeft":`0px`,
+                            "marginLeft":`${TRACK_SIDEBAR_WIDTH}px`
+                            }}
                 >
                     <canvas
                         className='overview-canvas'
@@ -2537,10 +2804,14 @@ function Track(
                     <button
                         id='left-scroll-overview-btn'
                         onClick={leftScrollOverview}
+                        style={{"paddingLeft":`${TRACK_SIDEBAR_WIDTH - 200 + 3}px`,
+                                "marginLeft":"0px"
+                        }}
                     />
                     <button
                         id='right-scroll-overview-btn'
                         onClick={rightScrollOverview}
+                        style={{"marginLeft":`${TRACK_SIDEBAR_WIDTH - 200 - 3  }px`}}
                     />
                     <canvas
                         className='time-axis-canvas'
@@ -2567,224 +2838,384 @@ function Track(
                     className='track-container'
                     onMouseLeave={handleMouseLeaveTrackContainer}
                 >
-                    <div className={showWaveform ? 'side-window' : 'side-window-small'}>
-                        <div className={showWaveform ? 'track-controls' : 'track-controls-small'}>
-                            <div className='show-track-file-upload-container'>
-                                <Tooltip title={`Hide Track ${trackData.trackIndex}`}>
-                                    <IconButton
-                                        style={toggleVisibilityBtn}
-                                        onClick={() => toggleTrackVisibility(trackID)}
+                    <Box display="flex" flexDirection="column" width="100vw">
+                        <Box display="flex" flexDirection="row">
+                            {/* Box_left */}
+                            <Box display="flex" flexDirection="column">
+                                <Box display="flex" flexDirection="row">
+                                    <Box
+                                        width={`${controlPanelWidth}px`}
+                                        height={`${WAVEFORM_CVS_HEIGHT + specCanvasHeight}px`}
+                                        border={0}
+                                        display="flex"
+                                        flexDirection="row" // Arrange buttons in a row to allow wrapping
+                                        flexWrap="wrap" // Enable wrapping to form a grid layout
+                                        alignContent="flex-start" // Align content to the top of the container
+                                        style={{ overflowY: 'auto', overflowX: 'hidden' }} // Restrict overflow to vertical with hidden horizontal scroll
                                     >
-                                        <VisibilityOffIcon style={icon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <LocalFileUpload
-                                    filename={trackData.filename}
-                                    trackID={trackID}
-                                    specCalMethod={specCalMethod}
-                                    nfft={nfft}
-                                    binsPerOctave={binsPerOctave}
-                                    minFreq={minFreq}
-                                    maxFreq={maxFreq}
-                                    passSpectrogramIsLoadingToTrack={passSpectrogramIsLoadingToTrack}
-                                    handleUploadResponse={handleUploadResponse}
-                                    handleUploadError={handleUploadError}
-                                    strictMode={strictMode}
-                                />
-                            </div>
-                            <div>
-                                <Tooltip title="Move Track Up">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(trackData.trackIndex === 0 && iconBtnDisabled)}}
-                                        disabled={trackData.trackIndex === 0}
-                                        onClick={() => moveTrackUp(trackID)}
-                                    >
-                                        <VerticalAlignTopIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Move Track Down">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(trackData.trackIndex === lastTrackIndex && iconBtnDisabled)}}
-                                        disabled={trackData.trackIndex === lastTrackIndex}
-                                        onClick={() => moveTrackDown(trackID)}
-                                    >
-                                        <VerticalAlignBottomIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Change Track Parameters">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(spectrogramIsLoading && iconBtnDisabled)}}
-                                        disabled={spectrogramIsLoading}
-                                        onClick={() => setShowLocalConfigWindow(true)}
-                                    >
-                                        <TuneIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <WhisperSeg
-                                    audioId={audioId}
-                                    minFreq={minFreq}
-                                    labels={labels}
-                                    speciesArray={speciesArray}
-                                    passLabelsToTrack={passLabelsToTrack}
-                                    passWhisperSegIsLoadingToTrack={passWhisperSegIsLoadingToTrack}
-                                    activeIconBtnStyle={activeIconBtnStyle}
-                                    activeIcon={activeIcon}
-                                    strictMode={strictMode}
-                                    passSpeciesArrayToApp={passSpeciesArrayToApp}
-                                    assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
-                                    tokenInference={tokenInference}
-                                    tokenFinetune={tokenFinetune}
-                                    passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
-                                    passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
-                                />
-                                {/* <Tooltip title="Frequency Range">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(!audioId && iconBtnDisabled)}}
-                                        disabled={!audioId}
-                                        onClick={handleClickFrequencyLinesBtn}
-                                    >
-                                        <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
-                                    </IconButton>
-                                </Tooltip> */}
-                                <Tooltip title={showWaveform ? 'Hide Waveform' : 'Show Waveform'}>
-                                    <IconButton
-                                        style={activeIconBtnStyle}
-                                        onClick={toggleShowWaveform}
-                                    >
-                                        <GraphicEqIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title={`${showLabelAndIndividualsCanvas ? 'Hide' : 'Show'} Annotations Panel`}>
-                                    <IconButton
-                                        style={activeIconBtnStyle}
-                                        onClick={() => setShowLabelAndIndividualsCanvas(prevState => !prevState)}
-                                    >
-                                        {showLabelAndIndividualsCanvas ? <ExpandLessIcon style={activeIcon}/> : <ExpandMoreIcon style={activeIcon}/>}
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Delete Track">
-                                    <IconButton
-                                        style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
-                                        disabled={strictMode}
-                                        onClick={handleRemoveTrack}
-                                    >
-                                        <DeleteIcon style={activeIcon}/>
-                                    </IconButton>
-                                </Tooltip>
-                            </div>
-                            <div className='audio-controls'>
-                                <IconButton
-                                    style={iconBtn}
-                                    onClick={() => getAudio(currentStartTime, globalClipDuration)}
+                                            <LocalFileUpload
+                                                filename={trackData.filename}
+                                                trackID={trackID}
+                                                specCalMethod={specCalMethod}
+                                                nfft={nfft}
+                                                binsPerOctave={binsPerOctave}
+                                                minFreq={minFreq}
+                                                maxFreq={maxFreq}
+                                                passSpectrogramIsLoadingToTrack={passSpectrogramIsLoadingToTrack}
+                                                handleUploadResponse={handleUploadResponse}
+                                                handleUploadError={handleUploadError}
+                                                strictMode={strictMode}
+                                            />
+                                            <Tooltip title={`Hide Track ${trackData.trackIndex}`}>
+                                                <IconButton
+                                                    style={toggleVisibilityBtn}
+                                                    onClick={() => toggleTrackVisibility(trackID)}
+                                                >
+                                                    <VisibilityOffIcon style={icon}/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title={displayWaveform ? 'Hide Waveform' : 'Show Waveform'}>
+                                                <IconButton
+                                                    style={{
+                                                        position: 'relative',
+                                                        paddingBottom: "15px",
+                                                        marginTop: "8px",
+                                                        marginRight: "15px",
+                                                        marginLeft: "8px",
+                                                    }}
+                                                    onClick={ toggleDisplayWaveform }
+                                                    >
+                                                    {/* First Icon */}
+                                                    <GraphicEqIcon
+                                                        style={{
+                                                        position: 'absolute',
+                                                        top: '0',
+                                                        left: '0',
+                                                        // fontSize: '24px',
+                                                        color: "white"
+                                                        }}
+                                                    />
+                                                    {/* Second Icon */}
+                                                    { displayWaveform?
+                                                        <VisibilityOffIcon
+                                                            style={{
+                                                            position: 'absolute',
+                                                            top: '-5',
+                                                            left: '15px', // Adjust for overlap
+                                                            fontSize: '16px',
+                                                            color: "white"
+                                                            }}
+                                                        />:
+                                                        <VisibilityIcon
+                                                            style={{
+                                                            position: 'absolute',
+                                                            top: '-5',
+                                                            left: '15px', // Adjust for overlap
+                                                            fontSize: '16px',
+                                                            color: "white"
+                                                            }}
+                                                        />
+                                                    }
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title={`${showLabelAndIndividualsCanvas ? 'Hide' : 'Show'} Annotations Panel`}>
+                                                <IconButton
+                                                    style={{
+                                                        position: 'relative',
+                                                        paddingBottom: "15px",
+                                                        marginTop: "8px",
+                                                        marginRight: "15px",
+                                                        marginLeft: "8px",
+                                                    }}
+                                                    onClick={ ()=>{ setShowLabelAndIndividualsCanvas(!showLabelAndIndividualsCanvas) } }
+                                                    >
+                                                    {/* First Icon */}
+                                                    <LineStyleIcon
+                                                        style={{
+                                                        position: 'absolute',
+                                                        top: '0',
+                                                        left: '0',
+                                                        // fontSize: '24px',
+                                                        color: "white"
+                                                        }}
+                                                    />
+                                                    {/* Second Icon */}
+                                                    { showLabelAndIndividualsCanvas?
+                                                        <VisibilityOffIcon
+                                                            style={{
+                                                            position: 'absolute',
+                                                            top: '-5',
+                                                            left: '15px', // Adjust for overlap
+                                                            fontSize: '16px',
+                                                            color: "white"
+                                                            }}
+                                                        />:
+                                                        <VisibilityIcon
+                                                            style={{
+                                                            position: 'absolute',
+                                                            top: '-5',
+                                                            left: '15px', // Adjust for overlap
+                                                            fontSize: '16px',
+                                                            color: "white"
+                                                            }}
+                                                        />
+                                                    }
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Change Track Parameters">
+                                                <IconButton
+                                                    style={{...activeIconBtnStyle, ...(spectrogramIsLoading && iconBtnDisabled)}}
+                                                    disabled={spectrogramIsLoading}
+                                                    onClick={() => setShowLocalConfigWindow(true)}
+                                                >
+                                                    <TuneIcon style={activeIcon}/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <WhisperSeg
+                                                audioId={audioId}
+                                                minFreq={minFreq}
+                                                labels={labels}
+                                                speciesArray={speciesArray}
+                                                passLabelsToTrack={passLabelsToTrack}
+                                                passWhisperSegIsLoadingToTrack={passWhisperSegIsLoadingToTrack}
+                                                activeIconBtnStyle={activeIconBtnStyle}
+                                                activeIcon={activeIcon}
+                                                strictMode={strictMode}
+                                                passSpeciesArrayToApp={passSpeciesArrayToApp}
+                                                assignSpeciesInformationToImportedLabels={assignSpeciesInformationToImportedLabels}
+                                                tokenInference={tokenInference}
+                                                tokenFinetune={tokenFinetune}
+                                                passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
+                                                passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                                            />
+                                            {/* <Tooltip title="Frequency Range">
+                                                <IconButton
+                                                    style={{...activeIconBtnStyle, ...(!audioId && iconBtnDisabled)}}
+                                                    disabled={!audioId}
+                                                    onClick={handleClickFrequencyLinesBtn}
+                                                >
+                                                    <DensityLargeIcon style={{...activeIcon, ...(showFrequencyLines && {color: FREQUENCY_LINES_COLOR})}}/>
+                                                </IconButton>
+                                            </Tooltip> */}
+                                            <Tooltip title="Move Track Up">
+                                                <IconButton
+                                                    style={{...activeIconBtnStyle, ...(trackData.trackIndex === 0 && iconBtnDisabled)}}
+                                                    disabled={trackData.trackIndex === 0}
+                                                    onClick={() => moveTrackUp(trackID)}
+                                                >
+                                                    <VerticalAlignTopIcon style={activeIcon}/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Move Track Down">
+                                                <IconButton
+                                                    style={{...activeIconBtnStyle, ...(trackData.trackIndex === lastTrackIndex && iconBtnDisabled)}}
+                                                    disabled={trackData.trackIndex === lastTrackIndex}
+                                                    onClick={() => moveTrackDown(trackID)}
+                                                >
+                                                    <VerticalAlignBottomIcon style={activeIcon}/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Delete Track">
+                                                <IconButton
+                                                    style={{...activeIconBtnStyle, ...(strictMode && iconBtnDisabled)}}
+                                                    disabled={strictMode}
+                                                    onClick={handleRemoveTrack}
+                                                >
+                                                    <DeleteIcon style={activeIcon}/>
+                                                </IconButton>
+                                            </Tooltip>
+                                        <div className='audio-controls'>
+                                            <IconButton
+                                                style={iconBtn}
+                                                onClick={() => getAudio(currentStartTime, globalClipDuration)}
+                                            >
+                                                <PlayArrowIcon style={activeIcon}/>
+                                            </IconButton>
+                                            <IconButton style={iconBtn} onClick={pauseAudio}>
+                                                <PauseIcon style={activeIcon}/>
+                                            </IconButton>
+                                            <IconButton style={iconBtn} onClick={stopAudio}>
+                                                <StopIcon style={activeIcon}/>
+                                            </IconButton>
+                                        </div>
+                                        {showLocalConfigWindow && !spectrogramIsLoading &&
+                                            <Parameters
+                                                specCalMethod={specCalMethod}
+                                                nfft={nfft}
+                                                binsPerOctave={binsPerOctave}
+                                                minFreq={minFreq}
+                                                maxFreq={maxFreq}
+                                                passShowLocalConfigWindowToTrack={passShowLocalConfigWindowToTrack}
+                                                passSpecCalMethodToTrack={passSpecCalMethodToTrack}
+                                                passNfftToTrack={passNfftToTrack}
+                                                passBinsPerOctaveToTrack={passBinsPerOctaveToTrack}
+                                                passMinFreqToTrack={passMinFreqToTrack}
+                                                passMaxFreqToTrack={passMaxFreqToTrack}
+                                                submitLocalParameters={submitLocalParameters}
+                                                strictMode={strictMode}
+                                                spectrogram={spectrogram}
+                                            />
+                                        }
+                                        
+                                    </Box>
+                                    <Box display="flex" flexDirection="column">
+                                        {/* Area B */}
+                                        <Box
+                                        width={`${specYAxisWidth}px`}
+                                        height={`${WAVEFORM_CVS_HEIGHT}px`}
+                                        border={0}
+                                        display={ displayWaveform? "flex":"none"} 
+                                        >
+                                                <div 
+                                                    className={audioArray ? 'waveform-buttons' : 'hidden'}
+                                                >
+                                                    <IconButton style={freqBtn} onClick={waveformZoomIn}>
+                                                        <ZoomInIcon style={icon}/>
+                                                    </IconButton>
+                                                    <IconButton style={freqBtn} onClick={waveformZoomOut}>
+                                                        <ZoomOutIcon style={icon}/>
+                                                    </IconButton>
+                                                </div>
+                                        </Box>
+                                        {/* Area D */}
+                                        <Box
+                                        width={`${specYAxisWidth}px`}
+                                        height={`${specCanvasHeight}px`}
+                                        border={0}
+                                        style={{"marginTop":"-20px"}}
+                                        >
+                                            <canvas
+                                                className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
+                                                ref={frequenciesCanvasRef}
+                                                width={specYAxisWidth}
+                                                height={specCanvasHeight+20} //{showWaveform ? FREQ_CVS_HEIGHT : specCanvasHeight }
+                                                // style={{"paddingTop":"50px"}}
+                                            />
+                                        </Box>
+                                    </Box>
+                                </Box>
+                                {/* Area F */}
+                                <Box
+                                    width={`${TRACK_SIDEBAR_WIDTH}px`}
+                                    height={showLabelAndIndividualsCanvas?"50px":"0px"}
+                                    border={0}
                                 >
-                                    <PlayArrowIcon style={activeIcon}/>
-                                </IconButton>
-                                <IconButton style={iconBtn} onClick={pauseAudio}>
-                                    <PauseIcon style={activeIcon}/>
-                                </IconButton>
-                                <IconButton style={iconBtn} onClick={stopAudio}>
-                                    <StopIcon style={activeIcon}/>
-                                </IconButton>
-                            </div>
-                            {showLocalConfigWindow && !spectrogramIsLoading &&
-                                <Parameters
-                                    specCalMethod={specCalMethod}
-                                    nfft={nfft}
-                                    binsPerOctave={binsPerOctave}
-                                    minFreq={minFreq}
-                                    maxFreq={maxFreq}
-                                    passShowLocalConfigWindowToTrack={passShowLocalConfigWindowToTrack}
-                                    passSpecCalMethodToTrack={passSpecCalMethodToTrack}
-                                    passNfftToTrack={passNfftToTrack}
-                                    passBinsPerOctaveToTrack={passBinsPerOctaveToTrack}
-                                    passMinFreqToTrack={passMinFreqToTrack}
-                                    passMaxFreqToTrack={passMaxFreqToTrack}
-                                    submitLocalParameters={submitLocalParameters}
-                                    strictMode={strictMode}
-                                    spectrogram={spectrogram}
-                                />
-                            }
-                        </div>
-                        <div className='waveform-buttons-frequencies-canvas-container'>
-                            <div className={showWaveform ? 'waveform-buttons' : 'hidden'}>
-                                <IconButton style={freqBtn} onClick={waveformZoomIn}>
-                                    <ZoomInIcon style={icon}/>
-                                </IconButton>
-                                <IconButton style={freqBtn} onClick={waveformZoomOut}>
-                                    <ZoomOutIcon style={icon}/>
-                                </IconButton>
-                            </div>
-                            <canvas
-                                className={showWaveform ? 'frequencies-canvas' : 'frequencies-canvas-small'}
-                                ref={frequenciesCanvasRef}
-                                width={FREQ_CVS_WIDTH}
-                                height={showWaveform ? FREQ_CVS_HEIGHT : SPEC_CVS_HEIGHT}
-                            />
-                        </div>
-                        <canvas
-                            className={showLabelAndIndividualsCanvas ? 'individuals-canvas' : 'hidden'}
-                            ref={individualsCanvasRef}
-                            width={TRACK_SIDEBAR_WIDTH}
-                            height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                        />
-                    </div>
+                                    <canvas
+                                        className={showLabelAndIndividualsCanvas ? 'individuals-canvas' : 'hidden'}
+                                        ref={individualsCanvasRef}
+                                        width={TRACK_SIDEBAR_WIDTH}
+                                        height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES }
+                                    />
+                                </Box>
+                            </Box>
+                            {/* Box_right */}
+                            <Box 
+                                onMouseLeave={handleMouseLeaveCanvases}
+                                display="flex" flexDirection="column" flex="1">
+                                {/* Area C*/}
+                                <Box height={`${WAVEFORM_CVS_HEIGHT}px`} border={0} >
+                                        <div className='waveform-spec-labels-canvases-container' >
+                                            <canvas
+                                                    className={showWaveform ? 'waveform-canvas' : 'hidden'}
+                                                    ref={waveformCanvasRef}
+                                                    width={canvasWidth}
+                                                    height={WAVEFORM_CVS_HEIGHT}
+                                                    onMouseDown={handleLMBDown}
+                                                    onMouseUp={handleMouseUp}
+                                                    onContextMenu={handleRightClick}
+                                                    onMouseMove={handleMouseMove}
+                                                />
+                                            {/* Overlay canvas for the waveform */}
+                                            <canvas
+                                                className="waveform-overlay-canvas"
+                                                ref={waveformOverlayCanvasRef}
+                                                width={canvasWidth}
+                                                height={WAVEFORM_CVS_HEIGHT}
+                                                style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }} // Pass-through style
+                                            />
+                                        </div>
+                                </Box>
+                                {/* Area E */}
+                                <Box
+                                        height={`${specCanvasHeight}px`}
+                                        border={0}
+                                        flex="1"
+                                        >
+                                            <div  className='waveform-spec-labels-canvases-container'>
+                                                <canvas
+                                                    className='spec-canvas'
+                                                    ref={specCanvasRef}
+                                                    width={canvasWidth}
+                                                    height={specCanvasHeight}
+                                                    onMouseDown={handleLMBDown}
+                                                    onMouseUp={handleMouseUp}
+                                                    onContextMenu={handleRightClick}
+                                                    onMouseMove={handleMouseMove}
+                                                />
+                                            <canvas
+                                                className="spec-overlay-canvas"
+                                                ref={specOverlayCanvasRef}
+                                                width={canvasWidth}
+                                                height={specCanvasHeight}
+                                                style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }} // Pass-through style
+                                            />
+                                            </div>
+                                </Box>
+                                {/* Area G */}
+                                <Box
+                                        flex="1"
+                                        height={showLabelAndIndividualsCanvas?`${numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}px`:"0px"}
+                                        border={0}
+                                    >
+                                        <div className='waveform-spec-labels-canvases-container'>
+                                                <canvas
+                                                    className={showLabelAndIndividualsCanvas ? 'label-canvas' : 'hidden'}
+                                                    ref={labelCanvasRef}
+                                                    width={canvasWidth}
+                                                    height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                                                    onMouseDown={handleLMBDown}
+                                                    onMouseUp={handleMouseUp}
+                                                    onContextMenu={handleRightClick}
+                                                    onMouseMove={handleMouseMove}
+                                                />
+                                                <canvas
+                                                    className="label-overlay-canvas"
+                                                    ref={labelOverlayCanvasRef}
+                                                    width={canvasWidth}
+                                                    height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
+                                                    style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }} // Pass-through style
+                                                />
+                                                {
+                                                    expandedLabel &&
+                                                    createPortal(
+                                                        <LabelWindow
+                                                            speciesArray={speciesArray}
+                                                            labels={labels}
+                                                            expandedLabel={expandedLabel}
+                                                            passLabelsToTrack={passLabelsToTrack}
+                                                            passExpandedLabelToTrack={passExpandedLabelToTrack}
+                                                            getAllIndividualIDs={getAllIndividualIDs}
+                                                            globalMouseCoordinates={globalMouseCoordinates}
+                                                            audioId={audioId}
+                                                            getAudio={getAudio}
+                                                            handleClickFrequencyLinesBtn={handleClickFrequencyLinesBtn}
+                                                            handleClickRemoveAnnotatedFreqBtn={handleClickRemoveAnnotatedFreqBtn}
+                                                            numFreqLinesToAnnotate={numFreqLinesToAnnotate}
+                                                        />,
+                                                        document.body
+                                                    )
+                                                }
+                                                {spectrogramIsLoading || whisperSegIsLoading ?
+                                                    <Box sx={{width: '100%'}}><LinearProgress/></Box> : ''}
+                                        </div>
+                                </Box>
+                            </Box>
+                        </Box>
 
-                    <div className='waveform-spec-labels-canvases-container'
-                         onMouseLeave={handleMouseLeaveCanvases}>
-                        <canvas
-                            className={showWaveform ? 'waveform-canvas' : 'hidden'}
-                            ref={waveformCanvasRef}
-                            width={canvasWidth}
-                            height={WAVEFORM_CVS_HEIGHT}
-                            onMouseDown={handleLMBDown}
-                            onMouseUp={handleMouseUp}
-                            onContextMenu={handleRightClick}
-                            onMouseMove={handleMouseMove}
-                        />
-                        <canvas
-                            className='spec-canvas'
-                            ref={specCanvasRef}
-                            width={canvasWidth}
-                            height={SPEC_CVS_HEIGHT}
-                            onMouseDown={handleLMBDown}
-                            onMouseUp={handleMouseUp}
-                            onContextMenu={handleRightClick}
-                            onMouseMove={handleMouseMove}
-                        />
-                        <canvas
-                            className={showLabelAndIndividualsCanvas ? 'label-canvas' : 'hidden'}
-                            ref={labelCanvasRef}
-                            width={canvasWidth}
-                            height={numberOfIndividuals * HEIGHT_BETWEEN_INDIVIDUAL_LINES}
-                            onMouseDown={handleLMBDown}
-                            onMouseUp={handleMouseUp}
-                            onContextMenu={handleRightClick}
-                            onMouseMove={handleMouseMove}
-                        />
-                        {
-                            expandedLabel &&
-                            createPortal(
-                                <LabelWindow
-                                    speciesArray={speciesArray}
-                                    labels={labels}
-                                    expandedLabel={expandedLabel}
-                                    passLabelsToTrack={passLabelsToTrack}
-                                    passExpandedLabelToTrack={passExpandedLabelToTrack}
-                                    getAllIndividualIDs={getAllIndividualIDs}
-                                    globalMouseCoordinates={globalMouseCoordinates}
-                                    audioId={audioId}
-                                    getAudio={getAudio}
-                                    handleClickFrequencyLinesBtn={handleClickFrequencyLinesBtn}
-                                    handleClickRemoveAnnotatedFreqBtn={handleClickRemoveAnnotatedFreqBtn}
-                                    numFreqLinesToAnnotate={numFreqLinesToAnnotate}
-                                />,
-                                document.body
-                            )
-                        }
-                        {spectrogramIsLoading || whisperSegIsLoading ?
-                            <Box sx={{width: '100%'}}><LinearProgress/></Box> : ''}
-                    </div>
+                    </Box>
+
                 </div>
+
             }
         </>
     )

@@ -28,6 +28,8 @@ import VerticalAlignTopIcon from '@mui/icons-material/VerticalAlignTop';
 import VerticalAlignBottomIcon from '@mui/icons-material/VerticalAlignBottom';
 import {Button} from '@mui/material';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
+import ContrastIcon from '@mui/icons-material/Contrast';
+import LightModeIcon from '@mui/icons-material/LightMode';
  
 // Internal dependencies
 import Parameters from "./Parameters.jsx"
@@ -101,7 +103,9 @@ function Track(
                             passTokenFinetuneToWhisperSeg,
                             specCanvasHeight,
                             showAllWaveforms,
-                            showAllLabels
+                            showAllLabels,
+                            globalSpecBrightness,
+                            globalSpecContrast
                         }
                     )
                 {
@@ -222,7 +226,12 @@ function Track(
     const WAVEFORM_CVS_HEIGHT = displayWaveform ? 60 : 0; // height of B and C
     const specYAxisWidth = 45;
     const controlPanelWidth = TRACK_SIDEBAR_WIDTH - specYAxisWidth;
-    
+
+    // Spectrogram
+    const [ specBrightness, setSpecBrightness ] = useState(1.0);
+    const [ specContrast, setSpecContrast ] = useState(1.0);
+    const [sliderSpecBrightnessValue, setSliderSpecBrightnessValue] = useState(1);
+    const [sliderSpecContrastValue, setSliderSpecContrastValue] = useState(1);
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -266,6 +275,25 @@ function Track(
         setWhisperSegIsLoading( boolean )
     }
 
+
+    /* ++++++++++++++++++ Handle brightness/contrast slider dragging ++++++++++++++++++ */
+    // Update the slider value as user drags
+    const handleSliderSpecBrightnessChange = (event) => {
+        setSliderSpecBrightnessValue(parseFloat(event.target.value));
+    };
+    const handleSliderSpecBrightnessMouseUp = () => {
+        setSpecBrightness(sliderSpecBrightnessValue);
+    };
+
+    const handleSliderSpecContrastChange = (event) => {
+        setSliderSpecContrastValue(parseFloat(event.target.value))
+    };
+
+    const handleSliderSpecContrastMouseUp = () => {
+        setSpecContrast( sliderSpecContrastValue )
+    };
+
+
     /* ++++++++++++++++++ Backend API calls ++++++++++++++++++ */
 
     const getAudioClipSpec = async () => {
@@ -281,7 +309,9 @@ function Track(
             n_fft: Number(nfft),
             bins_per_octave: Number(binsPerOctave),
             min_frequency: Number(minFreq),
-            max_frequency: Number(maxFreq)
+            max_frequency: Number(maxFreq),
+            brightness: specBrightness,
+            contrast: specContrast
         }
 
         try {
@@ -839,6 +869,7 @@ function Track(
         image.addEventListener('load', () => {
             specCTX.drawImage(image, 0, 0, specCVS.width, specCVS.height);
             specImgData.current = specCTX.getImageData(0, 0, specCVS.width, specCVS.height);
+
             drawWaveform(newAudioArray)
             drawFrequenciesAxis(frequenciesArray)
             drawIndividualsCanvas()
@@ -2083,19 +2114,19 @@ function Track(
 
     const leftScrollOverview = () => {
         passCurrentStartTimeToApp(
-            prevStartTime => Math.max(prevStartTime - globalClipDuration, 0)
+            prevStartTime => Math.max(prevStartTime - globalClipDuration * 0.9, 0)
         )
         passCurrentEndTimeToApp(
-            prevEndTime => Math.max(prevEndTime - globalClipDuration, globalClipDuration)
+            prevEndTime => Math.max(prevEndTime - globalClipDuration * 0.9, globalClipDuration)
         )
     }
 
     const rightScrollOverview = () => {
         passCurrentStartTimeToApp(
-            prevStartTime => Math.min(prevStartTime + globalClipDuration, maxScrollTime)
+            prevStartTime => Math.min(prevStartTime + globalClipDuration * 0.9, maxScrollTime)
         )
         passCurrentEndTimeToApp(
-            prevEndTime => Math.min(prevEndTime + globalClipDuration, globalAudioDuration)
+            prevEndTime => Math.min(prevEndTime + globalClipDuration * 0.9, globalAudioDuration)
         )
     }
 
@@ -2518,7 +2549,7 @@ function Track(
         }
     }, [activeLabel] )
 
-    // When user zoomed or scrolled
+    // When user zoomed or scrolled, or when the spectrogram's brightness and contrast is modified
     useEffect( () => {
             if (!globalClipDuration || !trackData.audioID) return
 
@@ -2529,7 +2560,7 @@ function Track(
 
             getSpecAndAudioArray()
 
-    }, [currentStartTime, globalClipDuration, audioId])
+    }, [currentStartTime, globalClipDuration, audioId, specBrightness, specContrast])
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the SpeciesMenu Component
     useEffect(() => {
@@ -2780,6 +2811,17 @@ function Track(
         drawIndividualsCanvas()
         drawAllLabels()
     },[ showLabelAndIndividualsCanvas ]);
+
+    useEffect(()=>{
+        setSpecBrightness( globalSpecBrightness )
+        setSliderSpecBrightnessValue( globalSpecBrightness )
+    },[ globalSpecBrightness ]);
+
+    useEffect(()=>{
+        setSpecContrast( globalSpecContrast )
+        setSliderSpecContrastValue( globalSpecContrast )
+    },[ globalSpecContrast ]);
+
 
     return (
         <>
@@ -3038,6 +3080,40 @@ function Track(
                                                 <StopIcon style={activeIcon}/>
                                             </IconButton>
                                         </div>
+
+                                        <div style={{ display: "flex", alignItems: "center", "marginLeft":"3px", "marginRight":"10px" }}>
+                                                <Tooltip title="Brightness">
+                                                    <LightModeIcon style={{marginLeft: "3px", marginRight: "3px", width:"22px" }} />
+                                                </Tooltip>
+                                                <input
+                                                type="range"
+                                                min="0.5"
+                                                max="1.5"
+                                                step="0.01"
+                                                value={sliderSpecBrightnessValue}
+                                                onChange={handleSliderSpecBrightnessChange} // Update temporary sliderValue
+                                                onMouseUp={handleSliderSpecBrightnessMouseUp} // Update specBrightness on mouse up
+                                                onTouchEnd={handleSliderSpecBrightnessMouseUp} // For mobile support
+                                                style = {{"width":`${TRACK_SIDEBAR_WIDTH - 100}px`}}
+                                                />
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", "marginLeft":"3px", "marginRight":"10px" }}>
+                                                <Tooltip title="Contrast">
+                                                    <ContrastIcon style={{marginLeft: "3px", marginRight: "3px", width:"22px" }} />
+                                                </Tooltip>
+                                                <input
+                                                type="range"
+                                                min="0.5"
+                                                max="1.5"
+                                                step="0.01"
+                                                value={sliderSpecContrastValue}
+                                                onChange={handleSliderSpecContrastChange} // Update temporary sliderValue
+                                                onMouseUp={handleSliderSpecContrastMouseUp} // Update specBrightness on mouse up
+                                                onTouchEnd={handleSliderSpecContrastMouseUp} // For mobile support
+                                                style = {{"width":`${TRACK_SIDEBAR_WIDTH - 100}px`}}
+                                                />
+                                        </div>
+
                                         {showLocalConfigWindow && !spectrogramIsLoading &&
                                             <Parameters
                                                 specCalMethod={specCalMethod}

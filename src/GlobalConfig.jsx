@@ -17,6 +17,8 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Slider from '@mui/material/Slider';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
+import ContrastIcon from '@mui/icons-material/Contrast';
+import LightModeIcon from '@mui/icons-material/LightMode';
 
 function GlobalConfig (
             {
@@ -36,7 +38,13 @@ function GlobalConfig (
                 showAllWaveforms,
                 setShowAllWaveforms,
                 showAllLabels,
-                setShowAllLabels
+                setShowAllLabels,
+                sliderSpecBrightnessValue,
+                handleSliderSpecBrightnessChange,
+                handleSliderSpecBrightnessMouseUp,
+                sliderSpecContrastValue,
+                handleSliderSpecContrastChange,
+                handleSliderSpecContrastMouseUp
             }
         )
     {
@@ -175,7 +183,7 @@ function GlobalConfig (
                         <Button variant="contained" disabled={strictMode} onClick={submitGlobalParameters}>Apply</Button>
                     </Box>
                     <div style={{"paddingLeft":"100px", "paddingTop":"10px"}}> <ModuleTitle text="Display" /> </div>
-                    <Box style={{"paddingLeft":"10px"}} display={"flex"} alignItems={"center"}>Spectrogram Height 
+                    <Box style={{"paddingLeft":"10px", height:"40px"}} display={"flex"} alignItems={"center"}>Spectrogram Height 
                         <Box style={{"paddingLeft":"120px", "paddingTop":"7px"}}>  
                             {/* <Tooltip title="Increase"> <IconButton variant="contained" onClick={increaseSpecHeight} ><AddIcon style={{"color":"white"}}/></IconButton> </Tooltip> */}
                             <Slider
@@ -190,7 +198,37 @@ function GlobalConfig (
                             {/* <Tooltip title="Decrease"> <IconButton variant="contained" onClick={decreaseSpecHeight} ><RemoveIcon style={{"color":"white"}}/></IconButton> </Tooltip> */}
                         </Box> 
                     </Box>
-                    <Box style={{"paddingLeft":"10px", "paddingBottom":"20px"}} display={"flex"} alignItems={"center"}>{showAllWaveforms?"Hide All Waveforms":"Show All Waveforms"}
+                    <div style={{ display: "flex", alignItems: "center",  "paddingLeft":"10px", "marginLeft":"0px", "marginRight":"10px", height:"40px" }}>
+                            Spectrogram Brightness
+                            <LightModeIcon style={{marginLeft: "3px", marginRight: "65px", width:"22px" }} />
+                            <Slider
+                                value={sliderSpecBrightnessValue}
+                                onChange={handleSliderSpecBrightnessChange}
+                                onMouseUp={handleSliderSpecBrightnessMouseUp}
+                                onTouchEnd={handleSliderSpecBrightnessMouseUp}
+                                min={0.5}
+                                max={1.5}
+                                step={0.01} // Ensures only integer values
+                                valueLabelDisplay="off" // Shows the value label on hover or drag
+                                style={{"width":"100px"}}
+                            />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", "marginLeft":"10px", "marginRight":"10px", height:"40px"  }}>
+                            Spectrogram Contrast
+                            <ContrastIcon style={{marginLeft: "3px", marginRight: "80px", width:"22px" }} />
+                            <Slider
+                                value={sliderSpecContrastValue}
+                                onChange={handleSliderSpecContrastChange} // Update temporary sliderValue
+                                onMouseUp={handleSliderSpecContrastMouseUp} // Update specBrightness on mouse up
+                                onTouchEnd={handleSliderSpecContrastMouseUp} // For mobile support
+                                min={0.5}
+                                max={1.5}
+                                step={0.01} // Ensures only integer values
+                                valueLabelDisplay="off" // Shows the value label on hover or drag
+                                style={{"width":"100px"}}
+                            />
+                    </div>
+                    <Box style={{"paddingLeft":"10px", "paddingBottom":"0px", height:"40px" }} display={"flex"} alignItems={"center"}>{showAllWaveforms?"Hide All Waveforms":"Show All Waveforms"}
                         <Box style={{"paddingLeft": showAllWaveforms? "125px":"118px"}}> 
                             <Tooltip title={showAllWaveforms?"Hide":"Show"}> 
                                 <IconButton
@@ -235,7 +273,7 @@ function GlobalConfig (
                             </Tooltip>
                         </Box> 
                     </Box>
-                    <Box style={{"paddingLeft":"10px", "paddingBottom":"20px"}} display={"flex"} alignItems={"center"}>{showAllLabels?"Hide All Annotations":"Show All Annotations"}
+                    <Box style={{"paddingLeft":"10px", "paddingBottom":"10px", height:"40px"}} display={"flex"} alignItems={"center"}>{showAllLabels?"Hide All Annotations":"Show All Annotations"}
                         <Box style={{"paddingLeft": showAllLabels? "120px":"113px"}}> 
                             <Tooltip title={showAllLabels?"Hide":"Show"}> 
                                 <IconButton
@@ -280,9 +318,6 @@ function GlobalConfig (
                             </Tooltip>
                         </Box> 
                     </Box>
-
-
-
                 </Box>
             </div>
 

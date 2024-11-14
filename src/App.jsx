@@ -96,6 +96,12 @@ function App() {
     const [showAllWaveforms, setShowAllWaveforms] = useState(true);
     const [showAllLabels, setShowAllLabels] = useState(true);
 
+    // Spectrogram
+    const [ specBrightness, setSpecBrightness ] = useState(1.0);
+    const [ specContrast, setSpecContrast ] = useState(1.0);
+    const [ sliderSpecBrightnessValue, setSliderSpecBrightnessValue] = useState(1);
+    const [ sliderSpecContrastValue, setSliderSpecContrastValue] = useState(1);
+
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
@@ -196,6 +202,23 @@ function App() {
     const passTokenFinetuneToWhisperSeg = (newToken) => {
         setTokenFinetune( newToken )
     }
+
+    /* ++++++++++++++++++ Handle brightness/contrast slider dragging ++++++++++++++++++ */
+    // Update the slider value as user drags
+    const handleSliderSpecBrightnessChange = (event) => {
+        setSliderSpecBrightnessValue(parseFloat(event.target.value));
+    };
+    const handleSliderSpecBrightnessMouseUp = () => {
+        setSpecBrightness(sliderSpecBrightnessValue);
+    };
+
+    const handleSliderSpecContrastChange = (event) => {
+        setSliderSpecContrastValue(parseFloat(event.target.value))
+    };
+
+    const handleSliderSpecContrastMouseUp = () => {
+        setSpecContrast( sliderSpecContrastValue )
+    };
 
     /* ++++++++++++++++++ Audio Tracks ++++++++++++++++++ */
     
@@ -352,6 +375,8 @@ function App() {
                     specCanvasHeight={specCanvasHeight}
                     showAllWaveforms={showAllWaveforms}
                     showAllLabels={showAllLabels}
+                    globalSpecBrightness={specBrightness}
+                    globalSpecContrast={specContrast}
                 />
             )
         })
@@ -974,6 +999,12 @@ function App() {
                         setShowAllWaveforms={setShowAllWaveforms}
                         showAllLabels={showAllLabels}
                         setShowAllLabels={setShowAllLabels}
+                        sliderSpecBrightnessValue={sliderSpecBrightnessValue}
+                        handleSliderSpecBrightnessChange={handleSliderSpecBrightnessChange}
+                        handleSliderSpecBrightnessMouseUp={handleSliderSpecBrightnessMouseUp}
+                        sliderSpecContrastValue={sliderSpecContrastValue}
+                        handleSliderSpecContrastChange={handleSliderSpecContrastChange}
+                        handleSliderSpecContrastMouseUp={handleSliderSpecContrastMouseUp}
                     />
                 }
 

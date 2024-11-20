@@ -9,8 +9,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import ZoomInIcon from "@mui/icons-material/ZoomIn.js";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut.js";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import SettingsIcon from '@mui/icons-material/Settings';
 

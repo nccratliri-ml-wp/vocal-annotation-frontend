@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.13.0",
+    "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^5.16.7",
-    "@mui/material": "^5.16.7",
+    "@mui/icons-material": "^6.1.7",
+    "@mui/material": "^6.1.7",
     "@uiw/react-color": "^2.3.0",
     "@uiw/react-color-sketch": "^2.3.0",
     "axios": "^1.7.4",

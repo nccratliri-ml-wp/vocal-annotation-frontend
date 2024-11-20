@@ -17,7 +17,8 @@ function LocalFileUpload(
             passSpectrogramIsLoadingToTrack,
             handleUploadResponse,
             handleUploadError,
-            strictMode
+            strictMode,
+            colorMap,
         }
     )
 {
@@ -39,6 +40,7 @@ function LocalFileUpload(
         formData.append('bins_per_octave', binsPerOctave);
         formData.append('min_frequency', minFreq);
         formData.append('max_frequency', maxFreq);
+        formData.append('color_map', colorMap);
         uploadLocalFile(formData, file.name);
     }
 

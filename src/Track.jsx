@@ -30,11 +30,8 @@ import {Button} from '@mui/material';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import PaletteIcon from '@mui/icons-material/Palette';
 
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
  
 // Internal dependencies
 import Parameters from "./Parameters.jsx"
@@ -110,7 +107,8 @@ function Track(
                             showAllWaveforms,
                             showAllLabels,
                             globalSpecBrightness,
-                            globalSpecContrast
+                            globalSpecContrast,
+                            globalColorMap,
                         }
                     )
                 {
@@ -237,6 +235,7 @@ function Track(
     const [ specContrast, setSpecContrast ] = useState(1.0);
     const [sliderSpecBrightnessValue, setSliderSpecBrightnessValue] = useState(1);
     const [sliderSpecContrastValue, setSliderSpecContrastValue] = useState(1);
+    const [colorMap, setColorMap] = useState('inferno');
 
     /* ++++++++++++++++++++ Pass methods ++++++++++++++++++++ */
 
@@ -316,7 +315,8 @@ function Track(
             min_frequency: Number(minFreq),
             max_frequency: Number(maxFreq),
             brightness: specBrightness,
-            contrast: specContrast
+            contrast: specContrast,
+            color_map: colorMap,
         }
 
         try {
@@ -2565,7 +2565,7 @@ function Track(
 
             getSpecAndAudioArray()
 
-    }, [currentStartTime, globalClipDuration, audioId, specBrightness, specContrast])
+    }, [currentStartTime, globalClipDuration, audioId, specBrightness, specContrast, colorMap])
 
     // When a user adds, deletes, renames or recolors species, individuals or clusternames in the SpeciesMenu Component
     useEffect(() => {
@@ -2827,6 +2827,10 @@ function Track(
         setSliderSpecContrastValue( globalSpecContrast )
     },[ globalSpecContrast ]);
 
+    useEffect(()=>{
+        setColorMap( globalColorMap )
+    },[ globalColorMap ]);
+
 
     return (
         <>
@@ -2912,6 +2916,7 @@ function Track(
                                                 handleUploadResponse={handleUploadResponse}
                                                 handleUploadError={handleUploadError}
                                                 strictMode={strictMode}
+                                                colorMap={colorMap}
                                             />
                                             <Tooltip title={`Hide Track ${trackData.trackIndex}`}>
                                                 <IconButton
@@ -3117,6 +3122,34 @@ function Track(
                                                 onTouchEnd={handleSliderSpecContrastMouseUp} // For mobile support
                                                 style = {{"width":`${TRACK_SIDEBAR_WIDTH - 100}px`}}
                                                 />
+                                        </div>
+                                        <div style={{ display: "flex", alignItems: "center", "marginLeft":"3px", "marginRight":"10px", "marginTop":"5px" }}>
+                                                <Tooltip title="Color Palette">
+                                                    <PaletteIcon style={{marginLeft: "3px", marginRight: "3px", width:"22px" }} />
+                                                </Tooltip>
+                                                <select
+                                                    id="colormap"
+                                                    value={colorMap}
+                                                    onChange={(event) => {
+                                                        setColorMap(event.target.value);
+                                                    }}
+                                                    style={{
+                                                    width: '100%',
+                                                    // height: '30px',
+                                                    padding: '2px',
+                                                    fontSize: '16px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #ccc',
+                                                    }}
+                                                >
+                                                    {/* Dropdown options */}
+                                                    <option value="inferno">inferno</option>
+                                                    <option value="viridis">viridis</option>
+                                                    <option value="magma">magma</option>
+                                                    <option value="gray">gray</option>
+                                                    <option value="plasma">plasma</option>
+                                                    <option value="cividis">cividis</option>
+                                                </select>
                                         </div>
 
                                         {showLocalConfigWindow && !spectrogramIsLoading &&

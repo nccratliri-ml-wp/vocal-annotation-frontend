@@ -101,6 +101,7 @@ function App() {
     const [ specContrast, setSpecContrast ] = useState(1.0);
     const [ sliderSpecBrightnessValue, setSliderSpecBrightnessValue] = useState(1);
     const [ sliderSpecContrastValue, setSliderSpecContrastValue] = useState(1);
+    const [ colorMap, setColorMap] = useState('inferno');
 
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
@@ -377,6 +378,7 @@ function App() {
                     showAllLabels={showAllLabels}
                     globalSpecBrightness={specBrightness}
                     globalSpecContrast={specContrast}
+                    globalColorMap={colorMap}
                 />
             )
         })
@@ -1005,6 +1007,8 @@ function App() {
                         sliderSpecContrastValue={sliderSpecContrastValue}
                         handleSliderSpecContrastChange={handleSliderSpecContrastChange}
                         handleSliderSpecContrastMouseUp={handleSliderSpecContrastMouseUp}
+                        colorMap={colorMap}
+                        setColorMap={setColorMap}
                     />
                 }
 

@@ -19,6 +19,7 @@ import Slider from '@mui/material/Slider';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import PaletteIcon from '@mui/icons-material/Palette';
 
 function GlobalConfig (
             {
@@ -44,7 +45,9 @@ function GlobalConfig (
                 handleSliderSpecBrightnessMouseUp,
                 sliderSpecContrastValue,
                 handleSliderSpecContrastChange,
-                handleSliderSpecContrastMouseUp
+                handleSliderSpecContrastMouseUp,
+                colorMap,
+                setColorMap,
             }
         )
     {
@@ -228,6 +231,34 @@ function GlobalConfig (
                                 style={{"width":"100px"}}
                             />
                     </div>
+                    <div style={{ display: "flex", alignItems: "center", "marginLeft":"10px", "marginRight":"10px", height:"40px" }}>
+                                                Color Palette
+                                                <PaletteIcon style={{marginLeft: "3px", marginRight: "150px", width:"22px" }} />
+                                                <select
+                                                    id="colormap"
+                                                    value={colorMap}
+                                                    onChange={(event) => {
+                                                        setColorMap(event.target.value);
+                                                    }}
+                                                    style={{
+                                                    // width: '100%',
+                                                    // height: '30px',
+                                                    padding: '2px',
+                                                    fontSize: '16px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #ccc',
+                                                    }}
+                                                >
+                                                    {/* Dropdown options */}
+                                                    <option value="inferno">inferno</option>
+                                                    <option value="viridis">viridis</option>
+                                                    <option value="magma">magma</option>
+                                                    <option value="gray">gray</option>
+                                                    <option value="plasma">plasma</option>
+                                                    <option value="cividis">cividis</option>
+                                                </select>
+                                        </div>
+
                     <Box style={{"paddingLeft":"10px", "paddingBottom":"0px", height:"40px" }} display={"flex"} alignItems={"center"}>{showAllWaveforms?"Hide All Waveforms":"Show All Waveforms"}
                         <Box style={{"paddingLeft": showAllWaveforms? "125px":"118px"}}> 
                             <Tooltip title={showAllWaveforms?"Hide":"Show"}> 

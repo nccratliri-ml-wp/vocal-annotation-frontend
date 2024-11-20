@@ -6,7 +6,7 @@ import axios from "axios";
 import {toast} from "react-toastify";
 import Draggable from "react-draggable";
 import DownloadIcon from '@mui/icons-material/Download'
-import PlayArrowIcon from "@mui/icons-material/PlayArrow.js";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import DensityLargeIcon from '@mui/icons-material/DensityLarge';
 import Tooltip from '@mui/material/Tooltip';
 import Badge from '@mui/material/Badge';

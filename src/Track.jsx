@@ -30,6 +30,11 @@ import {Button} from '@mui/material';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import LightModeIcon from '@mui/icons-material/LightMode';
+
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
  
 // Internal dependencies
 import Parameters from "./Parameters.jsx"

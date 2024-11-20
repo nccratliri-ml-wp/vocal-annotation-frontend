@@ -9,7 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import LockIcon from '@mui/icons-material/Lock';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddBoxIcon from "@mui/icons-material/AddBox.js";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 
 // Internal dependencies
 import Colorwheel from "./Colorwheel.jsx";

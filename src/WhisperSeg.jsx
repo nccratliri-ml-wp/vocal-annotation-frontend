@@ -8,7 +8,7 @@ import Draggable from 'react-draggable';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import {iconBtnDisabled} from "./buttonStyles.js";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh.js";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 
 // Internal dependencies
 import ModelsWindow from "./ModelsWindow.jsx";

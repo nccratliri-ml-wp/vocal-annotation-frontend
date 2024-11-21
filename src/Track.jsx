@@ -109,6 +109,7 @@ function Track(
                             globalSpecBrightness,
                             globalSpecContrast,
                             globalColorMap,
+                            annotationTimestamps
                         }
                     )
                 {
@@ -400,6 +401,8 @@ function Track(
 
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
+
+        annotationTimestamps.current = [...annotationTimestamps.current, new Date().toISOString().replace('T', ' ').slice(0, 23) ];
 
         // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas'){

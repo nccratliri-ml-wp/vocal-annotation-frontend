@@ -134,6 +134,10 @@ function App() {
     // Keep track of Open Windows
     const { anyWindowsOpen } = useOpenWindowsContext()
 
+    // mouse click time array
+    const annotationTimestamps = useRef([])
+    const [ annotationTime, setAnnotationTime ] = useState(0)
+
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
     function passClipDurationToApp( newClipDuration ){
@@ -379,6 +383,7 @@ function App() {
                     globalSpecBrightness={specBrightness}
                     globalSpecContrast={specContrast}
                     globalColorMap={colorMap}
+                    annotationTimestamps={annotationTimestamps}
                 />
             )
         })
@@ -437,12 +442,37 @@ function App() {
         setSubmitRequest(true)
     }
 
-    async function submitAllAnnotations(){
-        if (!allLabels.length) {
-            toast.error('There are currently no annotations. Add some and try again.')
-            return
+    async function submitAnnotationTime(){ 
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/estimate-annotation-time`
+        const requestParameters = {
+            timestamps: annotationTimestamps.current,
+            idle_thres: 300  //5 min idle threshold 
+        }
+        const headers = {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
         }
 
+        try {
+            const res = await axios.post(path, requestParameters, { headers } )
+            
+            const path2 = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/post-annotation-time/${hashID}`
+            const requestParameters2 = {
+                annotationTime: annotationTime + res.data.response
+            }
+            await axios.post( path2, requestParameters2, { headers } )
+
+        } catch (error) {
+            // toast.error('Something went wrong trying to submit the annotation time. Check the console for more information.')
+            console.log(error)
+        }
+    }
+
+    async function submitAllAnnotations(){
+        // if (!allLabels.length) {
+        //     toast.error('There are currently no annotations. Add some and try again.')
+        //     return
+        // }
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/post-annotations/${hashID}`
 
         // Remove the Annotated Area labels because they are only necessary for WhisperSeg
@@ -678,6 +708,16 @@ function App() {
         }
     }
 
+    const getAnnotationTimeFromHashID = async (hashID) =>{
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + `/get-annotation-time/${hashID}`
+        try{
+            const response = await axios.get(path)
+            setAnnotationTime( response.data.annotationTime )
+        } catch (error){
+            console.error('An error occurred while getting the annotation time:', error)
+        }
+    }
+
     const extractLabelsUsingFileNames = async (audioFilesArray, hashID) => {
         const allLabels = []
         for (let audioFile of audioFilesArray){
@@ -802,6 +842,8 @@ function App() {
 
         if (hashID) {
             getMetaDataFromHashID()
+            // get the current annotation time
+            getAnnotationTimeFromHashID( hashID )
         }
 
         if (metaData) {
@@ -818,6 +860,7 @@ function App() {
     useEffect( () => {
         if (!allLabels || !submitRequest) return
         submitAllAnnotations()
+        submitAnnotationTime()
         setSubmitRequest(false)
         deleteAllLabelsInApp()
     }, [allLabels])
@@ -877,6 +920,18 @@ function App() {
         }
     }, [])
 
+    // This is used to keep the tab active and not discarded automatically by Chrome
+    useEffect(() => {
+        const keepTabAlive = setInterval(() => {
+            fetch(import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + 'get-status', {
+                method: 'GET',
+                keepalive: true, // Ensure the request persists even if the tab is closed
+            }).catch((err) => console.error('Error in keepalive GET request:', err));
+        }, 180000); // Send every 3 minutes
+    
+        return () => clearInterval(keepTabAlive); // Cleanup interval on unmount
+    }, []);
+    
     const checkIfAnyWindowIsOpen = () => {
         const individualOrClusternameWindowOpen = speciesArray.find(speciesObj => {
             if (speciesObj.showClusternameInputWindow || speciesObj.showIndividualInputWindow){

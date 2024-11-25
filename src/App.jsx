@@ -43,6 +43,7 @@ import {
     iconBtn,
     iconBtnDisabled
 } from "./buttonStyles.js"
+import useTimeSynchronization from './useTimeSynchronization';
 
 // Global Variables
 const SCROLL_STEP_RATIO = 0.2
@@ -103,6 +104,53 @@ function App() {
     const [ sliderSpecContrastValue, setSliderSpecContrastValue] = useState(1);
     const [ colorMap, setColorMap] = useState('inferno');
 
+    // Get UTC time from reliable time provider
+    const { getCurrentUTCTime, getUTCTimestamp, isLoading, error } = useTimeSynchronization();
+
+    // Get device info
+    // Browser and OS info through navigator
+    const getBrowserInfo = () => {
+        const userAgent = navigator.userAgent;
+        const platform = navigator.platform;
+        const language = navigator.language;
+        const vendor = navigator.vendor;
+        const cookieEnabled = navigator.cookieEnabled;
+        const online = navigator.onLine;
+        
+        return {
+        userAgent,
+        platform,
+        language,
+        vendor,
+        cookieEnabled,
+        online
+        };
+    };
+  
+    // Screen properties
+    const getScreenInfo = () => {
+        return {
+        width: window.screen.width,
+        height: window.screen.height,
+        colorDepth: window.screen.colorDepth,
+        pixelDepth: window.screen.pixelDepth,
+        availWidth: window.screen.availWidth,
+        availHeight: window.screen.availHeight,
+        orientation: window.screen.orientation.type
+        };
+    };
+
+    // All Device properties
+    const getDeviceInfo = () => {
+        const browserInfo = getBrowserInfo();
+        const screenInfo = getScreenInfo();
+        return {
+            screenWidth: screenInfo.width,
+            screenHeight: screenInfo.height
+        };
+    };
+
+
     // Species Array
     const [speciesArray, setSpeciesArray] = useState(() => {
         const annotatedAreaIndividual = new Individual(nanoid(), ANNOTATED_AREA_INDIVIDUAL)
@@ -136,7 +184,6 @@ function App() {
 
     // mouse click time array
     const annotationTimestamps = useRef([])
-    const [ annotationTime, setAnnotationTime ] = useState(0)
 
     /* ++++++++++++++++++ Pass methods ++++++++++++++++++ */
 
@@ -384,6 +431,9 @@ function App() {
                     globalSpecContrast={specContrast}
                     globalColorMap={colorMap}
                     annotationTimestamps={annotationTimestamps}
+                    getCurrentUTCTime={getCurrentUTCTime}
+                    getDeviceInfo={getDeviceInfo}
+                    hashID={hashID}
                 />
             )
         })
@@ -442,26 +492,17 @@ function App() {
         setSubmitRequest(true)
     }
 
-    async function submitAnnotationTime(){ 
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/estimate-annotation-time`
+    async function submitAnnotationTimestamps(){ 
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/annotations/annotation-time/${hashID}`
         const requestParameters = {
-            timestamps: annotationTimestamps.current,
-            idle_thres: 300  //5 min idle threshold 
+            log: annotationTimestamps.current
         }
         const headers = {
             'Content-Type': 'application/json',
             'accept': 'application/json'
         }
-
         try {
-            const res = await axios.post(path, requestParameters, { headers } )
-            
-            const path2 = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/post-annotation-time/${hashID}`
-            const requestParameters2 = {
-                annotationTime: annotationTime + res.data.response
-            }
-            await axios.post( path2, requestParameters2, { headers } )
-
+            await axios.post(path, requestParameters, { headers } )
         } catch (error) {
             // toast.error('Something went wrong trying to submit the annotation time. Check the console for more information.')
             console.log(error)
@@ -708,16 +749,6 @@ function App() {
         }
     }
 
-    const getAnnotationTimeFromHashID = async (hashID) =>{
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS + `/get-annotation-time/${hashID}`
-        try{
-            const response = await axios.get(path)
-            setAnnotationTime( response.data.annotationTime )
-        } catch (error){
-            console.error('An error occurred while getting the annotation time:', error)
-        }
-    }
-
     const extractLabelsUsingFileNames = async (audioFilesArray, hashID) => {
         const allLabels = []
         for (let audioFile of audioFilesArray){
@@ -842,8 +873,6 @@ function App() {
 
         if (hashID) {
             getMetaDataFromHashID()
-            // get the current annotation time
-            getAnnotationTimeFromHashID( hashID )
         }
 
         if (metaData) {
@@ -860,7 +889,7 @@ function App() {
     useEffect( () => {
         if (!allLabels || !submitRequest) return
         submitAllAnnotations()
-        submitAnnotationTime()
+        submitAnnotationTimestamps()
         setSubmitRequest(false)
         deleteAllLabelsInApp()
     }, [allLabels])

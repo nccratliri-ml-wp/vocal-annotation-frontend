@@ -43,6 +43,7 @@ import {Label} from "./label.js"
 import {ANNOTATED_AREA, UNKNOWN_SPECIES} from "./species.js";
 import {freqBtn, icon, iconBtn, iconBtnDisabled, iconBtnSmall, iconSmall, toggleVisibilityBtn} from "./buttonStyles.js"
 
+
 // Classes Definitions
 class Playhead{
     constructor(timeframe) {
@@ -109,7 +110,10 @@ function Track(
                             globalSpecBrightness,
                             globalSpecContrast,
                             globalColorMap,
-                            annotationTimestamps
+                            annotationTimestamps,
+                            getCurrentUTCTime,
+                            getDeviceInfo,
+                            hashID
                         }
                     )
                 {
@@ -402,13 +406,18 @@ function Track(
         const mouseX = getMouseX(event)
         const mouseY = getMouseY(event)
 
-        annotationTimestamps.current = [...annotationTimestamps.current, new Date().toISOString().replace('T', ' ').slice(0, 23) ];
-
         // Deal with click on Onset or Offset to trigger drag methods
         if ( checkIfOccupiedByOnsetOrOffset(mouseX, mouseY) && event.target.className === 'label-canvas'){
+
             // Deal with click on Onset
             clickedLabel = checkIfClickedOnOnset(mouseX, mouseY)
             if ( clickedLabel ){
+                annotationTimestamps.current = [...annotationTimestamps.current, {
+                    "hash_id":hashID,
+                    "timestamp":getCurrentUTCTime().toISOString(),
+                    "action":"update onset",
+                    "deviceInfo":getDeviceInfo()
+                } ];
 
                 // specCanvasRef.current.addEventListener('mousemove', dragOnset)
                 // waveformCanvasRef.current.addEventListener('mousemove', dragOnset)
@@ -424,6 +433,13 @@ function Track(
             // Deal with click on Offset
             clickedLabel = checkIfClickedOnOffset(mouseX, mouseY)
             if (clickedLabel){
+                annotationTimestamps.current = [...annotationTimestamps.current, {
+                    "hash_id":hashID,
+                    "timestamp":getCurrentUTCTime().toISOString(),
+                    "action":"update offset",
+                    "deviceInfo":getDeviceInfo()
+                } ];
+
                 specCanvasRef.current.addEventListener('mousemove', dragOffset)
                 waveformCanvasRef.current.addEventListener('mousemove', dragOffset)
                 labelCanvasRef.current.addEventListener('mousemove', dragOffset)
@@ -433,6 +449,13 @@ function Track(
 
         // Deal with click on Active Label onset
         if (checkIfClickedOnActiveLabelOnset(mouseX)) {
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"update onset",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
             specCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
             waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOnset)
@@ -441,6 +464,13 @@ function Track(
 
         // Deal with click on Active Label offset
         if (checkIfClickedOnActiveLabelOffset(mouseX)) {
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"update offset",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             draggedActiveLabel = JSON.parse(JSON.stringify(activeLabel))
             specCanvasRef.current.addEventListener('mousemove', dragActiveLabelOffset)
             waveformCanvasRef.current.addEventListener('mousemove', dragActiveLabelOffset)
@@ -449,6 +479,13 @@ function Track(
 
         // Deal with click on Max Frequency Line
         if (checkIfOccupiedByMaxFreqLine(mouseY) && event.target.className === 'spec-canvas'){
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"update frequency",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMaxFreqLine)
             allowUpdateMaxFreqGivenLineY.current = true // User is going to drag the frequency line
@@ -457,6 +494,13 @@ function Track(
     
         // Deal with click on Min Frequency Line
         if (checkIfOccupiedByMinFreqLine(mouseY) && event.target.className === 'spec-canvas'){
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"update frequency",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             draggedFrequencyLinesObject = frequencyLines
             specCanvasRef.current.addEventListener('mousemove', dragMinFreqLine)
             allowUpdateMinFreqGivenLineY.current = true
@@ -483,6 +527,13 @@ function Track(
         // Add offset to existing label if necessary
         const newestLabel = labels[labels.length-1]
         if (labels.length > 0 && newestLabel.offset === undefined){
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"add offset",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             let newOffset = calculateTimestamp(event)
             newOffset = magnet(newOffset)
             /*
@@ -517,6 +568,13 @@ function Track(
         // In this case, we are in the state of adding frequency lines
         if (numFreqLinesToAnnotate > 0 ){
             if( event.target.className === 'spec-canvas' ){
+                annotationTimestamps.current = [...annotationTimestamps.current, {
+                    "hash_id":hashID,
+                    "timestamp":getCurrentUTCTime().toISOString(),
+                    "action":"add frequency",
+                    "deviceInfo":getDeviceInfo()
+                } ];
+
                 if (numFreqLinesToAnnotate == 2){
                     setFrequencyLines( {...frequencyLines, minFreqY:mouseY } )
                     allowUpdateMinFreqGivenLineY.current = true
@@ -536,6 +594,13 @@ function Track(
         setExpandedLabel(null);
 
         // Add onset
+        annotationTimestamps.current = [...annotationTimestamps.current, {
+            "hash_id":hashID,
+            "timestamp":getCurrentUTCTime().toISOString(),
+            "action":"add onset",
+            "deviceInfo":getDeviceInfo()
+        } ];
+        
         let clickedTimestamp = calculateTimestamp(event)
         clickedTimestamp = magnet(clickedTimestamp)
         addNewLabel(clickedTimestamp)
@@ -633,6 +698,13 @@ function Track(
 
         if (!labelToBeDeleted) return
 
+        annotationTimestamps.current = [...annotationTimestamps.current, {
+            "hash_id":hashID,
+            "timestamp":getCurrentUTCTime().toISOString(),
+            "action":"remove annotation",
+            "deviceInfo":getDeviceInfo()
+        } ];
+        
         deleteLabel(labelToBeDeleted)
 
         // Remove active label from other tracks, if the deleted label was the active one

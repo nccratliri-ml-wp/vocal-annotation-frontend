@@ -493,7 +493,7 @@ function App() {
     }
 
     async function submitAnnotationTimestamps(){ 
-        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/annotations/annotation-time/${hashID}`
+        const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/annotation/annotation-time/`
         const requestParameters = {
             log: annotationTimestamps.current
         }
@@ -503,6 +503,8 @@ function App() {
         }
         try {
             await axios.post(path, requestParameters, { headers } )
+            // refresh the action list after successful submission
+            annotationTimestamps.current = []
         } catch (error) {
             // toast.error('Something went wrong trying to submit the annotation time. Check the console for more information.')
             console.log(error)

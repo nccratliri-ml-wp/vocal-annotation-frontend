@@ -415,7 +415,7 @@ function Track(
                 annotationTimestamps.current = [...annotationTimestamps.current, {
                     "hash_id":hashID,
                     "timestamp":getCurrentUTCTime().toISOString(),
-                    "action":"update onset",
+                    "action":"update_onset",
                     "deviceInfo":getDeviceInfo()
                 } ];
 
@@ -436,7 +436,7 @@ function Track(
                 annotationTimestamps.current = [...annotationTimestamps.current, {
                     "hash_id":hashID,
                     "timestamp":getCurrentUTCTime().toISOString(),
-                    "action":"update offset",
+                    "action":"update_offset",
                     "deviceInfo":getDeviceInfo()
                 } ];
 
@@ -452,7 +452,7 @@ function Track(
             annotationTimestamps.current = [...annotationTimestamps.current, {
                 "hash_id":hashID,
                 "timestamp":getCurrentUTCTime().toISOString(),
-                "action":"update onset",
+                "action":"update_onset",
                 "deviceInfo":getDeviceInfo()
             } ];
 
@@ -467,7 +467,7 @@ function Track(
             annotationTimestamps.current = [...annotationTimestamps.current, {
                 "hash_id":hashID,
                 "timestamp":getCurrentUTCTime().toISOString(),
-                "action":"update offset",
+                "action":"update_offset",
                 "deviceInfo":getDeviceInfo()
             } ];
 
@@ -482,7 +482,7 @@ function Track(
             annotationTimestamps.current = [...annotationTimestamps.current, {
                 "hash_id":hashID,
                 "timestamp":getCurrentUTCTime().toISOString(),
-                "action":"update frequency",
+                "action":"update_frequency",
                 "deviceInfo":getDeviceInfo()
             } ];
 
@@ -497,7 +497,7 @@ function Track(
             annotationTimestamps.current = [...annotationTimestamps.current, {
                 "hash_id":hashID,
                 "timestamp":getCurrentUTCTime().toISOString(),
-                "action":"update frequency",
+                "action":"update_frequency",
                 "deviceInfo":getDeviceInfo()
             } ];
 
@@ -530,7 +530,7 @@ function Track(
             annotationTimestamps.current = [...annotationTimestamps.current, {
                 "hash_id":hashID,
                 "timestamp":getCurrentUTCTime().toISOString(),
-                "action":"add offset",
+                "action":"add_offset",
                 "deviceInfo":getDeviceInfo()
             } ];
 
@@ -571,7 +571,7 @@ function Track(
                 annotationTimestamps.current = [...annotationTimestamps.current, {
                     "hash_id":hashID,
                     "timestamp":getCurrentUTCTime().toISOString(),
-                    "action":"add frequency",
+                    "action":"add_frequency",
                     "deviceInfo":getDeviceInfo()
                 } ];
 
@@ -597,7 +597,7 @@ function Track(
         annotationTimestamps.current = [...annotationTimestamps.current, {
             "hash_id":hashID,
             "timestamp":getCurrentUTCTime().toISOString(),
-            "action":"add onset",
+            "action":"add_onset",
             "deviceInfo":getDeviceInfo()
         } ];
         
@@ -701,7 +701,7 @@ function Track(
         annotationTimestamps.current = [...annotationTimestamps.current, {
             "hash_id":hashID,
             "timestamp":getCurrentUTCTime().toISOString(),
-            "action":"remove annotation",
+            "action":"remove_annotation",
             "deviceInfo":getDeviceInfo()
         } ];
         
@@ -2228,6 +2228,13 @@ function Track(
         // Else, start process to get a new audio snippet from the backend
         setAudioSnippet(null)
         setPlayWindowTimes( {startTime: newStartTime, clipDuration: newClipDuration} )
+
+        annotationTimestamps.current = [...annotationTimestamps.current, {
+            "hash_id":hashID,
+            "timestamp":getCurrentUTCTime().toISOString(),
+            "action":"play_audio",
+            "deviceInfo":getDeviceInfo()
+        } ];
 
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'get-audio-clip-wav'
         try {

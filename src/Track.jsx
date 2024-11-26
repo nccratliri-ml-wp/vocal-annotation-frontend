@@ -2645,6 +2645,13 @@ function Track(
                 audioSnippet.currentTime = currentStartTime
             }
 
+            annotationTimestamps.current = [...annotationTimestamps.current, {
+                "hash_id":hashID,
+                "timestamp":getCurrentUTCTime().toISOString(),
+                "action":"browsing_spectrogram",
+                "deviceInfo":getDeviceInfo()
+            } ];
+
             getSpecAndAudioArray()
 
     }, [currentStartTime, globalClipDuration, audioId, specBrightness, specContrast, colorMap])

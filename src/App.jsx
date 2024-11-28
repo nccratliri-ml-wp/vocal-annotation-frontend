@@ -519,7 +519,10 @@ function App() {
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+`/post-annotations/${hashID}`
 
         // Remove the Annotated Area labels because they are only necessary for WhisperSeg
-        let newLabelsArray = allLabels.filter( label => label.species !== ANNOTATED_AREA )
+        // Remove the invalid annotations (whose onset and offset is negative, which is actually a placeholder)
+        let newLabelsArray = allLabels.filter( label => (label.species !== ANNOTATED_AREA && label.onset>=0 && label.offset >= 0 ) )
+        console.log( "newLabelsArray:", newLabelsArray )
+        
         // Assign each label it's correct trackIndex
         newLabelsArray = newLabelsArray.map( label => {
             const correctChannelIndex = tracks.find( track => track.trackID === label.trackID).channelIndex
@@ -547,6 +550,28 @@ function App() {
                 timestamp: timeStamp
             }
         })
+
+        if (modifiedLabels.length === 0){
+            if (tracks.length === 0){
+                toast.error('There are currently no audio uploaded. Upload audio and try again.')
+                return
+            }
+            modifiedLabels.push(
+                {
+                    onset: -1,
+                    offset: -1,
+                    minFrequency: -1,
+                    maxFrequency: -1,
+                    species: "Unknown",
+                    individual: "Unknown",
+                    clustername: "Unknown",
+                    filename: tracks[0].filename,
+                    channelIndex: 0,
+                    username: userName,
+                    timestamp: timeStamp
+                }
+            )
+        }
 
         const requestParameters = {
             annotations: modifiedLabels
@@ -742,7 +767,7 @@ function App() {
             const response = await axios.get(path)
             const annotationVersions = response.data
             if (annotationVersions.length > 0){
-                return [...annotationVersions].sort( (a,b) => new Date(b.version) - new Date(a.version) )[0].annotations
+                return [...annotationVersions].sort( (a,b) => new Date(b.version) - new Date(a.version) )[0].annotations.filter( label => (label.onset>=0 && label.offset >= 0 ) )
             }else{
                 return []
             }

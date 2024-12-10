@@ -104,6 +104,10 @@ function Track(
                             tokenFinetune,
                             passTokenInferenceToWhisperSeg,
                             passTokenFinetuneToWhisperSeg,
+                            authToken, 
+                            setAuthToken,
+                            isAuthenticated,
+                            setIsAuthenticated,
                             specCanvasHeight,
                             showAllWaveforms,
                             showAllLabels,
@@ -3128,6 +3132,10 @@ function Track(
                                                 tokenFinetune={tokenFinetune}
                                                 passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
                                                 passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                                                authToken={authToken}
+                                                setAuthToken={setAuthToken}
+                                                isAuthenticated={isAuthenticated}
+                                                setIsAuthenticated={setIsAuthenticated}
                                             />
                                             {/* <Tooltip title="Frequency Range">
                                                 <IconButton

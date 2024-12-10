@@ -174,6 +174,8 @@ function App() {
     // WhisperSeg
     const [tokenInference, setTokenInference] = useState('')
     const [tokenFinetune, setTokenFinetune] = useState('')
+    const [authToken, setAuthToken] = useState('')
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
 
     // Keyboard Interactions
     const [leftArrowKeyPressed, setLeftArrowKeyPressed] = useState(false)
@@ -424,6 +426,10 @@ function App() {
                     tokenFinetune={tokenFinetune}
                     passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
                     passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                    authToken={authToken}
+                    setAuthToken={setAuthToken}
+                    isAuthenticated={isAuthenticated}
+                    setIsAuthenticated={setIsAuthenticated}
                     specCanvasHeight={specCanvasHeight}
                     showAllWaveforms={showAllWaveforms}
                     showAllLabels={showAllLabels}
@@ -521,7 +527,6 @@ function App() {
         // Remove the Annotated Area labels because they are only necessary for WhisperSeg
         // Remove the invalid annotations (whose onset and offset is negative, which is actually a placeholder)
         let newLabelsArray = allLabels.filter( label => (label.species !== ANNOTATED_AREA && label.onset>=0 && label.offset >= 0 ) )
-        console.log( "newLabelsArray:", newLabelsArray )
         
         // Assign each label it's correct trackIndex
         newLabelsArray = newLabelsArray.map( label => {

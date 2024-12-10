@@ -31,7 +31,11 @@ function WhisperSeg(
             tokenInference,
             tokenFinetune,
             passTokenInferenceToWhisperSeg,
-            passTokenFinetuneToWhisperSeg
+            passTokenFinetuneToWhisperSeg,
+            authToken,
+            setAuthToken,
+            isAuthenticated,
+            setIsAuthenticated
         }
     )
 {
@@ -113,7 +117,7 @@ function WhisperSeg(
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-inference'
 
         try{
-            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            const response = await axios.post(path, {token:authToken}, {headers: {'Content-Type': 'application/json'}})
             return response.data.response
         } catch(error){
             toast.error('Something went wrong with your request. Check the console to view the error.')
@@ -125,7 +129,7 @@ function WhisperSeg(
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-available-for-finetuning'
 
         try{
-            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            const response = await axios.post(path, {token:authToken}, {headers: {'Content-Type': 'application/json'}})
             return response.data.response
         } catch(error){
             toast.error('Something went wrong with your request. Check the console to view the error.')
@@ -137,7 +141,7 @@ function WhisperSeg(
         const path = import.meta.env.VITE_BACKEND_SERVICE_ADDRESS+'list-models-training-in-progress'
 
         try{
-            const response = await axios.post(path, {}, {headers: {'Content-Type': 'application/json'}})
+            const response = await axios.post(path, {token:authToken}, {headers: {'Content-Type': 'application/json'}})
             return response.data.response
         } catch(error){
             toast.error('Something went wrong with your request. Check the console to view the error.')
@@ -160,7 +164,7 @@ function WhisperSeg(
 
         // Clean up the interval on component unmount
         return () => clearInterval(interval)
-    }, [showModelsWindow])
+    }, [showModelsWindow, authToken])
 
     // Keep Ref values up-to-date
     useEffect( () => {
@@ -173,14 +177,17 @@ function WhisperSeg(
         if (!modelsCurrentlyTrained) return
 
         const allCurrentlyTrainedModelNames = modelsCurrentlyTrained.map(model => model.model_name)
-
+        const allCurrentlyModelNamesAvailableForInference = modelsAvailableForInference.map(model => model.model_name)
+        
         const updatedModelsInTrainingQueue = []
 
         for (const modelName of currentlyTrainedModelsNames){
             if (allCurrentlyTrainedModelNames.includes(modelName)){
                 updatedModelsInTrainingQueue.push(modelName)
             } else {
-                toast.success(`New custom model "${modelName}" has finished training!`)
+                if (allCurrentlyModelNamesAvailableForInference.includes(modelName)){
+                    toast.success(`New custom model "${modelName}" has finished training!`)
+                }
             }
         }
 
@@ -210,7 +217,7 @@ function WhisperSeg(
             </Tooltip>
 
             {showModelsWindow &&
-                <Draggable cancel='.models-container'>
+                <Draggable cancel='.models-container, .auth-input'>
                     <div className="draggable-container-models-window">
                         <ModelsWindow
                             modelsAreLoading={modelsAreLoading}
@@ -236,6 +243,10 @@ function WhisperSeg(
                             tokenFinetune={tokenFinetune}
                             passTokenInferenceToWhisperSeg={passTokenInferenceToWhisperSeg}
                             passTokenFinetuneToWhisperSeg={passTokenFinetuneToWhisperSeg}
+                            authToken={authToken}
+                            setAuthToken={setAuthToken}
+                            isAuthenticated={isAuthenticated}
+                            setIsAuthenticated={setIsAuthenticated}
                         />
                     </div>
                 </Draggable>

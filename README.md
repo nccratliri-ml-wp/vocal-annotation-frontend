@@ -42,24 +42,6 @@ It was written by [Alon Cohen](https://github.com/AlonCohen96/) and [Nianlong Gu
 npm install
 ```
 
-## Starting a Development Server
-
-```
-npm run dev
-```
-
-## Create a Production Build
-```
-npm run build
-```
-
-## Deploy the Production Build
-```
-serve -s dist -l 5050
-```
-
-If necessary, replace 5050 with the port you want to serve the production build from.
-
 ## Set up the backend
 Go over to the [backend repo](https://github.com/nccratliri-ml-wp/vocal-annotation-backend) and follow the installation guide there.  
 Back in the frontend folder, navigate to or create your .env file, and add the following line:
@@ -68,3 +50,25 @@ VITE_BACKEND_SERVICE_ADDRESS=http://localhost:8050/
 ```
 
 If necessary, replace 8050 with the port in which you are running the backend on your local machine.
+
+## Start Server
+### Option 1: Starting a Development Server
+
+```
+npm run dev
+```
+
+### Option 2: Starting Production Server
+#### Create a Production Build
+```
+npm run build
+```
+
+#### Deploy the Production Build
+```
+serve -s dist -l 5050
+```
+
+If necessary, replace 5050 with the port you want to serve the production build from.
+
+

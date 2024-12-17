@@ -91,6 +91,8 @@ function App() {
     const [annotationInstance, setAnnotationInstance] = useState(null)
     const [userName, setUserName] = useState(null)
     const [hashID, setHashID] = useState(null)
+    // 17-Dev 2024: temporal solution for investigator mode
+    const [strictDevMode, setStrictDevMode] = useState(true)
 
     // Layout
     const [specCanvasHeight, setSpecCanvasHeight] = useState(300);
@@ -409,6 +411,7 @@ function App() {
                     globalSamplingRate={globalSamplingRate}
                     updateClipDurationAndTimes={updateClipDurationAndTimes}
                     strictMode={strictMode}
+                    strictDevMode={strictDevMode}
                     importedLabels={importedLabels}
                     handleUploadResponse={handleUploadResponse}
                     trackData={track}
@@ -1048,10 +1051,10 @@ function App() {
                         id='left-scroll-btn'
                         onClick={leftScroll}
                     />
-                    <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomIn}>
+                    <IconButton style={(strictMode && !strictDevMode) ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode && !strictDevMode} onClick={onZoomIn}>
                         <ZoomInIcon style={icon}/>
                     </IconButton>
-                    <IconButton style={strictMode ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode} onClick={onZoomOut}>
+                    <IconButton style={(strictMode && !strictDevMode) ? globalControlsBtnDisabled : globalControlsBtn} disabled={strictMode && !strictDevMode} onClick={onZoomOut}>
                         <ZoomOutIcon style={icon}/>
                     </IconButton>
                     <button
@@ -1111,6 +1114,7 @@ function App() {
                         defaultConfig={defaultConfig}
                         passShowGlobalConfigWindowToApp={passShowGlobalConfigWindowToApp}
                         strictMode={strictMode}
+                        strictDevMode={strictDevMode}
                         specCanvasHeight={specCanvasHeight}
                         setSpecCanvasHeight={setSpecCanvasHeight}
                         showAllWaveforms={showAllWaveforms}

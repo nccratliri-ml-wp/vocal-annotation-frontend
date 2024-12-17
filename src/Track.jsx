@@ -87,6 +87,7 @@ function Track(
                             globalSamplingRate,
                             updateClipDurationAndTimes,
                             strictMode,
+                            strictDevMode,
                             importedLabels,
                             handleUploadResponse,
                             trackData,
@@ -1984,14 +1985,14 @@ function Track(
         const xEndFrame = calculateViewportFrameX(currentStartTime + globalClipDuration)
 
         // Deal with click on Start Frame
-        if (!strictMode && mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
+        if ((!strictMode || strictDevMode )&& mouseX >= xStartFrame - 2 && mouseX <= xStartFrame + 2){
             overviewTimeAxisContainerRef.current.addEventListener('mousemove', dragStartFrame)
             overviewTimeAxisContainerRef.current.addEventListener('mouseleave', stopDragViewport)
             return
         }
 
         // Deal with click on End Frame
-        if (!strictMode && mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
+        if ((!strictMode || strictDevMode ) && mouseX >= xEndFrame - 2 && mouseX <= xEndFrame + 2){
             overviewTimeAxisContainerRef.current.addEventListener('mousemove', dragEndFrame)
             overviewTimeAxisContainerRef.current.addEventListener('mouseleave', stopDragViewport)
             return
@@ -2182,7 +2183,7 @@ function Track(
     }
 
     const hoverViewportFrame = (event) => {
-        if (strictMode) return
+        if (strictMode && !strictDevMode) return
 
         const xHovered = getMouseX(event)
         const xStartFrame = calculateViewportFrameX(currentStartTime)
@@ -3264,6 +3265,7 @@ function Track(
                                                 passMaxFreqToTrack={passMaxFreqToTrack}
                                                 submitLocalParameters={submitLocalParameters}
                                                 strictMode={strictMode}
+                                                strictDevMode={strictDevMode}
                                                 spectrogram={spectrogram}
                                             />
                                         }

@@ -34,6 +34,7 @@ function GlobalConfig (
                 defaultConfig,
                 passShowGlobalConfigWindowToApp,
                 strictMode,
+                strictDevMode,
                 specCanvasHeight,
                 setSpecCanvasHeight,
                 showAllWaveforms,
@@ -145,7 +146,7 @@ function GlobalConfig (
                                         type="number"
                                         value={hopLengthInputValue}
                                         min={0}
-                                        disabled={strictMode}
+                                        disabled={strictMode && !strictDevMode}
                                         onKeyPress={excludeNonDigits}
                                         onChange={() => setHopLengthInputValue(event.target.value)}
                                         onFocus={(event) => event.target.select()}
@@ -159,7 +160,7 @@ function GlobalConfig (
                                         type="number"
                                         value={numSpecColumnsInputValue}
                                         min={0}
-                                        disabled={strictMode}
+                                        disabled={strictMode && !strictDevMode}
                                         onChange={(event) => setColumnsInputValue(event.target.value)}
                                         onKeyPress={excludeNonDigits}
                                         onFocus={(event) => event.target.select()}
@@ -173,7 +174,7 @@ function GlobalConfig (
                                         type="number"
                                         value={samplingRateInputValue}
                                         min={0}
-                                        disabled={strictMode}
+                                        disabled={strictMode && !strictDevMode}
                                         onChange={(event) => setSamplingRateInputValue(event.target.value)}
                                         onKeyPress={excludeNonDigits}
                                         onFocus={(event) => event.target.select()}
@@ -182,8 +183,8 @@ function GlobalConfig (
                                 </label>
                     </Box>
                     <Box display="flex" flexDirection="row" justifyContent={"flex-end"} style={{"width":"380px", "marginTop":"10px", "marginLeft":"10px"}} >
-                        <Button style={{"marginRight":"10px"}} variant="contained" disabled={strictMode} onClick={restoreDefaultValues}>Restore Default Values</Button>
-                        <Button variant="contained" disabled={strictMode} onClick={submitGlobalParameters}>Apply</Button>
+                        <Button style={{"marginRight":"10px"}} variant="contained" disabled={strictMode && !strictDevMode} onClick={restoreDefaultValues}>Restore Default Values</Button>
+                        <Button variant="contained" disabled={strictMode && !strictDevMode} onClick={submitGlobalParameters}>Apply</Button>
                     </Box>
                     <div style={{"paddingLeft":"100px", "paddingTop":"10px"}}> <ModuleTitle text="Display" /> </div>
                     <Box style={{"paddingLeft":"10px", height:"40px"}} display={"flex"} alignItems={"center"}>Spectrogram Height 
